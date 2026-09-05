@@ -109,9 +109,15 @@ jobs:
       - name: Verify Pages export
         env:
           NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        # `verify:export` and `audit:schema` are defined in apps/portfolio, not the
+        # workspace root, and both resolve `out/` relative to the working directory.
+        # Run them there directly: going through `turbo run` would re-enter `build`
+        # with NEXT_PUBLIC_SITE_URL unset, missing the cache and re-exporting the
+        # site that the next step uploads.
+        working-directory: src/typescript/apps/portfolio
         run: |
-          touch apps/portfolio/out/.nojekyll
-          test -f apps/portfolio/out/.nojekyll
+          touch out/.nojekyll
+          test -f out/.nojekyll
           bun run verify:export
           bun run audit:schema
 
