@@ -34,18 +34,6 @@ in
   semble-rs = pkgs.callPackage ./semble-rs.nix { };
   tandf-template = pkgs.callPackage ./tandf-template.nix { };
 
-  # `lib` passed explicitly: auto-filling would substitute `pkgs.lib` for the
-  # caller's `nixpkgs.lib` in the uv2nix overlay composition.
-  dbt-with-duckdb = pkgs.callPackage ./dbt-with-duckdb.nix {
-    inherit lib;
-    inherit (inputs)
-      python-workspace
-      pyproject-build-systems
-      pyproject-nix
-      uv2nix
-      ;
-  };
-
   duckdb-cli = duckdb;
 
   lean-toolchain = import ./lean-toolchain.nix {

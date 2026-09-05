@@ -34,13 +34,10 @@ documentation:
 |---|---|
 | Root `ARCHITECTURE.md` | Overview of the monorepo design |
 | `src/ARCHITECTURE.md` | Python + LaTeX + Lean co-location |
-| `src/python/ARCHITECTURE.md` | uv workspace design |
 | `src/latex/ARCHITECTURE.md` | Canonical arXiv and journal publishing boundary |
 | `src/lean/ARCHITECTURE.md` | Lake multi-package workspace |
 | `src/typescript/ARCHITECTURE.md` | Bun + Turbo web application workspace |
 | `infra/ARCHITECTURE.md` | Reproducible environment, static schemas, and deployment infrastructure |
-| `src/python/apps/pipeline/ARCHITECTURE.md` | Python pipeline and DVC stage design |
-| `src/python/apps/harnessme/ARCHITECTURE.md` | DuckDB + dbt query-plane design |
 | `infra/nix/docs/just/ARCHITECTURE.md` | just task runner design |
 | `infra/nix/docs/prek/ARCHITECTURE.md` | prek hooks design |
 

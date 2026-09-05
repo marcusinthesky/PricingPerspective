@@ -4,8 +4,6 @@ set shell := ["bash", "-uc"]
 mod pipeline 'apps/pipeline/justfile'
 # Simulation app (Monte-Carlo): tests.
 mod simulation 'apps/simulation/justfile'
-# Crawler app: tests.
-mod crawler 'apps/crawler/justfile'
 # Ettax app: vintage-locked GPU document-encoder training.
 mod ettax 'apps/ettax/justfile'
 # jcor package (core energy/distance library): tests.
@@ -16,8 +14,6 @@ mod semflow 'packages/semflow/justfile'
 mod insitu 'packages/insitu/justfile'
 # Repository projectors and Insitu orchestration.
 mod insitu-repository 'apps/insitu-repository/justfile'
-# Repository-introspection application (dbt + DuckDB).
-mod harnessme 'apps/harnessme/justfile'
 # Manim animation and Kokoro narration application.
 mod manimize 'apps/manimize/justfile'
 
@@ -76,7 +72,7 @@ typecheck-scripts:
             continue
         fi
         uv run pyrefly check -c /dev/null --python-interpreter-path "$interp" "$f" || rc=1
-    done < <(grep -rl '# /// script' scripts notebooks apps --include='*.py')
+    done < <(grep -rl '# /// script' scripts apps --include='*.py')
     exit "$rc"
 
 # Native Ruff dependency graph, including TYPE_CHECKING and string imports.
@@ -231,10 +227,6 @@ pydoclint:
 # Dead-code report (advisory — never auto-deletes; findings are human-reviewed).
 vulture:
     cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/python" && uv run vulture
-
-# Validate .context/chat/ frontmatter schema.
-chat-validate:
-    uv run --script scripts/chat_validate/script.py
 
 # Run Python prek hooks against the whole tree.
 check:

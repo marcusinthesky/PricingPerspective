@@ -13,7 +13,6 @@ Shared Python libraries consumed by pipeline scripts, notebooks, and
 |---|---|---|
 | `insitu/` | Typed, reactive in-place document materializations | `Pydantic`, `watchfiles` |
 | `jcor/` | JAX-based distance correlation and energy statistics | `jax[cuda12]`, `jaxopt` |
-| `agentrail/` | Provider-neutral workflow contracts and deterministic orchestration | `pydantic`, `pydantic-graph` |
 | `dotell/` | Structured logging and process-resource telemetry | `loguru`, `psutil` |
 | `semflow/` | Semantic Python fingerprints and review-first DVC patches | `PyYAML`, `Typer` |
 
@@ -27,7 +26,6 @@ depth = 1
 
 ```text
 .
-├── agentrail # Provider-neutral workflow contracts, deterministic orchestration, and graph conformance primitives.
 ├── dotell
 ├── insitu # Reactive, typed materializations for Markdown and YAML front matter.
 ├── jcor

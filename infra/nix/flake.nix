@@ -5,10 +5,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
 
-    # Separately-pinned nixpkgs used ONLY for the duckdb CLI, so it can track the
-    # version src/python/apps/harnessme/extensions.lock.yml requires (extension binaries are
-    # version-keyed) without moving the rest of the shell. See ARCHITECTURE.md
-    # § "Why the SQL toolchain is built from uv.lock".
+    # Separately-pinned nixpkgs used ONLY for the duckdb CLI, so its version can
+    # move independently of the rest of the shell (DuckDB extension binaries are
+    # version-keyed). See pkgs/duckdb-cli.nix.
     nixpkgs-duckdb.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # Lean toolchain provider. Pinned as a *source* input (flake = false): we only
@@ -16,36 +15,6 @@
     # pulling in its nixpkgs/flake-parts inputs. See pkgs/lean-toolchain.nix.
     lean4-nix = {
       url = "github:lenianiva/lean4-nix";
-      flake = false;
-    };
-
-    # uv2nix: builds the dbt/duckdb SQL toolchain as a hermetic Python env from
-    # the harnessme member in src/python/uv.lock. See pkgs/dbt-with-duckdb.nix.
-    pyproject-nix = {
-      url = "github:pyproject-nix/pyproject.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    uv2nix = {
-      url = "github:pyproject-nix/uv2nix";
-      inputs = {
-        pyproject-nix.follows = "pyproject-nix";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-    pyproject-build-systems = {
-      url = "github:pyproject-nix/build-system-pkgs";
-      inputs = {
-        pyproject-nix.follows = "pyproject-nix";
-        uv2nix.follows = "uv2nix";
-        nixpkgs.follows = "nixpkgs";
-      };
-    };
-
-    # The Python uv workspace as a source input — only git-tracked files are
-    # copied, so .venv / dbt_packages / target are excluded. Editing the shared
-    # src/python/uv.lock re-locks this input automatically.
-    python-workspace = {
-      url = "path:../../src/python";
       flake = false;
     };
 
@@ -59,8 +28,8 @@
         pkgs = import nixpkgs { inherit system; };
         inherit (nixpkgs) lib;
 
-        # `inputs` is passed whole because three of these (duckdb-cli,
-        # dbt-with-duckdb, lean-toolchain) are built from flake inputs, not `pkgs`.
+        # `inputs` is passed whole because two of these (duckdb-cli,
+        # lean-toolchain) are built from flake inputs, not `pkgs`.
         customPkgs = import ./pkgs {
           inherit
             pkgs
@@ -82,7 +51,6 @@
             bun
             chktex
             dbt-language-server
-            dbt-with-duckdb
             duckdb-cli
             frontmatter-cli
             latexdiff

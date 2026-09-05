@@ -10,8 +10,6 @@ belong under `src/python/packages/`.
 
 `insitu-repository/` is the executable policy adapter for this repository's
 Markdown projections; its reusable reconciliation engine is `packages/insitu/`.
-`harnessme/` is the flattened DuckDB/dbt application boundary for repository
-introspection, retrieval, architecture analysis, and its mart-backed dashboards.
 
 ## Directory Tree
 
@@ -23,12 +21,9 @@ depth = 1
 
 ```text
 .
-├── crawler # Web crawler for financial data collection
 ├── ettax
-├── harnessme # Harnessme — DuckDB/dbt application for repository introspection and retrieval.
 ├── insitu-repository # Pricing Perspective projectors and orchestration for the reusable Python Insitu engine.
 ├── manimize
-├── nasdaq-pilot # Permission-gated, resumable collector for the Nasdaq continuity pilot
 ├── pipeline
 └── simulation # GPU-capable JAX Monte-Carlo simulation package for energy/Wasserstein metrics and portfolio optimisation.
 ```

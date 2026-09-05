@@ -15,7 +15,7 @@ the moment its derivation is edited.
 | Upstream is not in nixpkgs | `frontmatter-cli`, `dbt-language-server`, `merman-cli`, `semble-rs` |
 | The nixpkgs version trails the workspace contract | `bun` |
 | The nixpkgs attribute is the wrong shape | `chktex`, `pgf-metrics`, `latexdiff` (all need TeX Live scaffolding the standalone attribute lacks) |
-| Built from a flake input, not from `pkgs` | `duckdb-cli`, `dbt-with-duckdb`, `lean-toolchain` |
+| Built from a flake input, not from `pkgs` | `duckdb-cli`, `lean-toolchain` |
 | Materializes a pinned third-party source | `oup-template`, `tandf-template` |
 
 A package that is simply `pkgs.<name>` does **not** belong here — declare it in

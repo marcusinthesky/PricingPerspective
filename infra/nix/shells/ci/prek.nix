@@ -24,10 +24,9 @@ pkgs.mkShell {
     dvc-with-remotes
     pandoc
 
-    ## Python, SQL, and agent gates
+    ## Python and agent gates
     uv
     python313
-    dbt-with-duckdb
     bun
     deno
 
@@ -57,7 +56,7 @@ pkgs.mkShell {
     tflint
     trivy
 
-    ## TLS roots for uv, prek, Lychee, dbt, and Tectonic downloads
+    ## TLS roots for uv, prek, Lychee, and Tectonic downloads
     cacert
   ];
 

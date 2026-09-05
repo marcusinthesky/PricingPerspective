@@ -144,20 +144,11 @@ compiler — which is exactly the churn the lean4-nix maintainer currently absor
 Bumping either route means moving `leanManifest.tag` and the per-platform hashes
 in lockstep with `src/lean/lean-toolchain`.
 
-### Why the SQL toolchain is built from `uv.lock`
-
-Harnessme's DuckDB/dbt dependencies must be present when the dev shell activates,
-not fetched lazily by `uv run` at the first hook invocation. uv2nix reads the
-shared `src/python/uv.lock` and selects only the `harnessme` workspace member's
-closure, materializing a hermetic, GC-rooted Python environment without pulling
-the research apps into the SQL gate. prek hooks then call the bare binaries
-(`sqlfmt`, `sqlfluff`, `dbt`, `check-script-*`) through `language: system` — no
-network and no lazy sync. This replaced a hand-rolled `dbt-duckdb`
-`buildPythonPackage`.
+### Why the DuckDB CLI has its own nixpkgs pin
 
 The DuckDB *CLI* is pinned through a second, separately-moving `nixpkgs-duckdb`
 input. The extension binaries under `~/.duckdb/extensions/` are version-keyed, so
-a CLI older than the `duckdb_version` in `src/python/apps/harnessme/extensions.lock.yml`
+a CLI older than the `duckdb_version` its extensions were built against
 cannot load them — and a dedicated input lets DuckDB track current
 `nixos-unstable` without dragging Python, Tectonic, and the Lean toolchain's
 autoPatchelf inputs forward days before a manuscript deadline.

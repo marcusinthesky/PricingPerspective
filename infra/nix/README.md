@@ -47,7 +47,7 @@ id = "tool-inventory"
 | Group | Provides | Tools |
 |---|---|---|
 | **shell** | Interactive shell, version control, and the GitHub CLI. | zsh, git, git-lfs, gh |
-| **tools** | Operator tooling: secrets, the DuckDB/dbt data plane, DVC, the hook runner, watch loops, data transformation, and rendering. | jq, yq, sd, dotenvx, secret-tool, dvc, prek, duckdb, harnessme-sql-gates, pandoc, watchexec, difft, graphviz, merman-cli, ffmpeg, espeak-ng |
+| **tools** | Operator tooling: secrets, the DuckDB data plane, DVC, the hook runner, watch loops, data transformation, and rendering. | jq, yq, sd, dotenvx, secret-tool, dvc, prek, duckdb, pandoc, watchexec, difft, graphviz, merman-cli, ffmpeg, espeak-ng |
 | **languages** | Every language in the repo and its toolchain — runtime, type checker, formatter, linter, LSP — from Python and Lean through LaTeX, Markdown, Nix, JSON, and HCL. | uv, pyrefly, bun, deno, lean, harper-ls, tectonic, tex-fmt, texlab, chktex, pdflatex, latexdiff, tandf-template, oup-template, just, just-lsp, nixfmt, statix, deadnix, nixd, yaml-language-server, marksman, rumdl, schematter, lychee, frontmatter, tombi, dbt-language-server, jsonschema-cli, vscode-langservers-extracted, bash-language-server, tofu, terragrunt, tflint, terraform-ls, trivy |
 | **search** | Discovery: find files, text, and code — exact, then structural, then semantic — and size up what the repository contains. | rg, fd, fzf, ast-grep, semble_rs, tokei |
 | **documents** | Native PDF/raster primitives used by the visual-document-analysis skill. | pdf2md, poppler-utils, pdfannots, qpdf, ocrmypdf, tesseract, mupdf, magick, diff-pdf |
@@ -61,11 +61,9 @@ id = "tool-inventory"
 | Input | Role |
 |---|---|
 | `nixpkgs` | The pin every tool resolves from (`nixos-unstable`, frozen by `flake.lock`) |
-| `nixpkgs-duckdb` | A second, separately-moving pin used **only** for the DuckDB CLI, so it can track the version `src/python/apps/harnessme/extensions.lock.yml` requires without moving the whole shell |
+| `nixpkgs-duckdb` | A second, separately-moving pin used **only** for the DuckDB CLI, so its version can move independently of the whole shell |
 | `flake-utils` | `eachSystem` over x86_64-linux and aarch64-linux |
 | `lean4-nix` | Source-only (`flake = false`); supplies the `fetchBinaryLean` helper |
-| `uv2nix`, `pyproject-nix`, `pyproject-build-systems` | Build the hermetic dbt/DuckDB Python env from a `uv.lock` |
-| `python-workspace` | The `src/python` uv workspace, consumed as a source input; the SQL environment selects only the `harnessme` member closure |
 
 Vendored third-party sources are pinned by commit and content hash in
 `pkgs/*.nix` — including the generic Taylor & Francis Interact template and the

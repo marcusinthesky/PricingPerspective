@@ -35,7 +35,7 @@
     ## ── meaning ───────────────────────────────────────────────────────────
     ## Beyond this point the question is no longer answerable by matching text.
     ## For imports, drift, and blast radius across the whole repo, escalate again
-    ## to the DuckDB harness (`just harnessme`), which has no CLI of its own.
+    ## to `semble_rs deps`/`impact`, which read the whole dependency graph.
     semble-rs # `semble_rs search|deps|impact`: semantic + BM25 search, and transitive blast radius
 
     ## ── census, not matching ──────────────────────────────────────────────

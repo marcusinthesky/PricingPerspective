@@ -5,27 +5,16 @@ set shell := ["bash", "-uc"]
 
 # Dev shell (flake devShell) + nix formatting.
 mod nix 'infra/nix/justfile'
-# Python uv workspace: apps (pipeline/simulation/crawler) + packages (jcor).
+# Python uv workspace: apps (pipeline/simulation/ettax) + packages (jcor).
 mod python 'src/python/justfile'
 # Lean 4: build, mathlib cache, sorry/axiom allowlist gate.
 mod lean 'src/lean/justfile'
-# AgentSync symlinks + agent worktree provisioning.
-mod agents '.agents/justfile'
-# Repo-introspection application (dbt + DuckDB).
-mod harnessme 'src/python/apps/harnessme/justfile'
-# Marimo notebook workspace (src/python/notebooks).
-mod marimo 'src/python/notebooks/justfile'
 # Reference CSL validation, BibTeX export, and citation graph.
 mod references 'src/python/scripts/references/justfile'
 # Materialized Markdown views: reusable Python core plus repository projectors.
 mod insitu 'src/python/apps/insitu-repository/justfile'
-# Chat/session export intake into .context/chat.
-mod chat 'src/python/packages/agentrail/chat.justfile'
 # Plan layer: graph, board, ROADMAP map.
 mod plan 'src/python/apps/insitu-repository/justfile'
-
-# Agent workflow gates: Claude scripts + typed Codex SDK orchestration.
-mod workflows '.agents/workflows/justfile'
 # LaTeX manuscripts: build, fmt, smoke.
 mod latex 'src/latex/justfile'
 # TypeScript Bun workspace and Turbo task graph.
@@ -42,17 +31,17 @@ default:
 # hooks can compile the project. LaTeX needs nothing here: its bundle subset is
 # vendored in the tree (`just latex::bundle-refresh` regenerates it), so every
 # compile is already offline.
-setup: python::setup harnessme::setup typescript::setup
+setup: python::setup typescript::setup
 
 # Install git hooks via prek (drop-in pre-commit replacement).
 hooks:
     prek install
 
 # Lint everything.
-lint: python::lint harnessme::lint latex::lint typescript::lint
+lint: python::lint latex::lint typescript::lint
 
 # Auto-format all code.
-fmt: nix::fmt python::fmt harnessme::fmt terraform::fmt latex::fmt typescript::fmt
+fmt: nix::fmt python::fmt terraform::fmt latex::fmt typescript::fmt
 
 # Static type checking.
 typecheck: python::typecheck typescript::typecheck
