@@ -1,0 +1,9 @@
+import WassersteinGeometry.Geodesics
+import WassersteinGeometry.Gluing
+import WassersteinGeometry.Contraction
+import WassersteinGeometry.Hilbert.Defs
+import WassersteinGeometry.Hilbert.Polarization
+import WassersteinGeometry.Real.Geodesic
+import WassersteinGeometry.FrechetMean
+import WassersteinGeometry.Real.Examples
+import WassersteinGeometry.Multimarginal

@@ -1,0 +1,12 @@
+{
+  "arm": "V0",
+  "identifier": "enwiki-20171220",
+  "initial_alphabet_size": 256,
+  "recipe": "byte-complete-bpe-v1",
+  "run_id": "v3-byte-complete",
+  "sample_seed": "t69-ettax-vintage-staircase:tokenizer",
+  "source": "data/.encoder_vintage/corpus/V0.txt",
+  "source_documents": 9299358,
+  "target_documents": 2000000,
+  "tokenizer_sha256": "87dcce575ae6effd6ddd2341671e0ea28505fac30584b90d9867fae5b9bf90d7"
+}

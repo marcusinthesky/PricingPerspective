@@ -1,0 +1,55 @@
+# Shared body for the parallel test tiers. $1 is the marker expression.
+#
+# `-p no:monitor` is load-bearing under `-n auto`, not a preference.
+# `pytest-monitor`'s `pytest_sessionstart` hookwrapper does a check-then-act on
+# its `.pymon` SQLite store (`pytest_monitor/session.py:99-103`): SELECT the
+# environment hash, and INSERT if absent — a plain INSERT, no `OR IGNORE`, no
+# xdist awareness. Every worker runs that hook concurrently against one file, so
+# on the first run under a new `ENV_H` all N SELECT "absent" and all N INSERT.
+# One wins; the rest die with
+# `sqlite3.IntegrityError: UNIQUE constraint failed: EXECUTION_CONTEXTS.ENV_H`
+# inside `pytest_sessionstart`, before the worker can emit `workerready`.
+#
+# That worker-side crash is then masked: xdist's `worker_internal_error` removes
+# the node from `_active_nodes` (`dsession.py:230`) without setting `_down`, so
+# the channel-close path queues a second teardown and `worker_errordown`
+# (`dsession.py:267`) removes it again — `.remove()`, not `.discard()` — and the
+# run dies with `INTERNALERROR> KeyError: <WorkerController gwN>` and exit 3.
+# The KeyError is the symptom; the IntegrityError is the fault.
+#
+# `ENV_H` hashes CPU frequency among other things, so it changes as the host
+# clocks up and down. That is what makes this look intermittent and
+# load-dependent rather than deterministic: a run is red exactly when it is the
+# first parallel run at a given `ENV_H`, and green once a winner has written the
+# row. Nothing in this repository reads `.pymon` — performance telemetry is the
+# first-party `dotell` package — so the plugin is switched off for the
+# parallel tiers rather than worked around. `test-durations` stays serial and
+# keeps it.
+_pytest markexpr *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd '{{ source_directory() }}'
+    export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+    exec env -u VIRTUAL_ENV uv run pytest -q -p no:monitor -n auto -m '{{ markexpr }}' {{ args }}
+
+# Run fast unit tests (default) with Testmon's xdist-aware cache.
+test *args: (_pytest "not slow" "--testmon-forceselect" args)
+
+# Run all tests including slow statistical/backtest tests.
+test-all *args: (_pytest "" args)
+
+# Run tests with duration report.
+test-durations:
+    env -u VIRTUAL_ENV uv run pytest -v --durations=20
+
+# Run linting.
+lint:
+    uv run ruff check src/pipeline/
+
+# Auto-fix lint issues.
+fix:
+    uv run ruff check --fix src/pipeline/
+
+# Format code.
+format:
+    uv run ruff format src/pipeline/

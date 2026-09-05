@@ -1,0 +1,30 @@
+set shell := ["bash", "-uc"]
+
+test *args:
+    env -u VIRTUAL_ENV uv run --project . pytest -q {{ args }}
+
+lint:
+    env -u VIRTUAL_ENV uv run --project . ruff check src tests scenes theme.py tools
+
+format:
+    env -u VIRTUAL_ENV uv run --project . ruff format src tests scenes theme.py tools
+
+format-check:
+    env -u VIRTUAL_ENV uv run --project . ruff format --check src tests scenes theme.py tools
+
+typecheck:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/python" && env -u VIRTUAL_ENV uv run --project . pyrefly check apps/manimize/src apps/manimize/tests
+
+deptry:
+    cd '{{ source_directory() }}' && env -u VIRTUAL_ENV uv run --project . deptry .
+
+preview *args:
+    env -u VIRTUAL_ENV uv run --project . python tools/preview_renderer.py {{ args }}
+
+native *args:
+    env -u VIRTUAL_ENV uv run --project . --extra native manimize-render {{ args }}
+
+narrate *args:
+    env -u VIRTUAL_ENV uv run --project . --extra narration manimize-narrate {{ args }}
+
+check: format-check lint typecheck deptry test

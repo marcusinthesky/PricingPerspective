@@ -1,0 +1,8 @@
+/* TEAM */
+Researchers: Marcus Gawronsky, Chun-Sung Huang
+Affiliation: Department of Finance and Tax, University of Cape Town
+
+/* SITE */
+Language: English
+Stack: Next.js, TypeScript, Tailwind CSS, MDX, Bun, Biome, Oxlint, Storybook
+Visual direction: black-and-white serif constellation

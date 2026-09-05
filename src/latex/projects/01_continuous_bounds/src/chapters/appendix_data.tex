@@ -1,0 +1,69 @@
+\section{Data construction and coverage}\label{sec:data-provenance}
+
+The application uses a declared Nasdaq-100-based frame rather than a
+reconstructed historical-membership panel. A firm enters the news frame only
+if the raw Nasdaq per-symbol archive contains at least
+\ppvalue{annual-raw-article-floor} articles in every
+calendar year from \ppvalue{sample-year-start} through
+\ppvalue{sample-year-end}. The screen ensures annual support for each empirical
+article distribution but conditions the sample on media coverage.
+
+The comparison in \Cref{tab:news-dataset-comparison} highlights the trade-off:
+the public source permits researcher-controlled full-text measurement but
+offers narrower market coverage than large proprietary archives.
+
+\input{chapters/news_dataset_comparison}
+
+\begin{table}[H]
+  \centering
+  \caption{Data construction and estimation flow. Counts are pipeline-generated;
+    article selection uses stable URL-hash order and return dates use an exact
+  complete-case rule. Authors' calculations.}
+  \label{tab:data-provenance}
+  \label{tab:sample-flow}
+  \begin{tabularx}{\linewidth}{lXr}
+    \toprule
+    Stage & Source and rule & Retained \\
+    \midrule
+    Raw article records & Public Nasdaq per-symbol news archive &
+    \ppnum[0]{corpus-raw-records} \\
+    Deduplicated universe & Identifier-level deduplication,
+    \ppvalue{corpus-year-min}--\ppvalue{corpus-year-max} &
+    \ppnum[0]{corpus-articles-total} \\
+    Analysis window & Articles dated
+    \ppvalue{sample-year-start}--\ppvalue{sample-year-end} &
+    \ppnum[0]{corpus-articles-window} \\
+    Deterministic cap & Up to \ppvalue{n-samples-cap} articles per firm &
+    \ppvalue{sample-desc-total-articles} \\
+    News firms & Prespecified coverage-qualified frame &
+    \ppvalue{n-firms-news} \\
+    Priced firms & Intersection with local adjusted-close histories &
+    \ppvalue{n-firms} \\
+    Return dates & Common dates from \ppvalue{return-panel-date-start} to
+    \ppvalue{return-panel-date-end} &
+    \ppvalue{return-panel-n-observations} \\
+    Estimation dyads & Unordered priced pairs $i<j$ & \ppvalue{n-pairs} \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Identifier-level deduplication removes
+\ppnum[0]{corpus-duplicates-dropped} repeated records. After the fixed window
+and deterministic cap, full article bodies are embedded independently with the
+pinned encoder and row-normalized before exact balanced W$_2$ construction.
+Daily simple returns are adjusted-close ratios minus one; nullable observations
+are removed before matrix construction, with no interpolation or zero filling.
+The news frame contains \ppnum[0]{n-firms-news} firms, and its intersection with
+compatible local return histories retains \ppnum[0]{n-firms} priced firms.
+
+The canonical priced W$_2$ roster used by the return-dependent plots and
+estimates is listed in \Cref{tab:sample-universe}.
+
+\input{generated/sample_universe}
+
+\Cref{tab:sample-descriptives-sectors}, reported in the body, gives coverage,
+mean daily return volatility, and within- versus cross-sector W$_2$ distances.
+Counts are near the declared cap by construction. Energy and Financial Services
+are singleton sectors in the current roster, so their within-sector quantities
+are reported as undefined rather than zero. The imbalance and the missing
+timestamp on Nasdaq sector metadata limit sector-based interpretation.

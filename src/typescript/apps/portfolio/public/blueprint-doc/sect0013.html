@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = {
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Finite interaction and the strong-interaction boundary</title>
+<link rel="prev" href="sect0012.html" title="Operator and convergence certificate" />
+<link rel="up" href="chap-spatial.html" title="Spatial interaction and the rank-one boundary" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Pricing Perspective: Formalization Blueprint</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="chap-random-exposure.html"><span class="toc_ref">1</span> <span class="toc_entry">Random functional exposures and the covariance envelope</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0001.html"><span class="toc_ref">1.1</span> <span class="toc_entry">The exposure law and its risk coordinates</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1.2</span> <span class="toc_entry">The Fréchet class and its endpoints</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">1.3</span> <span class="toc_entry">Transfer from observable characteristics</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">1.4</span> <span class="toc_entry">Coherent aggregation</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">1.5</span> <span class="toc_entry">Rehomed from the retired deterministic chapter</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-distance-implied.html"><span class="toc_ref">2</span> <span class="toc_entry">Paper 3: information-certified portfolio variance</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0006.html"><span class="toc_ref">2.1</span> <span class="toc_entry">Coherent certificate</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">2.2</span> <span class="toc_entry">Return bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">2.3</span> <span class="toc_entry">Portfolio choice</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-robust-slack.html"><span class="toc_ref">3</span> <span class="toc_entry">Robust envelopes under measurement slack</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0009.html"><span class="toc_ref">3.1</span> <span class="toc_entry">Radii propagate through the embedding</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">3.2</span> <span class="toc_entry">Maximizing over the box</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">3.3</span> <span class="toc_entry">Reconciling the two geometries</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active">
+  <a href="chap-spatial.html"><span class="toc_ref">4</span> <span class="toc_entry">Spatial interaction and the rank-one boundary</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="sect0012.html"><span class="toc_ref">4.1</span> <span class="toc_entry">Operator and convergence certificate</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0013.html"><span class="toc_ref">4.2</span> <span class="toc_entry">Finite interaction and the strong-interaction boundary</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000014">4.2 Finite interaction and the strong-interaction boundary</h1>
+<p>Let \(P=\mathbf1\pi ^\top \) and \(N=W-P\). When \(P\) is an absorbing idempotent projection, the normalized Leontief multiplier has the exact complementary-resolvent remainder used in the next result. </p>
+<div class="theorem_thmwrapper theorem-style-plain" id="prop:finite-rho-bound">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">35</span>
+    <span class="theorem_thmtitle">Finite-\(\rho \) resolvent bound</span>
+    <div class="thm_header_extras">
+
+
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0013.html#prop:finite-rho-bound">#</a>
+
+    <a class="icon proof" href="sect0013.html#a0000000050"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+
+
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.normalized_leontief_error_le" class="lean_decl">PricingPerspective.Connections.SpatialAsymptotics.normalized_leontief_error_le</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   If \(\lVert \rho (W-P)\rVert {\lt}1\), then </p>
+<div class="displaymath" id="a0000000051">
+  \[  \left\lVert (1-\rho )(I-\rho W)^{-1}-P\right\rVert \leq |1-\rho |\{ 1-\lVert \rho (W-P)\rVert \} ^{-1}\lVert I-P\rVert .  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000050">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> Split the multiplier into the Perron projection and complementary resolvent, then apply the Neumann-series norm bound to the latter. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:resolvent-from-perron">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">36</span>
+    <span class="theorem_thmtitle">Resolvent limit from the power limit</span>
+    <div class="thm_header_extras">
+
+
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0013.html#thm:resolvent-from-perron">#</a>
+
+    <a class="icon proof" href="sect0013.html#a0000000052"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="sect0012.html#thm:perron-from-geometric">Theorem 32</a></li>
+
+          <li><a href="sect0012.html#thm:perron-from-geometric">Theorem 32</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.isResolventLimit_of_isPerronLimit" class="lean_decl">PricingPerspective.Connections.SpatialAsymptotics.isResolventLimit_of_isPerronLimit</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For row-stochastic \(W\), the Perron power limit implies \((1-\rho )(I-\rho W)^{-1}\to P\) as \(\rho \uparrow 1\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000052">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>  The exact projection split leaves a complementary term multiplied by \(1-\rho \), which vanishes at the boundary. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:rankone-collapse">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">37</span>
+    <span class="theorem_thmtitle">Rank-one collapse of rescaled covariance</span>
+    <div class="thm_header_extras">
+
+
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0013.html#thm:rankone-collapse">#</a>
+
+    <a class="icon proof" href="sect0013.html#a0000000053"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="sect0013.html#thm:resolvent-from-perron">Theorem 36</a></li>
+
+          <li><a href="sect0013.html#thm:resolvent-from-perron">Theorem 36</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.sigmaSAR_rankOne_limit_of_perron" class="lean_decl">PricingPerspective.Connections.SpatialAsymptotics.sigmaSAR_rankOne_limit_of_perron</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>    For innovation covariance \(V\), row-stochastic \(W\), and the Perron power limit, </p>
+<div class="displaymath" id="a0000000054">
+  \[  (1-\rho )^2\Sigma _{\mathrm{SAR}} \longrightarrow (\pi ^\top V\pi )\mathbf1\mathbf1^\top .  \]
+</div>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000053">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>  Apply the normalized resolvent limit on both sides of the covariance congruence. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0012.html" title="Operator and convergence certificate"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="chap-spatial.html" title="Spatial interaction and the rank-one boundary"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

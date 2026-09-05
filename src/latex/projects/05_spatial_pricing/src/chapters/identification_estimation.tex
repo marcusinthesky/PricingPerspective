@@ -1,0 +1,479 @@
+\section{Return Bridge, Empirical Design, and Data}
+\label{sec:identification-estimation}
+
+\subsection{Empirical questions and return bridge}
+\label{sec:exposures-to-returns}
+
+The empirical analysis follows four successive questions.
+First, does the barycentric interaction field organize conditional
+cross-sectional return dependence?
+This is the existence question; it concerns the return dependence associated
+with a predetermined field, not whether semantic similarity causes returns.
+Second, does target-anchored Wasserstein barycentric reconstruction add
+information beyond pairwise RBF proximity computed from the same Wasserstein
+distances and beyond equal weighting of the selected peer support?
+This mechanism question distinguishes joint representability from pairwise
+distance decay and cardinal reconstruction weights from peer selection.
+Third, does the barycentric interaction field remain informative beside a
+persistent co-mention field?
+This distinctness question motivates estimating the two fields jointly.
+Finally, do the comparisons remain stable when representation width, model
+capacity, model family, or information vintage changes?
+These last exercises diagnose sensitivity to the measurement design; they are
+not additional hypotheses about economic behavior.
+
+The theory concerns latent peer-adjusted exposure vectors, whereas the data
+contain scalar returns.
+The empirical bridge therefore has two steps.
+First, scalar projection preserves the spatial operator and the structural
+coefficient for the systematic return component.
+Second, the application estimates an observable return equation under a
+spherical working quasi-likelihood.
+Only the first step follows algebraically from the exposure model; interpreting
+the QMLE coefficient as the structural adjustment parameter requires the
+additional restriction stated below.
+
+The theory's stand-alone exposure $\xi_i$, peer-adjusted exposure $B_i$,
+transmission map $T$, and risk-coordinate law $P_i$ are latent.
+The application observes empirical text laws $\widehat C_i$ and returns $r_t$
+and constructs $W^\flat$ before the return-evaluation window.
+The following result shows that the equilibrium derivation survives when an
+exposure is viewed along one scalar risk direction.
+
+\begin{proposition}[Scalar projection]\label{prop:scalar-projection}
+  For every $h\in\mathcal H$, the scalar field $\inner{B_i,h}$ satisfies the
+  ordinary spatial autoregression with the same $W$ and $\rho$, with reduced
+  form $(1-\rho)(I-\rho W)^{-1}$ applied to $\inner{\xi_i,h}$.
+\end{proposition}
+By linearity of the inner product,
+\[
+  \langle B_i,h\rangle
+  =\rho\sum_j W_{ij}\langle B_j,h\rangle
+  +(1-\rho)\langle\xi_i,h\rangle.
+\]
+Stacking preserves the same $W$ and $\rho$; applying the already-established
+inverse in \Cref{thm:sar-reduced-form} gives the reduced form stated in the
+proposition.
+
+To state the exact return implication, define the systematic return component
+and the projected stand-alone exposure by
+$s_t^i=\inner{B_i,F_t}_{\mathcal H}$ and
+$z_t^i=\inner{\xi_i,F_t}_{\mathcal H}$, and stack them across firms.
+Conditional on the realized factor direction $F_t$, scalar projection gives
+$s_t=\rho Ws_t+(1-\rho)z_t$.
+Since centered excess returns satisfy $\widetilde r_t=s_t+e_t$, substitution,
+not an additional stochastic assumption, yields
+
+\begin{equation}\label{eq:model-return-innovation}
+  \widetilde r_t
+  =\rho W\widetilde r_t+x_t^{\mathrm{model}},
+  \qquad
+  x_t^{\mathrm{model}}
+  =(1-\rho)z_t+(I-\rho W)e_t.
+\end{equation}
+
+Equation~\eqref{eq:model-return-innovation} is the return equation implied by
+the exposure model.
+Even when the components of $e_t$ are cross-sectionally uncorrelated, filtering
+them by $I-\rho W$ and adding the projected stand-alone exposure generally makes
+$x_t^{\mathrm{model}}$ nonspherical and correlated across firms.
+Allowing an intercept to absorb centering and possible mean components gives
+the empirical notation
+
+\begin{equation}\label{eq:spatial-lag}
+  r_t = \rho W r_t + x_t .
+\end{equation}
+
+When $x_t=x_t^{\mathrm{model}}$, the $\rho$ in
+\eqref{eq:spatial-lag} is the structural coefficient inherited from the
+exposure model.
+The QMLE instead replaces that innovation with a working specification and
+targets a potentially different coefficient.
+
+\subsection{Estimand and identification}
+
+Three coefficients must remain distinct.
+The structural $\rho$ governs peer adjustment of latent exposures in
+\Cref{sec:spatial-closure} and lies on the model's nonnegative branch
+$0\leq\rho<1$ fixed by \Cref{hyp:spectral-gate}; on this branch, the structural
+ratio is $\lambda=\rho/(1-\rho)$.
+For the concentrated working log-likelihood $\ell_t^Q(\rho;W)$ introduced
+below, the population target is the pseudo-true coefficient
+
+\[
+  \rho^\star
+  \in\operatorname*{argmax}_{|\rho|<1}
+  \E[\ell_t^Q(\rho;W)].
+\]
+
+The sample coefficient $\hat\rho$ is a finite-sample maximizer of the
+corresponding pooled working objective for a supplied $W$.
+Thus $\rho$ is a structural exposure-adjustment parameter, $\rho^\star$ is the
+best population approximation within the working likelihood, and $\hat\rho$
+is its sample estimate.
+
+Scalar projection establishes the algebraic bridge from latent exposures to
+systematic returns; it does not identify the structural adjustment parameter
+from the observed return panel.
+For $\rho^\star$ to equal the structural $\rho$, the expected derivative of the
+working objective---the population quasi-score---must have its unique zero at
+the structural value despite the richer innovation in
+\eqref{eq:model-return-innovation}.
+This return-bridge restriction is neither implied by projection nor established
+by the empirical design.
+
+Absent that restriction, QMLE describes conditional spatial dependence for a
+specified geometry and working likelihood.
+Then $\lambda^\star=\rho^\star/(1-\rho^\star)$ is the population working-model
+adjustment index, and
+$\hat\lambda=\hat\rho/(1-\hat\rho)$ is its sample analogue.
+It is not the structural cost ratio, a causal peer effect, an observed cost, or
+a separately identified latent exposure parameter.
+The return panel also cannot identify the carrier parameters, the transmission
+map, individual adjustment costs, or individual peer-adjusted exposures.
+A negative statistical solution would describe negative conditional spatial
+dependence under the working likelihood.
+It would lie outside the peer-alignment environment of \Cref{sec:model}, rather
+than imply a negative adjustment cost.
+
+\subsection{QMLE and stationary-bootstrap inference}
+
+For a fixed $W$, quasi-maximum likelihood estimation (QMLE) replaces the
+innovation in \eqref{eq:spatial-lag} with a common intercept and a spherical
+disturbance:
+
+\[
+  r_t=\alpha\1+\rho W r_t+\varepsilon_t,
+  \qquad \varepsilon_t\mathrel{\overset{\mathrm{work}}{\sim}}
+  \mathrm{iid}(0,\sigma^2I).
+\]
+
+This mean-zero, homoskedastic, cross-sectionally spherical innovation defines a
+working quasi-likelihood; it is not implied by
+\eqref{eq:model-return-innovation} or by the text construction.
+Concentrating out $\alpha$ and $\sigma^2$ leaves the spatial Jacobian term
+$T\log|I-\rho W|$, which accounts for the simultaneous mapping from spatial
+innovations to observed returns.
+The numerical objective is searched over the stable symmetric region
+$|\rho|<1$, allowing the working likelihood to diagnose negative as well as
+positive conditional spatial dependence.
+
+The pooled single-field analysis applies this same estimator to the barycentric
+interaction field, its RBF and equal-active-support comparators, and the
+persistent co-mention field.
+For descriptive persistence, only the coefficient and nuisance parameters are
+re-estimated in four non-overlapping annual samples; every geometry remains
+frozen.
+Inference uses 2,000 joint-date stationary-bootstrap refits with expected block
+length 21.
+Each resampled date retains the full cross-section, while the blocks allow for
+temporal dependence.
+Reported 95 per cent intervals are empirical quantiles of the bootstrap
+distribution.
+The QMLE and bootstrap are therefore tools for answering the empirical
+questions, not separate hypotheses.
+
+\subsection{Comparator and joint-field design}
+\label{sec:two-field-estimation}
+
+The single-field comparators isolate different parts of the mechanism defined
+in \Cref{sec:interaction-comparators}.
+Equal weighting on $W^\flat$'s active support holds peer selection fixed and
+removes only the fitted cardinal reconstruction weights.
+The RBF field holds fixed the empirical laws, pairwise quadratic Wasserstein
+distances, and candidate universe, but replaces target-anchored
+Wasserstein barycentric reconstruction with a separate median-bandwidth
+distance-decay weight for each pair.
+The first comparison asks whether the fitted coordinate magnitudes add to peer
+selection; the second asks whether joint reconstruction adds to pairwise
+proximity.
+Because the RBF and barycentric fields are supplied non-nested geometries, their
+quasi-log-likelihood comparison is descriptive rather than a generic formal
+QLR test.
+
+The persistent co-mention matrix changes the information object and link rule
+while retaining the same pre-evaluation window and row-stochastic econometric
+role.
+Its single-field fit and overlap diagnostics describe how the two constructions
+compare in isolation.
+The distinctness question is sharper: does the barycentric interaction field
+retain conditional return content once the co-mention field enters the same
+model?
+At the structural level, scalar projection applies to
+\eqref{eq:two-field-sar} exactly as it does to the one-field equilibrium because
+\Cref{prop:scalar-projection} uses only linearity of the inner product and the
+cross-sectional operator.
+Substituting as before gives
+
+\begin{equation}\label{eq:two-field-spatial-lag}
+  r_t=\rho_B W^\flat r_t+\rho_N W^{\mathrm{news}}r_t+x_t .
+\end{equation}
+
+Estimation replaces $x_t$ with the same spherical working disturbance as in the
+one-field likelihood.
+The fitted $\rho_B$ and $\rho_N$, and their transformed indices, therefore have
+the same pseudo-true interpretation unless the return bridge holds for both
+channels.
+
+We enter the two fixed matrices unchanged and estimate their coefficients
+jointly rather than orthogonalizing one field against the other.
+Residualization would generally produce negative entries and rows that do not
+sum to one, destroying the admissibility required by
+\Cref{def:interaction-matrix} and the peer-average interpretation of the
+peer-adjusted exposure.
+The joint specification preserves both admissible fields while asking whether
+each is needed conditional on the other.
+
+Because
+$I-\rho_B\,W^\flat-\rho_N\,W^{\mathrm{news}}=I-(\rho_B+\rho_N)W(\theta)$,
+the concentrated objective is the one-field objective evaluated at the mixture;
+no separate Jacobian is required.
+Restricting $0\leq\theta\leq1$ and $0\leq\rho_B+\rho_N<1$ imposes exactly
+$\lambda_B,\lambda_N\geq0$, as required by the quadratic model.
+
+Two consequences matter for interpretation.
+First, the single-field fits are the $\theta=1$ and $\theta=0$ boundaries of the
+same family.
+The joint quasi-log-likelihood therefore cannot fall below either boundary, and
+the reported gains compare specifications within one objective rather than
+across estimators.
+Both boundary fits are re-estimated here rather than carried over from
+\Cref{tab:qmle-pooled}.
+Second, a coefficient pinned at a boundary would indicate that the corresponding
+channel is unnecessary within the working model; the share of bootstrap refits
+at each boundary records this possibility.
+
+The joint model uses the same 2,000 joint-date stationary-bootstrap refits and
+expected block length 21 as the pooled analysis.
+Both nested boundaries are refit on the same draws, making their intervals
+comparable with the joint intervals.
+Alongside the marginal intervals, the bootstrap correlation between channel
+coefficients measures how separately the sample estimates them: a value near
+$-1$ would indicate that the sample estimates their sum more sharply than their
+division.
+
+The quasi-likelihood-ratio statistic is reserved for these nested joint-field
+boundaries.
+The pooled comparisons use
+$QLR_k=2\{\sup_{\rho_B,\rho_N\geq 0}\ell^Q(\rho_B,\rho_N)
+-\sup_{\rho_k=0}\ell^Q(\rho_B,\rho_N)\}$ for $H_{0,k}:\rho_k=0$ against the
+nonnegative-channel alternative, with both suprema taken over the stationary
+parameter region.
+Because each null lies on the boundary of the working quasi-likelihood, its
+reference distribution is simulated under the corresponding restricted
+single-field fit rather than taken from a chi-square law.
+The restricted-null residual simulation, spatial inverse mapping, refitting
+schedule, and continuous grid-cell refinement are documented in
+Appendix~\ref{sec:p5-two-field-implementation}.
+
+\subsection{Data, timing, and representation construction}
+\label{sec:panel-data}
+
+We constructed the barycentric interaction, RBF, equal-support, and persistent
+co-mention fields from information ending in 2022 and froze every matrix.
+We then aligned firms with compatible return histories from
+\ppvalue{post-evaluation-date-start} through
+\ppvalue{post-evaluation-date-end} and estimated conditional spatial
+dependence over
+\ppvalue{post-pooled-2023-2026-w-flat-trading-days} common dates.
+The 2023--2025 folds cover complete calendar years, whereas 2026 ends at the
+last available observation.
+No evaluation return enters the text geometry or the comparator matrices.
+
+Within each common date, the coefficient is estimated from the co-movement
+between a firm's return and the fixed weighted return of its peers, pooled under
+one common coefficient.
+Predetermination removes the direct same-sample reflection that would arise if
+$W$ were estimated from these returns.
+It does not make text exogenous: industries, technologies, attention, and news
+selection can jointly shape the clouds and returns.
+Comparisons across frozen matrices therefore ask which predetermined geometry
+better organizes conditional spatial dependence, not which peer links cause
+returns.
+
+We assembled firm text from Nasdaq's public per-symbol archive of syndicated
+news \citep{nasdaq_news_headlines_2026}.
+We selected this source because its ticker-indexed retrieval, dated article
+bodies, and public access support one reproducible collection rule across the
+prespecified universe.
+The choice prioritizes auditable corpus construction rather than a claim that
+Nasdaq is comprehensive relative to alternative news sources, and we do not
+treat its ticker assignment as manually validated article-level entity
+annotation.
+We constructed daily simple returns as Yahoo Finance adjusted-close ratios
+minus one, using the pinned \texttt{yfinance} client
+\citep{yahoo_finance_historical_2026,aroussi_yfinance_2026}.
+These are raw rather than excess returns: no risk-free series was subtracted,
+and the intercept in the empirical equation accommodates centering and possible
+mean components without removing the return-bridge restriction.
+Per-firm return files were inner-joined on date, and dates with a missing return
+were removed rather than interpolated or filled with zeros.
+
+The source universe is a prespecified Nasdaq-100-based frame, admitted by an
+annual raw-coverage screen requiring at least
+\ppvalue{annual-raw-article-floor} raw articles per firm in each calendar year
+from 2018 through 2022.
+The annual floor ensured that every retained firm had raw text support
+throughout the construction window; it did not make the frame representative of
+listed firms.
+The estimation sample is the intersection of firms with a frozen embedding
+cloud and a compatible return history, producing
+\ppvalue{n-tickers-priced} firms.
+The current governed roster aligns the news and return panels at this same
+sample size; no embedding-only firm is removed at the return-alignment step.
+
+The estimation sample is a fixed \ppvalue{n-tickers-priced}-firm intersection
+observed on \ppvalue{post-pooled-2023-2026-w-flat-trading-days} common
+evaluation dates from 2023 through the 2026 data cutoff.
+This large-cap intersection excludes firms without compatible evaluation
+histories and is therefore survivor-conditioned.
+Two restrictions bind the reading of every estimate below.
+The coverage screen selects continuously and heavily covered large-cap names,
+so the cross-section is not representative of listed firms.
+Moreover, because articles were truncated to balanced clouds, article counts
+carry no information about a firm's true news volume.
+\Cref{sec:limitations} states what each restriction costs the interpretation.
+
+The current specification changes two features relative to the pinned
+52-firm reference specification: it expands the priced universe and ends the
+return window earlier.
+To preserve a complete 100-firm panel, the current study ends on 6 April 2026,
+the final common date before HOLX's take-private; no 100-firm July specification
+belongs to the design.
+\Cref{tab:p5-universe-horizon-bridge} therefore reports a sequential bridge
+across three observed specifications.
+At 52 firms, extending the common-date window from 6 April to 15 July 2026
+moves $\hat\rho$ from
+$\ppnum[3]{bridge-reference-52-short-rho}$ to
+$\ppnum[3]{bridge-reference-52-long-rho}$, a descriptive difference of
+$\ppnum[3]{bridge-horizon-rho-difference}$.
+At the short horizon, expanding the universe from 52 to 100 firms moves
+$\hat\rho$ from $\ppnum[3]{bridge-reference-52-short-rho}$ to
+$\ppnum[3]{bridge-current-100-short-rho}$, a descriptive difference of
+$\ppnum[3]{bridge-universe-rho-difference}$.
+These are not causal or factorial effects: the universe comparison changes the
+frozen operator as well as the roster, and its complete-case intersection has
+one fewer date.
+The bridge verifies that the 52 shared return histories are identical through
+the common cutoff, so data revision within those histories does not explain
+the comparison.
+
+\input{generated/universe_horizon_bridge}
+
+Within the 2018--2022 window, we deterministically ordered eligible articles by
+URL hash and retained
+\ppvalue{paper5-balanced-cloud-size} articles per firm over the pooled period.
+The common cloud size put every empirical law on the support size required by
+the balanced assignment in \eqref{eq:w2-assignment}; the annual coverage floor
+and the pooled cap therefore serve different purposes.
+This maintained truncation rule makes the geometry comparable across firms but
+deliberately removes raw news-volume information and need not preserve raw
+annual article shares.
+
+An embedding model maps an article body to a fixed-dimensional numerical vector;
+its training is designed to place semantically related texts nearer in the
+representation space \citep{qwen3_embedding_2025}.
+We encoded each retained article with the fixed, full-width
+Qwen3-Embedding-8B model and row-normalized its 4,096-coordinate vector.
+Rather than average a firm's vectors into one point, we treated its balanced
+article cloud as an equal-mass empirical probability distribution.
+Wasserstein geometry supplied target-specific alignments between those
+distributions.
+The target-anchored Wasserstein barycentric reconstruction used those alignments
+to produce the barycentric interaction field $W^\flat$.
+The article cloud is a proxy for $C_i$; it does not observe $T$, $\xi_i$, $B_i$,
+or $P_i$.
+
+The representation exercises address design sensitivity rather than new
+economic hypotheses.
+For output width, we recomputed the Qwen3-8B geometry at 1,024, 256, and 64
+coordinates beside its 4,096-coordinate primary representation.
+For model capacity, the fixed-width comparison placed Qwen3-Embedding-8B and
+Qwen3-Embedding-4B at 1,024 coordinates; their native 4,096- and
+2,560-coordinate comparison changes capacity and width jointly.
+The 1,024-coordinate BGE-large-v1.5 arm changes model family and pretraining
+jointly, so it is an external sensitivity rather than an identified
+architecture effect.
+The production Qwen encoder postdates the 2018--2022 article window, so the
+vintage diagnostic asks whether the comparison is unusually sensitive to an
+encoder's information cutoff.
+Finally, three matched 320-coordinate EttaX encoders held architecture,
+optimization recipe, compute budget, and training-token budget fixed while
+varying the Wikipedia snapshot: V0 used 20 December 2017, V1 used 20 December
+2020, and V3 used 1 August 2026.
+V3 deliberately postdates both the article-construction and return-evaluation
+windows, so it is a negative control rather than a valid point-in-time encoder.
+Because EttaX capacity differs materially from the production Qwen encoders,
+the vintage comparisons remain descriptive sensitivities rather than identified
+vintage effects.
+Every representation arm uses the same article inputs through 2022, the same
+2023--2026 return dates, and one common joint-date bootstrap schedule.
+The contrasts are paired within resample and corrected for multiplicity within
+their declared families; they are sensitivity diagnostics rather than a
+representation-selection test.
+
+\input{generated/sample_descriptives}
+
+\Cref{tab:p5-sample-descriptives} records the news frame's industry composition
+and its return and text dispersion.
+Two features matter for what follows.
+Sector sizes are heavily unbalanced, with Technology holding roughly a third of
+the frame and two sectors holding fewer than three firms, so peer sets built
+from the text geometry inherit that imbalance rather than correct it.
+Mean within-sector $W_2$ distance is also below the corresponding cross-sector
+distance in every sector holding more than one firm.
+The frozen geometry therefore contains industry structure before any return is
+used.
+This composition contextualizes the resulting peer sets rather than validating
+them: the matched-sparsity null in \Cref{sec:results} holds each
+row's peer count
+fixed, not its sector composition.
+
+Before turning to estimation, \Cref{fig:wflat-barycentric-mixtures} illustrates
+the structure of the constructed field to clarify its interpretation; it is not
+evidence for the return hypotheses.
+The heat map reads by row: each row is a target firm, each column is a candidate
+source, and color marks the five largest actual coefficients in that target's
+row without renormalizing them.
+The upper panel aligns with the source columns and reports each source's total
+incoming mass across all target rows.
+The two right-hand panels align with target rows and report the effective source
+count and the share of each complete row captured by the five displayed cells.
+
+\begin{figure}[htbp]
+  \centering
+  \ppfigure{1}{w2_barycentric_mixture_weights}
+  \caption{Illustrative barycentric interaction field from the target-anchored
+    Wasserstein barycentric reconstruction. Each row is the actual
+    leave-one-out solution $W^\flat_{i\cdot}$ to \eqref{eq:w2-barycentre} over
+    the frozen 2018--2022 article clouds: weights are nonnegative, sum to one,
+    and assign zero self-weight. The heat map shows each target's five largest
+    \emph{actual} coefficients without renormalizing them; the remaining
+    positive coefficients still belong to $W^\flat$ but are not colored. The
+  upper and right-hand diagnostics are calculated from the complete field.}
+  \label{fig:wflat-barycentric-mixtures}
+  \figalttext{Rows index target firms and columns index source firms. Colored
+    cells mark each target's five largest actual barycentric weights; their
+    scattered, row-specific locations show that the field is directed and
+    heterogeneous. Marginal bar charts show heterogeneous incoming mass,
+    effective source counts, and the fraction of each full row contained in the
+    displayed top five. Uncolored positive weights remain in the operator, and
+  the exhibit is descriptive rather than causal.}
+\end{figure}
+
+The full-field diagnostics show that both concentration within rows and total
+incoming mass across rows vary across firms; the five colored entries should
+not be mistaken for the complete operator.
+As an illustrative reading, AMD's row combines firms from complementary chip
+design, equipment-supply, and memory segments.
+This example makes one target-anchored reconstruction tangible, but it neither
+establishes economic substitutability nor tests whether the field organizes
+returns.
+Thus $W^\flat$ is a barycentric interaction field rather than a product-link
+map, and its effective source count is a description of sourcing breadth rather
+than evidence about an economic mechanism.
+
+The next section answers existence, mechanism, and distinctness in that order
+before reporting descriptive annual persistence.
+Appendix~\ref{sec:p5-representation-ablation} addresses the fourth question as
+a design-sensitivity diagnostic.

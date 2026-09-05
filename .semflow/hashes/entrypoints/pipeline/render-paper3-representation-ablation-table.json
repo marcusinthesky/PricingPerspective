@@ -1,0 +1,28 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p3.exhibit:cli_render_paper3_representation_ablation_table",
+  "digest": "sha256:1b845d9341c1f15d80770f40dbf095ca0987a252c0686f16b294663f0a4cdf30",
+  "entrypoint": "pipeline render-paper3-representation-ablation-table",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p3/exhibit.py","symbol":"pipeline.cli.commands.p3.exhibit:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p3/exhibit.py","symbol":"pipeline.cli.commands.p3.exhibit:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p3/exhibit.py","symbol":"pipeline.cli.commands.p3.exhibit:<binding:typer=typer>"},
+    {"digest":"sha256:74751ad26a6b213cec45c8e872f5bbd175ed7e6dea8b06ebe2bda3a3e15dcdaf","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p3/exhibit.py","symbol":"pipeline.cli.commands.p3.exhibit:cli_render_paper3_representation_ablation_table"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p3/exhibit.py","symbol":"pipeline.cli.commands.p3.exhibit:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:f5b270e78401abfa55a4047c331b1199b42df2ba4065a6f1882f58a0a906008b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:<binding:cast=typing:cast>"},
+    {"digest":"sha256:920d77e2e47b9cdfa0b3cd0ae81eb83b6776aeb41a7a6f89a994f9a90228e547","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:<binding:yaml=yaml>"},
+    {"digest":"sha256:5d7d22927f81d114322666845901b5a9b7cd7d78e73066d36b10c49a5c74dec0","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:_DESIGN_ORDER"},
+    {"digest":"sha256:4b63c0e1c2a0d82688717494b80ea67ffc0adb1efdf8ed176cbac9279cab5056","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:_MAIN_TEXT_CELL_ORDER"},
+    {"digest":"sha256:04a37b12e0ee55c628b320616f212d0fb17702d7fef7264f0f3c60c671ab8d43","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:_cell_label"},
+    {"digest":"sha256:4018c66f613bd441fde371e06622aa7104971e791881d12be35c4873ddf1bfbb","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:_contrast_rows"},
+    {"digest":"sha256:aef184102e7bafca4e381234eeaa4f41db05a7862c73074384e2855f6593d72a","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:_main_text_rows"},
+    {"digest":"sha256:1b0d979c88e5467adcec912cdaf158601ea31b96dd89db18549e24d89db7061d","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:_number"},
+    {"digest":"sha256:0cf30ccad7c209ccdd4aa650c3e70511f1c6074b71949fae8516c5d6a0104934","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:_percentile"},
+    {"digest":"sha256:2e334d1c435dc75f9f66439d57e740de3b0468286070c929f5029a7adde4e0ad","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper3/tables.py","symbol":"pipeline.figures.paper3.tables:render_paper3_representation_ablation_table"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

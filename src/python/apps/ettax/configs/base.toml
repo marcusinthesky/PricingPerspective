@@ -1,0 +1,40 @@
+[model]
+vocab_size = 32768
+width = 320
+layers = 12
+heads = 5
+ff_width = 576
+local_window = 128
+global_every = 3
+rope_theta = 160000.0
+pad_id = 0
+doc_id = 1
+eos_id = 2
+unk_id = 3
+delete_rate = 0.60
+decoder_mask_rate = 0.0
+bow_weight = 0.0
+decoder_layers = 1
+logit_chunk = 256
+compute_dtype = "bfloat16"
+global_attention_implementation = "cudnn"
+
+[data]
+paths = ["data/.encoder_vintage/ettax/prepared/V0.u16"]
+sequence_length = 256
+batch_size = 32
+shuffle_seed = 17
+
+[train]
+token_budget = 900000000
+learning_rate = 3.0e-4
+min_learning_rate = 3.0e-5
+warmup_fraction = 0.02
+weight_decay = 0.01
+max_grad_norm = 1.0
+seed = 42
+log_every = 20
+checkpoint_every = 6000
+checkpoint_dir = "data/.encoder_vintage/ettax/checkpoints/V0"
+live_dir = "data/.encoder_vintage/ettax/dvclive/V0"
+metrics_path = "data/.encoder_vintage/ettax/metrics/V0.json"

@@ -1,0 +1,42 @@
+\documentclass[largeformat]{interact}
+
+\usepackage[round,authoryear]{natbib}
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+
+\input{metadata}
+\input{generated/numbers}
+\input{generated/lean_status}
+
+\begin{document}
+
+\articletype{ARTICLE}
+\title{\papertitle}
+\author{\name{\paperauthors}\affil{\paperaffiliations}}
+\thanks{\papercontact}
+\history{Manuscript prepared \paperdate}
+\maketitle
+
+\begin{abstract}
+  \input{chapters/abstract}
+\end{abstract}
+
+\begin{keywords}
+  \paperkeywords
+\end{keywords}
+
+\begin{jelcode}
+  \paperjel
+\end{jelcode}
+
+\input{body}
+
+\bibliographystyle{tfcad}
+\bibliography{refs}
+
+\appendix
+\input{appendix}
+
+\end{document}

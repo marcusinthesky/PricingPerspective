@@ -1,0 +1,129 @@
+\chapter{Spatial interaction and the rank-one boundary}
+\label{chap:spatial}
+
+The spatial manuscript (\texttt{05\_spatial\_pricing}) studies a
+row-stochastic interaction operator inside a finite-dimensional SAR model.  Its
+formal contribution is deliberately narrower than an equilibrium asset-pricing
+model: it verifies compatibility of the constructed operator with the SAR norm
+gate, links a quantitative contraction certificate to Perron convergence, and
+separates exact finite-\(\rho\) algebra from the strong-interaction boundary.
+
+\section{Operator and convergence certificate}
+
+\begin{theorem}[SAR compatibility of the Wasserstein operator]
+  \label{thm:wflat-sar-gate}
+  \ppClaimBinding{thm:wflat-sar-gate}
+  A leave-one-out simplex operator is nonnegative, row stochastic, and
+  zero-diagonal.  Its induced infinity norm is at most one, so
+  \(\lVert\rho W\rVert_\infty<1\) whenever \(|\rho|<1\).
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:wflat-sar-gate}
+  The simplex constraints give the row sums and nonnegativity; the norm gate
+  follows from the maximum absolute row sum.
+\end{proof}
+
+\begin{definition}[Geometric Perron certificate]
+  \label{def:perron-limit}
+  \ppClaimBinding{def:perron-limit}
+  For \(P=\mathbf 1\pi^\top\), a geometric Perron certificate records constants
+  \(C\geq0\) and \(0\leq q<1\) such that
+  \(\lVert W^k-P\rVert\leq Cq^k\) for every natural number \(k\).
+\end{definition}
+
+\begin{theorem}[Geometric certificate implies the Perron limit]
+  \label{thm:perron-from-geometric}
+  \ppClaimBinding{thm:perron-from-geometric}
+  \uses{def:perron-limit}
+  A geometric Perron certificate implies \(W^k\to P\).
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:perron-from-geometric}
+  \uses{def:perron-limit}
+  The geometric upper bound converges to zero because \(q<1\).
+\end{proof}
+
+\begin{theorem}[Interaction cascades converge to a constant vector]
+  \label{thm:replication-centrality}
+  \ppClaimBinding{thm:replication-centrality}
+  \uses{thm:perron-from-geometric}
+  Under the Perron limit, \(W^kx\to(\pi^\top x)\mathbf 1\) for every vector
+  \(x\).  The limit is a constant vector, not a traded basket.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:replication-centrality}
+  Apply the matrix limit to \(x\).
+\end{proof}
+
+\begin{theorem}[Stationarity]
+  \label{thm:stationarity}
+  \ppClaimBinding{thm:stationarity}
+  \uses{thm:perron-from-geometric}
+  Under the Perron limit, the limiting vector obeys
+  \(\pi^\top W=\pi^\top\).
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:stationarity}
+  Pass the limit through one additional multiplication by \(W\).
+\end{proof}
+
+\section{Finite interaction and the strong-interaction boundary}
+
+Let \(P=\mathbf 1\pi^\top\) and \(N=W-P\).  When \(P\) is an absorbing
+idempotent projection, the normalized Leontief multiplier has the exact
+complementary-resolvent remainder used in the next result.
+
+\begin{theorem}[Finite-\(\rho\) resolvent bound]
+  \label{prop:finite-rho-bound}
+  \ppClaimBinding{prop:finite-rho-bound}
+  If \(\lVert\rho(W-P)\rVert<1\), then
+  \[
+    \left\lVert(1-\rho)(I-\rho W)^{-1}-P\right\rVert
+    \leq
+    |1-\rho|\{1-\lVert\rho(W-P)\rVert\}^{-1}\lVert I-P\rVert.
+  \]
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{prop:finite-rho-bound}
+  Split the multiplier into the Perron projection and complementary resolvent,
+  then apply the Neumann-series norm bound to the latter.
+\end{proof}
+
+\begin{theorem}[Resolvent limit from the power limit]
+  \label{thm:resolvent-from-perron}
+  \ppClaimBinding{thm:resolvent-from-perron}
+  \uses{thm:perron-from-geometric}
+  For row-stochastic \(W\), the Perron power limit implies
+  \((1-\rho)(I-\rho W)^{-1}\to P\) as \(\rho\uparrow1\).
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:resolvent-from-perron}
+  \uses{thm:perron-from-geometric}
+  The exact projection split leaves a complementary term multiplied by
+  \(1-\rho\), which vanishes at the boundary.
+\end{proof}
+
+\begin{theorem}[Rank-one collapse of rescaled covariance]
+  \label{thm:rankone-collapse}
+  \ppClaimBinding{thm:rankone-collapse}
+  \uses{thm:resolvent-from-perron}
+  For innovation covariance \(V\), row-stochastic \(W\), and the Perron power
+  limit,
+  \[
+    (1-\rho)^2\Sigma_{\mathrm{SAR}}
+    \longrightarrow (\pi^\top V\pi)\mathbf 1\mathbf 1^\top.
+  \]
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:rankone-collapse}
+  \uses{thm:resolvent-from-perron}
+  Apply the normalized resolvent limit on both sides of the covariance
+  congruence.
+\end{proof}

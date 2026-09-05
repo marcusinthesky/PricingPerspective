@@ -1,0 +1,111 @@
+\section{Discussion and Limitations}\label{sec:limitations}
+
+Within its maintained transmission model and prespecified information geometry,
+the paper establishes a bounded positive implication.
+The certificate maps observed Wasserstein separation into a one-sided
+restriction on portfolio variance, and the zero-slack allocation rule
+minimizes the resulting certified upper bound without estimating cross-asset
+return covariance.
+In the \ppnum[0]{n-tickers}-firm panel, only
+\ppnum[2]{news-only-percentile-uniform-cap-15-pct}\%--
+\ppnum[2]{news-only-percentile-concentrated-cap-15-pct}\% of portfolios across
+four prespecified reference populations have conventional variance no greater
+than that allocation, while equal risk weights rank materially higher under
+every comparison.
+The evidence is therefore an unusually low location among feasible allocations,
+not covariance-free replication of the covariance-informed optimum.
+Five boundaries qualify what this finding establishes and what it does not.
+
+The first is identification.
+The certificate is conditional on an antilipschitz carrier, firm-specific
+slack, one coherent joint exposure law, and the return bridge.
+Together, these maintained restrictions transmit observed information
+separation into a statement about portfolio risk, but the text data do not
+identify that transmission mechanism.
+The cost is interpretive: the certificate is valid under the declared
+restrictions rather than an unconditional implication of text geometry.
+At the zero-slack boundary, however, the carrier constant drops out of the
+normalized allocation through \Cref{cor:p3-carrier-invariance}, so the
+selected risk weights depend only on the observed W$_2$ distances.
+The maintained restrictions therefore determine what the low variance ranking
+means economically---whether it reflects genuine risk reduction through
+information separation---rather than whether the allocation exists or whether
+its realized variance is low relative to the declared reference populations.
+Isolating the transmission would require identified or calibrated counterparts
+to the carrier, firm-specific slack, and return bridge.
+
+The second boundary is representation dependence.
+The article selection, embedding model, and output width determine the
+measured distributions and may therefore alter the distances and portfolio
+weights.
+The representation ladder evaluates this sensitivity while holding the priced
+firms and return evaluation fixed, but it does not make the canonical
+Qwen3-Embedding-8B geometry invariant to measurement choices.
+Two features of the ladder sharpen the interpretive consequence.
+The width ladder is non-monotone: extreme compression to 64 coordinates
+materially alters the point allocation and improves its in-sample variance
+ranking, although the paired contrast with 256 coordinates does not survive
+Holm adjustment, so the geometry is not simply degraded by truncation.
+Among the matched EttaX vintage contrasts, only V3--V1 satisfies the
+post-specified equivalence criterion; neither comparison involving V0 does.
+The evidence therefore does not establish broad representation invariance even
+within a fixed architecture.
+The primary representation was prespecified, and the ladder evaluates
+sensitivity rather than selecting a winner from the same return data.
+Prespecified alternatives using different ground metrics, unbalanced clouds,
+or held-out evaluation windows would show which features of the geometry
+survive those measurement choices.
+
+The third boundary concerns comparison-set design.
+The percentile ranking is relative to four prespecified Dirichlet-capped
+reference populations, and the choice of concentration parameter and cap
+determines what ``low'' means.
+The two concentrated populations reduce the effective-$N$ gap relative to the
+uniform laws, and the ranking survives, but neither matches the candidate's
+realized effective $N$.
+They therefore provide concentration sensitivity rather than a
+concentration-adjusted comparison, and they do not eliminate concentration as
+a confound.
+These four laws nevertheless remain maintained design choices.
+Alternative reference populations---market-capitalization-weighted draws,
+factor-tilted draws, or draws from the empirical distribution of a historical
+allocation universe---could rank the candidate differently.
+The evidence is that the allocation is unusually low under every declared
+comparison, not under every conceivable one.
+
+The fourth boundary is portfolio implementation.
+The empirical exercise implements the standardized-asset specialization, in
+which unit marginal scales make capital weights coincide with normalized risk
+weights.
+The general raw-capital objective in \eqref{eq:p3-certified-objective}
+retains the marginal volatility scales through $A(x)^2$ and the risk-weight
+mapping $q(x)$.
+Constructing a capital-weight allocation from the certificate therefore
+requires the same marginal-scale inputs as an inverse-volatility portfolio,
+though it does not require cross-asset return covariance.
+The standardized exercise isolates the certificate's information channel
+cleanly, but the practical gap between the standardized and capital-weight
+allocations remains unquantified.
+
+The fifth boundary is external validity.
+The empirical universe is a coverage-screened survivor panel of
+\ppnum[0]{n-tickers} firms with complete return histories, not a historical
+index-membership universe.
+The resulting evidence characterizes firms with the required source coverage
+rather than every investable firm or a changing historical universe.
+The information geometry and the return evaluation also draw on the same
+2018--2022 period.
+The reported percentile is therefore descriptive: it is neither a
+point-in-time test nor an ex-ante guarantee of future realized variance.
+The expanding-cutoff sequence shows how the allocation evolves with
+accumulated articles, but it does not constitute out-of-sample evidence
+because the return evaluation period is unchanged.
+A prospective performance claim requires a frozen point-in-time construction
+in which the encoder, article corpus, and W$_2$ geometry are all fixed before
+the evaluation returns are observed, together with genuinely out-of-sample
+return evaluation.
+The present evidence demonstrates the framework's implications for a specific
+panel and representation; whether those implications survive prospective
+evaluation is the immediate empirical priority.
+The conclusion returns to the conditional portfolio-risk certificate and its
+allocation rule within these boundaries.

@@ -1,0 +1,77 @@
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \caption{Comparison of finance-news corpora used in text-implied network
+    studies. ``Partial'' denotes a qualified or product-dependent property;
+    vendor entity tags are not manual gold-standard annotations. The final row
+  describes the source used in this study.}
+  \label{tab:news-dataset-comparison}
+  \begin{tabularx}{\linewidth}{@{}p{0.18\linewidth}
+      >{\raggedright\arraybackslash}X
+      >{\raggedright\arraybackslash}X
+      >{\raggedright\arraybackslash}X
+      >{\raggedright\arraybackslash}X
+      >{\raggedright\arraybackslash}X
+    >{\raggedright\arraybackslash}X@{}}
+    \toprule
+    Dataset and representative citation &
+    English / major-market coverage &
+    Full article body &
+    Entity annotation &
+    Scale / coverage &
+    Access / reproducibility &
+    Researcher text control \\
+    \midrule
+    RavenPack Equity---Dow Jones Edition
+    \citet{ge_news-implied_2023} &
+    Yes, English Dow Jones sources; the focal study uses U.S. large-cap
+    equities &
+    No, standard academic analytics files do not provide article bodies &
+    Partial, high-quality vendor entity IDs but no manual gold labels &
+    Yes, large commercial archive; 2004--2015 in the focal study &
+    No, proprietary; WRDS entitlement required &
+    No, vendor ontology and analytics limit raw-text experiments \\
+    Thomson Reuters News Analytics (TRNA)
+    \citet{scherbina_economic_2013} &
+    Yes, English Reuters; broad international archive with a U.S. focal
+    application &
+    Partial, the analytics feed lacks the body; pair with Reuters archive or
+    MRN &
+    Partial, vendor firm tags but no manual gold labels &
+    Yes, approximately 5.5 million stories from 1996--2012 &
+    No, commercial access; analytics and archive entitlements may differ &
+    Partial, rich metadata; body-level NLP requires a companion feed \\
+    Raw Reuters financial-news corpus (Ding et al. corpus)
+    \citet{schwenkler_network_2020} &
+    Yes, English Reuters; U.S.-oriented firm sample &
+    Yes, complete article text &
+    Partial, automated NER by the authors and no manual gold-standard labels &
+    Partial, 106{,}521 articles from 2006--2013 &
+    No, the historical files were removed from public download for copyright
+    reasons &
+    Yes, researchers control NER, sentence rules, and embeddings \\
+    RESET Financial Text Intelligent Analysis Platform + Juyuan
+    \citet{ge_network_guided_covariance_2026} &
+    No, Chinese-language financial news; focused on China A-shares &
+    Partial, sentence-level use is documented; bulk export is licence-dependent &
+    Partial, company mentions are available; the exact annotation pipeline is
+    unclear &
+    Yes, 1{,}138{,}247 relevant articles from 2006--2021; pre-2012 coverage is
+    thinner &
+    No, proprietary databases with uncertain bulk-export rights &
+    Partial, passage and sentence definitions can vary; raw text may be
+    restricted \\
+    Nasdaq-hosted public per-symbol news archive (this study) &
+    Yes, English syndicated news for Nasdaq-listed U.S. firms; not global &
+    Yes, article bodies are retrieved and filtered by body length &
+    Partial, ticker-level source assignment but no article-level vendor or
+    manual entity labels &
+    Partial, coverage-conditioned Nasdaq-100-based frame and fixed five-year
+    window rather than a representative market sample &
+    Yes, public pages are viewable and retrievable; provider terms and rate
+    limits still apply &
+    Yes, bodies can be independently extracted and embedded with a pinned
+    open-weights model \\
+    \bottomrule
+  \end{tabularx}
+\end{table}

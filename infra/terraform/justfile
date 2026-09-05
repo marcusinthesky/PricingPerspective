@@ -1,0 +1,40 @@
+set shell := ["bash", "-uc"]
+
+# List available terraform recipes.
+default:
+    @just --list --list-prefix "  "
+
+# Format all OpenTofu (.tf) and Terragrunt (.hcl) files.
+fmt:
+    tofu fmt -recursive
+    terragrunt hcl fmt
+
+# Validate all component configurations via terragrunt (production).
+validate:
+    cd environments/production && terragrunt run-all validate
+
+# Lint all OpenTofu/Terraform code with tflint.
+lint:
+    tflint --chdir "$(git rev-parse --show-toplevel)/infra/terraform" --config "$(git rev-parse --show-toplevel)/infra/terraform/.tflint.hcl"
+
+# Security-scan the IaC with trivy.
+scan:
+    trivy config "$(git rev-parse --show-toplevel)/infra/terraform"
+
+# Plan all production components (read-only; requires cloud credentials).
+plan:
+    cd environments/production && terragrunt run-all plan
+
+# Apply all production components. Humans only — review the plan first.
+apply:
+    cd environments/production && terragrunt run-all apply
+
+# Export existing GCP resources as HCL for brownfield import (Phase 1).
+# `export` is a just keyword, so the recipe is named bulk-export.
+# Usage: just terraform::bulk-export pricing-perspective
+bulk-export project:
+    gcloud beta resource-config bulk-export --project={{ project }} --resource-format=terraform --path=./_export
+
+# Run all prek quality gates for terraform.
+check:
+    cd "$(git rev-parse --show-toplevel)" && prek run --all-files --config infra/terraform/.pre-commit-config.yaml

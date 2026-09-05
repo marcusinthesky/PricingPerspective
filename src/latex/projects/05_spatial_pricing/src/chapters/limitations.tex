@@ -1,0 +1,82 @@
+\section{Discussion and Limitations}\label{sec:limitations}
+
+Within its prespecified information geometry and working return model, the paper
+establishes a bounded positive implication.
+The target-anchored Wasserstein barycentric reconstruction maps
+distribution-valued information positions into a predetermined, row-stochastic
+barycentric interaction field, and the quadratic closure gives an economic
+scale to the relation between stand-alone and peer-adjusted exposure in
+\Cref{thm:spatial-closure}.
+In the return panel, this field and the persistent news co-mention field select
+largely different peers but generate correlated peer-return series.
+Estimating them jointly leaves total model-implied adjustment close to its
+single-field level and reallocates it across the two channels, a result that
+separate one-field fits conceal.
+
+The first limit is identification.
+The quadratic criterion is an as-if reduced-form representation of exposure
+adjustment, not a claim that managers observe the barycentric interaction field
+or literally solve the displayed optimization problem.
+Constructing every field from information ending in 2022 and freezing it before
+the 2023--2026 return panel prevents evaluation returns from mechanically
+determining their own peer weights.
+That predetermination does not make text exogenous: industries, technologies,
+investor attention, and state-dependent reporting selection can jointly shape
+the information positions and returns.
+The likelihood gains and channel decomposition therefore measure conditional
+field fit rather than causal peer effects; isolating peer transmission would
+require an exclusion restriction or shock design.
+The full distinction between the structural adjustment parameter and the
+pseudo-true target of QMLE remains the identification boundary in
+\Cref{sec:identification-estimation}.
+
+The second limit concerns measurement and design.
+The central field contribution depends on a fixed representation and ground
+metric for quadratic Wasserstein transport, balanced article clouds, and the
+target-specific alignment and simplex restrictions of the target-anchored
+Wasserstein barycentric reconstruction.
+Balancing the clouds makes firms comparable but removes news volume as a source
+of information, while changing the representation, ground metric, or
+reconstruction design can alter the barycentric interaction field and its
+conditional fit.
+The implementation uses a predetermined deterministic rule to select one
+optimal pairwise assignment, but some assignments are tied; the paper does not
+establish that alternative optimal selections would leave $W^\flat$ unchanged.
+Cross-geometry likelihood comparisons are consequently evidence about competing
+measurement designs, not geometry-free rankings.
+Prespecified alternatives using weighted or unbalanced clouds, other ground
+metrics, and held-out evaluation windows would show which features of the
+field survive those measurement choices.
+
+Measurement also bounds the dispersion and multi-field conclusions.
+The common carrier, its noncollapse constant $L$, and the transmission radii
+$\tau_i$ in \Cref{eq:imported-transfer} remain latent and are not estimated by
+the return QMLE.
+The attenuation bracket therefore limits the share of implied stand-alone
+exposure dispersion that peer adjustment can erase but does not determine its
+level, so \Cref{cor:spatial-dispersion-certificate} remains a conditional
+restriction rather than a measured quantity.
+The two fields' peer-return series correlate at
+\ppnum[3]{overlap-induced-pearson}, and the bootstrap correlation between
+$\hat\rho_B$ and $\hat\rho_N$ is
+\ppnum[3]{post-pooled-2023-2026-two-field-channel-correlation}.
+Both channel intervals exclude zero in this sample, but more nearly collinear
+fields could leave their division weakly determined even when total adjustment
+remains precise.
+The split should therefore be read from the joint region in
+Figure~\ref{fig:two-field-region}; extensions to additional fields should report
+the corresponding joint uncertainty and induced-signal collinearity.
+
+The final limit is external validity.
+The evidence comes from a large-cap, survivor-conditioned intersection of
+\ppvalue{n-tickers-priced} firms with complete return histories, rather than a
+representative cross-section of listed firms.
+A broader or changing universe would alter each target's feasible peer set and
+could change the field's stationary weighting.
+The timing is also specific: the barycentric interaction field uses 2018--2022
+text, the return evaluation begins in 2023, and the 2026 window ends on
+\ppvalue{post-evaluation-date-end}, making that final period unsuitable for
+like-for-like comparison with complete calendar years.
+Reconstructing fields in successive ex ante windows and extending the sample to
+firms with shorter histories would test whether the conditional patterns persist
+across firm entry, market segments, and information regimes.

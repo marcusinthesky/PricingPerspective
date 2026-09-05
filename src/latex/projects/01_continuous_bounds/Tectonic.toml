@@ -1,0 +1,23 @@
+[doc]
+name = "01_continuous_bounds"
+bundle = "../../bundle/tlextras-2022.0r0-pricing-perspective.zip"
+
+[[output]]
+name = "draft"
+type = "pdf"
+inputs = ["targets/draft.tex"]
+
+[[output]]
+name = "arxiv"
+type = "pdf"
+inputs = ["targets/arxiv.tex"]
+
+[[output]]
+name = "quantitative-finance"
+type = "pdf"
+inputs = ["targets/quantitative-finance.tex"]
+
+[[output]]
+name = "quantitative-finance-letter"
+type = "pdf"
+inputs = ["targets/quantitative-finance/letter.tex"]

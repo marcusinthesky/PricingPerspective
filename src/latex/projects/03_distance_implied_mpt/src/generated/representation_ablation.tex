@@ -1,0 +1,51 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Encoder & Dim. & Uniform 12.5\% & Uniform 15\% & Fixed $\alpha=0.8$ & Concentrated 15\% & Rel. GMV \\
+\midrule
+Qwen3-8B full (primary) & 4096 & 0.10 & 0.08 & 0.19 & 0.46 & 147.5 \\
+Qwen3-4B full & 2560 & 0.07 & 0.06 & 0.08 & 0.33 & 146.7 \\
+Qwen3-8B@1024 & 1024 & 0.07 & 0.06 & 0.08 & 0.33 & 146.7 \\
+Qwen3-4B@1024 & 1024 & 0.17 & 0.17 & 0.29 & 0.73 & 148.5 \\
+BGE-large-v1.5 full & 1024 & -- & 0.01 & 0.03 & 0.18 & 145.3 \\
+Qwen3-8B@256 & 256 & 0.27 & 0.29 & 0.46 & 0.98 & 149.4 \\
+Qwen3-8B@64 & 64 & 0.01 & 0.01 & 0.01 & 0.13 & 144.6 \\
+EttaX V0 & 320 & -- & 0.33 & 0.53 & 1.10 & 149.7 \\
+EttaX V1 & 320 & 1.19 & 1.10 & 1.59 & 2.60 & 152.0 \\
+EttaX V3 & 320 & -- & 0.77 & 1.20 & 2.05 & 151.4 \\
+\midrule
+Equal risk weights & -- & 34.73 & 34.02 & 32.84 & 28.33 & 162.6 \\
+\bottomrule
+\end{tabular}
+\caption{Representation sensitivity of the news-only allocation across seven base representations and three matched EttaX encoder vintages on the common 100-firm, 1,207-date standardized-return panel. The four middle columns report the percentage of fixed-law allocations with standardized variance no greater than the candidate's; lower is better. Relative variance indexes the long-only sample GMV to 100, so values above 100 measure percentage excess variance and lower is better. A dash marks a candidate that violates the law's unchanged cap. The $\alpha=0.8$ law is a fixed moderately concentrated comparison; its realized mean effective $N$ is reported rather than assumed to match the primary allocation. Returns evaluate every fixed news-only allocation in sample; they do not construct it.}
+\label{tab:p3-representation-ablation}
+\end{table}
+\medskip
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\begin{tabularx}{\linewidth}{Xrrrrrr}
+\toprule
+Contrast ($c-r$) & Estimate & 95\% CI & Raw $p$ & Holm $p$ & Bound & Equiv. \\
+\midrule
+Qwen3-4B full $-$ Qwen3-8B full & -0.842 & [-2.664, 1.649] & 0.454 & 0.873 & -- & -- \\
+Qwen3-4B@1024 $-$ Qwen3-8B@1024 & 1.811 & [-0.863, 3.486] & 0.192 & 0.768 & -- & -- \\
+Qwen3-8B@1024 $-$ Qwen3-8B full & -0.794 & [-1.934, 0.762] & 0.291 & 0.873 & -- & -- \\
+Qwen3-8B@256 $-$ Qwen3-8B@1024 & 2.641 & [0.076, 4.830] & 0.046 & 0.322 & -- & -- \\
+Qwen3-8B@64 $-$ Qwen3-8B@256 & -4.774 & [-8.324, 0.365] & 0.065 & 0.390 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -1.446 & [-3.807, 1.674] & 0.349 & 0.873 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -3.257 & [-5.526, 0.733] & 0.115 & 0.575 & -- & -- \\
+\addlinespace[1.5pt]
+EttaX V1 $-$ EttaX V0 & 2.365 & [-2.930, 5.212] & 0.370 & 1.000 & 3.807 & No \\
+EttaX V3 $-$ EttaX V0 & 1.693 & [-2.465, 4.096] & 0.467 & 1.000 & 3.807 & No \\
+EttaX V3 $-$ EttaX V1 & -0.673 & [-2.713, 1.793] & 0.599 & 1.000 & 3.807 & Yes \\
+\bottomrule
+\end{tabularx}
+\caption{Paired stationary-return-bootstrap contrasts for the ten-cell representation ladder. The seven base contrasts are descriptive candidate-minus-reference relative-GMV index-point differences, so a negative estimate favours the candidate. Raw $p$-values are two-sided add-one sign-tail probabilities; Holm adjustment is applied separately to the seven base and three vintage contrasts. The EttaX rows additionally use the BGE-large-minus-Qwen3-8B@1024 interval as a benchmark-calibrated, post-specified robustness threshold. Equivalence requires strict containment of the full interval; this is not a causal or architecture-only comparison.}
+\label{tab:p3-representation-contrasts}
+\end{table}

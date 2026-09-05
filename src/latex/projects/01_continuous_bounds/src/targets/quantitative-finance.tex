@@ -1,0 +1,62 @@
+\RequirePackage[2018-12-01]{latexrelease}
+\documentclass[printer]{rQUF2e}
+
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+
+\input{metadata}
+\input{generated/numbers}
+\input{generated/lean_status}
+
+\hypersetup{
+  pdftitle={\papertitle},
+  pdfauthor={\paperauthors},
+  pdfsubject={Distribution-valued factor covariance model},
+  pdfkeywords={\paperkeywords}
+}
+
+% The publisher class prints placeholder receipt metadata by default. Submitted
+% manuscripts do not own those production dates, so remove that row from the
+% title block rather than supplying provisional history.
+\makeatletter
+% Use the class's ordinary folio-only page style in place of the first-page
+% production banner (journal, placeholder volume/issue/date, and DOI).
+\let\ps@plain\ps@empty
+\patchcmd{\@maketitle}
+{{\receivedfont{\rm{(}}\@received{\rm{)}}\par}\vskip18pt} % chktex 9
+{}
+{}
+{\PackageError{quantitative-finance}{Could not remove placeholder receipt metadata}{}}
+\makeatother
+
+\begin{document}
+
+\title{\papertitle}
+\author{\paperauthors\\
+\affil{\paperaffiliations}}
+\thanks{\papercontact}
+\maketitle
+
+\begin{abstract}
+  \input{chapters/abstract}
+\end{abstract}
+
+\begin{keywords}
+  \paperkeywords
+\end{keywords}
+
+\begin{classcode}
+  \paperjel
+\end{classcode}
+
+\input{body}
+
+\bibliographystyle{rQUF}
+\bibliography{refs}
+
+\appendices
+\input{appendix}
+
+\end{document}

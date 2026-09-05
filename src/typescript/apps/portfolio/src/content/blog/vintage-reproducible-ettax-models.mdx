@@ -1,0 +1,104 @@
+---
+number: "03"
+category: Methods and infrastructure
+title: Why finance needs vintage, reproducible encoders
+summary: The design of the EttaX models and why a dated encoder should be treated as part of the information set in financial econometrics.
+datePublished: "2026-07-24"
+dateModified: "2026-07-24"
+keywords:
+  - EttaX
+  - Reproducibility
+  - Financial econometrics
+---
+
+Reproducibility is often treated as the last section of a paper: publish the code, list the packages, and give the reader a command that runs. For financial machine learning, that is not enough. The model itself is part of the data-generating environment. If the encoder changes, the measured firm information changes, even when the financial dataset and the downstream estimator remain untouched.
+
+That is the reason for building EttaX as a set of explicit model vintages rather than as one moving `latest` checkpoint.
+
+## A compact encoder with a fixed training contract
+
+EttaX is a small, document-oriented Transformer encoder designed to turn financial text into normalized document vectors. The deployed encoder has:
+
+- 12 pre-normalized Transformer blocks;
+- width 320, with five 64-dimensional attention heads;
+- a GeGLU feed-forward width of 576;
+- a 128-token local attention window, with global attention every third block;
+- rotary position embeddings with a base of 160,000; and
+- a 32,768-entry byte-level BPE vocabulary seeded with all 256 byte symbols.
+
+The encoder has exactly 22,052,480 trainable parameters. Training adds a separate one-layer causal-local decoder and brings the temporary training graph to 23,016,960 parameters. The decoder is discarded when the model is used for embeddings; the deployed object is the encoder’s `[DOC]` representation, exported as a normalized FP32 vector.
+
+The objective is a lightweight denoising reconstruction task. Sixty percent of content tokens are deleted from the encoder input, the encoder compresses the damaged document at `[DOC]`, and the training-only decoder reconstructs the clean sequence. Parameters and optimizer state remain in FP32; bfloat16 is used for matrix operands where supported, with FP32 accumulation for the numerically sensitive reductions. This gives the model a practical accelerator path without changing the scientific identity of the exported representation.
+
+The important design choice is not any single hyperparameter. It is that the recipe is frozen as a contract: sequence length 256, batch size 32, the same tokenizer, the same initialization seed, the same sampler, the same optimizer schedule, and 900 million nominal token slots per arm.
+
+## Three dates, one matched experiment
+
+The current staircase trains the same architecture on three dated Wikipedia snapshots:
+
+<figure className="blog-table">
+  <table>
+    <caption>Table 1. EttaX model vintages, source snapshots, and experimental roles.</caption>
+    <thead>
+      <tr>
+        <th scope="col">Vintage</th>
+        <th scope="col">Snapshot</th>
+        <th scope="col">Experimental role</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">EttaX V0</th>
+        <td><code>enwiki-20171220</code></td>
+        <td>Zero-exposure floor</td>
+      </tr>
+      <tr>
+        <th scope="row">EttaX V1</th>
+        <td><code>enwiki-20201220</code></td>
+        <td>Outcome-clean primary arm</td>
+      </tr>
+      <tr>
+        <th scope="row">EttaX V3</th>
+        <td><code>enwiki-20260801</code></td>
+        <td>Maximum-exposure arm</td>
+      </tr>
+    </tbody>
+  </table>
+</figure>
+
+The model, tokenizer, budget, sampling rule, optimizer, and seed are held fixed. Only the snapshot date - and the resulting training corpus - changes. V0 predates the sample, V1 closes before the evaluation window opens, and V3 deliberately postdates the sample and out-of-sample period. These are diagnostic sensitivity arms, not three interchangeable claims of a canonical model.
+
+The comparison is useful because a single current model collapses several sources of change. If the V0/V1/V3 distance changes the downstream result, that contrast tells researchers that corpus vintage is capable of moving the representation. It does not, by itself, tell researchers whether a financial effect is causal. It identifies which information-set assumption a paper is making and gives researchers a way to stress that assumption.
+
+<Callout title="The reproducibility rule">
+Every model vintage gets its own tokenizer hash, corpus identifier, preparation manifest, checkpoint, configuration, metrics, and output path. A new corpus or recipe becomes a new vintage; it never overwrites an older scientific input.
+</Callout>
+
+## Why this matters in finance
+
+In ordinary machine learning, replacing a pretrained encoder with a newer checkpoint may look like a quality improvement. In financial econometrics, it can be a change in the information set. The newer model may have seen later news, later descriptions, or revisions that were unavailable when the return was forecast. A model refresh can therefore create look-ahead bias even if the price and return files are perfectly point-in-time.
+
+The same issue appears in cross-sectional research. Suppose two firms are represented by distributions of article embeddings and their Wasserstein distance enters a covariance bound or an interaction field. Updating the encoder changes the points in that distribution. The distance, barycentre, nearest neighbours, and portfolio certificate can all move without any change in the firms’ observed articles in the evaluation window.
+
+This is why a reproducible paper needs to identify more than the model family. It should record:
+
+1. the corpus snapshot and cutoff date;
+2. the tokenizer vocabulary and preprocessing rules;
+3. the architecture, pooling policy, normalization, and sequence limit;
+4. the initialization, sampler, optimizer, precision, and token budget;
+5. the checkpoint and environment hashes; and
+6. the exact downstream representation artifact consumed by the analysis.
+
+Those records make the encoder auditable as a scientific input. They also make a refresh interpretable: a researcher can compare the old and new vintages instead of silently rewriting the result.
+
+## A better baseline for QuantFi
+
+For quantitative finance and financial econometrics, the vintage ladder creates a more informative baseline than “old model versus new model.” It supports three distinct questions.
+
+**Does the result survive representation drift?** Compare the same downstream estimator across V0, V1, and V3 while keeping the financial sample fixed.
+
+**Does a newer corpus help because it is better, or because it leaks?** Put the vintage cutoff beside the return forecast date and treat any post-cutoff arm as a diagnostic stress test, not as evidence for a point-in-time claim.
+
+**Does model age interact with market efficiency?** Combine dated encoders with rolling portfolio evaluation. A fixed vintage can reveal signal decay; a sequence of vintages can separate market adaptation from information refresh.
+
+This makes reproducibility part of identification. The model is not a neutral preprocessing step sitting before the econometrics. It defines a map from documents to measurable characteristics, and that map has a date.

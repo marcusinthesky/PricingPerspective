@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "Please cite the relevant paper below."
+title: "Pricing Perspective research website"
+type: software
+authors:
+  - family-names: Gawronsky
+    given-names: Marcus
+  - family-names: Huang
+    given-names: Chun-Sung
+repository-code: "https://github.com/marcusinthesky"
+license: MIT
+date-released: 2026-09-03
+references:
+  - type: article
+    title: "Systematic Covariance Envelopes from Wasserstein Geometry: Evidence from Language-Model Representations"
+    authors:
+      - family-names: Gawronsky
+        given-names: Marcus
+      - family-names: Huang
+        given-names: Chun-Sung
+    year: 2024
+    doi: "10.48550/arXiv.2410.23447"
+    url: "https://arxiv.org/abs/2410.23447"
+  - type: article
+    title: "Wasserstein-Barycentric Interaction Fields for Spatial Factor Models: Evidence from Language-Model Representations"
+    authors:
+      - family-names: Gawronsky
+        given-names: Marcus
+      - family-names: Huang
+        given-names: Chun-Sung
+    year: 2026
+    doi: "10.48550/arXiv.2608.29669"
+    url: "https://arxiv.org/abs/2608.29669"
+  - type: article
+    title: "Portfolio Risk Bounds without Cross-Asset Return Covariances: Distributional Fields from Language-Model Representations"
+    authors:
+      - family-names: Gawronsky
+        given-names: Marcus
+      - family-names: Huang
+        given-names: Chun-Sung
+    year: 2026
+    doi: "10.48550/arXiv.2608.29692"
+    url: "https://arxiv.org/abs/2608.29692"

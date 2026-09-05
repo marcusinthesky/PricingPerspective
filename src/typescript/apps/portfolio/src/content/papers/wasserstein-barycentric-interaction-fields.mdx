@@ -1,0 +1,43 @@
+## Abstract
+
+Spatial return models usually begin with an interaction matrix supplied by the researcher. This paper instead constructs a bandwidth-free field from firms' language-model article-embedding distributions. For each target firm, quadratic transport aligns its article cloud separately with every candidate peer. Holding those target-specific correspondences fixed, a simplex problem chooses nonnegative, unit-sum weights that jointly reconstruct the target.
+
+Repeating the reconstruction across targets produces a directed barycentric interaction field. A quadratic exposure-adjustment problem then maps spatial feedback into the relative penalty placed on peer misalignment versus departure from a stand-alone exposure.
+
+## Reading the field
+
+The heat map is most useful when read one target row at a time. The fitted field is heterogeneous in both directions: targets draw on different peer mixes, and some source firms receive more total incoming weight than others. Figure 2 shows the five largest actual weights in each target row, alongside incoming mass, effective source count, and the share of each complete row captured by the displayed top five.
+
+AMD provides a particularly legible economic example. Its five largest sources are NVDA (0.133), INTC (0.108), AMAT (0.105), MU (0.101), and LRCX (0.061), together carrying 0.508 of AMD's unit row. This is a recognizable semiconductor ecosystem spanning accelerator and processor design, memory, and equipment supply. The pattern is economically suggestive of shared technology and supply-chain language. It is not a claim that these firms are direct substitutes, that AMD owns them, or that the coefficients are portfolio weights.
+
+AMD's effective source count is 14.4, below the cross-target median of 18.3, so its information footprint is more concentrated than a typical target's. Even here, the five highlighted cells show only about half of the row. The remaining positive coefficients are still part of the field, which is why a vivid cell should be read as a leading coordinate rather than a complete explanation.
+
+The scattered, row-specific cells are the expected signature of target-anchored reconstruction rather than a symmetric distance map. The upper incoming-mass bars answer a different question from the AMD row: they show which sources are repeatedly useful across targets. In the complete field, CSCO, LRCX, EXPE, AVGO, QCOM, and INTC are among the largest receivers. The effective-source-count bars use every coefficient in each row, while top-five mass measures only how much of that full row is visible in the heat map. White cells therefore mean unshown or zero coefficients, not necessarily that a source is irrelevant.
+
+These visual relationships suggest a useful economic follow-up: when a target draws on a recognizable ecosystem, does the mixture reflect common technology, customers, suppliers, or investor attention? The field can organize that investigation, but it does not establish causal peer influence or return substitutability.
+
+<PaperFigure
+  src="/figures/paper-2-barycentric-weights.webp"
+  alt="Heat map of the five largest barycentric weights for each target firm, with incoming mass, effective source count, and displayed top-five mass diagnostics."
+  width={1060}
+  height={966}
+  caption="Paper 2: Target-anchored barycentric weights, with incoming mass and concentration diagnostics. Colored cells show the five largest actual weights without renormalization; the exhibit is descriptive and not a causal influence map."
+  />
+
+## Mathematical sequence
+
+1. Represent each firm by an equally weighted empirical distribution of article embeddings.
+2. Solve one target-to-peer optimal-transport assignment for every ordered pair.
+3. Freeze those correspondences and reconstruct the target with one common set of simplex weights.
+4. Stack the target-specific rows into a nonnegative, row-stochastic, zero-diagonal operator.
+5. Derive the exposure equation
+
+> B = ρWB + (1 − ρ)ξ, with ρ = λ / (1 + λ).
+
+## Why the field is directed
+
+Quadratic Wasserstein distance is symmetric, but representational usefulness is target-specific. Firm *j* can receive a large weight when reconstructing firm *i* even when firm *i* is not equally useful for reconstructing firm *j*. Direction therefore records reconstruction relevance, not an asymmetric distance and not causal influence.
+
+<Callout title="Boundary">
+The fitted spatial coefficient is a conditional working-model quantity. Its adjustment interpretation requires the paper's exposure and return bridges; freezing the field before the return window does not by itself identify causal peer effects.
+</Callout>

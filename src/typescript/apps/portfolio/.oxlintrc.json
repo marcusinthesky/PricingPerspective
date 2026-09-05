@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "plugins": ["typescript", "react", "unicorn", "import", "jsx-a11y"],
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "typescript/no-explicit-any": "error",
+    "unicorn/prefer-node-protocol": "error",
+    "import/no-unassigned-import": "off"
+  },
+  "ignorePatterns": [".next/**", ".lighthouseci/**", "out/**", "storybook-static/**", "public/**"]
+}

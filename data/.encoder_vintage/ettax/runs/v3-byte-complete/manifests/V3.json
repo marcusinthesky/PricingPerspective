@@ -1,0 +1,107 @@
+{
+  "arm": {
+    "identifier": "enwiki-20260801",
+    "name": "V3",
+    "role": "maximum-exposure arm",
+    "source": "data/.encoder_vintage/corpus/V3.txt"
+  },
+  "budget_source": {
+    "arm": "V3",
+    "articles_scanned": 11942943,
+    "articles_written": 7955954,
+    "budget_tokens": 4362984034,
+    "bytes": 25006248273,
+    "corpus": "data/.encoder_vintage/corpus/V3.txt",
+    "sampling_rate": 0.6661256894693524,
+    "seed": "t69-encoder-vintage-staircase",
+    "source_tokens": 6680786802,
+    "tokens": 4362984034
+  },
+  "checkpoint": "data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3",
+  "environment": {
+    "backend": "gpu",
+    "device": "cuda:0",
+    "flax": "0.12.8",
+    "jax": "0.11.0",
+    "optax": "0.2.8",
+    "platform": "Linux-6.18.40-x86_64-with-glibc2.42",
+    "python": "3.13.14"
+  },
+  "experiment": {
+    "data": {
+      "batch_size": 32,
+      "paths": [
+        "data/.encoder_vintage/ettax/runs/v3-byte-complete/prepared/V3.u16"
+      ],
+      "sequence_length": 256,
+      "shuffle_seed": 17
+    },
+    "model": {
+      "compute_dtype": "bfloat16",
+      "decoder_layers": 1,
+      "delete_rate": 0.6,
+      "doc_id": 1,
+      "eos_id": 2,
+      "ff_width": 576,
+      "global_attention_implementation": "cudnn",
+      "global_every": 3,
+      "heads": 5,
+      "layers": 12,
+      "local_window": 128,
+      "logit_chunk": 256,
+      "pad_id": 0,
+      "rope_theta": 160000.0,
+      "vocab_size": 32768,
+      "width": 320
+    },
+    "nominal_tokens": 900005888,
+    "steps": 109864,
+    "train": {
+      "checkpoint_dir": "data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3",
+      "checkpoint_every": 6000,
+      "learning_rate": 0.0003,
+      "live_dir": "data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V3",
+      "log_every": 20,
+      "max_grad_norm": 1.0,
+      "metrics_path": "data/.encoder_vintage/ettax/runs/v3-byte-complete/metrics/V3.json",
+      "min_learning_rate": 3e-05,
+      "seed": 42,
+      "token_budget": 900000000,
+      "warmup_fraction": 0.02,
+      "weight_decay": 0.01
+    },
+    "warmup_steps": 2197
+  },
+  "metrics": {
+    "backend": "gpu",
+    "batch_size": 32,
+    "completed_steps_this_run": 109864,
+    "compute_dtype": "bfloat16",
+    "elapsed_seconds_this_run": 8143.79071587004,
+    "encoder_parameters": 22052480,
+    "jax_enable_x64": false,
+    "loss": 3.815837860107422,
+    "nominal_token_slots": 900005888,
+    "parameter_dtype": "float32",
+    "resumed_from_step": 0,
+    "sequence_length": 256,
+    "steps": 109864,
+    "token_budget": 900000000,
+    "token_slots_per_second_this_run": 110514.36848028678
+  },
+  "prepared": {
+    "content_tokens": 1211526724,
+    "doc_id": 1,
+    "dtype": "uint16",
+    "eos_id": 2,
+    "pad_id": 0,
+    "rows": 5988582,
+    "selected_documents": 1998073,
+    "selection_sha256": "d5f36f88bb387005a784cdd1231522832e98b9fa3815fe6acd596084fdf23026",
+    "sequence_length": 256,
+    "tokenizer_sha256": "87dcce575ae6effd6ddd2341671e0ea28505fac30584b90d9867fae5b9bf90d7",
+    "vocab_size": 32768
+  },
+  "run_id": "v3-byte-complete",
+  "tokenizer_sha256": "87dcce575ae6effd6ddd2341671e0ea28505fac30584b90d9867fae5b9bf90d7"
+}

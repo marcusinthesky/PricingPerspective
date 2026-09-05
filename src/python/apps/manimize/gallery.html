@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Distributional Information Geometry — Animation Gallery</title>
+<style>
+:root{--bg:#090909;--panel:#272725;--grid:#666660;--fg:#f6f6f1;--muted:#cecec5;--blue:#f6f6f1;}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,Segoe UI,sans-serif;line-height:1.45}
+header{max-width:1500px;margin:auto;padding:2.2rem 1.5rem 1rem} h1{font-size:clamp(2rem,4vw,3.7rem);line-height:1.05;margin:.2rem 0} header p{color:var(--muted);max-width:900px}
+.hero{max-width:1200px;margin:1rem auto 2.5rem;padding:0 1.5rem} .hero video{width:100%;border:1px solid var(--grid);border-radius:14px;background:#000}
+.grid{max-width:1500px;margin:auto;padding:0 1.5rem 3rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:1.25rem}
+.card{background:var(--panel);border:1px solid var(--grid);border-radius:14px;padding:1rem;box-shadow:0 10px 30px #0005} .card h2{font-size:1.08rem;margin:.1rem 0 .8rem;display:flex;gap:.6rem;align-items:center} .card h2 span{display:inline-grid;place-items:center;width:2.2rem;height:1.75rem;border-radius:.45rem;background:var(--blue);color:var(--bg);font-weight:800} .card video{width:100%;border-radius:8px;background:#000} .card p{margin:.65rem 0 0;color:var(--muted);font-size:.86rem;overflow-wrap:anywhere}
+.notice{max-width:1200px;margin:0 auto 1rem;padding:0 1.5rem;color:var(--muted)} code{color:#cecec5}
+</style>
+</head>
+<body>
+<header>
+  <h1>Distributional Information Geometry for Financial Dependence</h1>
+  <p>Thirteen progressive mathematical animations: representation, pairwise transport and covariance restriction, target-anchored interaction fields, coherent multi-firm dispersion, and portfolio-risk certification.</p>
+</header>
+<section class="hero">
+  <h2>Complete series</h2>
+  <video controls preload="metadata" poster="thumbnails/contact_sheet.png"><source src="videos/00_full_series.mp4" type="video/mp4"></video>
+</section>
+<p class="notice">The included MP4s are deterministic reference renders. The editable ManimCE 0.21.x source is in <code>scenes/</code>; see <code>BUILD_INFO.md</code>.</p>
+<main class="grid"><article class="card">
+  <h2><span>01</span>A firm as a probability law</h2>
+  <video controls preload="metadata" poster="thumbnails/01_firm_as_distribution.png">
+    <source src="videos/01_firm_as_distribution.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/01_firm_as_distribution.py</code></p>
+</article>
+<article class="card">
+  <h2><span>02</span>Couplings and quadratic transport</h2>
+  <video controls preload="metadata" poster="thumbnails/02_couplings_and_wasserstein.png">
+    <source src="videos/02_couplings_and_wasserstein.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/02_couplings_and_wasserstein.py</code></p>
+</article>
+<article class="card">
+  <h2><span>03</span>Polarization: distance becomes covariance</h2>
+  <video controls preload="metadata" poster="thumbnails/03_polarization_to_covariance.png">
+    <source src="videos/03_polarization_to_covariance.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/03_polarization_to_covariance.py</code></p>
+</article>
+<article class="card">
+  <h2><span>04</span>A sharp covariance envelope</h2>
+  <video controls preload="metadata" poster="thumbnails/04_covariance_envelope.png">
+    <source src="videos/04_covariance_envelope.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/04_covariance_envelope.py</code></p>
+</article>
+<article class="card">
+  <h2><span>05</span>Transmission, distortion and slack</h2>
+  <video controls preload="metadata" poster="thumbnails/05_transmission_and_slack.png">
+    <source src="videos/05_transmission_and_slack.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/05_transmission_and_slack.py</code></p>
+</article>
+<article class="card">
+  <h2><span>06</span>Target-anchored barycentric reconstruction</h2>
+  <video controls preload="metadata" poster="thumbnails/06_target_anchored_reconstruction.png">
+    <source src="videos/06_target_anchored_reconstruction.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/06_target_anchored_reconstruction.py</code></p>
+</article>
+<article class="card">
+  <h2><span>07</span>A symmetric metric can yield a directed field</h2>
+  <video controls preload="metadata" poster="thumbnails/07_symmetric_distance_directed_field.png">
+    <source src="videos/07_symmetric_distance_directed_field.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/07_symmetric_distance_directed_field.py</code></p>
+</article>
+<article class="card">
+  <h2><span>08</span>Quadratic adjustment implies spatial closure</h2>
+  <video controls preload="metadata" poster="thumbnails/08_quadratic_adjustment_spatial_closure.png">
+    <source src="videos/08_quadratic_adjustment_spatial_closure.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/08_quadratic_adjustment_spatial_closure.py</code></p>
+</article>
+<article class="card">
+  <h2><span>09</span>Pairwise plans need not form one joint law</h2>
+  <video controls preload="metadata" poster="thumbnails/09_pairwise_not_jointly_coherent.png">
+    <source src="videos/09_pairwise_not_jointly_coherent.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/09_pairwise_not_jointly_coherent.py</code></p>
+</article>
+<article class="card">
+  <h2><span>10</span>Multi-firm transport dispersion</h2>
+  <video controls preload="metadata" poster="thumbnails/10_multifirm_dispersion_barycentre.png">
+    <source src="videos/10_multifirm_dispersion_barycentre.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/10_multifirm_dispersion_barycentre.py</code></p>
+</article>
+<article class="card">
+  <h2><span>11</span>Portfolio variance as alignment minus dispersion</h2>
+  <video controls preload="metadata" poster="thumbnails/11_portfolio_variance_certificate.png">
+    <source src="videos/11_portfolio_variance_certificate.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/11_portfolio_variance_certificate.py</code></p>
+</article>
+<article class="card">
+  <h2><span>12</span>Geometry can certify convex optimization</h2>
+  <video controls preload="metadata" poster="thumbnails/12_certificate_convexity.png">
+    <source src="videos/12_certificate_convexity.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/12_certificate_convexity.py</code></p>
+</article>
+<article class="card">
+  <h2><span>13</span>Three distinct optimization layers</h2>
+  <video controls preload="metadata" poster="thumbnails/13_three_optimizations.png">
+    <source src="videos/13_three_optimizations.mp4" type="video/mp4">
+  </video>
+  <p><code>scenes/13_three_optimizations.py</code></p>
+</article></main>
+</body>
+</html>

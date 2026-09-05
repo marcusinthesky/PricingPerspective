@@ -1,0 +1,46 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": ["bun.lock", "tsconfig.base.json", "tsconfig.json"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "env": ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BASE_PATH"],
+      "outputs": [".next/**", "!.next/cache/**", "out/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "typecheck": {},
+    "lint": {},
+    "format": {},
+    "format:check": {},
+    "verify": {
+      "dependsOn": ["build"],
+      "env": ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BASE_PATH"]
+    },
+    "verify:export": {
+      "dependsOn": ["build"],
+      "env": ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BASE_PATH"]
+    },
+    "audit:links": {
+      "dependsOn": ["build"]
+    },
+    "audit:schema": {
+      "dependsOn": ["build"],
+      "env": ["NEXT_PUBLIC_SITE_URL", "NEXT_PUBLIC_BASE_PATH"]
+    },
+    "build-storybook": {
+      "dependsOn": ["build"],
+      "outputs": ["storybook-static/**"]
+    },
+    "lighthouse:ci": {
+      "cache": false,
+      "dependsOn": ["build"]
+    },
+    "verify:full": {
+      "cache": false,
+      "dependsOn": ["verify", "build-storybook", "lighthouse:ci"]
+    }
+  }
+}

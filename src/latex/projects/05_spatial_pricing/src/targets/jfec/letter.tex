@@ -1,0 +1,92 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[letterpaper,margin=20mm]{geometry}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\input{metadata}
+
+\hypersetup{
+  pdftitle={Cover letter for \papertitle},
+  pdfauthor={\paperauthorone},
+  pdfsubject={Submission to the Journal of Financial Econometrics Special Issue}
+}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5.8pt}
+\setlength{\emergencystretch}{1em}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\begin{document}
+
+\fontsize{10.5pt}{12.35pt}\selectfont
+
+\noindent\hfill 30 August 2026\par
+
+\begingroup
+\setlength{\parskip}{0pt}
+\textbf{Editors and Guest Editors}
+
+\textit{Journal of Financial Econometrics}
+
+Special Issue: \textit{Machine Learning in Financial Econometrics}
+\endgroup
+
+\smallskip
+
+Dear Editors and Guest Editors,
+
+Please consider our manuscript, ``\textbf{\papertitle},'' for the
+\textit{Journal of Financial Econometrics} Special Issue on \textit{Machine
+Learning in Financial Econometrics}.
+
+The paper addresses a central theme of the call: how modern machine-learning
+representations can enter financial econometrics without sacrificing economic
+interpretation.
+Rather than using embeddings only as predictive features, we represent each
+firm's information as a distribution and use target-anchored Wasserstein
+barycentric reconstruction to construct a predetermined, directed interaction field.
+That field enters a spatial factor model in which feedback receives an
+explicit exposure-adjustment interpretation.
+
+The framework builds on well-understood spatial-econometric and spatial
+asset-pricing foundations, but moves one step upstream: instead of taking the
+interaction matrix as given, we construct it from firms' semantic information
+footprints.
+To our knowledge, this offers a novel generalization of spatial financial
+econometrics from geographic or supplied-network spaces to
+distribution-valued semantic spaces while retaining an admissible and
+economically interpretable interaction operator.
+
+Empirically, all text-derived fields are constructed from 2018--2022
+information and frozen before estimation on 2023--2026 returns.
+The Wasserstein-barycentric field delivers stronger conditional fit than both
+equal weighting of the same peer support and a conventional distance-decay
+transformation of the same Wasserstein distances.
+When the barycentric and persistent news co-mention fields enter jointly,
+both remain incrementally informative.
+We also evaluate the construction across a broad panel of modern open-weight
+embedding models, dimensions, capacities, architectures, and information vintages.
+These models are widely used in contemporary information retrieval and
+retrieval-augmented-generation pipelines, making the robustness exercise
+especially relevant to current ML practice.
+
+We believe this combination of modern ML representation, interpretable
+spatial financial econometrics, and reproducible formal verification is
+particularly well aligned with the aims of the Special Issue.
+
+Thank you for considering our manuscript.
+
+\begingroup
+\setlength{\parskip}{0pt}
+Sincerely,\par
+\smallskip
+\paperauthorone\par
+Department of Finance and Tax, University of Cape Town\par
+\href{mailto:\paperemail}{\paperemail}
+\endgroup
+
+\end{document}

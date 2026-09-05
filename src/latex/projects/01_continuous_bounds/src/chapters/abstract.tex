@@ -1,0 +1,27 @@
+Firm characteristics are commonly represented as fixed vectors, even though
+evidence about firms' operations arrives as heterogeneous collections of
+articles and reports.
+We study how distances between distributions of firm characteristics restrict
+systematic covariance.
+For given latent exposure laws, quadratic Wasserstein geometry yields sharp
+covariance endpoints over admissible couplings.
+Under a common randomized bi-Lipschitz characteristic-to-exposure map, bounded
+risk-coordinate slack, and a maintained return-covariance bridge,
+characteristic-side distance yields a conditional interval for the covariance ceiling.
+Greater separation then leaves less scope for aligned systematic exposures when
+these assumptions are tight, while a nonnegative transport-excess term records
+the gap between realized and maximum-covariance arrangements.
+The resulting envelope is scenario analysis rather than an expected-return,
+no-arbitrage, or identified structural model.
+Empirically, we proxy characteristic distributions with encoder-only
+language-model embeddings of financial news articles, disclosures, and analyst
+reports for Nasdaq firms over
+\ppvalue{sample-year-start}--\ppvalue{sample-year-end}.
+In a dyadic regression with symmetric firm effects, greater pairwise
+article-embedding W$_2$ distance is associated with weaker return co-movement:
+the coefficient is
+\ppnum[3]{confound-w2-coef}, with 95\% interval
+[\ppnum[3]{confound-w2-ci-low}, \ppnum[3]{confound-w2-ci-high}].
+The estimate retains the same sign when returns are measured in a later window,
+although the feature construction is not point-in-time and the evidence remains
+reduced form.

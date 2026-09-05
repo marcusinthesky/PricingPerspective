@@ -1,0 +1,56 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrcr}
+\toprule
+Encoder & Dim. & Distance & Rank $\rho$ & $\Delta D$/1 SD [95\% CI] & Partial $R^2$ \\
+\midrule
+\multicolumn{6}{l}{\textit{Panel A: encoder and embedding dimension}} \\
+Qwen3-8B & 4096 & $W_2$ & 1.000 & 0.069 [0.056, 0.082] & 0.332 \\
+Qwen3-4B & 2560 & $W_2$ & 0.965 & 0.068 [0.055, 0.082] & 0.299 \\
+Qwen3-8B & 1024 & $W_2$ & 0.985 & 0.067 [0.055, 0.081] & 0.333 \\
+Qwen3-4B & 1024 & $W_2$ & 0.960 & 0.066 [0.054, 0.080] & 0.308 \\
+BGE-large-v1.5 & 1024 & $W_2$ & 0.904 & 0.064 [0.050, 0.081] & 0.229 \\
+Qwen3-8B & 256 & $W_2$ & 0.925 & 0.062 [0.051, 0.075] & 0.322 \\
+Qwen3-8B & 64 & $W_2$ & 0.804 & 0.055 [0.044, 0.066] & 0.279 \\
+\midrule
+\multicolumn{6}{l}{\textit{Panel B: distance family, canonical encoder and dimension}} \\
+Qwen3-8B & 4096 & $W_2$ & 1.000 & 0.069 [0.056, 0.082] & 0.332 \\
+Qwen3-8B & 4096 & $W_1$ & 0.999 & 0.069 [0.056, 0.083] & 0.332 \\
+Qwen3-8B & 4096 & Energy & 0.289 & 0.085 [0.070, 0.102] & 0.356 \\
+\midrule
+\multicolumn{6}{l}{\textit{Panel C: matched encoder-vintage negative control}} \\
+EttaX V0 & 320 & $W_2$ & 0.747 & 0.053 [0.036, 0.074] & 0.081 \\
+EttaX V1 & 320 & $W_2$ & 0.749 & 0.057 [0.041, 0.080] & 0.093 \\
+EttaX V3 & 320 & $W_2$ & 0.768 & 0.053 [0.038, 0.073] & 0.093 \\
+\bottomrule
+\end{tabular}
+\medskip
+\begin{tabularx}{\linewidth}{Xrrrrrr}
+\toprule
+Vintage contrast ($c-r$) & Estimate & 95\% CI & Raw $p$ & Holm $p$ & Bound & Equiv. \\
+\midrule
+EttaX V1 $-$ EttaX V0 & 0.005 & [0.000, 0.010] & 0.056 & 0.168 & 0.012 & Yes \\
+EttaX V3 $-$ EttaX V0 & 0.000 & [-0.005, 0.005] & 0.881 & 0.881 & 0.012 & Yes \\
+EttaX V3 $-$ EttaX V1 & -0.004 & [-0.010, 0.000] & 0.064 & 0.168 & 0.012 & Yes \\
+\bottomrule
+\end{tabularx}
+\medskip
+\begin{tabularx}{\linewidth}{Xrrrrr}
+\toprule
+Base contrast ($c-r$) & Estimate & 95\% CI & Raw $p$ & Holm $p$ \\
+\midrule
+Qwen3-4B full $-$ Qwen3-8B full & -0.001 & [-0.003, 0.001] & 0.388 & 1.000 \\
+Qwen3-4B@1024 $-$ Qwen3-8B@1024 & -0.001 & [-0.004, 0.002] & 0.437 & 1.000 \\
+Qwen3-8B@1024 $-$ Qwen3-8B full & -0.001 & [-0.003, 0.000] & 0.070 & 0.350 \\
+Qwen3-8B@256 $-$ Qwen3-8B@1024 & -0.005 & [-0.008, -0.002] & 0.001 & 0.007 \\
+Qwen3-8B@64 $-$ Qwen3-8B@256 & -0.008 & [-0.012, -0.004] & 0.001 & 0.007 \\
+BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -0.003 & [-0.009, 0.003] & 0.321 & 1.000 \\
+BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -0.002 & [-0.008, 0.004] & 0.470 & 1.000 \\
+\bottomrule
+\end{tabularx}
+\caption{Representation sensitivity under the primary estimator. Every row uses symmetric additive firm effects and the same 1,999 node-bootstrap schedule. Rank agreement is Spearman correlation with the canonical Qwen3-Embedding-8B, 128-article rooted-$W_2$ geometry on the common 100-firm, 4,950-dyad panel. The full-width Qwen rows change capacity and native width jointly; the 8B prefixes isolate Matryoshka truncation; BGE-large changes architecture, training pipeline, and provider. The EttaX panel holds architecture, recipe, compute, and sampling fixed while changing only the encoder's Wikipedia snapshot; its paired contrasts reuse identical bootstrap draws and declare equivalence only when the full interval lies inside the configured symmetric bound. Standardized effects use each row's dyadic standard deviation. Raw $p$-values are two-sided add-one sign-tail probabilities; Holm adjustment is applied separately to the seven base and three vintage contrasts. Contrast estimates are candidate-minus-reference differences in $\Delta D$ per one dyadic standard deviation ($c-r$); the vintage equivalence bound is shown in its contrast panel. $W_1$ and energy are lower-cost descriptive comparators; the table does not test representation superiority.}
+\label{tab:w2-representation-sensitivity}
+\end{table}

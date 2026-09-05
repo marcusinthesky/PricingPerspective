@@ -1,0 +1,69 @@
+\section{Model and information-certified variance bound}
+\label{sec:model}\label{sec:certificate}
+
+The systematic exposures that generate portfolio risk are latent, whereas the
+paper observes firms' information.
+The model therefore separates three roles: an observed information law, a
+latent systematic-exposure law, and a maintained transmission restriction that
+connects the two without equating them.
+It then places all latent exposures under one coherent joint law so that
+pairwise restrictions can support an $n$-asset portfolio statement.
+
+Let $i\in\{1,\ldots,n\}$ index assets.
+The observed object records the distribution of firm $i$'s information.
+Formally, $X_i$ is an observable characteristic draw taking values in a
+separable metric space $\mathcal X$, and its law $C_i$ is the probability
+distribution of the firm's row-normalized article embeddings.
+The latent object records the corresponding systematic exposure.
+Let $B_i$ denote that exposure in a real Hilbert space $\mathcal H$.
+The exposure model is
+\begin{equation}\label{eq:p3-exposure-model}
+  B_i=u_i(X_i),
+  \qquad P_i=\mathcal L(B_i),
+\end{equation}
+where the measurable map $u_i$ captures the firm's information-to-exposure
+mapping and $P_i$ is the resulting latent exposure law.
+Thus $C_i$ and $P_i$ are distinct laws and need not use the same metric units.
+
+The maintained transmission restriction supplies the link between these two
+spaces.
+Its common component is a measurable carrier
+$t:\mathcal X\to\mathcal H$.
+It is $L$-antilipschitz:
+\begin{equation}\label{eq:p3-antilipschitz}
+  d_{\mathcal H}(t(x),t(y))
+  \ge L^{-1}d_{\mathcal X}(x,y),
+  \qquad L>0.
+\end{equation}
+Each firm-specific map remains within a synchronous slack radius:
+\begin{equation}\label{eq:p3-synchronous-slack}
+  d_{\mathcal H}(u_i(x),t(x))\le\tau_i
+  \quad\text{for every }x,
+  \qquad \tau_i\ge0.
+\end{equation}
+The antilipschitz restriction prevents economically distinct information states
+from collapsing into identical systematic exposures, while $\tau_i$ permits
+firm-specific information-to-exposure mismatch.
+Together, these restrictions translate observed information distance into a
+lower bound on exposure separation rather than an equality or a covariance
+estimate.
+
+Pairwise exposure restrictions do not by themselves define portfolio risk.
+To aggregate them, let $J$ be one coherent joint law for
+$(B_1,\ldots,B_n)$ with coordinate marginals $P_i$.
+For normalized risk weights $q_i\ge0$ satisfying $\sum_i q_i=1$, define
+\[
+  v_i=\mathbb E_J\lVert B_i\rVert^2,
+  \qquad
+  V_{\mathrm{sys}}(q)
+  =\mathbb E_J\left\lVert\sum_i q_i B_i\right\rVert^2.
+\]
+The same $J$ governs every cross term, so the induced covariance matrix is
+positive semidefinite.
+This requirement rules out assembling a portfolio from mutually incompatible
+pairwise optimal couplings.
+
+With the observed and latent objects linked and joint coherence imposed, the
+next subsections derive observable pairwise floors, aggregate them into a
+conservative portfolio certificate, sharpen that certificate with a multi-firm
+object, and finally connect systematic exposure risk to returns.

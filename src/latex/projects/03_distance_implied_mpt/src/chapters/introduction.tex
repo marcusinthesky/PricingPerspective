@@ -1,0 +1,162 @@
+\section{Introduction}\label{sec:introduction}
+
+Mean--variance allocation requires a covariance matrix, yet that
+matrix is hardest to estimate in the settings where diversification
+matters most.
+An unrestricted covariance matrix for $n$ assets contains $n(n+1)/2$
+entries, while a demeaned return history of length $T$ has rank at
+most $\min(T-1,n)$.
+Short histories therefore leave a portfolio manager with two linked
+problems: the strongest sample directions are noisy, and the
+optimizer is most sensitive to the weakest ones.
+Shrinkage and factor models reduce this burden by imposing structure
+\citep{ledoit_wolf_2004,kelly_characteristics_2019}, but their
+cross-asset information still originates in joint returns.
+
+An alternative is to ask how much portfolio risk observable firm
+information can rule out before a return covariance matrix is estimated.
+We represent each firm by the distribution of its article embeddings
+and use quadratic optimal transport to compare those distributions.
+When two information distributions are sufficiently different,
+maintained restrictions linking information to systematic exposures
+imply that the firms' latent risks cannot be perfectly aligned.
+The resulting separation certifies a diversification benefit relative
+to perfect positive dependence.
+
+For a standardized long-only portfolio with normalized risk weights
+$q$, the headline result takes the form
+\[
+  \operatorname{Var}(R_q)\le 1-\mathcal C(q).
+\]
+The value $1$ is the variance benchmark under perfect positive dependence,
+and $\mathcal C(q)$ is the amount that the observed information
+geometry certifies away.
+A larger certificate therefore tightens the admissible upper bound on
+portfolio risk.
+It does not estimate the covariance matrix.
+
+\begin{figure}
+  \centering
+  \ppfigure{0.95}{conceptual_pipeline}
+  \caption{Observed information to portfolio choice. Solid arrows connect
+    computed objects; the dashed arrow from observed W2 separation to the
+    latent floor is the maintained transmission restriction. Blue denotes
+    observed objects, orange latent and certificate objects, green the risk
+  bound, and purple the allocation decision.}
+  \label{fig:p3-conceptual-pipeline}
+\end{figure}
+
+The same distribution-valued representation has generated related
+financial objects at neighbouring levels of aggregation.
+At the pairwise level, \citet{gawronsky_continuous_2026} derive a
+covariance envelope from Wasserstein separation.
+At the cross-sectional level, \citet{gawronsky_spatial_2027} use
+target-anchored Wasserstein barycentric reconstruction to form a
+barycentric interaction field.
+The contribution here is at the portfolio level: it aggregates
+information-derived separation within one coherent joint exposure law
+and turns the resulting variance bound into a decision rule.
+The construction below is self-contained.
+
+Let $C_i$ denote firm $i$'s observed characteristic law and let $P_i$
+denote its latent exposure law in factor-risk coordinates.
+Empirically, $C_i$ is the distribution of the firm's article embeddings.
+The quadratic Wasserstein distance $W_2(C_i,C_j)$ is the minimum
+root-mean-square displacement required to match the two article clouds.
+It therefore measures how much semantic mass must be rearranged to
+make the observed information distributions coincide.
+The latent law $P_i$ describes systematic exposure rather than text,
+so $C_i$ and $P_i$ need not share units and one does not identify the
+other directly.
+
+Three maintained links carry the argument from observed information
+to portfolio risk.
+A common information-to-exposure map prevents distinct information
+states from collapsing into identical systematic exposures, while
+firm-specific slack permits bounded departures from that common map.
+A coherent joint law ensures that all pairwise exposure relations can
+coexist within the same portfolio.
+A return bridge then connects systematic exposure variance to
+standardized total returns.
+The text determines the observed geometry; it does not identify these
+transmission restrictions.
+
+For a common carrier constant $L>0$ and firm-specific slack radii
+$\tau_i$, the observable pairwise floor is
+\[
+  \ell_{ij}
+  =\left[L^{-1}W_2(C_i,C_j)-\tau_i-\tau_j\right]_+.
+\]
+This floor is the exposure separation that remains after allowing for
+common distortion and the two firms' deviations from the common map.
+The positive part records that the observed distance may be too small
+to certify any separation once slack is deducted.
+The portfolio certificate aggregates these floors using normalized
+risk weights for a long-only portfolio:
+\[
+  \mathcal C(q)
+  =\frac12\sum_i \sum_j q_i q_j\ell_{ij}^2.
+\]
+Separation between a pair contributes only when the portfolio holds
+both firms, and contributes more when their joint portfolio weight is larger.
+If the exposure marginals belong to one coherent joint law and the
+maintained carrier and slack restrictions hold, systematic portfolio
+variance is bounded by weighted marginal second moments less $\mathcal C(q)$.
+The standardized return bridge then gives the headline bound above.
+Observed differences between firms therefore restrict the joint risk
+configurations that remain admissible.
+
+Investors choose capital weights rather than normalized risk weights.
+For capital weights $x_i$ and marginal volatility scales $\sigma_i$,
+define $A(x)=\sum_i x_i\sigma_i$ and $q_i(x)=x_i\sigma_i/A(x)$.
+The corresponding raw-return certificate is
+\[
+  \operatorname{Var}(R_x)
+  \le A(x)^2\{1-\mathcal C(q(x))\}.
+\]
+Minimizing this upper bound yields an information-certified portfolio without
+an expected-return input.
+Compactness of the feasible long-only set supplies existence of a
+minimizer, while a directly checkable condition on the observed
+distance matrix makes the standardized objective convex.
+
+The empirical exercise keeps construction separate from evaluation.
+The canonical zero-slack implementation, which we call the news-only
+allocation, is formed from observed W2 geometry without using cross-asset return
+covariance and is evaluated only afterwards on the full-sample standardized
+covariance matrix.
+Across four prespecified capped long-only reference populations,
+between \ppnum[2]{news-only-percentile-uniform-cap-15-pct}\% and
+\ppnum[2]{news-only-percentile-concentrated-cap-15-pct}\% of feasible
+portfolios have variance no greater than the news-only allocation.
+The corresponding share for equal risk weights---the inverse-volatility capital
+benchmark expressed in normalized risk-weight coordinates---lies between
+\ppnum[1]{equal-percentile-concentrated-cap-15-pct}\% and
+\ppnum[1]{equal-percentile-uniform-cap-12p5-pct}\%.
+These rankings are descriptive and in-sample; they illustrate the
+allocation implied by the maintained model rather than forecast
+out-of-sample performance.
+
+The paper makes three contributions.
+First, it derives a coherent portfolio variance bound in a sharp
+multi-firm form and supplies the computationally simpler weighted
+pairwise relaxation used by the decision rule.
+Second, it shows that when firm-specific slack is zero, the common
+carrier scale changes the certified variance reduction but not the
+normalized allocation, which is determined by the observed information geometry.
+Third, in a \ppnum[0]{n-tickers}-firm in-sample exercise, it reports
+how the allocation's
+conventionally evaluated variance ranks under four prespecified
+feasible-portfolio laws.
+
+The argument proceeds from identification to decision and then to
+descriptive evaluation.
+\Cref{sec:literature} positions the contribution in structured
+covariance, factor-risk, and textual-characteristic research.
+\Cref{sec:model} defines the observed, latent, and coherent portfolio
+objects and derives the information-certified variance bound.
+\Cref{sec:portfolio-choice} turns the pairwise certificate into a decision rule.
+\Cref{sec:empirical-design,sec:results} describe the data and report
+the in-sample variance ranking.
+\Cref{sec:limitations} discusses what the results establish and where
+their boundaries lie before \Cref{sec:conclusion} concludes.

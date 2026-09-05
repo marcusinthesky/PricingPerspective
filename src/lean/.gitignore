@@ -1,0 +1,10 @@
+.lake/
+build/
+*.olean
+*.ilean
+*.c
+*.o
+*.trace
+*.hash
+lakefile.olean.lock
+lakefile.olean.trace

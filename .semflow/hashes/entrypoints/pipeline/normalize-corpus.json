@@ -1,0 +1,27 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.substrate.corpus:cli_normalize_corpus",
+  "digest": "sha256:3398437d2be52ea91e8f4e853b34971902b424bef114db3ba6128215080aa0d7",
+  "entrypoint": "pipeline normalize-corpus",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:701b162d541e1c9506cca310ef2b8a90b9ce4ab016c5aeb67a529eb0e89c9e8f","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/corpus.py","symbol":"pipeline.cli.commands.substrate.corpus:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/corpus.py","symbol":"pipeline.cli.commands.substrate.corpus:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/corpus.py","symbol":"pipeline.cli.commands.substrate.corpus:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/corpus.py","symbol":"pipeline.cli.commands.substrate.corpus:<binding:typer=typer>"},
+    {"digest":"sha256:baf5adeeca243dd658bdf1a0d479fd4795ab66a2d578ae81e96060577aa38b52","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/corpus.py","symbol":"pipeline.cli.commands.substrate.corpus:cli_normalize_corpus"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/corpus.py","symbol":"pipeline.cli.commands.substrate.corpus:commands"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:d8fc3cf7f30b6468160c361f2e9a70b680e5225efaa2198c56aacc1ba85de45b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:<binding:duckdb=duckdb>"},
+    {"digest":"sha256:12943183c5b9deb37f3c8f9fd50f5cfa760fd97b60aac308b882508bc763173e","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:<binding:logging=logging>"},
+    {"digest":"sha256:920d77e2e47b9cdfa0b3cd0ae81eb83b6776aeb41a7a6f89a994f9a90228e547","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:<binding:yaml=yaml>"},
+    {"digest":"sha256:b8abe20b8c0932573eb7363606d0242795fef634b19e036109e405c807db6f5f","kind":"class","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:_MissingNormalizationSummaryError"},
+    {"digest":"sha256:f137d480da9d62f9d0b24496e0f43ad3324d10420e1c8b9bd8b630b09e0f9641","kind":"function","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:load_symbols"},
+    {"digest":"sha256:c18c79c11b7006e7a5ddd73e367f09f37e44f78745c29dcdf91131d0e1c9dca7","kind":"global","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:logger"},
+    {"digest":"sha256:26f76f0d9264db12461c967d5cd061e2ff35a5229931f7aaf02717ef5277a0a6","kind":"function","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/corpus.py","symbol":"pipeline.stages.substrate.corpus:normalize_corpus"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

@@ -1,0 +1,93 @@
+\section{Related literature}\label{sec:literature}
+
+Markowitz portfolio choice makes covariance the central input to
+minimum-variance allocation \citep{markowitz_portfolio_1952}.
+In short or high-dimensional return panels, however, the sample covariance
+can be unstable or singular.
+Regularization improves that input by replacing part of its sampling
+variation with a structured target \citep{ledoit_wolf_2004}.
+Such methods make covariance estimation more reliable, but they still solve
+the portfolio problem by first estimating joint return risk.
+
+The alternative developed here changes the source and form of the risk information.
+Under a maintained information-to-exposure bridge, observable separation
+between firms' information distributions rules out part of the
+perfect-positive-dependence benchmark without estimating every covariance entry.
+The resulting object is a one-sided bound that can be evaluated at feasible
+portfolio weights and then minimized.
+It is therefore a certificate about admissible joint risk configurations, not
+a replacement point estimate for the covariance matrix.
+This distinction determines how the factor, distributional, and textual
+literatures enter the argument.
+
+Factor models clarify the latent object that covariance summarizes.
+The CAPM represents systematic covariance through scalar market loadings
+\citep{sharpe_capital_1964}, whereas APT and approximate-factor models use
+vector or expanding factor structures
+\citep{ross_arbitrage_1976,chamberlain_rothschild_1983,bai_ng_2002}.
+Characteristic-based models then use observable firm attributes to organize
+loadings and expected returns
+\citep{rosenberg1974extra,connor2007semiparametric,
+connor2012efficient,kelly_characteristics_2019}.
+These approaches explain how systematic exposures generate dependence, but an
+observed characteristic is not itself an exposure or covariance estimate.
+
+Distribution-valued characteristics replace a single firm descriptor with a
+probability law and use quadratic transport to compare those laws.
+For two exposure laws, the minimum expected squared displacement also
+determines the maximum systematic covariance permitted by their marginals.
+Using this identity, \citet{gawronsky_continuous_2026} derive a pairwise
+covariance envelope from observable distributional separation under
+maintained information-to-exposure restrictions.
+That result establishes the pairwise level of the argument: observed geometry
+can restrict how closely two latent systematic risks align.
+
+At the cross-sectional level, \citet{gawronsky_spatial_2027} develop
+target-anchored Wasserstein barycentric reconstruction.
+The resulting distributional spanning weights form a target-specific barycentric
+interaction field that enters exposure adjustment.
+That cross-sectional system organizes firm-level exposure adjustment rather
+than the risk of a portfolio assembled from those firms.
+The two studies therefore supply neighbouring pairwise and cross-sectional
+implications of distributional geometry, but neither resolves portfolio aggregation.
+
+Portfolio risk adds a joint-compatibility requirement.
+Pairwise optimal couplings need not be the pairwise marginals of any single
+joint exposure law, so separately attainable covariance envelopes cannot
+simply be stacked into a coherent portfolio risk configuration.
+The portfolio-level step retains one joint law for all exposure marginals and
+uses its weighted dispersion to deduct a certified amount from worst-case
+systematic variance.
+The weighted sum of squared Wasserstein distances provides a computational
+relaxation of that multi-firm object, while the sharp form preserves the common
+coupling needed for coherent portfolio risk.
+
+Textual finance establishes that documents contain financially relevant information.
+Prior studies map text into sentiment and disclosure measures, return
+forecasts, predictive factors, and learned pricing objects
+\citep{tetlock_giving_2007,loughran2011liability,
+  gentzkow_text_as_data_2019,ke_predicting_returns_2019,
+cong_textual_factors_2024,distaso_string_2024,wang2025newsnet}.
+Their primary targets are expected returns, factors, or pricing rather than a
+coherent bound on cross-asset portfolio risk.
+
+Modern encoders make the distributional approach empirically feasible by
+representing each document as a vector
+\citep{reimers_sentencebert_2019,qwen3_embedding_2025}.
+Word Mover's Distance provides an NLP precedent for using optimal transport
+to compare empirical distributions of embeddings \citep{kusner_word_embeddings_2015}.
+Retaining a firm's article embeddings as an empirical distribution preserves
+within-firm heterogeneity that a single pooled vector would suppress.
+In the present setting, those embeddings measure observed information
+geometry; they do not measure latent exposure or covariance directly.
+The carrier-and-slack restrictions provide the maintained link from that
+measurement layer to exposure separation.
+
+Taken together, portfolio theory supplies the decision problem, factor and
+distributional models identify the latent risk objects and pairwise
+restrictions, and text encoders supply observable information geometry.
+What remains absent is a portfolio-level bridge from that geometry to a risk
+bound supported by one coherent exposure law.
+The theory therefore begins by separating observed characteristic laws,
+latent exposure laws, and their maintained transmission before deriving the
+coherent portfolio bound and its decision rule.

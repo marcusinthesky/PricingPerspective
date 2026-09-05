@@ -1,0 +1,473 @@
+\section{Data and empirical design}\label{sec:empirical-design}
+
+The preceding theoretical analysis in \Cref{sec:methodology} derives
+restrictions that link distances between firms' latent characteristic
+distributions to systematic covariance under maintained transmission
+assumptions.
+Those characteristic distributions and the transmission map are not observed.
+The empirical goal is therefore modest: rather than recover the theoretical
+objects, we ask whether an article-embedding proxy for the characteristic
+geometry is associated with return co-movement in the theory-motivated
+direction under the maintained empirical bridge.
+The design proceeds in three steps.
+First, for each firm, we construct an empirical distribution of embeddings
+from selected financial news articles.
+Second, we compute pairwise quadratic Wasserstein distances between
+those distributions.
+Third, we relate article-embedding distance to return co-movement in
+a dyadic design.
+Throughout, embeddings measure selected semantic content rather than latent
+economic characteristics directly.
+\Cref{sec:data-provenance} gives the full retrieval, filtering, and
+provenance protocol.
+
+\subsection{Hypothesis and testable
+restrictions}\label{sec:testable-restrictions}
+
+The theory delivers a conditional restriction on feasible covariance rather
+than a point prediction, so the first exercise asks whether observed return
+geometry is compatible with the envelope at declared transmission inputs.
+The covariance envelope in \Cref{sec:methodology} brackets latent systematic
+covariance through the characteristic-side distance and the maintained inputs
+$(L,\tau)$.
+To express that restriction in observed returns, we maintain centered factor
+innovations, zero residual means, zero factor--residual cross covariances,
+and zero cross-firm residual covariance under the same coupling $\pi$ used
+for the systematic exposures.
+With standardized total returns and unit marginal variances, these
+restrictions identify $\rho_{ij}=\kappa_\pi$ and hence
+$c^{\mathrm{actual}}_{ij}:=\E(R_i-R_j)^2=2-2\rho_{ij}$.
+Writing $\Delta_{ij}$ for the transport excess under the realized coupling,
+the observable classification algebra is
+\begin{equation}\label{eq:random-transport-excess-bracket}
+  c^{\mathrm{actual}}_{ij}-(w^+_{ij})^2
+  \le \Delta_{ij}
+  \le c^{\mathrm{actual}}_{ij}-(w^-_{ij})^2.
+\end{equation}
+A dyad is \emph{covered} when the lower endpoint is nonnegative,
+\emph{violated} when the upper endpoint is negative, and
+\emph{unresolved} otherwise.
+The $(L,\tau)$ values are declared scenario inputs, so the classification
+does not form a return-based estimate of either transmission input.
+The observed article distance is only a proxy for an unobserved
+characteristic distance.
+Neither this inequality classification nor the dyadic regression below
+identifies the transmission model.
+
+The classification exercise evaluates compatibility at specified transmission
+inputs, whereas the directional expectation can also be examined without
+assigning each dyad to an envelope category.
+The second empirical check is therefore a reduced-form regression of return
+distance on article-embedding distance after absorbing stable
+firm-level heterogeneity.
+Its outcome is the return chord distance
+\begin{equation}\label{eq:chord-distance}
+  \hat{D}_{ij} = \sqrt{2(1 - \hat{\rho}_{ij})},
+\end{equation}
+where $\hat{\rho}_{ij}$ is the sample Pearson correlation of daily returns
+(equation~\ref{eq:sample-correlation} below).
+On this scale, $D_{ij}=0$ denotes perfectly correlated returns,
+$D_{ij}=\sqrt{2}$ denotes zero correlation, and $D_{ij}=2$ denotes perfectly
+negative correlation.
+Larger chord distance therefore means weaker return co-movement.
+
+The regression is defined over the observed undirected pairs $i<j$:
+\begin{equation}\label{eq:dyadic-fixed-effects}
+  D_{ij}=\mu+a_i+a_j+\beta_X X_{ij}+z_{ij}^{\top}\gamma+u_{ij},
+  \qquad 1\le i<j\le N.
+\end{equation}
+Here $N=\ppvalue{n-firms}$, $\mu$ is the intercept, $X_{ij}$ is the
+article-embedding regressor with coefficient $\beta_X$, $z_{ij}$ is the
+vector of secondary controls with coefficient vector $\gamma$, and $u_{ij}$
+is the dyadic error.
+The terms $a_i+a_j$ are symmetric additive firm effects.
+The restriction $i<j$ counts each unordered pair once.
+The normalization omits one firm-effect indicator; changing the omitted
+ticker does not change $\widehat\beta_X$.
+The canonical specification sets $X_{ij}=W^{(2)}_{ij}$ and $z_{ij}=0$,
+yielding the fixed-W$_2$ slope $\beta_{W_2}$.
+
+\begin{hypothesis}[Reduced-form distance association]
+  \label{hyp:monotonicity}
+  For the theory-aligned arm, the reported two-sided regression test is
+  \begin{equation}\label{eq:dyadic-association-hypothesis}
+    H_0:\beta_{W_2}=0
+    \qquad\text{against}\qquad
+    H_1:\beta_{W_2}\ne0.
+  \end{equation}
+  The directional expectation, stated before inspecting the result, is
+  $\beta_{W_2}>0$: under the maintained bridge, firms farther apart in the
+  characteristic geometry should tend to be farther apart in
+  return-correlation space after symmetric firm effects.
+  This directional expectation motivates the reported two-sided test but is
+  not a causal claim.
+  The envelope diagnostic separately asks whether the nonnegative
+  transport-excess restriction is covered, violated, or unresolved at each
+  declared $(L,\tau)$ scenario; it is a conditional inequality
+  classification, not a fitted-parameter test.
+\end{hypothesis}
+
+\subsection{Sample and return construction}\label{sec:sample-and-window}
+
+Firm-level distribution comparisons require sufficient text and common
+coverage across the fixed window to construct a common-size empirical measure
+for every firm, which motivates a coverage-conditioned sample rather than a
+broad but uneven news universe.
+The news universe is a prespecified, Nasdaq-100-based frame of
+\ppvalue{n-firms-news} Nasdaq-listed firms.
+Each retained firm had at least \ppvalue{annual-raw-article-floor} raw articles
+in every calendar year from
+\ppvalue{sample-year-start} through \ppvalue{sample-year-end} in Nasdaq's
+public per-symbol news archive.
+Within the fixed frame, articles satisfying the date-window and
+minimum-body-length filters are ordered by URL hash, and up to
+\ppvalue{n-samples-cap} are retained over the pooled window.
+The common coverage rule improves comparability across firm-level empirical
+measures, but the resulting panel is not representative of all
+Nasdaq-listed firms.
+\Cref{tab:sample-descriptives-sectors} reports the sector composition,
+per-firm article counts, return volatilities, and within- versus cross-sector
+W$_2$ distances.
+\Cref{tab:sample-flow} records the resulting flow from source records to
+estimation dyads; the full retrieval and provenance protocol is in
+\Cref{sec:data-provenance}.
+
+\input{generated/sample_descriptives}
+
+Two features of that composition motivate later design choices.
+First, mean daily return volatility differs markedly across sectors, whereas
+the primary return chord distance is constructed from correlations and is
+therefore invariant to firm-specific return scale.
+Symmetric firm effects instead absorb stable endpoint heterogeneity.
+Second, mean within-sector W$_2$ distance is smaller than the corresponding
+cross-sector distance in every sector holding more than one firm, so
+article-embedding distance encodes sector information before any return is used.
+The sector diagnostic in \Cref{sec:geometric-representation} quantifies that
+pattern, and the pooled same-sector rung probes it.
+The canonical symmetric-firm-effects specification does not include a
+same-sector control; the pooled rung shows how much of the unadjusted
+association survives that descriptive comparison.
+
+To measure co-movement independently of firm-specific return scale, the
+outcome is constructed from correlations of daily simple returns.
+Daily simple returns are Yahoo Finance adjusted-close ratios minus one.
+Return-dependent tests use the exact complete-case matrix of
+\ppvalue{return-panel-n-observations} dates shared by
+\ppvalue{return-panel-n-tickers} priced firms, spanning
+\ppvalue{return-panel-date-start} through \ppvalue{return-panel-date-end}.
+Nullable observations are removed before matrix construction, with no
+interpolation or zero filling.
+The news and return panels overlap over the
+\ppvalue{sample-year-start}--\ppvalue{sample-year-end} calendar window, so
+the association is contemporaneous and reduced-form rather than a
+pre-period prediction.
+Return alignment and sector-metadata details are documented in
+\Cref{sec:data-provenance}.
+
+The sample correlation underlying the chord distance in
+equation~\ref{eq:chord-distance} is
+\begin{equation}\label{eq:sample-correlation}
+  \hat{\rho}_{ij}
+  =
+  \frac{
+    \sum_{t=1}^{N_T} (r_t^i - \bar{r}^i)(r_t^j - \bar{r}^j)
+  }{
+    \sqrt{
+      \sum_{t=1}^{N_T} (r_t^i - \bar{r}^i)^2
+      \sum_{t=1}^{N_T} (r_t^j - \bar{r}^j)^2
+    }
+  },
+\end{equation}
+where $\bar{r}^i$ is the sample average of asset $i$'s returns, yielding a
+$\ppvalue{n-firms} \times \ppvalue{n-firms}$ symmetric chord distance matrix
+$D$ with zero diagonal.
+
+\subsection{Article-embedding representation and distance}
+\label{sec:distance-construction}\label{sec:article-proxy-model}
+
+The empirical bridge requires a common representation of heterogeneous
+articles while retaining each firm as a distribution rather than collapsing
+its text to a single point.
+Embeddings provide that measurement technology by mapping documents into a
+shared numerical space in which semantic proximity can be compared.
+An embedding model is a neural network that maps a text document to a
+fixed-length numerical vector---its \emph{embedding}.
+Documents discussing similar topics are placed nearby in the resulting
+high-dimensional space, whereas documents on unrelated subjects are placed
+farther apart.
+A firm's collection of vectors can therefore be treated as an empirical
+distribution in semantic space.
+This representation measures selected semantic content; it does not observe
+the firm's latent economic characteristics directly.
+
+Wasserstein comparison further requires each article to occupy the same
+reusable geometry before firm pairs are formed.
+A \emph{bi-encoder} meets that requirement by processing each document
+independently into one reusable vector, so every within- and cross-firm
+comparison shares a common geometry.
+A cross-encoder instead returns pair-specific scores and would not directly
+define the per-firm empirical measures needed for Wasserstein computation.
+The application therefore uses the bi-encoder as a fixed text map, without
+retrieval or reranking.
+
+The distinction between the theoretical object and the article-embedding
+proxy can be stated formally.
+The randomized framework in \Cref{sec:methodology} operates on latent
+characteristic laws $C_i\in\mathcal P_2(\Omega)$ over an abstract risk-factor
+space $\Omega$.
+Market data do not reveal these laws.
+In the application, write $C_i^\ast$ for the latent economic characteristic
+distribution represented by the theoretical $C_i$, and let $Q_i$ denote the
+distribution of content selected for media coverage and mapped by the
+embedding function $\phi$ into semantic space.
+The observed articles define only the empirical embedding measure
+\begin{equation}\label{eq:empirical-embedding-measure}
+  \widehat Q_i
+  :=\frac{1}{N_i}\sum_{d=1}^{N_i}\delta_{\phi(d)}.
+\end{equation}
+The data therefore measure distances between $\widehat Q_i$, not between the
+latent $C_i^\ast$.
+Reading the geometry of $Q_i$ as a proxy for that of $C_i^\ast$ is the
+maintained measurement premise below, not an identity between semantic and
+economic characteristics.
+
+\begin{assumption}[Measurement Premise: Article-Embedding
+  Proxy]\label{ass:article-proxy}
+  After symmetric firm margins and the declared controls, distortions from
+  media selection, article generation, duplicate handling, text extraction,
+  and embedding do not covary with return distance strongly enough to create
+  or reverse the sign of the latent association.
+\end{assumption}
+
+For the randomized-exposure formulation, the application also maintains that
+the same bi-Lipschitz map and common $L$ apply across firms and that the
+latent characteristic laws have finite second moments.
+Under \Cref{ass:article-proxy}, the observed embedding law $\widehat Q_i$
+proxies the latent characteristic law $C_i^\ast$.
+The common randomized map then sends $C_i^\ast$ to the latent exposure law
+$P_i$, while $\tau_i$ bounds only transmission deviation in risk coordinates,
+not article-measurement error.
+These are scenario assumptions, not fitted measurement equations.
+Article and return data identify neither $P_i$, $L$, nor $\tau_i$.
+
+The proxy is motivated by financial news because articles repeatedly record
+analysts', journalists', and market participants' assessments of
+firm-specific risks.
+Across the window, article topics cover persistent firm attributes, such as
+industry structure and business model, and transient events, such as earnings
+surprises and management changes.
+Accordingly, $C_i^\ast$ and $Q_i$ are pooled distributions over the fixed
+sample window, not timeless structural characteristics, and the corresponding
+return object is the same-window covariance.
+Treating the exposure law $P_i$ as fixed over the window is therefore a
+pooled-window approximation.
+The design does not separately identify the media-and-embedding distortion in
+\Cref{ass:article-proxy}.
+
+Given this proxy role, the headline representation embeds full article bodies
+with the open-weights \texttt{qwen/qwen3-embedding-8b} bi-encoder, producing
+\ppvalue{embed-dim}-dimensional vectors under pinned serving parameters
+\citep{qwen3_embedding_2025}.
+Each news article $d$ associated with asset $i$ is mapped to an embedding
+vector $\bm{e}_d=\phi(d)\in\R^{\ppvalue{embed-dim}}$, and these vectors are
+the atoms of $\widehat Q_i$ in equation~\ref{eq:empirical-embedding-measure}.
+Their distances approximate differences in selected semantic content, subject
+to \Cref{ass:article-proxy}.
+Every article predates the later returns evaluated in
+\Cref{sec:post-window-dyadic}, but the encoder has no documented
+training cutoff.
+Because the encoder is trained for semantic retrieval rather than recovery of
+financial risk factors, its economic interpretation rests on the measurement
+premise in \Cref{ass:article-proxy}.
+
+Holding article counts fixed keeps the number and weight of atoms comparable
+across firms rather than combining semantic comparisons with unequal
+empirical support sizes.
+Within each firm, articles are ordered lexicographically by their
+stable URL hash.
+All full-width encoder comparisons use the first $m=128$ articles under this
+ordering; for the headline encoder we additionally use $m\in\{32,64,128\}$.
+Let $x_{ia}$ denote the row-normalized embedding of selected article $a$, and
+let $S_m$ be the set of permutations of $\{1,\ldots,m\}$.
+The primary statistic is
+\begin{equation}\label{eq:empirical-wasserstein-2}
+  \widehat W_{2,m}(i,j)
+  = \left(\min_{\pi\in S_m}\frac{1}{m}\sum_{a=1}^{m}
+  \norm{x_{ia}-x_{j,\pi(a)}}_2^{2}\right)^{1/2}.
+\end{equation}
+The minimization pairs every article from one firm with one article from the
+other and finds the smallest root-mean-square semantic displacement, so W$_2$
+is small when two firms' article topics can be aligned closely even if no
+individual article is shared.
+The fixed-W$_2$ diagnostic uses the common $m=128$ unit-chord Qwen3
+representation.
+The complete W$_1$ and energy definitions are in
+Appendix~\ref{sec:representation-diagnostics} as lower-cost descriptive
+comparators, and the theorem is agnostic to the empirical ground metric.
+
+Before relating the article-embedding geometry to returns, we ask a
+descriptive question: does the pairwise W$_2$ matrix exhibit economically
+recognizable organization?
+The visualization is intuition-building scaffolding, not a test of the theory
+or the measurement premise.
+Because pairwise distances are not themselves points in a vector space,
+metric multidimensional scaling (MDS) recovers an approximate map from the
+distance table alone---analogous to reconstructing a city layout from a table
+of driving distances.
+\Cref{fig:sector-mds} projects the exact W$_2$ matrix into two dimensions and
+colours each firm by its Nasdaq summary sector label.
+
+\begin{figure}[htbp]
+  \centering
+  \ppfigure{0.96}{mds_sector_plot}
+  \caption{Descriptive two-dimensional metric MDS projection of the exact
+    128-article W$_2$ matrix.
+    Both axes are unitless projection coordinates; each labelled point is a
+    priced firm, and colours follow the sector legend.
+    Sector colours overlap throughout the map rather than separating into
+    discrete groups.
+    All statistics and pair selections use the original W$_2$ distances, not
+    these approximate coordinates, whose local-neighbour fidelity is limited
+    (\Cref{fig:mds-shepard-diagnostic}).
+  Authors' calculations.}
+  \label{fig:sector-mds}
+\end{figure}
+
+In finance terms, the overlap suggests that the article-embedding geometry
+contains broad sector structure but is not exhausted by sector labels.
+The DISCO (distance components) decomposition quantifies this distinction:
+sector membership accounts for only $R^2_{\mathcal E}=\ppnum[3]{disco-r2}$ of
+total energy dispersion \citep{szekely_energy_2013}.
+DISCO partitions dispersion in the distance matrix into between- and
+within-sector shares, much as a one-way ANOVA partitions variance, but it
+operates directly on pairwise distances rather than on a scalar variable.
+The full DISCO decomposition and Shepard-fidelity checks are reported in
+\Cref{sec:geometric-representation}.
+This descriptive structure neither validates the theory nor establishes that
+embeddings recover latent characteristics.
+It instead motivates the question in \Cref{sec:post-window-dyadic}: whether
+firm-level article-embedding differences in the original W$_2$ matrix are
+associated with return distance after symmetric firm effects.
+Having defined the sample, return outcome, and article-embedding geometry, we
+now specify the estimator and inference used to answer that question.
+
+\subsection{Estimator and inference}
+\label{sec:primary-estimator}\label{sec:empirical-testing}
+\label{sec:inference-design}
+
+Article and return data do not identify $L$ or $\tau$, so the envelope check
+treats both as sensitivity inputs rather than fitted parameters.
+The primary random-exposure check evaluates the one-sided transport-excess
+interval in
+equations~\ref{eq:random-w2-lower-metric}--\ref{eq:random-kappa-bracket}.
+It treats the fixed Qwen3 $m=128$ W$_2$ matrix defined in
+\Cref{sec:distance-construction} as the characteristic-side distance $G_{ij}$
+and uses standardized total-return geometry
+$c^{\mathrm{actual}}_{ij}=2-2\hat\rho_{ij}$.
+The nine $(L,\tau)$ cells form an uncalibrated local sensitivity grid around
+isometry and zero slack: $L\in\{1,1.25,1.5\}$ and
+$\tau_i=\tau_j\in\{0,0.05,0.10\}$.
+
+Dyads sharing a firm may be dependent, so the cross-sectional information is
+governed by the number of firms rather than the number of pairs.
+Firms are therefore the resampling units, and symmetric additive firm effects
+absorb stable endpoint heterogeneity.
+Each multinomial node-bootstrap draw assigns a count to every firm and
+weights dyad $(i,j)$ by the product of its endpoint counts, handling
+dependence among dyads that share a firm but not pair-specific
+omitted variables.
+Percentile intervals and the finite-draw-corrected two-sided sign tail use
+the same 1,999-draw schedule for every reported specification.
+
+The residual representation, partial-$R^2$ definition, nuisance-rank details,
+six-rung estimator audit, exact weights, rank checks, functional-form
+diagnostics, and influence results are reported in
+Appendix~\ref{sec:dyadic-diagnostics}.
+
+The contemporaneous design cannot distinguish the association from conditions
+shared by the article and return windows, so a timing-separated specification
+asks whether the qualitative relation persists when the return window
+moves forward.
+It holds the \ppvalue{sample-year-start}--\ppvalue{sample-year-end}
+article-embedding W$_2$ matrix fixed and rebuilds the outcome and symmetric
+firm effects from the 2023--2026 complete-case return panel.
+It uses the same dyads, estimator, bootstrap schedule, and two-sided null.
+This separation prevents returns in the evaluation window from determining
+article selection.
+It is nevertheless timing-separated evidence rather than point-in-time
+prediction: the encoder is not a point-in-time model, and common latent
+drivers may persist across windows.
+
+With the primary design fixed, the final subsection describes how the
+analysis probes sensitivity to the chosen article-embedding representation.
+
+\subsection{Representation sensitivity ladder}\label{sec:representation-ladder}
+
+Because embeddings are a measurement choice, the return-distance association
+would be less informative if it appeared only under one model, scale, output
+width, metric, or training-corpus vintage.
+The representation sensitivity ladder therefore asks whether the estimate
+survives when each of these axes is varied while the empirical design
+remains fixed.
+It holds the estimator, return matrix, firm sample, and node-bootstrap
+schedule fixed while changing encoder, output width, or distance metric,
+thereby probing sensitivity to these design choices
+(\Cref{tab:w2-representation-sensitivity}).
+
+The seven-row base ladder targets three distinct measurement concerns.
+The capacity comparison asks whether model scale drives the association by
+pairing Qwen3-Embedding-8B with its 4B variant at the same native width and
+at a common 1,024-dimensional output.
+The output-width comparison asks whether the estimated association depends on
+the full coordinate set.
+It uses Matryoshka prefixes, for which the encoder's training makes
+leading-coordinate prefixes usable as nested, lower-capacity embeddings at
+256 and 64 coordinates.
+These prefixes are fixed before the analysis, not principal components or
+selected coordinates \citep{kusupati_matryoshka_2022}.
+The architecture comparison asks whether the association is specific to the
+Qwen training pipeline.
+It uses BGE-large-v1.5, a bidirectional encoder from a different provider and
+training pipeline that changes architecture, pretraining, and provider
+jointly \citep{xiao_cpack_2023}.
+The compact contrast table reports the candidate-minus-reference pairs
+descriptively with paired intervals and Holm-adjusted $p$-values; none is a
+causal or encoder-superiority claim.
+W$_1$ and energy are substituted for $X_{ij}$ only in the descriptive
+representation table.
+Because all rows share the node schedule, endpoint effects, and omitted
+indicator, their standardized effects are comparable even though one-unit
+coefficients inherit different distance scales.
+
+Training-data vintage requires a separate design because comparisons across
+off-the-shelf encoders also change architecture and training pipeline.
+The matched EttaX panel holds those features fixed so that only the Wikipedia
+snapshot varies.
+Its three arms are 12-layer, 320-dimensional Transformer bi-encoders with
+approximately 22~million parameters, trained by the authors on Wikipedia
+article text using a masked autoencoding objective.
+During training, 60\% of input tokens are randomly deleted and a separate
+single-layer decoder reconstructs the original document from the encoder's
+compressed representation.
+Architecture, optimizer, training budget (900~million token slots),
+byte-level BPE tokenizer, corpus sampler, and random seed are identical
+across arms; only the Wikipedia snapshot changes.
+V0 uses the 20 December 2017 snapshot, which predates the
+\ppvalue{sample-year-start}--\ppvalue{sample-year-end} article sample window.
+V1 uses the 20 December 2020 snapshot, which falls within the sample window.
+V3 uses an August 2026 snapshot, which postdates the return evaluation window.
+If the measured association were an artifact of temporal overlap between
+encoder training data and the article sample, V0 would show a weaker
+association than V1 or V3.
+The vintage equivalence test declares equivalence only when the full paired
+interval lies inside a symmetric margin calibrated to the previously computed
+Qwen3-8B--BGE-large contrast.
+These margins are benchmark-calibrated robustness thresholds, not causal or
+architecture-only comparisons.
+These exercises assess the stability of the article-embedding proxy
+association; they do not identify the transmission model or convert the
+design into point-in-time prediction.
+
+% Geometric diagnostics (MDS, DISCO) are woven into §4.4 at point of use.
+% Labels preserved for any inbound cross-references.
+\label{sec:geometric-diagnostics}

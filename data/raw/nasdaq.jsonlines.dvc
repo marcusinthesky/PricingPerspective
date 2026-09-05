@@ -1,0 +1,5 @@
+outs:
+- md5: a30d7fe43928f7d99fee118a5cf66b77
+  size: 1815644085
+  hash: md5
+  path: nasdaq.jsonlines

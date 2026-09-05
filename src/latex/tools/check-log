@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# check-log — publisher-parity TeX log policy.
+#
+# Policy (see t24.13-review-gate-remediation):
+#   exit 1  <=>  the log contains unresolved/multiply-defined manuscript
+#                objects (undefined citations/references, multiply defined
+#                labels) OR missing glyphs ("Missing character: There is no").
+#   exit 0, advisory only  <=>  material overfull \hbox warnings
+#                (>= PP_OVERFULL_PT, default 30.0pt) are detected and printed
+#                to stderr for tracking, but do NOT fail the build. These are
+#                per-paper layout defects owned by the Wave-D ports
+#                (t24.7-t24.10); the current baseline legitimately contains
+#                them and must not regress to a red matrix here.
+#   NOT covered by this script  <=>  the arXiv cleveref theorem-reference-name
+#                regression, which is not log-detectable and is instead gated
+#                by the t24.5 compile fixture.
+set -euo pipefail
+
+if [[ $# -ne 1 || ! -f "$1" ]]; then
+  echo "usage: check-log TEX-LOG" >&2
+  exit 2
+fi
+
+logfile="$1"
+status=0
+
+pattern='(LaTeX|Package [^ ]+) (Error|Warning): (There were undefined|Citation .* undefined|Reference .* undefined|Label .* multiply defined)|There were undefined (citations|references)|multiply defined labels'
+
+if matches=$(rg -n --ignore-case "$pattern" "$logfile"); then
+  echo "unresolved or multiply-defined manuscript objects in $logfile:" >&2
+  echo "$matches" >&2
+  status=1
+fi
+
+glyph_pattern='Missing character: There is no'
+if glyph_matches=$(rg -n --ignore-case "$glyph_pattern" "$logfile"); then
+  echo "missing glyphs in $logfile:" >&2
+  echo "$glyph_matches" >&2
+  status=1
+fi
+
+overfull_threshold="${PP_OVERFULL_PT:-30.0}"
+overfull_lines=""
+if overfull_lines=$(rg -n --ignore-case 'Overfull \\hbox \(([0-9]+(\.[0-9]+)?)pt too wide' "$logfile"); then
+  :
+else
+  overfull_lines=""
+fi
+
+material_overfull=""
+if [[ -n "$overfull_lines" ]]; then
+  while IFS= read -r line; do
+    pt=$(sed -E 's/.*Overfull \\hbox \(([0-9]+(\.[0-9]+)?)pt too wide.*/\1/' <<<"$line")
+    if awk -v a="$pt" -v b="$overfull_threshold" 'BEGIN { exit !(a + 0 >= b + 0) }'; then
+      material_overfull+="$line"$'\n'
+    fi
+  done <<<"$overfull_lines"
+fi
+material_overfull="${material_overfull%$'\n'}"
+
+if [[ -n "$material_overfull" ]]; then
+  echo "material overfull boxes (advisory; tracked for Wave-D layout repair) in $logfile (>= ${overfull_threshold}pt):" >&2
+  echo "$material_overfull" >&2
+fi
+
+exit "$status"

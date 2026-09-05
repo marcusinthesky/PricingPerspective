@@ -1,0 +1,30 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p5.exhibit:cli_render_paper5_universe_horizon_bridge_table",
+  "digest": "sha256:32548b8e28a35463c2b7994f6f9a455eb9d77bd68792e08d9c8613e098d8d7f1",
+  "entrypoint": "pipeline render-paper5-universe-horizon-bridge-table",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:<binding:typer=typer>"},
+    {"digest":"sha256:a0cbafe238b7eba97f0cde4a2ebc608dcf48116f01efaee4db5864436dd30ef8","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:cli_render_paper5_universe_horizon_bridge_table"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:f5b270e78401abfa55a4047c331b1199b42df2ba4065a6f1882f58a0a906008b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:<binding:cast=typing:cast>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:<binding:json=json>"},
+    {"digest":"sha256:814a9c048b7220595eb91258a96ec4359fb680c09f5f0873810daeac2cd5f4d7","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_CURRENT_SHORT_CELL"},
+    {"digest":"sha256:0aa476d4d2e73a6a6f2dfa69461d875f91a87700b48e9c947882df8ae511c6b3","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_HORIZON_CONTRAST"},
+    {"digest":"sha256:6ef3f2d71f5d550efefdc7a93f3358352e9d18bd2657e77e5d9ad1dd44b49c14","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_REFERENCE_LONG_CELL"},
+    {"digest":"sha256:13ab8919fd0e85d35b401490cdb21ec9d5308e637b783feb135b60dd9b3df3a6","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_REFERENCE_SHORT_CELL"},
+    {"digest":"sha256:4619c87f0ff9c40a32b8139bb47e9c114ebd2235dfa4401844e1bb9b19721aab","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_UNIVERSE_CONTRAST"},
+    {"digest":"sha256:54f335bb3e5608e55158d8bf1a9f4fc6f2a788e09ff5ec646e4f67ee8907136e","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_cell_row"},
+    {"digest":"sha256:f2fa795b4d43f1c72c66f391c747559540e7fbbdfd2ab152c77b9d53b695d667","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_contrast_row"},
+    {"digest":"sha256:527e62bad29d53996b4ed2f08baea4e2503ef6a26673d619f43b8e8113daac3e","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_mapping"},
+    {"digest":"sha256:76f79ed2cdb4247ca54a18f39b23fb828955c639013ed0ba159b98846c43b87c","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:_number"},
+    {"digest":"sha256:244504a966a22a25328edd77e4a9453b9952868f029662b52b178423c02bcae8","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/universe_horizon_bridge.py","symbol":"pipeline.figures.paper5.universe_horizon_bridge:render_paper5_universe_horizon_bridge_table"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

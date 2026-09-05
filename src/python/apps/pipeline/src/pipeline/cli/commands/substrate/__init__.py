@@ -1,0 +1,1 @@
+"""Shared substrate command adapters."""

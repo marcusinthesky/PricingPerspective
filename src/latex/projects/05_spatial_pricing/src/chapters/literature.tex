@@ -1,0 +1,139 @@
+\section{Related Literature}\label{sec:literature}
+
+Spatial asset pricing asks how local interaction modifies factor-based pricing
+once the researcher supplies an interaction matrix $W$.
+Across geographic and financial applications, $W$ organizes local dependence
+before its strength is estimated
+\citep{fernandez_spatial_2011,kou_asset_2018,ge_news-implied_2023}.
+In the spatial CAPM and spatial APT of \citet{kou_asset_2018}, assets occupy
+point-valued locations and inverse geographic distance supplies the weights.
+The resulting spatial multiplier accumulates direct and higher-order
+interactions, but the asset representation and the rule that converts it into
+$W$ remain exogenous to the pricing model.
+
+Linear-quadratic network games address a different part of this problem.
+Costly local complementarity yields best responses summarized by a network
+resolvent, providing an economic route from individual objectives to aggregate
+propagation conditional on a given graph \citep{ballester_networks_2006}.
+The adjustment model in this paper applies that logic one layer below returns:
+firms trade off departures from their stand-alone factor exposures against
+misalignment among peer-adjusted exposures, and the spatial coefficient records
+the relative intensity of that adjustment.
+This interpretation explains why interaction may arise, but it leaves open
+which firms should be peers and how their weights should be determined.
+
+The news-implied-network literature supplies one influential answer by replacing
+geographic location with an observed informational edge.
+Beginning with economic linkages inferred from news and their relation to return
+predictability, this line uses sentence-level co-mentions to construct firm
+networks that trace contagion and aggregate risk
+\citep{scherbina_economic_2013,schwenkler_network_2020}.
+\citet{ge_news-implied_2023} places such a co-mention matrix inside a spatial
+factor model, and subsequent work studies whether auxiliary network information
+improves covariance estimation \citep{ge_network_guided_covariance_2026}.
+These studies expand the meaning of economic proximity beyond literal distance,
+but the observed or count-weighted graph remains the empirical primitive that
+supplies $W$.
+
+A broader text-finance literature usually maps information into a first-order
+object such as an attention measure, a textual factor, or an embedding-based
+input to return or stochastic-discount-factor estimation
+\citep{ben_rephael_information_consumption_2019,
+cong_textual_factors_2024,wang2025newsnet}.
+Related learned-network methods map connectivity directly into factor exposures
+or priced network factors \citep{son2022graph,uddin2024network}.
+Together, these approaches establish that text and learned representations carry
+economically relevant predictive and pricing information.
+The distinct question here is not whether text predicts a scalar outcome, but
+whether the full cross-section of within-firm information can construct the peer
+field along which exposures adjust.
+
+That question changes the primitive representation of a firm.
+A diversified firm need not occupy one geographic or characteristic point;
+its articles can instead be represented by a probability distribution $C_i$
+over positions in a maintained information space.
+This representation preserves dispersion, multimodality, and other differences
+that a centroid or single embedding suppresses.
+When every $C_i$ degenerates to a point mass, Wasserstein distance reduces to
+the underlying point distance, so point-based spatial logic is nested at the
+level of the representation.
+For genuinely distribution-valued firms, however, the graph becomes an output
+of the distributional geometry rather than its starting point.
+
+Quadratic Wasserstein transport gives that geometry economic content beyond a
+generic similarity metric.
+Its primal problem finds the least aggregate squared displacement required to
+reallocate one distribution into another.
+Unlike the $W_1$ Kantorovich--Rubinstein case, the quadratic $W_2$ dual is not a
+single Lipschitz price schedule, so it does not carry the same direct
+spatial-arbitrage interpretation.
+In this application, the ground cost is displacement in a maintained embedding
+space rather than a monetary shipping cost, so the construction neither prices
+literal transport nor tests for semantic arbitrage.
+It measures least semantic displacement conditional on the chosen
+representation and ground metric.
+
+Pairwise transport nevertheless stops short of an interaction field.
+A distance answers how much reallocation separates two firms, and a transport
+plan establishes article-level correspondence, but neither determines how
+several candidate firms should jointly represent one target.
+Turning pairwise distances directly into weights would require an additional
+kernel, bandwidth, or nearest-neighbour rule.
+The central abstraction of this paper is instead
+\emph{target-anchored Wasserstein barycentric reconstruction}.
+For each target firm, quadratic transport first aligns its articles separately
+with those of every candidate firm.
+Holding those target-specific correspondences fixed, a convex simplex step
+selects the nonnegative unit-sum distributional spanning weights that best
+reconstruct the target cloud from its aligned peers.
+The fitted rows form the \emph{barycentric interaction field} $W^\flat$.
+
+The closest geometric reference is the unrestricted Wasserstein barycentre,
+which selects a free centre distribution for several input laws
+\citep{agueh_carlier_barycenters_2011}.
+The present construction instead holds the target and pairwise alignments fixed
+and estimates target-specific distributional spanning weights.
+Section~\ref{sec:interaction-operator} states this boundary formally.
+The distinction is economically consequential: a large $W^\flat_{ij}$ records
+firm $j$'s conditional usefulness in reconstructing target $i$ from the
+investable universe, not merely small pairwise distance.
+Because that usefulness is target anchored, the barycentric interaction field
+can be directed even though pairwise Wasserstein distance is symmetric.
+Its direction records reconstruction relevance, not causal influence.
+
+At neighboring levels of aggregation, related studies use distribution-valued
+firm characteristics for different finance questions.
+\citet{gawronsky_continuous_2026} studies pairwise covariance envelopes implied
+by distances between characteristic laws, whereas
+\citet{gawronsky_distance_mpt_2026} studies portfolio-risk bounds and allocation
+from distributional structure.
+The present paper occupies the intermediate, multi-firm level: it turns
+target-specific correspondences into a cross-sectional field and studies the
+propagation of stand-alone exposures through that field.
+Its field construction and adjustment model are stated independently of the
+pairwise and portfolio results, which locate the contribution without supplying
+a premise for it.
+
+Constructing the field from text also preserves the conditioning requirement of
+spatial inference.
+Classical spatial-autoregressive methods condition on a known $W$, whereas
+estimating $W$ from the same outcomes used in the spatial lag creates mechanical
+reflection \citep{anselin_1988,lesage_pace_2009,kelejian_prucha_2010}.
+Freezing every text-derived field before the return-evaluation window removes
+that same-sample feedback.
+It does not identify causal peer effects when omitted industries, technologies,
+attention, or selection jointly influence text and returns.
+
+The possibility of several admissible fields produces the final change in the
+literature's empirical question.
+Estimating candidate matrices separately asks ``which $W$ wins?'' but cannot
+distinguish redundant descriptions of the same relations from distinct channels
+of exposure adjustment.
+The multi-field quadratic model instead places the barycentric interaction field
+beside a conventional news-link field and assigns each its own coefficient.
+Separate-network specifications become boundary cases of the joint model, and
+the estimand becomes how adjustment divides across channels, including the case
+in which one field absorbs the other.
+With the source of the field, the exposure-adjustment mechanism, and the return
+bridge kept distinct, the next section introduces the stand-alone and
+peer-adjusted exposures linked by that mechanism.

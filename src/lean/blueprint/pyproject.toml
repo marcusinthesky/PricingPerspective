@@ -1,0 +1,18 @@
+[project]
+name = "pricing-perspective-leanblueprint"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "leanblueprint==0.0.20",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "pytest-monitor",
+  "pytest-testmon",
+  "pytest-xdist",
+]
+
+[tool.uv]
+package = false

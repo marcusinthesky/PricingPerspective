@@ -1,0 +1,23 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Selected representation sensitivity of the news-only allocation. The percentile column reports the percentage of allocations under the fixed $\alpha=0.8$ reference law whose standardized variance is no greater than the candidate's. Relative variance indexes the long-only sample GMV to 100. Lower is better in both columns. The complete ladder and paired bootstrap contrasts appear in \Cref{sec:p3-representation-ablation}.}
+\label{tab:p3-representation-main}
+\setlength{\tabcolsep}{7.0pt}
+\begin{tabular}{lrrr}
+\toprule
+Encoder & Dim. & Fixed-$\alpha=0.8$ percentile & Rel. GMV \\
+\midrule
+Qwen3-8B full (primary) & 4096 & 0.19 & 147.5 \\
+Qwen3-8B@1024 & 1024 & 0.08 & 146.7 \\
+Qwen3-4B@1024 & 1024 & 0.29 & 148.5 \\
+BGE-large-v1.5 full & 1024 & 0.03 & 145.3 \\
+Qwen3-8B@64 & 64 & 0.01 & 144.6 \\
+\addlinespace[1.5pt]
+EttaX V0 & 320 & 0.53 & 149.7 \\
+EttaX V1 & 320 & 1.59 & 152.0 \\
+EttaX V3 & 320 & 1.20 & 151.4 \\
+\bottomrule
+\end{tabular}
+\end{table}

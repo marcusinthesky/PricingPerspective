@@ -1,0 +1,31 @@
+# TypeScript workspace hooks run by prek.
+default_stages: [pre-commit]
+
+repos:
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+
+  - repo: local
+    hooks:
+      - id: typescript-format
+        name: "bun: format"
+        language: system
+        entry: bun run format
+        pass_filenames: false
+        files: ^(?:apps|packages)/|^(?:package\.json|bun\.lock|bunfig\.toml|turbo\.json|tsconfig(?:\..*)?\.json|\.pre-commit-config\.yaml)$
+
+      - id: typescript-lint
+        name: "bun: lint"
+        language: system
+        entry: bun run lint
+        pass_filenames: false
+        files: ^(?:apps|packages)/|^(?:package\.json|bun\.lock|bunfig\.toml|turbo\.json|tsconfig(?:\..*)?\.json|\.pre-commit-config\.yaml)$
+
+      - id: typescript-typecheck
+        name: "bun: typecheck"
+        language: system
+        entry: bun run typecheck
+        pass_filenames: false
+        files: ^(?:apps|packages)/|^(?:package\.json|bun\.lock|bunfig\.toml|turbo\.json|tsconfig(?:\..*)?\.json|\.pre-commit-config\.yaml)$

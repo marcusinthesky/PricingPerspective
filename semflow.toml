@@ -1,0 +1,18 @@
+project-root = "."
+pipeline-file = "dvc.yaml"
+hash-dir = ".semflow/hashes"
+source-roots = [
+  "src/python/apps/pipeline/src",
+  "src/python/apps/simulation/src",
+  "src/python/apps/ettax/src",
+  "src/python/packages/jcor/src",
+]
+
+[hashing]
+ignore-docstrings = true
+ignore-annotations = true
+ignore-type-checking-blocks = true
+
+[tracking]
+auto-typer = true
+control-stages = ["semflow_refresh"]

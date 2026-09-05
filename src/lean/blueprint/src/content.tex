@@ -1,0 +1,38 @@
+% Human-authored Blueprint exposition and dependency graph.
+%
+% House rules are enforced by ../check.py and documented in ../README.md.
+% In short: declaration links and verified markers are never written by hand.
+% They arrive only through the generated projection, named by an approved claim
+% ID from src/lean/tools/claim-manifest/mapping.toml -- one binding command in
+% a statement and its proof-slot counterpart inside the proof. Dependency edges
+% are mathematical judgement and ARE authored here; they are never inferred from
+% Lean syntax, name similarity, or import order.
+%
+% (This comment deliberately avoids spelling the macro names: check.py scans raw
+% file text, comments included, and a literal occurrence reads as a hand-authored
+% verification claim.)
+%
+% Nodes carrying no binding are deliberate, and the graph distinguishes two
+% kinds:
+%   * unmarked -- stated informally, ready to formalize, and in several cases
+%     already proved in src/lean but not yet an approved manifest entry. These
+%     are the frontier; see README.md for the pending-approval list.
+%   * not-ready -- measure-level or asymptotic content the finite Lean
+%     development does not attempt, so it is not yet a formalization target.
+%
+% Chapter order follows the 2026-08-16 pivot: the random functional exposure law
+% and its quadratic transport envelope are the trunk.
+% See .context/chat/2026-08-16_random_functions/README.md.
+%
+% 2026-08-21: chapters/energy_specialization is GONE, completing the retirement
+% its own note tracked. Its manifest entries were withdrawn 2026-08-17; the two
+% nodes that kept bindings are rehomed (cor:approximate-map-bound into the trunk
+% via Transmission.Floor, eq:portfolio-envelope into distance_implied, which
+% already carried its own label for the same declaration); and its two
+% transmission premises moved to distance_implied, whose chapter is now their
+% only consumer. Nothing cites the deterministic model any more.
+
+\input{chapters/random_exposure}
+\input{chapters/distance_implied}
+\input{chapters/robust_slack}
+\input{chapters/spatial}

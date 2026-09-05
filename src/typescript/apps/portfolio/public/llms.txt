@@ -1,0 +1,25 @@
+# Pricing Perspective
+
+> Three papers by Marcus Gawronsky and Chun-Sung Huang on probability-valued firm information, financial dependence, spatial interaction, and portfolio risk.
+
+## Papers
+
+- [Systematic Covariance Envelopes](https://arxiv.org/abs/2410.23447): Quadratic Wasserstein geometry yields sharp conditional covariance endpoints over admissible exposure couplings.
+- [Wasserstein-Barycentric Interaction Fields](https://arxiv.org/abs/2608.29669): Target-anchored transport and simplex reconstruction produce a directed peer field for spatial factor models.
+- [Portfolio Risk Bounds](https://arxiv.org/abs/2608.29692): Multi-firm Wasserstein-2 dispersion produces one-sided portfolio-risk certificates without cross-asset return covariances.
+
+## Authors
+
+- Marcus Gawronsky - https://github.com/marcusinthesky
+- Chun-Sung Huang - https://www.researchgate.net/profile/Chun-sung-Huang
+
+## Blog
+
+- [The tidal wave of AI research in finance](/blog/tidal-wave-of-ai-research-in-finance/): Model age, retrieval efficiency, market efficiency, and a South African research agenda.
+- [Why finance needs vintage, reproducible encoders](/blog/vintage-reproducible-ettax-models/): The EttaX architecture and why dated model identities belong in financial econometrics.
+
+## Machine-readable resources
+
+- /citations.bib
+- /sitemap.xml
+- /video/transcript.txt

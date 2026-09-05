@@ -1,0 +1,5 @@
+outs:
+- md5: fafbf7567127e11985d66621666715c3
+  size: 7590
+  hash: md5
+  path: universe.csv

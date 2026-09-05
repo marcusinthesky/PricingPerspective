@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pricing-perspective.local/schemas/lean-claim-manifest.json",
+  "title": "Lean claim manifest",
+  "description": "Renderer-neutral record of manuscript claims backed by machine-checked Lean declarations. Populated only from human-authored mapping.toml entries (see t24.1 blocker B1) — nothing here is inferred from name or notation similarity.",
+  "type": "object",
+  "required": ["schema_version", "claims", "content_hash"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "claims": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim" }
+    },
+    "content_hash": {
+      "type": "string",
+      "description": "sha256 hex digest of the canonical JSON encoding of `claims`, computed identically by both renderer bindings so they can be proven to share one manifest.",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "required": [
+        "paper",
+        "claim_id",
+        "statement_summary",
+        "declaration",
+        "package",
+        "file",
+        "build_result",
+        "assumptions",
+        "axioms",
+        "statement_type",
+        "disclosure"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "paper": {
+          "type": "string",
+          "description": "Project directory name under src/latex/projects, e.g. '03_distance_implied_mpt'."
+        },
+        "claim_id": {
+          "type": "string",
+          "description": "Stable human-authored identifier for the manuscript claim, e.g. a label key. Never a Lean identifier."
+        },
+        "statement_summary": {
+          "type": "string",
+          "description": "Plain-language statement of the mathematical claim, independent of Lean notation."
+        },
+        "declaration": {
+          "type": "string",
+          "description": "Fully-qualified Lean declaration name, e.g. 'EnergyStatistics.v_statistic_nonneg'."
+        },
+        "package": {
+          "type": "string",
+          "description": "Lake sub-package name under src/lean/packages, e.g. 'EnergyStatistics'."
+        },
+        "file": {
+          "type": "string",
+          "description": "Path to the declaring file relative to src/lean, e.g. 'packages/EnergyStatistics/EnergyStatistics/VStatistic.lean'."
+        },
+        "build_result": {
+          "type": "string",
+          "enum": ["checked", "failed"],
+          "description": "Set by the extractor from the pinned Lake workspace build — never hand-authored as 'checked'."
+        },
+        "assumptions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Named hypotheses / Prop-valued premises the theorem statement carries (not Lean axioms)."
+        },
+        "axioms": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Axiom set reported by `#print axioms <declaration>`. A build_result of 'checked' implies this is a subset of the allowlist {propext, Classical.choice, Quot.sound} and does not contain sorryAx."
+        },
+        "statement_type": {
+          "type": "string",
+          "description": "Elaborated type reported by `#check @<declaration>`, whitespace-collapsed so it is stable under pretty-printer line breaking. Pins the statement rather than only the declaration name: because it is hashed into content_hash, weakening a mapped theorem in place produces a visible manifest diff instead of silently leaving a stale disclosure attached to a weaker result. Empty only on a 'failed' claim whose type could not be recovered."
+        },
+        "disclosure": {
+          "type": "string",
+          "description": "Human-facing sentence describing exactly what was verified, safe to surface next to the manuscript claim."
+        }
+      }
+    }
+  }
+}

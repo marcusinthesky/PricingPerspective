@@ -1,0 +1,6 @@
+outs:
+- md5: c8ec83aa5a1d3bb09fb1922b1360e52c.dir
+  size: 53128
+  nfiles: 4
+  hash: md5
+  path: reference_52_w_flat

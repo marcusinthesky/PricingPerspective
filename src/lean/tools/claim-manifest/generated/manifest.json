@@ -1,0 +1,724 @@
+{
+  "claims": [
+    {
+      "assumptions": [
+        "x, y in a real inner product space"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "lem:polarization",
+      "declaration": "norm_sub_sq_real",
+      "disclosure": "The polarization identity is provided by mathlib.",
+      "file": "packages/PricingPerspective/PricingPerspective/Continuous/Energy/Core.lean",
+      "package": "mathlib",
+      "paper": "01_continuous_bounds",
+      "statement_summary": "For any x, y in a real inner product space, \u27e8x,y\u27e9 = (1/2)(\u2016x\u2016\u00b2+\u2016y\u2016\u00b2-\u2016x-y\u2016\u00b2).",
+      "statement_type": "\u2200 {F : Type u_1} [inst : SeminormedAddCommGroup F] [inst_1 : InnerProductSpace \u211d F] (x y : F), \u2016x - y\u2016 ^ 2 = \u2016x\u2016 ^ 2 - 2 * inner \u211d x y + \u2016y\u2016 ^ 2"
+    },
+    {
+      "assumptions": [
+        "each row is a leave-one-out simplex vector",
+        "absolute rho below one"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:wflat-sar-gate",
+      "declaration": "PricingPerspective.Connections.SpatialWasserstein.anchoredW2_sar_gate",
+      "disclosure": "Machine-checked for the exact finite operator contract in the pinned Lean 4 / mathlib v4.31.0 workspace. This verifies SAR compatibility, not the economic validity of the text-derived weights.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialWasserstein.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "A leave-one-out simplex operator is nonnegative, row-stochastic and zero-diagonal, has induced infinity norm at most one, and therefore satisfies the SAR norm gate whenever absolute rho is below one.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] {W : Matrix \u03b9 \u03b9 \u211d}, PricingPerspective.Connections.SpatialWasserstein.IsAnchoredW2Operator W \u2192 \u2200 {\u03c1 : \u211d}, |\u03c1| < 1 \u2192 \u2016\u03c1 \u2022 W\u2016 < 1"
+    },
+    {
+      "assumptions": [],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "def:perron-limit",
+      "declaration": "PricingPerspective.Connections.SpatialAsymptotics.HasGeometricPerronBound",
+      "disclosure": "Formalized as the exact quantitative premise consumed by the convergence bridge. The declaration does not claim that a parquet operator satisfies the premise and does not formalize general Perron--Frobenius theory.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialAsymptotics.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "A quantitative geometric Perron certificate records that the operator powers approach the rank-one stationary projection at rate C q^k.",
+      "statement_type": "{\u03b9 : Type u_1} \u2192 [Fintype \u03b9] \u2192 [DecidableEq \u03b9] \u2192 Matrix \u03b9 \u03b9 \u211d \u2192 (\u03b9 \u2192 \u211d) \u2192 \u211d \u2192 \u211d \u2192 Prop"
+    },
+    {
+      "assumptions": [
+        "0 <= q < 1",
+        "the stated geometric matrix-norm bound holds for every natural k"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:perron-from-geometric",
+      "declaration": "PricingPerspective.Connections.SpatialAsymptotics.isPerronLimit_of_geometric_bound",
+      "disclosure": "Machine-checked under standard axioms only. This verifies that a quantitative contraction certificate is sufficient for the Perron limit; the empirical float64 certificate remains a separate numerical witness.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialAsymptotics.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "Any geometric Perron certificate with rate 0 <= q < 1 implies convergence of W^k to the rank-one stationary projection.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] {W : Matrix \u03b9 \u03b9 \u211d} {\u03c0 : \u03b9 \u2192 \u211d} {C q : \u211d}, 0 \u2264 q \u2192 q < 1 \u2192 PricingPerspective.Connections.SpatialAsymptotics.HasGeometricPerronBound W \u03c0 C q \u2192 PricingPerspective.Connections.SpatialAsymptotics.IsPerronLimit W \u03c0"
+    },
+    {
+      "assumptions": [
+        "absorbing idempotent projection",
+        "rho != 1",
+        "the complementary Neumann norm is below one",
+        "the index set is nonempty"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "prop:finite-rho-bound",
+      "declaration": "PricingPerspective.Connections.SpatialAsymptotics.normalized_leontief_error_le",
+      "disclosure": "Machine-checked under standard axioms only in the maximum absolute row-sum matrix norm. It is a finite-rho algebraic bound, not a statistical confidence interval.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialAsymptotics.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "At finite rho, the normalized Leontief multiplier differs from its rank-one projection by an exact complementary resolvent and is bounded by a Neumann denominator whenever the complementary norm is below one.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] {W P : Matrix \u03b9 \u03b9 \u211d} [Nonempty \u03b9], W * P = P \u2192 P * W = P \u2192 P * P = P \u2192 \u2200 {\u03c1 : \u211d}, \u03c1 \u2260 1 \u2192 \u2016\u03c1 \u2022 (W - P)\u2016 < 1 \u2192 \u2016(1 - \u03c1) \u2022 PricingPerspective.Discrete.Spatial.leontief \u03c1 W - P\u2016 \u2264 |1 - \u03c1| * (1 - \u2016\u03c1 \u2022 (W - P)\u2016)\u207b\u00b9 * \u20161 - P\u2016"
+    },
+    {
+      "assumptions": [
+        "IsPerronLimit W pi"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:replication-centrality",
+      "declaration": "PricingPerspective.Connections.SpatialAsymptotics.replication_centrality",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace, conditional on the assumed Perron--Frobenius limit hypothesis.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialAsymptotics.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "Conditional on the Perron limit hypothesis for (W,pi), every k-step interaction cascade converges to a CONSTANT VECTOR whose common entry is the pi-weighted average of the starting vector: W^k x -> (pi^top x) 1 as k -> infinity, for any vector x. The limit is a constant vector, not a basket; nothing here identifies pi as a portfolio or a traded object.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] {W : Matrix \u03b9 \u03b9 \u211d} {\u03c0 : \u03b9 \u2192 \u211d}, PricingPerspective.Connections.SpatialAsymptotics.IsPerronLimit W \u03c0 \u2192 \u2200 (x : \u03b9 \u2192 \u211d), Filter.Tendsto (fun k => (W ^ k).mulVec x) Filter.atTop (nhds ((\u03c0 \u2b1d\u1d65 x) \u2022 1))"
+    },
+    {
+      "assumptions": [
+        "IsPerronLimit W pi",
+        "\u03b9 nonempty"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:stationarity",
+      "declaration": "PricingPerspective.Connections.SpatialAsymptotics.perron_stationary",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace, conditional on the assumed Perron--Frobenius limit hypothesis.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialAsymptotics.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "Conditional on the Perron limit hypothesis for (W,pi), the limiting weight vector pi satisfies the fixed-point relation pi^top W = pi^top. The declaration proves only that relation; nonnegativity and unit mass are separate results requiring row-stochasticity as an extra hypothesis.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] [Nonempty \u03b9] {W : Matrix \u03b9 \u03b9 \u211d} {\u03c0 : \u03b9 \u2192 \u211d}, PricingPerspective.Connections.SpatialAsymptotics.IsPerronLimit W \u03c0 \u2192 Matrix.vecMul \u03c0 W = \u03c0"
+    },
+    {
+      "assumptions": [
+        "IsPerronLimit W pi",
+        "W row-stochastic",
+        "\u03b9 nonempty"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:rankone-collapse",
+      "declaration": "PricingPerspective.Connections.SpatialAsymptotics.sigmaSAR_rankOne_limit_of_perron",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace, conditional on the single assumed Perron--Frobenius power-limit hypothesis. The resolvent limit it previously also assumed is now derived from that hypothesis rather than assumed alongside it.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialAsymptotics.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "For a row-stochastic W, conditional on the Perron power limit hypothesis for (W,pi), (1-rho)^2 Sigma_SAR converges to (pi^top V pi) 1 1^top as rho -> 1 from below.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] {W : Matrix \u03b9 \u03b9 \u211d} {\u03c0 : \u03b9 \u2192 \u211d} [Nonempty \u03b9] {V : Matrix \u03b9 \u03b9 \u211d}, (\u2200 (i : \u03b9), \u2211 j, W i j = 1) \u2192 PricingPerspective.Connections.SpatialAsymptotics.IsPerronLimit W \u03c0 \u2192 Filter.Tendsto (fun \u03c1 => (1 - \u03c1) ^ 2 \u2022 PricingPerspective.Discrete.Spatial.spatialCov \u03c1 W V) (nhdsWithin 1 (Set.Iio 1)) (nhds ((\u03c0 \u2b1d\u1d65 V.mulVec \u03c0) \u2022 Matrix.vecMulVec 1 1))"
+    },
+    {
+      "assumptions": [
+        "IsPerronLimit W pi",
+        "W row-stochastic",
+        "\u03b9 nonempty"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:resolvent-from-perron",
+      "declaration": "PricingPerspective.Connections.SpatialAsymptotics.isResolventLimit_of_isPerronLimit",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace under standard axioms only. The derivation is elementary linear algebra via an absorbing-idempotent resolvent split; it introduces no Perron--Frobenius content of its own, no Abel/Tauberian summation, and no spectral theory.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialAsymptotics.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "For a row-stochastic W satisfying the Perron power limit W^k -> 1 pi^top for (W,pi), the pair (W,pi) satisfies the resolvent limit (1-rho)(I-rho W)^{-1} -> 1 pi^top as rho -> 1 from below.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] {W : Matrix \u03b9 \u03b9 \u211d} {\u03c0 : \u03b9 \u2192 \u211d} [Nonempty \u03b9], (\u2200 (i : \u03b9), \u2211 j, W i j = 1) \u2192 PricingPerspective.Connections.SpatialAsymptotics.IsPerronLimit W \u03c0 \u2192 PricingPerspective.Connections.SpatialAsymptotics.IsResolventLimit W \u03c0"
+    },
+    {
+      "assumptions": [
+        "nonnegative adjustment intensity",
+        "row-stochastic interaction matrix"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:adjustment-equilibrium",
+      "declaration": "PricingPerspective.Connections.SpatialTransmission.quadraticAdjustmentEquilibrium_iff_stationary",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace by a completing-square identity rather than a differentiability argument, so the equivalence holds in any real inner-product exposure space.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialTransmission.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "For nonnegative adjustment intensity and a row-stochastic interaction matrix, a profile minimizes every firm's quadratic adjustment objective coordinatewise if and only if it satisfies the exact vanishing-gradient equation.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {H : Type u_2} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] [inst_2 : NormedAddCommGroup H] [inst_3 : InnerProductSpace \u211d H] {lambda : \u211d} {W : Matrix \u03b9 \u03b9 \u211d} {xi b : \u03b9 \u2192 H}, 0 \u2264 lambda \u2192 W \u2208 Matrix.rowStochastic \u211d \u03b9 \u2192 (PricingPerspective.Connections.SpatialTransmission.IsQuadraticAdjustmentEquilibrium lambda W xi b \u2194 PricingPerspective.Connections.SpatialTransmission.IsQuadraticAdjustmentStationary lambda W xi b)"
+    },
+    {
+      "assumptions": [
+        "nonnegative adjustment intensity",
+        "row-stochastic interaction matrix"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:spatial-closure",
+      "declaration": "PricingPerspective.Connections.SpatialTransmission.sar_of_quadraticAdjustmentEquilibrium",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace. The spatial equation is derived from the stated adjustment problem; it is not imposed as a reduced form, and the interaction weights themselves are a maintained input.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialTransmission.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "The first-order condition of the coordinatewise quadratic adjustment problem is exactly a Hilbert-valued spatial autoregression whose feedback parameter is the adjustment intensity divided by one plus that intensity.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {H : Type u_2} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] [inst_2 : NormedAddCommGroup H] [inst_3 : InnerProductSpace \u211d H] {lambda : \u211d} {W : Matrix \u03b9 \u03b9 \u211d} {xi b : \u03b9 \u2192 H}, 0 \u2264 lambda \u2192 W \u2208 Matrix.rowStochastic \u211d \u03b9 \u2192 PricingPerspective.Connections.SpatialTransmission.IsQuadraticAdjustmentEquilibrium lambda W xi b \u2192 PricingPerspective.Connections.SpatialTransmission.IsHilbertSAR (PricingPerspective.Connections.SpatialTransmission.adjustmentRho lambda) W xi b"
+    },
+    {
+      "assumptions": [
+        "both interaction matrices are row-stochastic",
+        "the mixture weight lies in the unit interval"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "cor:mixture-nesting",
+      "declaration": "PricingPerspective.Connections.SpatialTransmission.mixField_mem_rowStochastic",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace. Admissibility of the mixture is what lets every one-field result transfer; it says nothing about whether either field is economically correct.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialTransmission.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "A convex combination of two nonnegative, zero-diagonal, unit-row-sum interaction matrices is again nonnegative, zero-diagonal, and unit-row-sum.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] {theta : \u211d} {WB WN : Matrix \u03b9 \u03b9 \u211d}, WB \u2208 Matrix.rowStochastic \u211d \u03b9 \u2192 WN \u2208 Matrix.rowStochastic \u211d \u03b9 \u2192 0 \u2264 theta \u2192 theta \u2264 1 \u2192 PricingPerspective.Connections.SpatialTransmission.mixField theta WB WN \u2208 Matrix.rowStochastic \u211d \u03b9"
+    },
+    {
+      "assumptions": [
+        "nonnegative adjustment intensity in each channel",
+        "both interaction matrices are row-stochastic"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:two-field-closure",
+      "declaration": "PricingPerspective.Connections.SpatialTransmission.twoField_sar_of_equilibrium",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace by reduction to the one-field closure at the intensity-weighted mixture. The two-channel equation is derived from the stated adjustment problem; both fields remain maintained inputs, and the result does not establish that they are separately identified in any sample.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialTransmission.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "When a firm prices misalignment against two admissible interaction fields at nonnegative intensities, every coordinatewise equilibrium of the literal quadratic objective satisfies a two-field spatial autoregression whose channel coefficients are each intensity divided by one plus their total.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {H : Type u_2} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] [inst_2 : NormedAddCommGroup H] [inst_3 : InnerProductSpace \u211d H] {lambdaB lambdaN : \u211d} {WB WN : Matrix \u03b9 \u03b9 \u211d} {xi b : \u03b9 \u2192 H}, 0 \u2264 lambdaB \u2192 0 \u2264 lambdaN \u2192 WB \u2208 Matrix.rowStochastic \u211d \u03b9 \u2192 WN \u2208 Matrix.rowStochastic \u211d \u03b9 \u2192 PricingPerspective.Connections.SpatialTransmission.IsTwoFieldAdjustmentEquilibrium lambdaB lambdaN WB WN xi b \u2192 PricingPerspective.Connections.SpatialTransmission.IsTwoFieldHilbertSAR (PricingPerspective.Connections.SpatialTransmission.channelRho lambdaB (lambdaB + lambdaN)) (PricingPerspective.Connections.SpatialTransmission.channelRho lambdaN (lambdaB + lambdaN)) WB WN xi b"
+    },
+    {
+      "assumptions": [
+        "nonnegative adjustment intensity in each channel"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "prop:channel-inversion",
+      "declaration": "PricingPerspective.Connections.SpatialTransmission.channelRho_inversion",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace. The inversion is an identity of the quadratic model; reading a fitted coefficient through it presumes the return-bridge restriction stated in the identification section.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialTransmission.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "Each channel's adjustment intensity equals its own spatial coefficient divided by one minus the sum of both coefficients.",
+      "statement_type": "\u2200 {lambdaB lambdaN : \u211d}, 0 \u2264 lambdaB \u2192 0 \u2264 lambdaN \u2192 PricingPerspective.Connections.SpatialTransmission.channelRho lambdaB (lambdaB + lambdaN) / (1 - PricingPerspective.Connections.SpatialTransmission.channelRho lambdaB (lambdaB + lambdaN) - PricingPerspective.Connections.SpatialTransmission.channelRho lambdaN (lambdaB + lambdaN)) = lambdaB"
+    },
+    {
+      "assumptions": [
+        "nonnegative adjustment intensity",
+        "row-stochastic interaction matrix",
+        "the scaled interaction operator has norm below one"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:sar-reduced-form",
+      "declaration": "PricingPerspective.Connections.SpatialTransmission.quadraticAdjustmentEquilibrium_leontief_reduced_form",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace for Hilbert-valued exposures under the displayed norm gate.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialTransmission.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "Under the operator-norm gate, a coordinatewise equilibrium of the quadratic adjustment problem equals the normalized Leontief multiplier applied to the primitive exposure profile.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {H : Type u_2} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] [inst_2 : NormedAddCommGroup H] [inst_3 : InnerProductSpace \u211d H] {lambda : \u211d} {W : Matrix \u03b9 \u03b9 \u211d} {xi b : \u03b9 \u2192 H}, 0 \u2264 lambda \u2192 W \u2208 Matrix.rowStochastic \u211d \u03b9 \u2192 PricingPerspective.Connections.SpatialTransmission.IsQuadraticAdjustmentEquilibrium lambda W xi b \u2192 \u2016PricingPerspective.Connections.SpatialTransmission.adjustmentRho lambda \u2022 W\u2016 < 1 \u2192 b = (1 - PricingPerspective.Connections.SpatialTransmission.adjustmentRho lambda) \u2022 PricingPerspective.Connections.SpatialTransmission.spatialMix (PricingPerspective.Discrete.Spatial.leontief (PricingPerspective.Connections.SpatialTransmission.adjustmentRho lambda) W) xi"
+    },
+    {
+      "assumptions": [
+        "the scaled interaction operator has norm below one"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "prop:scalar-projection",
+      "declaration": "PricingPerspective.Connections.SpatialTransmission.scalarProjection_reduced_form",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace for scalar projections of the systematic exposure equation. Its return-QMLE interpretation remains conditional on the maintained innovation specification and is not causal.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialTransmission.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "Every scalar inner-product projection of a Hilbert-valued spatial autoregression satisfies the ordinary scalar spatial autoregression with the same interaction matrix and feedback parameter, with the corresponding scalar reduced form.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {H : Type u_2} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] [inst_2 : NormedAddCommGroup H] [inst_3 : InnerProductSpace \u211d H] {rho : \u211d} {W : Matrix \u03b9 \u03b9 \u211d} {xi b : \u03b9 \u2192 H} (h : H), \u2016rho \u2022 W\u2016 < 1 \u2192 PricingPerspective.Connections.SpatialTransmission.IsHilbertSAR rho W xi b \u2192 PricingPerspective.Connections.SpatialTransmission.scalarProjection h b = (1 - rho) \u2022 (PricingPerspective.Discrete.Spatial.leontief rho W).mulVec (PricingPerspective.Connections.SpatialTransmission.scalarProjection h xi)"
+    },
+    {
+      "assumptions": [],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "cor:zero-feedback-nesting",
+      "declaration": "PricingPerspective.Connections.SpatialTransmission.hilbert_sar_zero_eq_primitive",
+      "disclosure": "Machine-checked unconditionally in the pinned Lean 4 / mathlib v4.31.0 workspace: at zero feedback, peer-adjusted exposure equals stand-alone exposure exactly. This verifies the exposure identity only; it does not import the related paper's transmission or covariance assumptions.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialTransmission.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "At zero spatial feedback the Hilbert-valued spatial autoregression reduces exactly to the primitive randomized transmission exposure.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {H : Type u_2} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] [inst_2 : NormedAddCommGroup H] [inst_3 : InnerProductSpace \u211d H] {W : Matrix \u03b9 \u03b9 \u211d} {xi b : \u03b9 \u2192 H}, PricingPerspective.Connections.SpatialTransmission.IsHilbertSAR 0 W xi b \u2192 b = xi"
+    },
+    {
+      "assumptions": [
+        "finitely many probability laws with finite second moments on a separable real Hilbert space",
+        "nonnegative weights summing to one"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "prop:p3-barycenter-representation",
+      "declaration": "WassersteinGeometry.Multimarginal.wassersteinBarycenterDispersionSq_eq_toReal_wassersteinDispersionSq_unconditional",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace without assuming that either the barycentre infimum or the multimarginal infimum is attained.",
+      "file": "packages/WassersteinGeometry/WassersteinGeometry/Multimarginal/Barycenter/Equivalence.lean",
+      "package": "WassersteinGeometry",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "For finitely many probability laws on a separable real Hilbert space, weighted multimarginal quadratic dispersion equals the infimum of the weighted sum of squared quadratic Wasserstein distances to a common barycentre law.",
+      "statement_type": "\u2200 {A : Type u_1} {H : Type u_2} [inst : Fintype A] [inst_1 : MeasurableSpace H] [inst_2 : NormedAddCommGroup H] [InnerProductSpace \u211d H] [inst_4 : CompleteSpace H] [inst_5 : SecondCountableTopology H] [inst_6 : BorelSpace H] [inst_7 : Inhabited H] (q : WassersteinGeometry.Multimarginal.ProbabilityWeight A) (P : A \u2192 WassersteinGeometry.WassersteinMeasure H), WassersteinGeometry.Multimarginal.wassersteinBarycenterDispersionSq q P = (WassersteinGeometry.Multimarginal.wassersteinDispersionSq q P).toReal"
+    },
+    {
+      "assumptions": [
+        "two probability laws on a second-countable pseudometric space"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:pairwise-nesting",
+      "declaration": "WassersteinGeometry.Multimarginal.wassersteinDispersionSq_finTwo",
+      "disclosure": "Machine-checked as an exact equality in the pinned Lean 4 / mathlib v4.31.0 workspace, with no optimal-coupling existence theorem required. It identifies the pairwise quadratic Wasserstein term as the two-firm case of the multi-firm dispersion functional.",
+      "file": "packages/WassersteinGeometry/WassersteinGeometry/Multimarginal/TwoMarginal.lean",
+      "package": "WassersteinGeometry",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "For two marginals, the weighted multi-marginal quadratic dispersion equals the product of the two weights and the squared quadratic Wasserstein distance between them.",
+      "statement_type": "\u2200 {\u03a9 : Type u_1} [inst : MeasurableSpace \u03a9] [inst_1 : PseudoMetricSpace \u03a9] [inst_2 : Inhabited \u03a9] [OpensMeasurableSpace \u03a9] [SecondCountableTopology \u03a9] (q : WassersteinGeometry.Multimarginal.ProbabilityWeight (Fin 2)) (P : Fin 2 \u2192 WassersteinGeometry.WassersteinMeasure \u03a9), WassersteinGeometry.Multimarginal.wassersteinDispersionSq q P = ENNReal.ofReal (q.weight 0 * q.weight 1) * WassersteinGeometry.WassersteinDistanceSq (P 0) (P 1)"
+    },
+    {
+      "assumptions": [
+        "a measurable embedding that is antilipschitz with nonzero constant",
+        "common carrier and realized transmission laws are coordinatewise pushforwards",
+        "each realized transmission has the stated integrated squared slack radius"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:p3-aggregate-transfer",
+      "declaration": "PricingPerspective.Transmission.Dispersion.aggregateCarrierFloor_le_of_rms_slack_unconditional",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace with heterogeneous weighted root-mean-square transmission slack and truncation at zero. The proof uses the unconditional barycentre--multimarginal equivalence and assumes no optimal barycentre or joint plan.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Dispersion/AggregateCarrier.lean",
+      "package": "PricingPerspective",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "For a measurable antilipschitz carrier and heterogeneous synchronous transmission slack, exposure dispersion is at least the positive part of inverse carrier distortion times characteristic dispersion minus weighted root-mean-square slack.",
+      "statement_type": "\u2200 {A : Type u_1} {X : Type u_2} {H : Type u_3} [inst : Fintype A] [inst_1 : MeasurableSpace X] [inst_2 : PseudoMetricSpace X] [inst_3 : Inhabited X] [OpensMeasurableSpace X] [SecondCountableTopology X] [inst_6 : MeasurableSpace H] [inst_7 : NormedAddCommGroup H] [InnerProductSpace \u211d H] [CompleteSpace H] [SecondCountableTopology H] [BorelSpace H] [inst_12 : Inhabited H] {K : NNReal}, K \u2260 0 \u2192 \u2200 {t : X \u2192 H}, AntilipschitzWith K t \u2192 MeasurableEmbedding t \u2192 \u2200 (q : WassersteinGeometry.Multimarginal.ProbabilityWeight A) (C : A \u2192 WassersteinGeometry.WassersteinMeasure X) (T P : A \u2192 WassersteinGeometry.WassersteinMeasure H) (u : A \u2192 X \u2192 H), Measurable t \u2192 (\u2200 (a : A), Measurable (u a)) \u2192 (\u2200 (a : A), (T a).measure = MeasureTheory.Measure.map t (C a).measure) \u2192 (\u2200 (a : A), (P a).measure = MeasureTheory.Measure.map (u a) (C a).measure) \u2192 \u2200 (tau : A \u2192 NNReal), (\u2200 (a : A), \u222b\u207b (x : X), edist (u a x) (t x) ^ 2 \u2202(C a).measure \u2264 \u2191(tau a) ^ 2) \u2192 PricingPerspective.Transmission.Dispersion.aggregateCarrierFloor K q C tau \u2264 WassersteinGeometry.Multimarginal.wassersteinDispersion q P"
+    },
+    {
+      "assumptions": [
+        "nonnegative row-stochastic interaction matrix",
+        "strictly positive stationary probability weights",
+        "feedback parameter in the unit interval below one",
+        "nonempty finite cross-section"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:spatial-attenuation",
+      "declaration": "PricingPerspective.Connections.SpatialDispersion.normalizedSAR_stationaryWeightedDispersionSq_bracket",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace for a nonnegative row-stochastic matrix centered at strictly positive stationary probability weights. No reversibility, symmetry, or spectral premise is used; the upper factor of one is exact and the lower factor is a universal worst case.",
+      "file": "packages/PricingPerspective/PricingPerspective/Connections/SpatialDispersion.lean",
+      "package": "PricingPerspective",
+      "paper": "05_spatial_pricing",
+      "statement_summary": "For a nonnegative row-stochastic interaction matrix with a strictly positive stationary probability vector and feedback between zero and one, the normalized spatial multiplier brackets stationary-weighted squared dispersion between the squared ratio of one minus feedback to one plus feedback, and one.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {H : Type u_2} [inst : Fintype \u03b9] [inst_1 : NormedAddCommGroup H] [inst_2 : NormedSpace \u211d H] [inst_3 : DecidableEq \u03b9] [Nonempty \u03b9] {W : Matrix \u03b9 \u03b9 \u211d}, W \u2208 Matrix.rowStochastic \u211d \u03b9 \u2192 \u2200 {\u03c0 : \u03b9 \u2192 \u211d}, PricingPerspective.Connections.SpatialDispersion.IsStrictlyPositiveStationaryWeight W \u03c0 \u2192 \u2200 {\u03c1 : \u211d}, 0 \u2264 \u03c1 \u2192 \u03c1 < 1 \u2192 \u2200 (z : PricingPerspective.Connections.SpatialDispersion.CrossSection \u03b9 H), ((1 - \u03c1) / (1 + \u03c1)) ^ 2 * PricingPerspective.Connections.SpatialDispersion.weightedCrossSectionalDispersionSq \u03c0 z \u2264 PricingPerspective.Connections.SpatialDispersion.weightedCrossSectionalDispersionSq \u03c0 ((PricingPerspective.Connections.SpatialDispersion.normalizedSARLinear \u03c1 W) z) \u2227 PricingPerspective.Connections.SpatialDispersion.weightedCrossSectionalDispersionSq \u03c0 ((PricingPerspective.Connections.SpatialDispersion.normalizedSARLinear \u03c1 W) z) \u2264 PricingPerspective.Connections.SpatialDispersion.weightedCrossSectionalDispersionSq \u03c0 z"
+    },
+    {
+      "assumptions": [
+        "finite asset universe and normalized long-only portfolio weights",
+        "common measurable antilipschitz carrier and measurable asset-specific exposure maps",
+        "pointwise draw-synchronous asset-specific slack bounds",
+        "one coherent joint exposure law with the declared coordinate marginals",
+        "integrability of every pairwise exposure inner product"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:p3-information-certified-cap",
+      "declaration": "PricingPerspective.Transmission.Dispersion.jointPortfolioVariance_le_informationCertifiedCap",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace by composing the carrier-and-slack W2 floor with the coherent joint-law portfolio-variance cap. The theorem is conditional on the displayed transmission, slack, joint-law, and integrability hypotheses; it neither calibrates those inputs nor establishes a realized total-return or ex-ante empirical bound.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Dispersion/CertifiedVariance.lean",
+      "package": "PricingPerspective",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "A common measurable antilipschitz carrier with asset-specific synchronous slack converts observable pairwise characteristic-law W2 distances into a computable deduction from coherent systematic portfolio variance.",
+      "statement_type": "\u2200 {A : Type u_1} {X : Type u_2} {H : Type u_3} [inst : Fintype A] [inst_1 : MeasurableSpace X] [inst_2 : PseudoMetricSpace X] [inst_3 : Inhabited X] [OpensMeasurableSpace X] [SecondCountableTopology X] [inst_6 : NormedAddCommGroup H] [inst_7 : InnerProductSpace \u211d H] [inst_8 : MeasurableSpace H] [BorelSpace H] [SecondCountableTopology H] [CompleteSpace H] [inst_12 : Inhabited H] {L : NNReal} {t : X \u2192 H}, AntilipschitzWith L t \u2192 MeasurableEmbedding t \u2192 \u2200 (C : A \u2192 WassersteinGeometry.WassersteinMeasure X) (u : A \u2192 X \u2192 H), (\u2200 (a : A), Measurable (u a)) \u2192 \u2200 (\u03c4 : A \u2192 NNReal), (\u2200 (a : A) (x : X), edist (u a x) (t x) \u2264 \u2191(\u03c4 a)) \u2192 \u2200 (P T : A \u2192 WassersteinGeometry.WassersteinMeasure H), (\u2200 (a : A), (P a).measure = MeasureTheory.Measure.map (u a) (C a).measure) \u2192 (\u2200 (a : A), (T a).measure = MeasureTheory.Measure.map t (C a).measure) \u2192 \u2200 (J : MeasureTheory.Measure (A \u2192 H)), (\u2200 (a : A), (P a).measure = MeasureTheory.Measure.map (fun x => x a) J) \u2192 \u2200 (q : WassersteinGeometry.Multimarginal.ProbabilityWeight A), (\u2200 (a b : A), MeasureTheory.Integrable (fun x => inner \u211d (x a) (x b)) J) \u2192 PricingPerspective.Transmission.portfolioVariance J q.weight \u2264 \u2211 a, q.weight a * WassersteinGeometry.Hilbert.secondMoment (P a) - PricingPerspective.Transmission.Dispersion.pairwiseRiskCertificate q (PricingPerspective.Transmission.Dispersion.informationPairwiseFloor L \u03c4 C)"
+    },
+    {
+      "assumptions": [
+        "an additive decomposition of total standardized variance into systematic and residual contributions",
+        "the information-certificate systematic variance cap",
+        "an assumed upper budget for the aggregate residual contribution"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:p3-residual-budget-cap",
+      "declaration": "PricingPerspective.Transmission.Dispersion.totalVariance_le_informationCertificate_add_residualBudget",
+      "disclosure": "Machine-checked as an additive portfolio-level sensitivity wrapper: if systematic standardized variance is at most one minus the certificate credit and the aggregate residual contribution is at most delta, total standardized variance is at most one minus the credit plus delta. Delta is an assumed budget, not an estimated structural parameter, and the theorem does not derive residual orthogonality.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Dispersion/CertifiedVariance.lean",
+      "package": "PricingPerspective",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "A systematic standardized variance cap and an assumed aggregate residual-covariance budget imply the additive total-return cap, with a nonnegative-scale raw-variance corollary.",
+      "statement_type": "\u2200 (systematic residual total certificate \u03b4 : \u211d), total = systematic + residual \u2192 systematic \u2264 1 - certificate \u2192 residual \u2264 \u03b4 \u2192 total \u2264 1 - certificate + \u03b4"
+    },
+    {
+      "assumptions": [
+        "finite asset universe",
+        "nonempty compact feasible subset of the long-only simplex",
+        "pointwise actual-variance upper certificate on the feasible set"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:p3-certified-minimizer",
+      "declaration": "PricingPerspective.Transmission.Dispersion.exists_minimumInformationCertifiedVariance",
+      "disclosure": "Machine-checked by continuity and compactness in the pinned Lean 4 / mathlib v4.31.0 workspace. The result establishes existence and the inherited risk guarantee, not uniqueness, unconditional convexity for an arbitrary distance matrix, or superior realized variance relative to competing portfolios.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Dispersion/CertifiedVariance.lean",
+      "package": "PricingPerspective",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "Every nonempty compact feasible subset of the long-only simplex has a minimizer of the characteristic-induced certified-variance objective, retaining any pointwise actual-variance certificate imposed on that set.",
+      "statement_type": "\u2200 {A : Type u_1} {X : Type u_2} [inst : Fintype A] [inst_1 : MeasurableSpace X] [inst_2 : PseudoMetricSpace X] [inst_3 : Inhabited X] (L : NNReal) (\u03c4 : A \u2192 NNReal) (C : A \u2192 WassersteinGeometry.WassersteinMeasure X) (\u03c3 : A \u2192 \u211d) (S : Set (A \u2192 \u211d)), IsCompact S \u2192 S.Nonempty \u2192 S \u2286 stdSimplex \u211d A \u2192 \u2200 (actualVariance : (A \u2192 \u211d) \u2192 \u211d), (\u2200 x \u2208 S, actualVariance x \u2264 PricingPerspective.Transmission.Dispersion.certifiedVarianceObjective \u03c3 (PricingPerspective.Transmission.Dispersion.informationPairwiseFloor L \u03c4 C) x) \u2192 \u2203 xStar \u2208 S, IsMinOn (PricingPerspective.Transmission.Dispersion.certifiedVarianceObjective \u03c3 (PricingPerspective.Transmission.Dispersion.informationPairwiseFloor L \u03c4 C)) S xStar \u2227 actualVariance xStar \u2264 PricingPerspective.Transmission.Dispersion.certifiedVarianceObjective \u03c3 (PricingPerspective.Transmission.Dispersion.informationPairwiseFloor L \u03c4 C) xStar"
+    },
+    {
+      "assumptions": [
+        "finite asset universe and normalized long-only risk weights",
+        "a measurable embedding that is antilipschitz with nonzero constant",
+        "common carrier and realized exposure laws are coordinatewise pushforwards of the characteristic laws",
+        "each realized transmission has the stated integrated squared slack radius",
+        "one coherent joint exposure law with the declared coordinate marginals",
+        "integrability of every pairwise exposure inner product"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:p3-sharp-certificate",
+      "declaration": "PricingPerspective.Transmission.Dispersion.jointPortfolioVariance_le_aggregateCertifiedCap",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace by composing the aggregate carrier floor with an attainment-free multi-marginal variance envelope; no optimal joint plan or barycentre is assumed to exist. It is sharper than the pairwise certificate in two independent respects, subtracting one weighted root-mean-square slack radius in aggregate rather than two radii per pair, and dominating any weighted sum of pairwise floors. It remains conditional on the displayed carrier, slack, joint-law, and integrability premises and calibrates none of them.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Dispersion/AggregateCertifiedVariance.lean",
+      "package": "PricingPerspective",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "Under a measurable antilipschitz carrier with integrated synchronous slack, coherent systematic portfolio variance is at most the weighted marginal second moments minus the square of the aggregate carrier floor built from multi-firm characteristic dispersion.",
+      "statement_type": "\u2200 {A : Type u_1} {X : Type u_2} {H : Type u_3} [inst : Fintype A] [inst_1 : MeasurableSpace X] [inst_2 : PseudoMetricSpace X] [inst_3 : Inhabited X] [OpensMeasurableSpace X] [SecondCountableTopology X] [inst_6 : MeasurableSpace H] [inst_7 : NormedAddCommGroup H] [inst_8 : InnerProductSpace \u211d H] [CompleteSpace H] [SecondCountableTopology H] [BorelSpace H] [inst_12 : Inhabited H] {K : NNReal}, K \u2260 0 \u2192 \u2200 {t : X \u2192 H}, AntilipschitzWith K t \u2192 MeasurableEmbedding t \u2192 \u2200 (q : WassersteinGeometry.Multimarginal.ProbabilityWeight A) (C : A \u2192 WassersteinGeometry.WassersteinMeasure X) (T P : A \u2192 WassersteinGeometry.WassersteinMeasure H) (u : A \u2192 X \u2192 H), Measurable t \u2192 (\u2200 (a : A), Measurable (u a)) \u2192 (\u2200 (a : A), (T a).measure = MeasureTheory.Measure.map t (C a).measure) \u2192 (\u2200 (a : A), (P a).measure = MeasureTheory.Measure.map (u a) (C a).measure) \u2192 \u2200 (tau : A \u2192 NNReal), (\u2200 (a : A), \u222b\u207b (x : X), edist (u a x) (t x) ^ 2 \u2202(C a).measure \u2264 \u2191(tau a) ^ 2) \u2192 \u2200 (J : WassersteinGeometry.Multimarginal.JointCoupling P), (\u2200 (a b : A), MeasureTheory.Integrable (fun x => inner \u211d (x a) (x b)) J.measure) \u2192 PricingPerspective.Transmission.portfolioVariance J.measure q.weight \u2264 \u2211 a, q.weight a * WassersteinGeometry.Hilbert.secondMoment (P a) - PricingPerspective.Transmission.Dispersion.aggregateCarrierFloor K q C tau ^ 2"
+    },
+    {
+      "assumptions": [
+        "finite asset universe and normalized risk weights",
+        "a supplied certificate that some coherent joint law attains the dispersion minimum",
+        "integrability of every pairwise inner product under that attaining law"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:p3-envelope-exactness",
+      "declaration": "PricingPerspective.Transmission.Dispersion.isGreatest_attainableJointPortfolioVariances",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace as an exact greatest-element statement, so the multi-marginal bound is not merely valid but unimprovable within the coherent-joint-law class. Attainment is a supplied premise: no general existence theorem for an optimal multi-marginal plan is claimed, and the result says nothing about which joint law the data realize.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Dispersion/OptimalVariance.lean",
+      "package": "PricingPerspective",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "Given a coherent joint law attaining the multi-marginal dispersion minimum, the weighted marginal second moments minus that minimum is the greatest systematic portfolio variance attainable across all coherent joint laws with integrable pairwise inner products.",
+      "statement_type": "\u2200 {A : Type u_1} {H : Type u_2} [inst : Fintype A] [inst_1 : NormedAddCommGroup H] [inst_2 : InnerProductSpace \u211d H] [inst_3 : MeasurableSpace H] [BorelSpace H] [inst_5 : Inhabited H] (q : WassersteinGeometry.Multimarginal.ProbabilityWeight A) (P : A \u2192 WassersteinGeometry.WassersteinMeasure H) (cert : WassersteinGeometry.Multimarginal.OptimalJointDispersion q P), (\u2200 (a b : A), MeasureTheory.Integrable (fun x => inner \u211d (x a) (x b)) cert.plan.measure) \u2192 IsGreatest (PricingPerspective.Transmission.Dispersion.attainableJointPortfolioVariances q P) (\u2211 a, q.weight a * WassersteinGeometry.Hilbert.secondMoment (P a) - (WassersteinGeometry.Multimarginal.wassersteinDispersionSq q P).toReal)"
+    },
+    {
+      "assumptions": [
+        "finite asset universe",
+        "the squared distance matrix is conditionally negative definite",
+        "two sets of normalized risk weights and a mixing parameter in the unit interval"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:p3-certificate-convexity",
+      "declaration": "PricingPerspective.Transmission.Dispersion.standardizedCertifiedObjective_convex_of_cnd",
+      "disclosure": "Machine-checked in the pinned Lean 4 / mathlib v4.31.0 workspace. Convexity is conditional on the stated curvature property of the squared distance matrix and is asserted for no other matrix; whether a given empirical matrix satisfies it is a separate numerical question the theorem does not answer. Convexity concerns the standardized objective along weight mixtures and implies neither uniqueness of a minimizer nor any claim about realized variance.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Dispersion/MinimumVariance.lean",
+      "package": "PricingPerspective",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "If the squared pairwise distance matrix is conditionally negative definite, then one minus the pairwise certificate is convex along mixtures of normalized risk weights.",
+      "statement_type": "\u2200 {A : Type u_1} [inst : Fintype A] (d : A \u2192 A \u2192 \u211d), PricingPerspective.Transmission.Dispersion.IsConditionallyNegativeDefinite d \u2192 \u2200 (q r : WassersteinGeometry.Multimarginal.ProbabilityWeight A) (\u03b8 : \u211d) (h\u03b80 : 0 \u2264 \u03b8) (h\u03b81 : \u03b8 \u2264 1), 1 - PricingPerspective.Transmission.Dispersion.pairwiseRiskCertificate (q.mix r \u03b8 h\u03b80 h\u03b81) d \u2264 \u03b8 * (1 - PricingPerspective.Transmission.Dispersion.pairwiseRiskCertificate q d) + (1 - \u03b8) * (1 - PricingPerspective.Transmission.Dispersion.pairwiseRiskCertificate r d)"
+    },
+    {
+      "assumptions": [
+        "exactly two assets with normalized risk weights",
+        "a supplied certificate that some coherent joint law attains the dispersion minimum",
+        "integrability of every pairwise inner product under that attaining law"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:p3-pairwise-bridge",
+      "declaration": "PricingPerspective.Transmission.Dispersion.optimalTwoAssetPortfolioVariance_eq_paperOne",
+      "disclosure": "Machine-checked as an exact equality in the pinned Lean 4 / mathlib v4.31.0 workspace. It identifies the pairwise covariance-envelope correction as the two-asset case of the multi-firm construction, establishing that the two papers describe one object rather than two compatible ones. It imports no assumption or empirical result from the pairwise paper.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Dispersion/OptimalVariance.lean",
+      "package": "PricingPerspective",
+      "paper": "03_distance_implied_mpt",
+      "statement_summary": "For two assets, the optimal coherent portfolio variance is the weighted marginal second moments minus the product of the two weights and the squared quadratic Wasserstein distance between the exposure laws.",
+      "statement_type": "\u2200 {H : Type u_1} [inst : NormedAddCommGroup H] [inst_1 : InnerProductSpace \u211d H] [inst_2 : MeasurableSpace H] [BorelSpace H] [SecondCountableTopology H] [inst_5 : Inhabited H] (q : WassersteinGeometry.Multimarginal.ProbabilityWeight (Fin 2)) (P : Fin 2 \u2192 WassersteinGeometry.WassersteinMeasure H) (cert : WassersteinGeometry.Multimarginal.OptimalJointDispersion q P), (\u2200 (a b : Fin 2), MeasureTheory.Integrable (fun x => inner \u211d (x a) (x b)) cert.plan.measure) \u2192 PricingPerspective.Transmission.portfolioVariance cert.plan.measure q.weight = q.weight 0 * WassersteinGeometry.Hilbert.secondMoment (P 0) + q.weight 1 * WassersteinGeometry.Hilbert.secondMoment (P 1) - q.weight 0 * q.weight 1 * (WassersteinGeometry.WassersteinDistanceSq (P 0) (P 1)).toReal"
+    },
+    {
+      "assumptions": [
+        "loading laws in P_2 of a separable real Hilbert space",
+        "couplings carrying integrability of both second moments and the cross term",
+        "a certified optimal transport plan, supplied rather than proved to exist"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:random-exposure-envelope",
+      "declaration": "PricingPerspective.Transmission.isGreatest_frechetClass",
+      "disclosure": "Machine-checked for probability laws on a separable real Hilbert space under the displayed integrability hypotheses. Existence of an optimal coupling is supplied as a certificate rather than proved; the result is that the ceiling is attained given such a plan, not that one exists. It does not formalize the article measurement proxy or estimate empirical scale parameters.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Frechet.lean",
+      "package": "PricingPerspective",
+      "paper": "01_continuous_bounds",
+      "statement_summary": "For every coupling of two exposure laws in P_2(H) whose polarization terms are integrable, the covariance ceiling (one half of the sum of second moments minus the optimal transport cost) is the greatest attainable systematic covariance, and a certified optimal plan attains it.",
+      "statement_type": "\u2200 {H : Type u_1} [inst : NormedAddCommGroup H] [inst_1 : InnerProductSpace \u211d H] [inst_2 : MeasurableSpace H] [BorelSpace H] [SecondCountableTopology H] [inst_5 : Inhabited H] {P Q : WassersteinGeometry.WassersteinMeasure H} (cert : PricingPerspective.Transmission.OptimalTransportCost P Q), IsGreatest (PricingPerspective.Transmission.frechetClass P Q) (PricingPerspective.Transmission.ceiling cert)"
+    },
+    {
+      "assumptions": [
+        "loading laws in P_2 of a separable real Hilbert space",
+        "couplings carrying integrability of both second moments and the cross term",
+        "a certified optimal transport plan, supplied rather than proved to exist"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:random-exposure-gap",
+      "declaration": "PricingPerspective.Transmission.systCov_eq_ceiling_sub_excess",
+      "disclosure": "Machine-checked as an exact polarization identity for probability laws on a separable real Hilbert space. The excess is a coupling-level diagnostic and is not a claim that the observed text cloud identifies the latent exposure coupling.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Frechet.lean",
+      "package": "PricingPerspective",
+      "paper": "01_continuous_bounds",
+      "statement_summary": "For any integrable coupling of two exposure laws in P_2(H), covariance equals the optimal covariance envelope minus one half of the excess transport cost of that coupling.",
+      "statement_type": "\u2200 {H : Type u_1} [inst : NormedAddCommGroup H] [inst_1 : InnerProductSpace \u211d H] [inst_2 : MeasurableSpace H] [BorelSpace H] [SecondCountableTopology H] [inst_5 : Inhabited H] {P Q : WassersteinGeometry.WassersteinMeasure H} (cert : PricingPerspective.Transmission.OptimalTransportCost P Q) (\u03c0 : PricingPerspective.Transmission.IntegrableCoupling P Q), WassersteinGeometry.Hilbert.systCov \u03c0.toMeasure = PricingPerspective.Transmission.ceiling cert - PricingPerspective.Transmission.excess cert \u03c0 / 2"
+    },
+    {
+      "assumptions": [
+        "loading laws in P_2 of a separable real Hilbert space",
+        "a certified optimal transport plan, supplied rather than proved to exist"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:random-exposure-excess-nonneg",
+      "declaration": "PricingPerspective.Transmission.excess_nonneg",
+      "disclosure": "Machine-checked for probability laws on a separable real Hilbert space: relative to a certified minimum transport cost, every integrable coupling's excess is nonnegative. This is the one-sided direction the empirical diagnostic tests; it is separate from the exact gap identity, which holds for any reference cost and asserts no sign.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Frechet.lean",
+      "package": "PricingPerspective",
+      "paper": "01_continuous_bounds",
+      "statement_summary": "Against a certified optimal transport cost, the excess of any integrable coupling is nonnegative. Stated separately from the gap identity because that identity holds for an arbitrary reference cost and therefore carries no sign information; the sign requires the reference cost to be the certified minimum.",
+      "statement_type": "\u2200 {H : Type u_1} [inst : NormedAddCommGroup H] [inst_1 : InnerProductSpace \u211d H] [inst_2 : MeasurableSpace H] [inst_3 : Inhabited H] {P Q : WassersteinGeometry.WassersteinMeasure H} (cert : PricingPerspective.Transmission.OptimalTransportCost P Q) (\u03c0 : PricingPerspective.Transmission.IntegrableCoupling P Q), 0 \u2264 PricingPerspective.Transmission.excess cert \u03c0"
+    },
+    {
+      "assumptions": [
+        "characteristic laws in P_2 of a separable complete metric space",
+        "a common L-Lipschitz measurable transmission map in risk coordinates",
+        "pointwise slack bounds on each firm's exposure map, synchronous with the draw"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:random-w2-upper-metric",
+      "declaration": "PricingPerspective.Transmission.wassersteinDistance_boundedSlack_le",
+      "disclosure": "Machine-checked for probability laws on a separable real Hilbert space under the displayed Lipschitz and pointwise slack bounds. The slack bounds are maintained quantities, not estimated residuals, and the bound is one-sided: it caps how far transmission can separate two exposure laws and says nothing about how close they must be.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Slack.lean",
+      "package": "PricingPerspective",
+      "paper": "01_continuous_bounds",
+      "statement_summary": "For exposure maps differing from a common L-Lipschitz map by a pointwise-bounded slack synchronous with the characteristic draw, the factor-weighted W_2 distance between the induced exposure laws is at most tau_i plus L times the characteristic W_2 distance plus tau_j. Slack enters additively and no support diameter appears.",
+      "statement_type": "\u2200 {X : Type u_1} {H : Type u_2} [inst : MeasurableSpace X] [inst_1 : PseudoMetricSpace X] [inst_2 : Inhabited X] [OpensMeasurableSpace X] [SecondCountableTopology X] [inst_5 : NormedAddCommGroup H] [inst_6 : MeasurableSpace H] [BorelSpace H] [SecondCountableTopology H] [CompleteSpace H] [inst_10 : Inhabited H] {L \u03c4i \u03c4j : NNReal} {t ui uj : X \u2192 H}, LipschitzWith L t \u2192 Measurable t \u2192 Measurable ui \u2192 Measurable uj \u2192 (\u2200 (x : X), edist (ui x) (t x) \u2264 \u2191\u03c4i) \u2192 (\u2200 (x : X), edist (uj x) (t x) \u2264 \u2191\u03c4j) \u2192 \u2200 (Ci Cj : WassersteinGeometry.WassersteinMeasure X) (Pi Pj TA TB : WassersteinGeometry.WassersteinMeasure H), Pi.measure = MeasureTheory.Measure.map ui Ci.measure \u2192 Pj.measure = MeasureTheory.Measure.map uj Cj.measure \u2192 TA.measure = MeasureTheory.Measure.map t Ci.measure \u2192 TB.measure = MeasureTheory.Measure.map t Cj.measure \u2192 WassersteinGeometry.WassersteinDistance Pi Pj \u2264 \u2191\u03c4i + \u2191L * WassersteinGeometry.WassersteinDistance Ci Cj + \u2191\u03c4j"
+    },
+    {
+      "assumptions": [
+        "loading laws in P_2 of a separable real Hilbert space",
+        "the reflected second law is the pushforward of the second under negation",
+        "a certified optimal transport plan against the reflected law"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "thm:random-exposure-lower-endpoint",
+      "declaration": "PricingPerspective.Transmission.isLeast_frechetClass_of_reflection",
+      "disclosure": "Machine-checked for probability laws on a separable real Hilbert space. It establishes the lower endpoint only; the upper endpoint is a separate checked result, and neither identifies the realized coupling.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Frechet.lean",
+      "package": "PricingPerspective",
+      "paper": "01_continuous_bounds",
+      "statement_summary": "The reflected law gives the sharp lower endpoint of the Frechet class of attainable systematic covariances: the least attainable covariance equals (optimal reflected transport cost minus the two second moments) divided by two.",
+      "statement_type": "\u2200 {H : Type u_1} [inst : NormedAddCommGroup H] [inst_1 : InnerProductSpace \u211d H] [inst_2 : MeasurableSpace H] [BorelSpace H] [SecondCountableTopology H] [inst_5 : Inhabited H] {P Q Q' : WassersteinGeometry.WassersteinMeasure H}, Q'.measure = MeasureTheory.Measure.map (fun y => -y) Q.measure \u2192 \u2200 (cert : PricingPerspective.Transmission.OptimalTransportCost P Q'), IsLeast (PricingPerspective.Transmission.frechetClass P Q) (-PricingPerspective.Transmission.ceiling cert)"
+    },
+    {
+      "assumptions": [
+        "finite-support source and target laws with finite transport certificates",
+        "upper Lipschitz transmission bound",
+        "nonnegative endpoint slack bounds",
+        "a maintained support-diameter bound"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:random-w2-upper-transfer",
+      "declaration": "PricingPerspective.RandomExposure.optimized_transportCost_le_of_upper_lipschitz_slack",
+      "disclosure": "Machine-checked on optimized squared transport costs under finite-support certificates and maintained Lipschitz, slack, and diameter bounds. The sharper metric-level bracket the empirical diagnostic uses, in which slack enters additively and no diameter appears, is the separately stated prose corollary and is not part of this entry.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Transfer.lean",
+      "package": "PricingPerspective",
+      "paper": "01_continuous_bounds",
+      "statement_summary": "Under an upper Lipschitz transmission bound and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at most the squared Lipschitz constant times the optimized squared characteristic cost, plus a slack term carrying the maintained support diameter.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {\u03b9' : Type u_2} [inst : Fintype \u03b9] [inst_1 : Fintype \u03b9'] {\u03a9 : Type u_3} [inst_2 : MetricSpace \u03a9] {H : Type u_4} [inst_3 : NormedAddCommGroup H] {p : \u03b9 \u2192 \u211d} {q : \u03b9' \u2192 \u211d} (\u03be : \u03b9 \u2192 \u03a9) (\u03b6 : \u03b9' \u2192 \u03a9) (T : \u03a9 \u2192 H) (\u03b4 : \u03b9 \u2192 H) (\u03b4' : \u03b9' \u2192 H) {L \u03c4 \u03c4' D : \u211d} (ground : PricingPerspective.RandomExposure.FiniteOptimalCostCertificate fun \u03c0 => PricingPerspective.RandomExposure.groundCost \u03c0 \u03be \u03b6) (mapped : PricingPerspective.RandomExposure.FiniteOptimalCostCertificate fun \u03c0 => PricingPerspective.RandomExposure.transportCost \u03c0 (fun a => T (\u03be a)) fun b => T (\u03b6 b)) (exposure : PricingPerspective.RandomExposure.FiniteOptimalCostCertificate fun \u03c0 => PricingPerspective.RandomExposure.transportCost \u03c0 (fun a => T (\u03be a) + \u03b4 a) fun b => T (\u03b6 b) + \u03b4' b), (\u2200 (x y : \u03a9), \u2016T x - T y\u2016 \u2264 L * dist x y) \u2192 \u2211 a, p a = 1 \u2192 (\u2200 (a : \u03b9), \u2016\u03b4 a\u2016 \u2264 \u03c4) \u2192 (\u2200 (b : \u03b9'), \u2016\u03b4' b\u2016 \u2264 \u03c4') \u2192 0 \u2264 \u03c4 \u2192 0 \u2264 \u03c4' \u2192 (\u2200 (a : \u03b9) (b : \u03b9'), \u2016T (\u03be a) - T (\u03b6 b)\u2016 \u2264 D) \u2192 (\u2200 (a : \u03b9) (b : \u03b9'), \u2016T (\u03be a) + \u03b4 a - (T (\u03b6 b) + \u03b4' b)\u2016 \u2264 D) \u2192 exposure.value \u2264 L ^ 2 * ground.value + 2 * (\u03c4 + \u03c4') * D + (\u03c4 + \u03c4') ^ 2"
+    },
+    {
+      "assumptions": [
+        "finite-support source and target laws with finite transport certificates",
+        "positive lower Lipschitz constant",
+        "lower Lipschitz transmission bound",
+        "nonnegative endpoint slack bounds",
+        "a maintained support-diameter bound"
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:random-w2-lower-transfer",
+      "declaration": "PricingPerspective.RandomExposure.optimized_transportCost_ge_of_lower_lipschitz_slack",
+      "disclosure": "Machine-checked on optimized squared transport costs under finite-support certificates and maintained bi-Lipschitz, slack, and diameter bounds. The sharper metric-level bracket the empirical diagnostic uses, in which slack enters additively and no diameter appears, is the separately stated prose corollary and is not part of this entry.",
+      "file": "packages/PricingPerspective/PricingPerspective/Transmission/Transfer.lean",
+      "package": "PricingPerspective",
+      "paper": "01_continuous_bounds",
+      "statement_summary": "Under a positive lower Lipschitz constant and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at least the inverse squared Lipschitz constant times the optimized squared characteristic cost, less a slack term carrying the maintained support diameter.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} {\u03b9' : Type u_2} [inst : Fintype \u03b9] [inst_1 : Fintype \u03b9'] {\u03a9 : Type u_3} [inst_2 : MetricSpace \u03a9] {H : Type u_4} [inst_3 : NormedAddCommGroup H] {p : \u03b9 \u2192 \u211d} {q : \u03b9' \u2192 \u211d} (\u03be : \u03b9 \u2192 \u03a9) (\u03b6 : \u03b9' \u2192 \u03a9) (T : \u03a9 \u2192 H) (\u03b4 : \u03b9 \u2192 H) (\u03b4' : \u03b9' \u2192 H) {L \u03c4 \u03c4' D : \u211d} (ground : PricingPerspective.RandomExposure.FiniteOptimalCostCertificate fun \u03c0 => PricingPerspective.RandomExposure.groundCost \u03c0 \u03be \u03b6) (mapped : PricingPerspective.RandomExposure.FiniteOptimalCostCertificate fun \u03c0 => PricingPerspective.RandomExposure.transportCost \u03c0 (fun a => T (\u03be a)) fun b => T (\u03b6 b)) (exposure : PricingPerspective.RandomExposure.FiniteOptimalCostCertificate fun \u03c0 => PricingPerspective.RandomExposure.transportCost \u03c0 (fun a => T (\u03be a) + \u03b4 a) fun b => T (\u03b6 b) + \u03b4' b), 0 < L \u2192 (\u2200 (x y : \u03a9), L\u207b\u00b9 * dist x y \u2264 \u2016T x - T y\u2016) \u2192 \u2211 a, p a = 1 \u2192 (\u2200 (a : \u03b9), \u2016\u03b4 a\u2016 \u2264 \u03c4) \u2192 (\u2200 (b : \u03b9'), \u2016\u03b4' b\u2016 \u2264 \u03c4') \u2192 0 \u2264 \u03c4 \u2192 0 \u2264 \u03c4' \u2192 (\u2200 (a : \u03b9) (b : \u03b9'), \u2016T (\u03be a) - T (\u03b6 b)\u2016 \u2264 D) \u2192 (\u2200 (a : \u03b9) (b : \u03b9'), \u2016T (\u03be a) + \u03b4 a - (T (\u03b6 b) + \u03b4' b)\u2016 \u2264 D) \u2192 L\u207b\u00b9 ^ 2 * ground.value - 2 * (\u03c4 + \u03c4') * D - (\u03c4 + \u03c4') ^ 2 \u2264 exposure.value"
+    }
+  ],
+  "content_hash": "cfc0901ef8b6bc4138edd285f7452c97838a0f0a9dc03dbb97e30e7361f6a8fc",
+  "schema_version": "1.0"
+}

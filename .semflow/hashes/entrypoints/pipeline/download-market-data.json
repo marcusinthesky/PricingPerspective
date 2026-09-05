@@ -1,0 +1,29 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.substrate.market:cli_download_market_data",
+  "digest": "sha256:d354a87e084bd7dfb815fa9e2813ff5ae4166225616885de17bdedff7dd5a034",
+  "entrypoint": "pipeline download-market-data",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:701b162d541e1c9506cca310ef2b8a90b9ce4ab016c5aeb67a529eb0e89c9e8f","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:<binding:typer=typer>"},
+    {"digest":"sha256:ba54538c6fba25dcec0bcda5a0ac651d036aac8c1a8c21fc2a48e650607362a9","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:cli_download_market_data"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:commands"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:d8fc3cf7f30b6468160c361f2e9a70b680e5225efaa2198c56aacc1ba85de45b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:duckdb=duckdb>"},
+    {"digest":"sha256:8ce944318e4ea1d88a9de02d36ccd10090ae7df3da1a580492359050ca7401e5","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:pq=pyarrow.parquet>"},
+    {"digest":"sha256:19efb8168404344dcee88838fd1def6f91b3a512ab0a8a5c388656b7c4884dd4","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:yf=yfinance>"},
+    {"digest":"sha256:87d8cf394ba8fa0946e9558ddcc23c9e628b6c5e2a04f9fc7206d1adcadbde99","kind":"class","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:_EmptyMarketDownloadError"},
+    {"digest":"sha256:bfb413ec10bd31e56e5b4ccd7763472676bd04866cc937847c85108c3cee8c5a","kind":"class","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:_MissingArchiveError"},
+    {"digest":"sha256:54784aa7cae94133a46f41cb5875ca5fd5e92c7dad0fd2d3eda04e0647413ef5","kind":"class","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:_MissingUniverseRowError"},
+    {"digest":"sha256:f4ad768172608236bb32fbb6105c2ccad5a3a17cc60812dd5b7341110e750644","kind":"class","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:_UnknownMarketSourceError"},
+    {"digest":"sha256:bece1aaa49376c6c375cd710b6a1e5de637f8a24f4e5f700ee2adda216a0c6ad","kind":"function","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:_resolve_market_route"},
+    {"digest":"sha256:e12692a63dc8d9ac80a7d581135c5cb917da50409e1bb53571d8f47ca04ebad7","kind":"function","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:download_market_data"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

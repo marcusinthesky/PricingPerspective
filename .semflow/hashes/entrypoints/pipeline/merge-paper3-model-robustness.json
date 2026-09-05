@@ -1,0 +1,22 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.cross_paper.robustness:cli_merge_paper3_model_robustness",
+  "digest": "sha256:b433bc5eedfcf8e71549c1f127ce98729b39e41963e60b5bf0b8f43082aa48cd",
+  "entrypoint": "pipeline merge-paper3-model-robustness",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/cross_paper/robustness.py","symbol":"pipeline.cli.commands.cross_paper.robustness:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/cross_paper/robustness.py","symbol":"pipeline.cli.commands.cross_paper.robustness:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/cross_paper/robustness.py","symbol":"pipeline.cli.commands.cross_paper.robustness:<binding:typer=typer>"},
+    {"digest":"sha256:920d77e2e47b9cdfa0b3cd0ae81eb83b6776aeb41a7a6f89a994f9a90228e547","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/cross_paper/robustness.py","symbol":"pipeline.cli.commands.cross_paper.robustness:<binding:yaml=yaml>"},
+    {"digest":"sha256:f7a158c9ed685f44cea5dc1bcdeb72f85e0483048e1b27b24a8558ed68800d24","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/cross_paper/robustness.py","symbol":"pipeline.cli.commands.cross_paper.robustness:cli_merge_paper3_model_robustness"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/cross_paper/robustness.py","symbol":"pipeline.cli.commands.cross_paper.robustness:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/paper3_model_robustness.py","symbol":"pipeline.stages.substrate.paper3_model_robustness:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:920d77e2e47b9cdfa0b3cd0ae81eb83b6776aeb41a7a6f89a994f9a90228e547","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/paper3_model_robustness.py","symbol":"pipeline.stages.substrate.paper3_model_robustness:<binding:yaml=yaml>"},
+    {"digest":"sha256:04e6e4db9d1a0a89840d47e8dbea551aa9a835d78a2d059a58970c8ba8a60fca","kind":"function","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/paper3_model_robustness.py","symbol":"pipeline.stages.substrate.paper3_model_robustness:_load_yaml"},
+    {"digest":"sha256:478036d57c58f4efabf733da752a35a90cd5c785529d780a000e1d7cc20da110","kind":"function","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/paper3_model_robustness.py","symbol":"pipeline.stages.substrate.paper3_model_robustness:merge_paper3_model_robustness_summaries"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

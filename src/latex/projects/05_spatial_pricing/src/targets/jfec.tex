@@ -1,0 +1,52 @@
+\documentclass[namedate,webpdf,modern,small]{oup-authoring-template}
+
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+
+% OUP modern,small has a 124 mm measure. Select separately authored PGFs at
+% natural size so figure type is not reduced by compile-time scaling.
+\renewcommand{\ppfiguresuffix}{-jfec}
+\renewcommand{\figalttext}[2][]{%
+  \par\smallskip
+{\footnotesize\textbf{Alt text:} #2\par}}
+
+\newcommand{\societylogo}{}
+
+\input{metadata}
+\input{generated/numbers}
+\input{generated/lean_status}
+
+\begin{document}
+
+\journaltitle{Journal of Financial Econometrics}
+\copyrightyear{\paperyear}
+\pubyear{\paperyear}
+\volume{}
+\issue{}
+\appnotes{Paper}
+\firstpage{1}
+\lastpage{42}
+\title[\papershorttitle]{\papertitle}
+\author{\paperauthorone}
+\author{\paperauthortwo}
+\address{\paperpostaladdress}
+\corresp{Corresponding author: \paperauthorone, \paperpostaladdress.
+Telephone: \paperphone. Email: \href{mailto:\paperemail}{\paperemail}}
+
+\abstract{\input{chapters/abstract}}
+\keywords{\paperkeywords}
+\keywords[JEL classification]{\paperjel}
+\maketitle
+\clearpage
+
+\input{body}
+
+\bibliographystyle{oup-abbrvnat}
+\bibliography{refs}
+
+\begin{appendices}
+  \input{appendix}
+\end{appendices}
+
+\end{document}

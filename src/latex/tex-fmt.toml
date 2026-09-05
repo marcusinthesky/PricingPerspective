@@ -1,0 +1,5 @@
+# Single source for tex-fmt formatting policy, consumed by both
+# src/latex/justfile (fmt, fmt-check) and src/latex/.pre-commit-config.yaml
+# (tex-fmt hook). See t24.16.4 (F10).
+wraplen = 88
+tabsize = 2

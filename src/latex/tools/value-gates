@@ -1,0 +1,186 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+"""Numeric display-contract gates for the manuscript boundary (t24.16.1).
+
+Two checks over every project's chapters/ + targets/ prose, both keyed to the
+renderer-neutral value model (`\\ppDeclareValue` in generated/numbers.tex):
+
+  F1  emit >= display precision. A call site displays a bound value at N decimal
+      places via `\\ppnum[N]{key}` / `\\ppnume[N]{key}` (default N=3). If the
+      emitted binding carries FEWER than N decimals, the display would round
+      already-truncated input -- reported so the pipeline precision is raised.
+
+  F2  literal-number drift. A bare empirical decimal (e.g. `0.319`) sitting in
+      body/abstract prose duplicates a pipeline value and goes stale silently.
+      This flags decimals that survive after math mode, value/reference macros,
+      and a tight non-empirical allowlist (window sizes, version strings, and
+      cross-reference numbers) are removed. Migrate the number to
+      `\\ppnum`/`\\ppvalue` so the pipeline owns it.
+
+Exit non-zero if either check fails. Stdlib only; run offline from src/latex or
+with --root pointing at the src/latex directory.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+DECLARE_RE = re.compile(r"\\ppDeclareValue\{([^{}]+)\}\{([^{}]*)\}")
+# \ppnum[N]{key} / \ppnume[N]{key} / \ppnum{key} (default precision 3).
+PPNUM_RE = re.compile(r"\\ppnume?(?:\[(\d+)\])?\{([^{}]+)\}")
+FLOAT_RE = re.compile(r"^-?\d+\.(\d+)$")
+DEFAULT_DISPLAY_PRECISION = 3
+
+# --- F2 stripping -----------------------------------------------------------
+# Macros whose braced argument legitimately carries numbers / identifiers.
+ARG_MACROS = (
+    "ppvalue", "ppnum", "ppnume", "num", "SI", "si", "ang",
+    "label", "ref", "cref", "Cref", "eqref", "pageref", "autoref", "vref",
+    "cite", "citep", "citet", "citeauthor", "citeyear", "citealp",
+    "input", "include", "includegraphics", "url", "href", "texttt", "path",
+)
+ARG_MACRO_RE = re.compile(
+    r"\\(?:" + "|".join(ARG_MACROS) + r")\*?(?:\[[^\]]*\])?\{[^{}]*\}"
+)
+# Inline/display math and the common math environments.
+INLINE_MATH_RE = re.compile(r"(?<!\\)\$[^$]*\$")
+PAREN_MATH_RE = re.compile(r"\\\((?:[^\\]|\\(?!\)))*?\\\)")
+BRACK_MATH_RE = re.compile(r"\\\[(?:[^\\]|\\(?!\]))*?\\\]", re.DOTALL)
+MATH_ENV_RE = re.compile(
+    r"\\begin\{(equation|align|gather|multline|eqnarray|split|flalign|alignat)\*?\}"
+    r".*?\\end\{\1\*?\}",
+    re.DOTALL,
+)
+# Table cells are not prose: axis tick labels and hand-set grids live here, and
+# genuine empirical cells are owned by the value model / F3 table generation, not
+# by this prose gate. Strip the whole tabular family (including the column spec).
+TABLE_ENV_RE = re.compile(
+    r"\\begin\{(tabular|tabularx|tabulary|array|matrix|pmatrix|bmatrix|smallmatrix)\*?\}"
+    r".*?\\end\{\1\*?\}",
+    re.DOTALL,
+)
+# Length/dimension arguments are layout, not empirical (0.30\linewidth, 1.5em).
+LENGTH_RE = re.compile(
+    r"\d+\.\d+\s*\\?(?:linewidth|textwidth|columnwidth|paperwidth|paperheight|"
+    r"textheight|baselineskip|height|width|pt|em|ex|cm|mm|in|bp|dd|pc|sp)\b"
+)
+# `\ppfigure{<frac>}{<name>}` is the same layout quantity as the `0.62\linewidth`
+# that `LENGTH_RE` exempts -- the `\linewidth` token simply moved inside the macro
+# when figures became PGF, which is placed at natural size and cannot be scaled.
+# The fraction records the authored width for `tests/figures/test_print_size.py`;
+# it is not an empirical claim and must not be routed through `\ppvalue`.
+PPFIGURE_RE = re.compile(r"\\ppfigure\{[0-9.]*\}")
+COMMENT_RE = re.compile(r"(?<!\\)%.*")
+# Non-empirical decimals: version/build strings (a digit-dot-digit fused with a
+# letter or hyphen, e.g. Apache-2.0, v4.31.0, T1) and cross-reference numbers
+# (Theorem 10.1, Section 2.3, Eq. 4.5).
+VERSION_RE = re.compile(r"[A-Za-z][\w.-]*\d+\.\d+[\w.-]*|\d+\.\d+[\w-]*[A-Za-z]")
+CROSSREF_RE = re.compile(
+    r"\b(?:Theorem|Section|Figure|Table|Chapter|Appendix|Appendices|Equation|Eq|Eqs|"
+    r"Assumption|Proposition|Lemma|Corollary|Definition|Remark|Hypothesis|Step|"
+    r"Fig|Thm|Sec|App|Def|Ass|Prop|Cor|Lem|Version|Panel|Item|pp?)\.?~?\s*\d+\.\d+"
+)
+BARE_DECIMAL_RE = re.compile(r"(?<![\w.])\d+\.\d+(?![\w.])")
+
+
+def load_numbers(numbers_path: Path) -> dict[str, str]:
+    if not numbers_path.exists():
+        return {}
+    text = numbers_path.read_text(encoding="utf-8")
+    return {m.group(1): m.group(2) for m in DECLARE_RE.finditer(text)}
+
+
+def strip_for_literals(text: str) -> str:
+    text = COMMENT_RE.sub("", text)
+    text = TABLE_ENV_RE.sub(" ", text)
+    text = LENGTH_RE.sub(" ", text)
+    text = PPFIGURE_RE.sub(" ", text)
+    text = MATH_ENV_RE.sub(" ", text)
+    text = BRACK_MATH_RE.sub(" ", text)
+    text = PAREN_MATH_RE.sub(" ", text)
+    text = INLINE_MATH_RE.sub(" ", text)
+    text = ARG_MACRO_RE.sub(" ", text)
+    text = CROSSREF_RE.sub(" ", text)
+    text = VERSION_RE.sub(" ", text)
+    return text
+
+
+def check_project(src: Path) -> tuple[list[str], list[str]]:
+    """Return (emit_violations, literal_violations) for one project src dir."""
+    numbers = load_numbers(src / "generated" / "numbers.tex")
+    emit_bad: list[str] = []
+    literal_bad: list[str] = []
+    subdirectories = (
+        ("chapters",)
+        if (src.parent / "dissertation.toml").is_file()
+        else ("chapters", "targets")
+    )
+    for sub in subdirectories:
+        d = src / sub
+        if not d.is_dir():
+            continue
+        for f in sorted(d.glob("*.tex")):
+            raw = f.read_text(encoding="utf-8")
+            rel = f.relative_to(src.parent)
+            # F1 emit >= display
+            for m in PPNUM_RE.finditer(raw):
+                disp = int(m.group(1)) if m.group(1) else DEFAULT_DISPLAY_PRECISION
+                key = m.group(2)
+                val = numbers.get(key)
+                if val is None:
+                    continue  # undefined-key error is raised by \ppvalue at compile
+                fm = FLOAT_RE.match(val)
+                if fm and len(fm.group(1)) < disp:
+                    emit_bad.append(
+                        f"{rel}: \\ppnum[{disp}]{{{key}}} displays {disp} places but "
+                        f"binding emits only {len(fm.group(1))} ({val}); raise pipeline precision"
+                    )
+            # F2 literal drift
+            stripped = strip_for_literals(raw)
+            for lm in BARE_DECIMAL_RE.finditer(stripped):
+                # report with a little context
+                s = max(0, lm.start() - 25)
+                ctx = " ".join(stripped[s:lm.end() + 15].split())
+                literal_bad.append(f"{rel}: bare decimal {lm.group(0)!r} in prose … {ctx!r}")
+    return emit_bad, literal_bad
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--root", default=".", help="src/latex directory")
+    args = ap.parse_args()
+    root = Path(args.root).resolve()
+    projects = sorted((root / "projects").glob("*/src"))
+    projects = [p for p in projects if (p.parent.name != "_template")]
+    emit_all: list[str] = []
+    lit_all: list[str] = []
+    for src in projects:
+        e, l = check_project(src)
+        emit_all += e
+        lit_all += l
+    status = 0
+    if emit_all:
+        print("emit precision is coarser than requested display precision (F1):", file=sys.stderr)
+        for v in emit_all:
+            print(f"  {v}", file=sys.stderr)
+        status = 1
+    if lit_all:
+        print(
+            "bare empirical decimals in prose (F2); bind them via \\ppnum/\\ppvalue "
+            "so the pipeline owns the number:",
+            file=sys.stderr,
+        )
+        for v in lit_all:
+            print(f"  {v}", file=sys.stderr)
+        status = 1
+    return status
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

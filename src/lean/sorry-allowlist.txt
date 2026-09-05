@@ -1,0 +1,29 @@
+# Per-file `sorry`/`admit` counts allowed in src/lean/packages — the canonical inventory.
+# Checked by src/lean/scripts/sorry_gate.sh in CI (.github/workflows/lean.yml).
+# `admit` is a v4.31.0 synonym for `sorry` and is counted in the same total; prose uses of
+# the English word therefore need a row here, exactly like the docstring `sorry` mentions.
+# Axiom entries appear as "path:axiom N". There are none, and adding one is a deliberate
+# reviewed act rather than something the gate forbids outright — the gate only diffs
+# against this file. The binding rejection of a stray axiom is tools/claim-manifest/
+# extract.py, which fails any manifest claim whose `#print axioms` leaves the mathlib base.
+# 2026-07-11: DistanceCovariance.lean has 0 `sorry` tokens — `theorem dcov_nonneg` is
+# RESTORED sorry-free (sampling/V-statistic route: pointwise Schur `F_n` ≥ 0 → `E[F_n]` ≥ 0
+# → closed form `dcov_integral_sampleStat` / leading coeff n(n−1) → dCov² via `le_of_tendsto`;
+# axioms: propext, Classical.choice, Quot.sound). No allowlist row for DistanceCovariance.lean
+# (permanent 0).
+packages/EnergyStatistics/EnergyStatistics/PermutationTest.lean:2
+packages/EnergyStatistics/EnergyStatistics/SampleStatistics.lean:1
+# MiddletonSatchell2000.lean: 1 tactic `sorry` (middleton_satchell_more_proxies, see
+# TODO.md D9) + 1 docstring mention of the token in that theorem's honesty caveat.
+packages/PaperReconstructions/PaperReconstructions/MiddletonSatchell2000.lean:2
+# 2026-08-07: Ross1976/Model.lean's row is GONE (was 1). The FTAP backward-direction gap
+# it covered is closed — the softplus-potential construction was ported from formal-mathfin
+# into the new `PaperReconstructions/FTAP/` modules, and the declarations moved with it.
+# The theorem gained a `Measurable Y` hypothesis in the process: the unconditional
+# statement was refuted, machine-checked, in `FTAP/Counterexample.lean`. See TODO.md.
+# Docstring "sorry-free" matches \bsorry\b (hyphen is a word boundary) — not a tactic sorry:
+packages/PricingPerspective/PricingPerspective/Connections/EnergyStatistics.lean:1
+# 2026-08-21: Continuous/Model.lean's row is GONE (was 1, the prose "Signed measures admit
+# negative"). The file was deleted with the rest of the signed-measure primitive when the
+# programme pivoted to the random functional exposure law — see the retirement note in
+# Continuous/CovarianceSpace.lean and blueprint/src/chapters/energy_specialization.tex.

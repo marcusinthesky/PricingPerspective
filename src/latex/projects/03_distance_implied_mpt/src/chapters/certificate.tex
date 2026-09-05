@@ -1,0 +1,398 @@
+
+This section turns the model's maintained link into a portfolio-risk statement.
+It first asks what exposure separation each observed pair can certify, then
+aggregates those pairwise floors under the coherent joint law.
+The resulting credit lowers the benchmark in which no cross-asset separation
+can be certified.
+
+\subsection{Observable pairwise floors}
+
+The carrier and slack restrictions first yield the minimum exposure separation
+supported by each pair's observed information distance.
+For assets $i$ and $j$, define
+\begin{equation}\label{eq:p3-information-floor}
+  \ell_{ij}
+  :=\left[
+    L^{-1}W_2(C_i,C_j)-\tau_i-\tau_j
+  \right]_+,
+  \qquad [a]_+:=\max\{a,0\}.
+\end{equation}
+The antilipschitz carrier first retains at least the fraction $L^{-1}$ of the
+observed W2 separation.
+The triangle inequality then deducts the two slack radii.
+Truncation at zero preserves the nonnegative lower bound, giving
+\begin{equation}\label{eq:p3-floor-validity}
+  \ell_{ij}\le W_2(P_i,P_j).
+\end{equation}
+Every term in \eqref{eq:p3-information-floor} therefore has a distinct role:
+$W_2(C_i,C_j)$ is observed geometry, $L$ controls common distortion, and the
+$\tau_i$ terms absorb asset-specific departures from the common carrier.
+In the empirical application, $W_2(C_i,C_j)$ is the least root-mean-square
+displacement required to align the two firms' information distributions.
+A positive $\ell_{ij}$ rules out exposure laws that are closer than this floor;
+a zero floor means only that the maintained restrictions certify no positive
+separation for that pair.
+
+The candidate portfolio credit weights each pairwise floor by the extent to
+which both assets enter a normalized long-only portfolio:
+\begin{equation}\label{eq:p3-certificate-credit}
+  \mathcal C(q)
+  :=\frac12\sum_i \sum_j q_i q_j\ell_{ij}^2.
+\end{equation}
+The factor one half compensates for counting both ordered pairs $(i,j)$ and
+$(j,i)$.
+Because diagonal distances are zero, this is also
+$\sum_{i<j} q_i q_j\ell_{ij}^2$.
+The ordered-pair sum is portfolio-specific: separation between two assets
+contributes only to the extent that both are held.
+Conditional on the declared carrier and slack parameters, $\mathcal C(q)$ is
+computed from observed information geometry rather than a return covariance
+matrix.
+
+\subsection{From floors to coherent portfolio variance}
+
+Pairwise floors constrain individual asset pairs, but portfolio risk is a joint
+object.
+To aggregate the floors without combining incompatible pairwise couplings,
+apply the weighted Hilbert-space polarization identity under the same joint law
+$J$:
+\begin{equation}\label{eq:p3-weighted-polarization}
+  \left\lVert\sum_i q_i B_i\right\rVert^2
+  =\sum_i q_i\lVert B_i\rVert^2
+  -\frac12\sum_i \sum_j q_i q_j\lVert B_i-B_j\rVert^2.
+\end{equation}
+Taking expectations under the coherent law $J$ is valid when the pairwise
+inner products are integrable.
+For each pair, the realized $J$-marginal is an admissible coupling of
+$P_i$ and $P_j$.
+Its expected squared displacement is therefore no smaller than
+$W_2^2(P_i,P_j)$, which in turn is no smaller than $\ell_{ij}^2$ by
+\eqref{eq:p3-floor-validity}.
+Substituting those lower bounds into the subtracted term of
+\eqref{eq:p3-weighted-polarization} yields the main result.
+
+\begin{theorem}[Information-certified coherent portfolio variance]
+  \label{thm:p3-information-certified-cap}
+  Suppose the common carrier satisfies \eqref{eq:p3-antilipschitz}, the
+  asset-specific maps satisfy \eqref{eq:p3-synchronous-slack}, the exposure
+  laws are marginals of one joint law $J$, and all pairwise inner products are
+  integrable.
+  Then every normalized long-only portfolio obeys
+  \begin{equation}\label{eq:p3-systematic-cap}
+    V_{\mathrm{sys}}(q)
+    \le \sum_i q_i v_i-\mathcal C(q).
+  \end{equation}
+\end{theorem}
+
+The theorem is an upper bound on systematic portfolio variance, not a point
+estimate of a covariance matrix.
+Its benchmark $\sum_i q_i v_i$ is the weighted marginal second-moment term that
+would remain if no cross-asset separation could be certified.
+The observable characteristic laws deduct $\mathcal C(q)$ from that benchmark.
+Larger distances tighten the deduction; larger distortion or slack weakens it.
+In finance terms, $\mathcal C(q)$ is the diversification relief that the
+observed information can certify under the maintained transmission model.
+
+The result is conservative in two specific ways, which the next subsection
+makes precise and addresses jointly.
+Pairwise optimal couplings need not all coexist inside one joint law, so the
+weighted pairwise floor understates the separation any coherent joint exposure
+law must incur.
+Equation \eqref{eq:p3-certificate-credit} also deducts each pair's two slack
+radii separately and truncates the result pair by pair, discarding every pair
+whose observed separation falls below its combined radius.
+
+\subsection{The sharp multi-firm certificate}\label{sec:sharp-certificate}
+
+The pairwise credit relaxes a single multi-firm object.
+That object measures the least total separation compatible with all observed
+characteristic laws under one common coupling.
+We refer to it as weighted multi-firm transport dispersion; for observed
+characteristic laws, the formal object below is weighted characteristic
+dispersion.
+Stating it directly tightens the deduction, and its two-asset case is exactly
+the pairwise covariance envelope of \citet{gawronsky_continuous_2026}, so the
+sharpening does not introduce a second theory.
+
+Fix normalized risk weights $q$ as above.
+Within $\mathcal D_q$, these weights are inputs: the infimum varies the coherent
+common coupling while holding $q$ fixed.
+Only the portfolio-choice problem in \Cref{sec:portfolio-choice} later treats
+$q$ as a decision variable.
+
+\begin{definition}[Weighted characteristic dispersion]
+  \label{def:p3-dispersion}
+  Let $\Pi$ denote the set of joint laws on $\mathcal X^n$ whose $i$th marginal
+  is $C_i$. For characteristic laws $C_1,\dots,C_n$ on
+  $(\mathcal X,d_{\mathcal X})$ and $(X_1,\dots,X_n)\sim\gamma$,
+  \begin{equation}\label{eq:p3-dispersion}
+    \mathcal D_q(C_1,\dots,C_n)
+    :=\inf_{\gamma\in\Pi}
+    \E_\gamma\left[\sum_{i<j}q_i\,q_j\,d_{\mathcal X}(X_i,X_j)^2\right].
+  \end{equation}
+\end{definition}
+
+The infimum is what makes the quantity conservative. It asks how close the
+laws could be under their most favourable common coupling, not how separated
+one selected matching makes them appear. Its units are squared characteristic
+distance, and its value depends on the ground metric and on $q$.
+
+Two facts locate \eqref{eq:p3-dispersion} against objects already in play.
+First, restricting a common coupling to any pair leaves an admissible coupling
+of that pair, whose expected squared displacement is therefore at least
+$W_2^2(C_i,C_j)$. Summing gives
+\begin{equation}\label{eq:p3-pairwise-relaxation}
+  \mathcal D_q(C_1,\dots,C_n)
+  \ \ge\ \sum_{i<j}q_i\,q_j\,W_2^2(C_i,C_j).
+\end{equation}
+The weighted pairwise sum is thus a computable lower bound on the multi-firm
+object, which is the inequality \eqref{eq:p3-certificate-credit} exploits.
+It can be built once from pairwise distances, but it does not retain the full
+restriction that all asset marginals share one coupling.
+Second, on a Hilbert space the same value has a free-centre Wasserstein
+barycentre representation: for exposure laws with finite second moments,
+\begin{equation}\label{eq:p3-barycenter-representation}
+  \mathcal D_q(P_1,\dots,P_n)
+  =\inf_{Q}\ \sum_i q_i\,W_2^2(P_i,Q),
+\end{equation}
+where $Q$ ranges over finite-second-moment laws on $\mathcal H$.
+For fixed $q$, only $Q$ varies.
+This shares the barycentric geometry of \citet{gawronsky_spatial_2027} but is not
+its target-anchored Wasserstein barycentric reconstruction; that problem fixes
+$i$ and its alignments and varies $w_i$ to form $W^\flat$.
+\Cref{prop:p3-barycenter-representation} states this in the appendix. Only
+equality of the two infimum values is used; neither an optimal barycentre nor
+an optimal joint plan is assumed to exist.
+
+The two-asset case recovers the pairwise foundation exactly.
+
+\begin{proposition}[Two-asset nesting]\label{thm:p3-pairwise-bridge}
+  Let $n=2$ and suppose some coherent joint law attains the dispersion minimum
+  for $P_1,P_2$. Then the systematic portfolio variance it attains is
+  \begin{equation}\label{eq:p3-two-asset-nesting}
+    q_1v_1+q_2v_2-q_1q_2\,W_2^2(P_1,P_2).
+  \end{equation}
+\end{proposition}
+Substituting $n=2$ into the dispersion definition gives
+$\mathcal D_q(P_1,P_2)=q_1q_2W_2^2(P_1,P_2)$.
+Weighted polarization then yields \eqref{eq:p3-two-asset-nesting}.
+
+Equation \eqref{eq:p3-two-asset-nesting} is the covariance-envelope correction
+of \citet{gawronsky_continuous_2026} written in portfolio form.
+The multi-firm construction extends that pairwise foundation to a coherent
+joint exposure law.
+
+The dispersion in \eqref{eq:p3-dispersion} remains measured in observed
+characteristic units, whereas the variance bound concerns latent exposure
+units.
+The same carrier and slack restrictions transfer the whole multi-firm object
+between these spaces rather than treating each pair separately.
+Aggregate the firm-specific mismatch through the weighted root-mean-square
+slack radius
+\begin{equation}\label{eq:p3-rms-slack}
+  \tau_q:=\Big(\sum_i q_i\tau_i^2\Big)^{1/2}.
+\end{equation}
+
+\begin{theorem}[Characteristic-to-exposure dispersion]
+  \label{thm:p3-aggregate-transfer}
+  Suppose the common carrier satisfies \eqref{eq:p3-antilipschitz} and the
+  asset-specific maps satisfy \eqref{eq:p3-synchronous-slack}. Then
+  \begin{equation}\label{eq:p3-aggregate-transfer}
+    \sqrt{\mathcal D_q(P_1,\dots,P_n)}
+    \ \ge\
+    \left[
+      L^{-1}\sqrt{\mathcal D_q(C_1,\dots,C_n)}-\tau_q
+    \right]_+ .
+  \end{equation}
+\end{theorem}
+
+For the transfer proof, write
+$T_i:=t_\#C_i$ and abbreviate
+$\mathcal D_q(C_1,\ldots,C_n)$,
+$\mathcal D_q(P_1,\ldots,P_n)$, and
+$\mathcal D_q(T_1,\ldots,T_n)$ by $\mathcal D_q(C)$,
+$\mathcal D_q(P)$, and $\mathcal D_q(T)$.
+The antilipschitz inequality implies, after pushing any coupling of the
+$C_i$ through $t$,
+\[
+  \sqrt{\mathcal D_q(C)}
+  \le L\sqrt{\mathcal D_q(T)}.
+\]
+The synchronous coupling $(u_i(X_i),t(X_i))$ gives
+\[
+  W_2(P_i,T_i)\le\tau_i.
+\]
+The weighted product-space stability inequality then yields
+\[
+  \left|\sqrt{\mathcal D_q(P)}-\sqrt{\mathcal D_q(T)}\right|
+  \le\left(\sum_i q_i W_2^2(P_i,T_i)\right)^{1/2}
+  \le\tau_q.
+\]
+Combining the last two displays gives
+\[
+  \sqrt{\mathcal D_q(P)}
+  \ge L^{-1}\sqrt{\mathcal D_q(C)}-\tau_q.
+\]
+Both sides of the left-hand inequality are nonnegative, so taking the
+positive part proves \eqref{eq:p3-aggregate-transfer}.
+Thus, even under the most favourable common coupling of the observed laws, the
+carrier preserves a minimum amount of latent exposure dispersion after one
+aggregate allowance for firm-specific mismatch.
+
+Squaring this transferred floor gives the sharp observable credit
+\begin{equation}\label{eq:p3-sharp-credit}
+  \mathcal C^{\sharp}(q)
+  :=\left[
+    L^{-1}\sqrt{\mathcal D_q(C_1,\dots,C_n)}-\tau_q
+  \right]_+^{2}.
+\end{equation}
+
+\begin{theorem}[Sharp information-certified portfolio variance]
+  \label{thm:p3-sharp-certificate}
+  Under the hypotheses of \Cref{thm:p3-information-certified-cap}, every
+  normalized long-only portfolio obeys
+  \begin{equation}\label{eq:p3-sharp-cap}
+    V_{\mathrm{sys}}(q)\le\sum_i q_i\,v_i-\mathcal C^{\sharp}(q).
+  \end{equation}
+\end{theorem}
+
+The proof is the following chain, where the first inequality uses the
+dispersion infimum and the second uses
+\Cref{thm:p3-aggregate-transfer}:
+\[
+  \begin{aligned}
+    V_{\mathrm{sys}}(q)
+    &=\sum_i q_i v_i-
+    \E_J\!\left[\sum_{i<j} q_i q_j\lVert B_i-B_j\rVert^2\right]\\
+    &\le\sum_i q_i v_i-\mathcal D_q(P)\\
+    &\le\sum_i q_i v_i-\mathcal C^{\sharp}(q).
+  \end{aligned}
+\]
+No attaining plan is needed for this bound.
+The theorem therefore tightens the systematic-risk cap by preserving joint
+compatibility across all assets instead of replacing the infimum over common
+couplings with a sum of pairwise infima.
+
+\begin{proposition}[Envelope exactness]\label{thm:p3-envelope-exactness}
+  If some coherent joint law attains the dispersion minimum for
+  $P_1,\dots,P_n$, then $\sum_i q_i\,v_i-\mathcal D_q(P_1,\dots,P_n)$ is the
+  greatest systematic portfolio variance attainable across coherent joint laws.
+\end{proposition}
+An attaining joint law realizes $\mathcal D_q(P)$, while every other coherent
+law has dispersion at least that infimum.
+Consequently, none can have greater systematic variance than the value stated
+in the proposition.
+This exactness concerns the variance envelope generated by the fixed exposure
+marginals and an attaining coherent law; it does not identify a return
+covariance matrix from text.
+
+\Cref{thm:p3-sharp-certificate} dominates
+\Cref{thm:p3-information-certified-cap} in two independent respects.
+Equation \eqref{eq:p3-pairwise-relaxation} makes the multi-firm dispersion at
+least the weighted pairwise sum, and \eqref{eq:p3-sharp-credit} subtracts one
+aggregate radius where \eqref{eq:p3-information-floor} subtracts
+$\tau_i+\tau_j$ from every pair. Under a common radius $\tau$ the second effect
+alone replaces a deduction of $2\tau$ per pair by a single $\tau$. Neither
+improvement needs new data: both use the same observed W2 geometry and the same
+declared $(L,\tau)$.
+
+The direction of the improvement is substantive.
+A larger credit is a tighter variance bound, and the sharp form replaces the
+pairwise relaxation with the coherent multi-firm dispersion while applying
+slack once at the aggregate level.
+The pairwise credit remains the decision form because it is a quadratic
+function of $q$ built once from the observed distance matrix, whereas
+evaluating $\mathcal D_q$ at a candidate $q$ requires solving an inner
+free-centre barycentre problem.
+The later portfolio search varies $q$ outside those fixed-$q$ evaluations; it
+is not part of the definition of $\mathcal D_q$.
+The empirical exercise therefore reports the pairwise relaxation while the
+sharp theorem records the coherent multi-firm benchmark against which that
+computational relaxation is judged.
+
+\subsection{Return bridge and residual sensitivity}
+
+The results so far bound latent systematic exposure risk, not observed return
+variance.
+To obtain a total-return statement, standardize each asset to unit marginal
+variance and decompose its return into systematic and residual components.
+This return bridge is a maintained restriction rather than a consequence of
+the information geometry.
+
+\begin{assumption}[Return bridge]\label{ass:p3-return-bridge}
+  Each standardized return splits as $R_i=S_i+\varepsilon_i$ into a scalar
+  systematic component $S_i$ carrying the exposure geometry and a residual
+  $\varepsilon_i$.
+  Write $v_i=\operatorname{Var}(S_i)$.
+  The residual vector is cross-orthogonal to the systematic component:
+  \[
+    \operatorname{Cov}(S_i,\varepsilon_j)=0
+    \quad\text{for every }i\text{ and }j.
+  \]
+  For risk weights $q$, set $S_q:=\sum_i q_i S_i$ and write
+  \[
+    \operatorname{Var}(R_q)=\operatorname{Var}(S_q)+\mathcal R(q),
+    \qquad
+    \mathcal R(q):=\sum_i\sum_j
+    q_i q_j\operatorname{Cov}(\varepsilon_i,\varepsilon_j).
+  \]
+  Unit marginal return variance and zero systematic--residual covariance give
+  $\operatorname{Var}(\varepsilon_i)=1-v_i$.
+  Zero cross-residual covariance is the benchmark; more generally, the excess
+  residual contribution is bounded by a declared $\delta\ge0$.
+\end{assumption}
+
+Under zero cross-residual covariance, the systematic certificate and the
+diagonal residual terms give
+\begin{equation}\label{eq:p3-standardized-cap}
+  \begin{aligned}
+    \operatorname{Var}(R_q)
+    &\le \sum_i q_i v_i-\mathcal C(q)
+    +\sum_i q_i^2(1-v_i)\\
+    &=1-\mathcal C(q)-\sum_i q_i(1-q_i)(1-v_i)\\
+    &\le 1-\mathcal C(q).
+  \end{aligned}
+\end{equation}
+The first line combines the systematic certificate with diagonal residual
+variance.
+The equality isolates the additional diversification relief supplied by
+asset-specific residual risk.
+Long-only normalization gives $q_i(1-q_i)\ge0$, so the final inequality
+discards that nonnegative relief and leaves the simpler
+$1-\mathcal C(q)$ certificate.
+With residual contamination, retain the sensitivity wrapper
+\begin{equation}\label{eq:p3-residual-budget-cap}
+  \operatorname{Var}(R_q)\le1-\mathcal C(q)+\delta.
+\end{equation}
+Here $\delta$ is a portfolio residual-covariance budget used for sensitivity
+analysis, not an estimated structural parameter.
+To express the standardized result as a capital-allocation bound, separate
+capital weights from shares of the perfect-dependence volatility budget.
+For long-only capital weights $x_i\ge0$ with $\sum_i x_i=1$ and positive
+marginal scales $\sigma_i$, define
+\begin{equation}\label{eq:p3-risk-weights}
+  A(x):=\sum_i x_i\sigma_i,
+  \qquad
+  q_i(x):=\frac{x_i\sigma_i}{A(x)}.
+\end{equation}
+Here $A(x)$ is the portfolio volatility under perfect positive dependence.
+The normalized weight $q_i(x)$ is asset $i$'s share of that benchmark.
+Thus $x_i$ are capital weights whereas $q_i$ are risk-budget shares; in
+particular, $x_i\propto1/\sigma_i$ implies $q_i=1/n$.
+Multiplying \eqref{eq:p3-residual-budget-cap} by $A(x)^2$ yields
+\begin{equation}\label{eq:p3-raw-cap}
+  \operatorname{Var}(R_x)
+  \le
+  A(x)^2\left\{1-\mathcal C(q(x))+\delta\right\}.
+\end{equation}
+This is the financial interpretation of the certificate:
+$A(x)^2$ is the perfect-dependence benchmark, while
+$A(x)^2\mathcal C(q(x))$ is the amount of raw systematic variance
+ruled out by the
+observed information geometry under the maintained transmission model.
+The additive term $A(x)^2\delta$ makes residual sensitivity explicit.
+Equation \eqref{eq:p3-raw-cap} is therefore a decision input rather than an
+estimated covariance model.
+At the benchmark $\delta=0$, \Cref{sec:portfolio-choice} turns this certified
+risk bound into a portfolio rule by minimizing it over a feasible allocation
+set.

@@ -1,0 +1,127 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=18mm]{geometry}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\input{metadata}
+
+\hypersetup{
+  pdftitle={Cover letter for \papertitle},
+  pdfauthor={Marcus Gawronsky},
+  pdfsubject={Submission to Quantitative Finance}
+}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4.4pt}
+\setlength{\emergencystretch}{1em}
+\linespread{0.966}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+
+\begin{document}
+
+\fontsize{9.85pt}{11.6pt}\selectfont
+
+\begin{flushright}
+  30 August 2026
+\end{flushright}
+
+Dear Editors of \textit{Quantitative Finance},
+
+Please consider our manuscript, ``\textbf{\papertitle},'' for publication in
+\textit{Quantitative Finance}.
+
+Financial models of dependence typically begin only after a firm has been
+reduced to a point-valued characteristic vector, assigned a position in a
+supplied network, or represented through an estimated return covariance.
+Yet economically heterogeneous firms do not occupy single positions: their
+operations span products, technologies, counterparties, markets, and information states.
+Modern language-model representations now make it possible to preserve much
+of this heterogeneity empirically, by representing a firm through a
+distribution of information rather than a single score or embedding.
+This creates a timely second-order question for quantitative finance:
+\textit{once rich distribution-valued representations of firms are available,
+what can they establish about financial dependence rather than merely prediction?}
+
+Our paper develops one answer at the pairwise level.
+We represent firm characteristics as probability laws and use quadratic
+optimal transport to compare them.
+The Wasserstein construction has an economic interpretation beyond generic
+similarity: it measures the least aggregate displacement required to align
+two heterogeneous characteristic distributions, treating substitutions
+between nearby economic positions as less costly than substitutions between
+distant ones.
+In latent factor-risk coordinates, quadratic transport has a further special
+property: the squared displacement minimized by $W_2$ is exactly the quantity
+that polarization converts into an inner product.
+Consequently, for given marginal exposure laws, the optimal transport problem
+delivers the \textbf{sharp maximum systematic covariance attainable over
+their possible joint arrangements}, while reflection gives the corresponding
+lower endpoint.
+
+We then ask when observable characteristic geometry can discipline this
+latent covariance set.
+Under an explicit common randomized bi-Lipschitz information-to-exposure map,
+bounded firm-specific slack in risk coordinates, and a maintained return
+bridge, observed distributional separation yields a conditional restriction
+on the covariance ceiling.
+Economically, if two firms remain far apart under every admissible
+transmission of their characteristics into systematic exposures, their risks
+cannot be made arbitrarily well aligned.
+The resulting object is therefore not another covariance estimator or
+expected-return signal.
+It is an \textbf{external restriction on the set of systematic dependence
+configurations consistent with observable economic composition}.
+
+This perspective is potentially useful where conventional dependence
+estimation is weakest: new or thinly traded securities, private or
+infrequently valued assets, changing investment universes, and other settings
+in which rich information about economic composition is available but joint
+return histories are short or heavily proxy-dependent.
+More generally, the distributional primitive need not be textual: analogous
+characteristic laws could describe geographic footprints, property
+portfolios, loan books, supplier or customer exposures, product mixes, or holdings.
+In such applications, the covariance envelope could complement rather than
+replace factor, shrinkage, or stress-testing approaches by supplying
+information about admissible dependence that originates outside joint returns.
+
+Our empirical application uses distributions of language-model
+representations of financial news, disclosures, and analyst reports for Nasdaq firms.
+Greater pairwise Wasserstein separation is associated with weaker return
+co-movement after symmetric firm effects; a one-standard-deviation increase
+in $W_2$ corresponds to approximately eight fewer correlation points at
+representative dyads.
+The association retains the same sign when the information geometry is held
+fixed and returns are measured in a later window, and it remains positive
+across a substantial representation-sensitivity analysis.
+We treat this evidence as reduced-form support for the relevance of the
+measured geometry, rather than as causal or point-in-time predictive validation.
+
+We believe the manuscript is particularly suited to \textit{Quantitative
+Finance} because it connects factor-model covariance, optimal transport,
+spatial notions of economic proximity, and modern representation methods to
+introduce a new quantitative object: a \textbf{covariance envelope derived
+from distribution-valued firm information}.
+The contribution is not that language models predict another financial
+variable, but that rich representations can, under explicit economic
+conditions, restrict the systematic risk configurations that remain feasible.
+
+We confirm that the manuscript is original, has not been published
+previously, and is not under consideration for publication elsewhere.
+
+Thank you for considering our manuscript.
+
+\begingroup
+\setlength{\parskip}{0pt}
+Sincerely,\par
+\smallskip
+Marcus Gawronsky\par
+Department of Finance and Tax\par
+University of Cape Town
+\endgroup
+
+\end{document}

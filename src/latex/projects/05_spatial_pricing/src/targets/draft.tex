@@ -1,0 +1,40 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=30mm]{geometry}
+\usepackage[round,authoryear]{natbib}
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+
+\input{metadata}
+\input{generated/numbers}
+\input{generated/lean_status}
+
+\title{\papertitle}
+\author{\paperauthors\\\paperaffiliations}
+\date{\paperdate}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  \input{chapters/abstract}
+\end{abstract}
+
+\noindent\textit{Keywords:} \paperkeywords
+
+\medskip
+
+\noindent\textit{JEL classification:} \paperjel
+
+\input{body}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\appendix
+\input{appendix}
+
+\end{document}

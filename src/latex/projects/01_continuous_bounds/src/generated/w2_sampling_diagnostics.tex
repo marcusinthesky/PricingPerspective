@@ -1,0 +1,17 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrcr}
+\toprule
+Encoder & Articles & Distance & Rank $\rho$ & $\Delta D$/1 SD [95\% CI] & Partial $R^2$ \\
+\midrule
+Qwen3-8B & 32 & $W_2$ & 0.895 & 0.060 [0.047, 0.073] & 0.260 \\
+Qwen3-8B & 64 & $W_2$ & 0.960 & 0.066 [0.054, 0.079] & 0.308 \\
+Qwen3-8B & 128 & $W_2$ & 1.000 & 0.069 [0.056, 0.082] & 0.332 \\
+\bottomrule
+\end{tabular}
+\caption{Article-sampling sensitivity for Qwen3-Embedding-8B. Prefixes are deterministic, rank agreement is measured against the 128-article $W_2$ matrix, and all association intervals reuse the common node schedule. The rows diagnose finite article sampling; they do not quantify embedding-estimation uncertainty.}
+\label{tab:w2-sampling-diagnostics}
+\end{table}
