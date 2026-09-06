@@ -665,29 +665,20 @@ a:hover {
   flex: 0 0 auto;
 }
 
-.blueprint-frame,
-.playground-frame {
+.blueprint-frame {
   overflow: hidden;
   border: 1px solid var(--line-dark);
   background: #fff;
   box-shadow: var(--shadow);
 }
 
-.blueprint-frame iframe,
-.playground-frame iframe {
+.blueprint-frame iframe {
   display: block;
   width: 100%;
   height: min(78rem, 82svh);
   min-height: 42rem;
   border: 0;
   background: #fff;
-}
-
-/* marimo puts a control sidebar beside three panels, so the playground needs
-   more vertical room than the blueprint document it otherwise matches. */
-.playground-frame iframe {
-  height: min(92rem, 92svh);
-  min-height: 54rem;
 }
 
 .blueprint-note {
@@ -2266,8 +2257,7 @@ a:hover {
     flex-direction: column;
   }
 
-  .blueprint-frame iframe,
-  .playground-frame iframe {
+  .blueprint-frame iframe {
     height: 72svh;
     min-height: 34rem;
   }
