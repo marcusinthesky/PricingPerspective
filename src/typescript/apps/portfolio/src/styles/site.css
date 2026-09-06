@@ -665,20 +665,29 @@ a:hover {
   flex: 0 0 auto;
 }
 
-.blueprint-frame {
+.blueprint-frame,
+.playground-frame {
   overflow: hidden;
   border: 1px solid var(--line-dark);
   background: #fff;
   box-shadow: var(--shadow);
 }
 
-.blueprint-frame iframe {
+.blueprint-frame iframe,
+.playground-frame iframe {
   display: block;
   width: 100%;
   height: min(78rem, 82svh);
   min-height: 42rem;
   border: 0;
   background: #fff;
+}
+
+/* marimo puts a control sidebar beside three panels, so the playground needs
+   more vertical room than the blueprint document it otherwise matches. */
+.playground-frame iframe {
+  height: min(92rem, 92svh);
+  min-height: 54rem;
 }
 
 .blueprint-note {
@@ -1222,6 +1231,29 @@ a:hover {
   font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
+}
+
+/* The interactive companion sits in the same row rhythm as the podcast player
+   above it; the frame, once launched, spans the full width on its own row. */
+.film-playground {
+  display: grid;
+  margin-top: 1rem;
+  padding: 1rem clamp(1rem, 2vw, 1.5rem);
+  border: 1px solid var(--line-dark);
+  background: var(--paper-bright);
+  grid-template-columns: minmax(13rem, 0.9fr) minmax(18rem, 1.8fr) auto;
+  align-items: center;
+  gap: 1rem;
+}
+
+.film-playground-frame {
+  display: block;
+  width: 100%;
+  height: min(88rem, 88svh);
+  min-height: 50rem;
+  border: 1px solid var(--line-dark);
+  background: var(--paper-bright);
+  grid-column: 1 / -1;
 }
 
 .research-timeline-wrap {
@@ -2012,6 +2044,15 @@ a:hover {
     grid-template-columns: 1fr;
   }
 
+  .film-playground {
+    grid-template-columns: 1fr;
+  }
+
+  .film-playground-frame {
+    height: 78svh;
+    min-height: 34rem;
+  }
+
   .film-audio {
     grid-template-columns: 1fr;
   }
@@ -2225,7 +2266,8 @@ a:hover {
     flex-direction: column;
   }
 
-  .blueprint-frame iframe {
+  .blueprint-frame iframe,
+  .playground-frame iframe {
     height: 72svh;
     min-height: 34rem;
   }

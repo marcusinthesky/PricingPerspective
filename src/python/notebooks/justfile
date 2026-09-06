@@ -1,0 +1,85 @@
+set shell := ["bash", "-uc"]
+
+# Notebooks are standalone PEP 723 units, not workspace members, so marimo is run
+# from its own ephemeral environment rather than the workspace venv. Pinned because
+# an unpinned `uvx marimo` silently changes the notebook file format on save.
+marimo := "marimo==0.24.0"
+
+# `--sandbox` resolves the notebook's `# /// script` block, so the editing
+# environment is the one the exports resolve against.
+#
+# Edit a notebook in the browser.
+edit slug:
+    cd '{{ source_directory() }}/{{ slug }}' && env -u VIRTUAL_ENV uvx --from {{ marimo }} marimo edit --sandbox notebook.py
+
+# Static HTML snapshot, non-interactive.
+html slug:
+    cd '{{ source_directory() }}/{{ slug }}' && env -u VIRTUAL_ENV uvx --from {{ marimo }} marimo export html --sandbox notebook.py -o output.html
+
+# Self-contained WebAssembly bundle in <slug>/dist/ — the payload for a Hugging
+# Face Space with `sdk: static`, and the copy the portfolio site serves.
+#
+# `--execute` pre-renders every cell, so the page shows results before Pyodide has
+# finished booting, and it runs marimo's WASM compatibility lint. That pass only
+# means anything with the Pyodide lockfile in hand: marimo fetches it from
+# wasm.marimo.app, and when the fetch fails inside the sandbox it falls back to
+# "no package version constraints" with only a warning — which is exactly the
+# check we wanted. So fetch it here and hand it over via MARIMO_PYODIDE_LOCK_FILE.
+#
+# `--no-show-code` because these are demos, not listings: with code shown, the
+# source sits above the outputs and a reader lands on an import block.
+#
+# marimo bundles a `CLAUDE.md` authoring guide with its frontend assets; it is not
+# ours and has no business in a published Space. The notebook's README is copied
+# in as the Space card.
+#
+# Export a notebook to a self-contained WebAssembly bundle in <slug>/dist/.
+wasm slug:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd '{{ source_directory() }}/{{ slug }}'
+    lock="$(mktemp -t pyodide-lock-XXXXXX.json)"
+    trap 'rm -f "$lock"' EXIT
+    version="$(sed 's/.*==//' <<<'{{ marimo }}')"
+    if curl -fsSL "https://wasm.marimo.app/pyodide-lock.json?v=${version}" -o "$lock"; then
+        export MARIMO_PYODIDE_LOCK_FILE="$lock"
+    else
+        echo "warn: could not fetch the Pyodide lockfile; exporting without version constraints" >&2
+    fi
+    env -u VIRTUAL_ENV uvx --from {{ marimo }} marimo export html-wasm notebook.py \
+        -o dist --mode run --no-show-code --execute --force
+    rm -f dist/CLAUDE.md
+    cp README.md dist/README.md
+
+# A Jupyter rendering of the notebook, executed, in <slug>/__marimo__/. The
+# `auto_download=["ipynb"]` in each App only fires during an interactive session,
+# so this is the non-interactive equivalent — run it when the notebook changes.
+ipynb slug:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd '{{ source_directory() }}/{{ slug }}'
+    mkdir -p __marimo__
+    env -u VIRTUAL_ENV uvx --from {{ marimo }} marimo export ipynb notebook.py \
+        -o __marimo__/notebook.ipynb --include-outputs --sort top-down --sandbox -f
+
+# Refresh <slug>/notebook.py.lock from the notebook's inline dependency block.
+lock slug:
+    cd '{{ source_directory() }}/{{ slug }}' && env -u VIRTUAL_ENV uv lock --script notebook.py
+
+fmt slug:
+    cd '{{ source_directory() }}' && env -u VIRTUAL_ENV uv run --project ../ ruff format {{ slug }}/notebook.py
+
+format-check slug:
+    cd '{{ source_directory() }}' && env -u VIRTUAL_ENV uv run --project ../ ruff format --check {{ slug }}/notebook.py
+
+lint slug:
+    cd '{{ source_directory() }}' && env -u VIRTUAL_ENV uv run --project ../ ruff check {{ slug }}/notebook.py
+
+# Per-file, against each notebook's own inline environment rather than the
+# workspace venv — the workspace recipe that walks every PEP 723 unit.
+#
+# Type check every notebook and standalone script.
+typecheck:
+    cd "$(git -C '{{ source_directory() }}' rev-parse --show-toplevel)" && just python::typecheck-scripts
+
+check slug: (format-check slug) (lint slug) typecheck

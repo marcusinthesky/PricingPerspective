@@ -16,6 +16,8 @@ mod insitu 'packages/insitu/justfile'
 mod insitu-repository 'apps/insitu-repository/justfile'
 # Manim animation and Kokoro narration application.
 mod manimize 'apps/manimize/justfile'
+# Standalone PEP 723 marimo notebooks, including the Wasserstein Playground Space.
+mod notebooks 'notebooks/justfile'
 
 # Sync the uv workspace.
 setup:
@@ -72,7 +74,7 @@ typecheck-scripts:
             continue
         fi
         uv run pyrefly check -c /dev/null --python-interpreter-path "$interp" "$f" || rc=1
-    done < <(grep -rl '# /// script' scripts apps --include='*.py')
+    done < <(grep -rl '# /// script' scripts notebooks apps --include='*.py')
     exit "$rc"
 
 # Native Ruff dependency graph, including TYPE_CHECKING and string imports.

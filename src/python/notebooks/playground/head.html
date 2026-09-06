@@ -1,0 +1,19 @@
+<!-- Social preview for the standalone bundle, injected into <head/> by marimo's
+     `wasm_notebook_template`. Written here rather than as `[tool.marimo.opengraph]`
+     script metadata, which only the server-rendered template reads. `og:url` names
+     the Space, this bundle's canonical standalone home; the copy embedded in the
+     portfolio site gets its own OpenGraph tags from the page around the iframe.
+     No plain `<meta name="description">`: marimo already emits one earlier in
+     <head/>, and a crawler reading duplicates takes the first. -->
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Pricing Perspective" />
+<meta property="og:title" content="Wasserstein Playground" />
+<meta property="og:description"
+      content="Shape four firms' characteristic laws and watch W2 geometry cap how their returns can co-move." />
+<meta property="og:url" content="https://huggingface.co/spaces/marcusinthesky/PricingPerspective" />
+
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Wasserstein Playground" />
+<meta name="twitter:description"
+      content="Shape four firms' characteristic laws and watch W2 geometry cap how their returns can co-move." />

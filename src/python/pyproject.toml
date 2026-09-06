@@ -74,8 +74,9 @@ allowed-confusables = [
   "\u03b1",
   "\u2139",
   "\u211d",
-  "\u00b5"
-]  # σ, ×, α, ℹ, ℝ, µ (intentional scientific notation)
+  "\u00b5",
+  "\u03c1"
+]  # σ, ×, α, ℹ, ℝ, µ, ρ (intentional scientific notation)
 # \u00b5 is MICRO SIGN, not \u03bc GREEK SMALL LETTER MU: it is the SI
 # prefix in timing units (`520 µs`), which is what the benchmark prose in
 # `geometry/neighbour.py` quotes. Listed rather than rewritten so a recorded
@@ -100,7 +101,33 @@ runtime-evaluated-decorators = ["typer.Typer.callback", "typer.Typer.command"]
 # one, names are rootdir-relative and unique. Re-adding an `__init__.py` to
 # satisfy this rule would silently re-break `just python::test`.
 "**/tests/**" = ["S101", "INP001"]
-"**/notebooks/**" = ["F821", "B018"]
+# The rest of this list is marimo's *generated* file format, not authored style,
+# and marimo rewrites it on every save — so these are unfixable by hand rather
+# than merely inconvenient. A marimo notebook is a module of `@app.cell`-decorated
+# functions named `_`, whose parameters are the globals the cell reads from other
+# cells and whose `return` tuple is the globals it exports; marimo derives both
+# the signature and the return statement itself. Hence: ANN001/ANN202 (marimo
+# writes the signatures, unannotated), N803/N806 (module-level constants are cell
+# locals and arrive as cell arguments, so `FIRMS` reads as a lowercase violation),
+# PLC0415 (imports must sit inside a cell to join the dataflow graph), PLR1711
+# (marimo appends a bare `return` to cells that export nothing).
+# Everything else in `ALL` still applies to notebook source.
+"**/notebooks/**" = [
+  "F821",
+  "B018",
+  "ANN001",
+  "ANN202",
+  "N803",
+  "N806",
+  "PLC0415",
+  "PLR1711",
+  # TC002 likewise: marimo builds its dataflow graph from the names a cell reads,
+  # and resolves them against real runtime globals. An import moved into a
+  # `if TYPE_CHECKING:` branch is invisible at runtime, so every cell whose
+  # signature mentions it dies with `NameError: Name 'Axes' is not defined` —
+  # observed, not hypothesised. Type-only imports must stay unconditional here.
+  "TC002",
+]
 # Generated marimo cache mirrors fixed, locally-authored analytical queries;
 # keep S608 active for every hand-maintained Python and notebook source.
 "**/notebooks/__marimo__/**" = ["S608"]

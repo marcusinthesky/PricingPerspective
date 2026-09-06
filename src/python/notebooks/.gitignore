@@ -1,0 +1,12 @@
+# WASM export output: the Hugging Face Space payload, ~29 MB, rebuilt by
+# `just python::notebooks::wasm <slug>`. The copy the site serves is committed
+# under the portfolio's public/; this one is not.
+*/dist/
+
+# `marimo export html` scratch output.
+*/output.html
+
+# marimo's pre-rendered cell outputs for `--execute`: derived from the notebook,
+# ~800 KB of embedded figures, rewritten on every export. The .ipynb beside it is
+# a real artifact and stays tracked.
+*/__marimo__/session/

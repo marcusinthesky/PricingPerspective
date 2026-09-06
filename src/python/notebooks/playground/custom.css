@@ -1,0 +1,28 @@
+/* Paper-and-ink, matching the portfolio site that embeds this notebook.
+ *
+ * This restores the palette the Gradio version carried in its own stylesheet.
+ * marimo defines its surface colours as `light-dark(<light>, <dark>)` pairs, but
+ * these are pinned to flat light values on purpose: every figure is drawn by
+ * matplotlib with `facecolor=PAPER` baked in, so a dark chrome would frame five
+ * permanently-light images. The Gradio app forced `color-scheme: light` for the
+ * same reason. Only surfaces, text and borders are touched — control accents and
+ * every foreground/background contrast pair marimo computes are left alone. */
+
+:root {
+  color-scheme: light;
+
+  --background: #f6f6f1;
+  --card: #fcfcf9;
+  --popover: #fcfcf9;
+
+  --foreground: #090909;
+  --card-foreground: #090909;
+  --popover-foreground: #090909;
+
+  --border: #cecec5;
+  --input: #cecec5;
+  --muted: #eeeee6;
+
+  --marimo-text-font: ui-serif, Georgia, "Times New Roman", serif;
+  --marimo-heading-font: ui-serif, Georgia, "Times New Roman", serif;
+}

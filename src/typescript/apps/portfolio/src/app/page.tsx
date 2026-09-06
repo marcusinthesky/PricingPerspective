@@ -8,6 +8,7 @@ import { AppearingIn } from "@/components/appearing-in";
 import { AudioFeature } from "@/components/audio-feature";
 import { JsonLd } from "@/components/json-ld";
 import { PaperCard } from "@/components/paper-card";
+import { PlaygroundFeature } from "@/components/playground-feature";
 import { ResearcherCard } from "@/components/researcher-card";
 import { ResearchTimeline } from "@/components/research-timeline";
 import { Reveal } from "@/components/reveal";
@@ -110,6 +111,14 @@ export default function HomePage() {
         />
         <Reveal delay={120}>
           <AudioFeature />
+        </Reveal>
+        <SectionHeading
+          eyebrow="Interactive companion"
+          title="Shape the distributions yourself."
+          description="A browser-native notebook where the W₂ separation you dial in caps how much the returns can co-move."
+        />
+        <Reveal delay={120}>
+          <PlaygroundFeature />
         </Reveal>
       </section>
 
