@@ -1,0 +1,8 @@
+/.venv/
+/.lake/
+/print/
+/web/
+/lean_decls
+/src/*.paux
+/src/web.bbl
+/checkdecls/.lake/

@@ -1,0 +1,629 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+r"""bundle-audit — hostile clean-room gate for arXiv / journal bundles.
+
+Given a staged, source-only bundle directory (as produced by `just bundle`'s
+staging step, before it is tarred), this tool:
+
+  1. Recompiles the staging tree with `tectonic -X compile --makefile-rules`
+     and parses the emitted rules file for the input closure. Every
+     prerequisite must resolve inside the staging root; anything else (e.g. an
+     absolute path back into the repository working tree) is a hard failure —
+     it means the bundle silently depends on something that was never staged.
+     TeX support files need no exemption: Tectonic serves them from its
+     content-addressable bundle cache, so they never appear as filesystem
+     prerequisites at all, and the check is exact rather than allow-listed.
+  2. Reuses `tools/check-log` for unresolved/multiply-defined objects and
+     missing glyphs, and additionally gates shell-escape usage, non-portable
+     filenames, missing `\includegraphics` targets, a missing document class,
+     and archive members that would resolve outside the staging root.
+  3. Emits a deterministic MANIFEST.json (sorted keys, no timestamps, sha256
+     per source file, tool versions) into the staging directory.
+  4. Archives the staging directory deterministically, excluding build
+     intermediates, as a deterministic tar.gz.
+  5. Extracts that archive into a fresh temporary directory and recompiles
+     there under `--only-cached`, proving the archive is self-contained and
+     that every support file was already in the pinned bundle cache (a
+     stronger claim than "the local TeX tree happened to have it").
+
+Usage:
+    bundle-audit STAGE_DIR TARGET OUT_ARCHIVE [BUNDLE]
+
+BUNDLE pins the Tectonic bundle used for both compiles and is recorded in
+MANIFEST.json with its content digest. Pass the value from the project's
+`Tectonic.toml` — a URL, or an *absolute* path to the vendored local bundle,
+which is what every project here uses and what `just bundle` resolves for you
+(the compiles run from STAGE_DIR, so a project-relative path would not resolve).
+Omitting it falls back to Tectonic's default bundle, which is NOT the one the
+manuscripts are pinned to.
+
+STAGE_DIR must already contain main.tex plus every other source file that
+belongs in the bundle (chapters/, generated/, images/, refs.bib). This script
+does not decide what to stage; the justfile owns that step.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import subprocess
+import sys
+import tarfile
+import zipfile
+from pathlib import Path
+
+TOOLS_DIR = Path(__file__).resolve().parent
+
+# Build intermediates that must never appear in a submitted archive.
+# NOTE: `.pdf` is deliberately NOT excluded by suffix — figure PDFs
+# (images/*.pdf) are legitimate arXiv/QF source members. Only the compiled
+# main output (main.pdf) is excluded, by name, below.
+# `.fls`/`.fdb_latexmk` are retained even though Tectonic never emits them:
+# the policy is about what may not ship, and a stray latexmk artifact from an
+# older checkout must still be stripped. `.mk` is this gate's own dependency
+# dump (`--makefile-rules`).
+EXCLUDED_SUFFIXES = {
+    ".aux",
+    ".log",
+    ".fls",
+    ".fdb_latexmk",
+    ".mk",
+    ".out",
+    ".bbl",
+    ".blg",
+    ".synctex.gz",
+}
+EXCLUDED_NAMES = {
+    "MANIFEST.json",  # regenerated fresh each run, not self-hashed
+    "main.pdf",  # the compiled document output, never a source member
+}
+
+PORTABLE_NAME_RE = re.compile(r"^[A-Za-z0-9._-]+$")
+GRAPHICS_SUFFIXES = {".pdf", ".png", ".jpg", ".jpeg"}
+
+
+class AuditError(RuntimeError):
+    pass
+
+
+def render_process_output(data: bytes) -> str:
+    """Render a subprocess byte stream without dropping undecodable bytes."""
+    return data.decode("utf-8", errors="backslashreplace")
+
+
+# Deliberately not the caller's full environment: a stray TEXINPUTS/BIBINPUTS
+# would let the compile read files the bundle never staged, which is exactly
+# what this gate exists to catch. HOME/XDG_CACHE_HOME/TECTONIC_CACHE_DIR are
+# required — they locate the bundle cache that `--only-cached` reads from.
+ENV_ALLOWLIST = ("PATH", "HOME", "XDG_CACHE_HOME", "TECTONIC_CACHE_DIR", "TMPDIR")
+
+
+def subprocess_env() -> dict[str, str]:
+    import os
+
+    return {name: os.environ[name] for name in ENV_ALLOWLIST if name in os.environ}
+
+
+def run(
+    cmd: list[str], cwd: Path, allow_fail: bool = False
+) -> subprocess.CompletedProcess[bytes]:
+    proc = subprocess.run(
+        cmd,
+        cwd=cwd,
+        capture_output=True,
+        text=False,
+        env=subprocess_env(),
+        check=False,
+    )
+    if proc.returncode != 0 and not allow_fail:
+        raise AuditError(
+            f"command failed ({proc.returncode}): {' '.join(cmd)}\n"
+            f"--- stdout ---\n{render_process_output(proc.stdout)}\n"
+            f"--- stderr ---\n{render_process_output(proc.stderr)}"
+        )
+    return proc
+
+
+def tectonic_compile(
+    stage: Path,
+    main: str,
+    bundle: str | None,
+    outdir: Path,
+    rules: Path | None = None,
+) -> None:
+    """Compile main.tex with Tectonic from `stage`, offline against the bundle cache."""
+    cmd = ["tectonic", "-X", "compile", "--untrusted", "--only-cached", "--keep-logs"]
+    if bundle:
+        cmd += ["--bundle", bundle]
+    if rules is not None:
+        cmd += ["--makefile-rules", str(rules)]
+    cmd += ["--outdir", str(outdir), main]
+    run(cmd, cwd=stage)
+
+
+def compile_with_rules(stage: Path, main: str, bundle: str | None) -> Path:
+    """Compile and dump the dependency closure; return path to the rules file."""
+    rules = stage / f"{Path(main).stem}.mk"
+    tectonic_compile(stage, main, bundle, outdir=stage, rules=rules)
+    if not rules.is_file():
+        raise AuditError(
+            f"expected makefile rules at {rules} after tectonic -X compile"
+        )
+    return rules
+
+
+def recorded_inputs(rules: Path) -> list[str]:
+    """Prerequisite tokens recorded by `tectonic -X compile --makefile-rules`.
+
+    The file is Makefile syntax: one or more backslash-continued
+    `targets : prerequisites` rules. Only the right-hand side is an input —
+    the targets are this run's own outputs (main.pdf, main.log, main.bbl, …).
+    Prerequisites are whitespace-separated and never contain spaces here;
+    `audit_portable_names` rejects any staged name that would.
+    """
+    text = rules.read_text(encoding="utf-8", errors="replace")
+    tokens: set[str] = set()
+    for logical in text.replace("\\\n", " ").splitlines():
+        if ":" not in logical:
+            continue
+        _targets, _, prerequisites = logical.partition(":")
+        tokens.update(prerequisites.split())
+    return sorted(tokens)
+
+
+def audit_rules_closure(rules: Path, stage: Path) -> None:
+    stage_real = stage.resolve()
+    offenders: list[str] = []
+    for raw in recorded_inputs(rules):
+        if not raw.startswith("/"):
+            # Relative prerequisite: Tectonic resolves these against the cwd (stage).
+            candidate = (stage_real / raw).resolve()
+            if (
+                not str(candidate).startswith(str(stage_real) + "/")
+                and candidate != stage_real
+            ):
+                offenders.append(raw)
+            continue
+        if str(Path(raw)).startswith(str(stage_real) + "/"):
+            continue
+        # No system-path exemption is needed: bundle assets are served from
+        # Tectonic's content-addressable cache and never appear here, so any
+        # absolute prerequisite outside the stage is a genuine unstaged input.
+        offenders.append(raw)
+    if offenders:
+        joined = "\n  ".join(sorted(set(offenders)))
+        raise AuditError(
+            f"unstaged input(s) referenced outside the staging root:\n  {joined}"
+        )
+
+
+def audit_image_closure(rules: Path, stage: Path) -> None:
+    """Reject staged images that the target's recorded closure never reads."""
+    stage_real = stage.resolve()
+    recorded: set[Path] = set()
+    for raw in recorded_inputs(rules):
+        candidate = (
+            Path(raw).resolve() if raw.startswith("/") else (stage_real / raw).resolve()
+        )
+        try:
+            relative = candidate.relative_to(stage_real)
+        except ValueError:
+            continue
+        if relative.parts and relative.parts[0] == "images":
+            recorded.add(relative)
+
+    staged = {
+        path.relative_to(stage_real)
+        for path in (stage_real / "images").rglob("*")
+        if path.is_file() and path.suffix.lower() in GRAPHICS_SUFFIXES
+    }
+    unreachable = sorted(staged - recorded)
+    if unreachable:
+        joined = "\n  ".join(path.as_posix() for path in unreachable)
+        raise AuditError(
+            "unreferenced image(s) staged outside the recorded compile closure:\n  "
+            + joined
+        )
+
+
+def audit_check_log(stage: Path, main_stem: str) -> None:
+    log = stage / f"{main_stem}.log"
+    if not log.is_file():
+        raise AuditError(f"missing compile log {log}")
+    proc = subprocess.run(
+        ["bash", str(TOOLS_DIR / "check-log"), str(log)],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if proc.returncode != 0:
+        raise AuditError(f"check-log rejected {log}:\n{proc.stdout}{proc.stderr}")
+
+
+def source_files(stage: Path) -> list[Path]:
+    files = []
+    for p in sorted(stage.rglob("*")):
+        if not p.is_file():
+            continue
+        rel = p.relative_to(stage)
+        if p.suffix in EXCLUDED_SUFFIXES:
+            continue
+        if p.name in EXCLUDED_NAMES:
+            continue
+        if str(rel).endswith(".synctex.gz"):
+            continue
+        files.append(p)
+    return files
+
+
+def audit_shell_escape(files: list[Path]) -> None:
+    pattern = re.compile(r"\\write18|--shell-escape|\\ShellEscape|\\immediate\\write18")
+    offenders = []
+    for f in files:
+        if f.suffix not in {".tex", ".sty", ".cls", ".bst"}:
+            continue
+        text = f.read_text(encoding="utf-8", errors="replace")
+        if pattern.search(text):
+            offenders.append(str(f))
+    if offenders:
+        raise AuditError(
+            "shell-escape usage forbidden in a submission bundle:\n  "
+            + "\n  ".join(offenders)
+        )
+
+
+def audit_portable_names(stage: Path, files: list[Path]) -> None:
+    offenders = []
+    seen_ci: dict[str, str] = {}
+    for f in files:
+        rel = f.relative_to(stage)
+        for part in rel.parts:
+            if not PORTABLE_NAME_RE.match(part):
+                offenders.append(f"{rel} (non-portable component {part!r})")
+                break
+        key = str(rel).lower()
+        if key in seen_ci and seen_ci[key] != str(rel):
+            offenders.append(f"{rel} collides case-insensitively with {seen_ci[key]}")
+        seen_ci.setdefault(key, str(rel))
+    if offenders:
+        raise AuditError(
+            "non-portable filename(s) in bundle:\n  " + "\n  ".join(offenders)
+        )
+
+
+def audit_includegraphics(stage: Path, files: list[Path]) -> None:
+    pattern = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}")
+    offenders = []
+    for f in files:
+        if f.suffix != ".tex":
+            continue
+        for m in pattern.finditer(f.read_text(encoding="utf-8", errors="replace")):
+            target = m.group(1).strip()
+            candidates = (
+                [target]
+                if Path(target).suffix
+                else [target + ext for ext in (".pdf", ".png", ".jpg", ".jpeg")]
+            )
+            # LaTeX resolves \includegraphics paths relative to the main
+            # document's directory (the compile cwd), not the including file.
+            resolved = [(stage / c).resolve() for c in candidates]
+            if not any(c.is_file() for c in resolved):
+                offenders.append(
+                    f"{f.relative_to(stage)}: \\includegraphics{{{target}}}"
+                )
+    if offenders:
+        raise AuditError(
+            "missing \\includegraphics target(s):\n  " + "\n  ".join(offenders)
+        )
+
+
+def audit_class_and_bibstyle(stage: Path, main: Path, target: str) -> str:
+    """Require a document class, and require publisher assets to be staged.
+
+    Unstaged classes and styles need no lookup: the `--only-cached` compile
+    above already proved they resolve from the pinned bundle with no network
+    and no ambient TeX tree.
+    """
+    text = main.read_text(encoding="utf-8", errors="replace")
+    cls_m = re.search(r"\\documentclass(?:\[[^\]]*\])?\{([^}]+)\}", text)
+    if not cls_m:
+        raise AuditError(f"{main}: no \\documentclass found")
+    return cls_m.group(1).strip()
+
+
+# Tectonic has no lockfile. `Tectonic.toml`'s `[doc]` table takes a bare `bundle`
+# reference with no digest field, and nothing in a compile checks it against a
+# committed hash. Recording the bundle's content digest here is what makes the
+# archive's TeX assets identifiable after the fact.
+#
+# Two bundle kinds, two places the digest lives:
+#
+#   * A local zip or directory (what every project here points at) carries its
+#     digest as a `SHA256SUM` member, which Tectonic reads on every open. That
+#     file is in the repository, so this is a hash *of committed bytes* — no
+#     trust-on-first-use step, and no cache required.
+#   * A URL keeps a trust-on-first-use record instead: the first uncached fetch
+#     reads the served bundle's SHA256SUM, files it under
+#     `<cache>/bundles/hashes/<escaped-url>`, and extracts to
+#     `<cache>/bundles/data/<digest>/`. There the URL says which bundle was
+#     *asked for* and the digest says which bytes were *served*. Retained for
+#     `bundle-refresh` and for any caller that still passes a URL.
+#
+# The cache escapes each non-portable character as `,<ord>,`
+# (`https://data1…/x.tar` → `https,58,,47,,47,data1…,47,x.tar`). Decoding is
+# unambiguous — a literal comma would itself be escaped as `,44,` — so this
+# reverses the mapping rather than guessing which characters get escaped.
+CACHE_ESCAPE_RE = re.compile(r",(\d+),")
+SHA256_RE = re.compile(r"[0-9a-f]{64}")
+
+
+def tectonic_cache_dir() -> Path:
+    import os
+
+    if explicit := os.environ.get("TECTONIC_CACHE_DIR"):
+        return Path(explicit)
+    if xdg := os.environ.get("XDG_CACHE_HOME"):
+        return Path(xdg) / "Tectonic"
+    return Path.home() / ".cache" / "Tectonic"
+
+
+def local_bundle_digest(path: Path) -> str:
+    """The `SHA256SUM` member of a local zip or directory bundle."""
+    if path.is_dir():
+        raw = (path / "SHA256SUM").read_text(encoding="utf-8")
+    else:
+        import zipfile
+
+        with zipfile.ZipFile(path) as archive:
+            raw = archive.read("SHA256SUM").decode("utf-8")
+    digest = raw.strip()
+    if not SHA256_RE.fullmatch(digest):
+        raise AuditError(
+            f"bundle {path} holds {digest!r} in SHA256SUM, not a sha256 digest"
+        )
+    return digest
+
+
+def bundle_digest(bundle: str) -> str:
+    """The bundle-content sha256 for `bundle`, however it is referenced."""
+    if "://" not in bundle:
+        path = Path(bundle)
+        if not path.exists():
+            raise AuditError(f"bundle {bundle!r} is neither a URL nor an existing path")
+        return local_bundle_digest(path)
+    hashes = tectonic_cache_dir() / "bundles" / "hashes"
+    for entry in sorted(hashes.glob("*")):
+        if CACHE_ESCAPE_RE.sub(lambda m: chr(int(m.group(1))), entry.name) != bundle:
+            continue
+        digest = entry.read_text(encoding="utf-8").strip()
+        if not SHA256_RE.fullmatch(digest):
+            raise AuditError(
+                f"cache entry {entry} holds {digest!r}, not a sha256 digest"
+            )
+        return digest
+    raise AuditError(
+        f"no cached digest for bundle {bundle!r} under {hashes}.\n"
+        "Both audit compiles run --only-cached, so the cache must already hold it. "
+        "Projects here point at the vendored bundle, which needs no cache; a URL "
+        "does, so warm it once or update this lookup if Tectonic's cache layout "
+        "changed."
+    )
+
+
+def build_manifest(
+    stage: Path, files: list[Path], target: str, engine: str, bundle: str | None
+) -> dict:
+    tectonic_v = (
+        subprocess.run(
+            ["tectonic", "--version"], capture_output=True, text=True, check=False
+        )
+        .stdout.strip()
+        .splitlines()
+    )
+    file_entries = {}
+    for f in files:
+        rel = str(f.relative_to(stage))
+        file_entries[rel] = hashlib.sha256(f.read_bytes()).hexdigest()
+    manifest = {
+        "target": target,
+        "engine": engine,
+        # The bundle is the whole reproducibility claim for TeX assets once TeX
+        # Live is out of the picture, and Tectonic offers no lockfile to carry
+        # it, so this triple is where it is written down: the reference names the
+        # bundle asked for, the digest fixes its bytes, and the engine version
+        # fixes how they were consumed. A local bundle is recorded by basename,
+        # not by the absolute path the compile needed — an archive a venue keeps
+        # must not carry one machine's checkout layout, and basename + digest is
+        # already a complete identity.
+        "bundle": (bundle if "://" in bundle else Path(bundle).name) if bundle else "",
+        "bundle_digest": bundle_digest(bundle) if bundle else "",
+        "tool_versions": {
+            "tectonic": tectonic_v[0] if tectonic_v else "",
+        },
+        "files": dict(sorted(file_entries.items())),
+    }
+    return manifest
+
+
+def write_manifest(stage: Path, manifest: dict) -> Path:
+    out = stage / "MANIFEST.json"
+    out.write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return out
+
+
+def archive_kind(path: Path) -> str:
+    """Return the supported archive kind encoded by ``path``."""
+    if path.name.endswith(".tar.gz"):
+        return "tar.gz"
+    if path.suffix == ".zip":
+        return "zip"
+    raise AuditError(f"archive must end in .tar.gz or .zip, got {path}")
+
+
+def archive_deterministically(
+    stage: Path,
+    files: list[Path],
+    manifest_path: Path,
+    out_archive: Path,
+) -> None:
+    stage_real = stage.resolve()
+    members = sorted(str(f.relative_to(stage_real)) for f in files) + [
+        manifest_path.name
+    ]
+    out_archive.parent.mkdir(parents=True, exist_ok=True)
+    if out_archive.exists():
+        out_archive.unlink()
+
+    if archive_kind(out_archive) == "tar.gz":
+        cmd = [
+            "tar",
+            "--sort=name",
+            "--mtime=1970-01-01 00:00:00 UTC",
+            "--owner=0",
+            "--group=0",
+            "--numeric-owner",
+            "-C",
+            str(stage_real),
+            "-czf",
+            str(out_archive),
+            *members,
+        ]
+        proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if proc.returncode != 0:
+            raise AuditError(f"tar failed: {proc.stdout}{proc.stderr}")
+    else:
+        with zipfile.ZipFile(
+            out_archive,
+            mode="w",
+            compression=zipfile.ZIP_DEFLATED,
+            compresslevel=9,
+        ) as archive:
+            for member in members:
+                info = zipfile.ZipInfo(member, date_time=(1980, 1, 1, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.create_system = 3
+                info.external_attr = 0o100644 << 16
+                archive.writestr(
+                    info,
+                    (stage_real / member).read_bytes(),
+                    compress_type=zipfile.ZIP_DEFLATED,
+                    compresslevel=9,
+                )
+    audit_archive_containment(out_archive)
+
+
+def audit_archive_containment(out_archive: Path) -> None:
+    if archive_kind(out_archive) == "tar.gz":
+        with tarfile.open(out_archive, "r:gz") as archive:
+            members = [
+                (member.name, member.issym() or member.islnk())
+                for member in archive.getmembers()
+            ]
+    else:
+        with zipfile.ZipFile(out_archive) as archive:
+            members = [
+                (
+                    member.filename,
+                    ((member.external_attr >> 16) & 0o170000) == 0o120000,
+                )
+                for member in archive.infolist()
+            ]
+
+    for name, is_link in members:
+        if name.startswith("/") or ".." in Path(name).parts:
+            raise AuditError(f"archive member resolves outside staging root: {name}")
+        if is_link:
+            raise AuditError(f"archive member is a symlink (forbidden): {name}")
+
+
+def recompile_unpacked(out_archive: Path, main: str, bundle: str | None) -> None:
+    import tempfile
+
+    with tempfile.TemporaryDirectory(prefix="bundle-unpack-") as td:
+        tmp = Path(td)
+        if archive_kind(out_archive) == "tar.gz":
+            with tarfile.open(out_archive, "r:gz") as archive:
+                archive.extractall(tmp, filter="data")
+        else:
+            with zipfile.ZipFile(out_archive) as archive:
+                archive.extractall(tmp)
+        try:
+            tectonic_compile(tmp, main, bundle, outdir=tmp)
+        except AuditError as exc:
+            raise AuditError(
+                f"recompile of unpacked archive {out_archive} failed:\n{exc}"
+            ) from exc
+        pdf = tmp / f"{Path(main).stem}.pdf"
+        if not pdf.is_file():
+            raise AuditError(
+                f"recompile of unpacked archive {out_archive} produced no PDF"
+            )
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) not in (4, 5):
+        print(
+            "usage: bundle-audit STAGE_DIR TARGET OUT_ARCHIVE [BUNDLE_URL]",
+            file=sys.stderr,
+        )
+        return 2
+    stage = Path(argv[1]).resolve()
+    target = argv[2]
+    out_archive = Path(argv[3]).resolve()
+    bundle = argv[4] if len(argv) == 5 else None
+    main_tex = "main.tex"
+
+    if not (stage / main_tex).is_file():
+        print(f"error: {stage / main_tex} not found", file=sys.stderr)
+        return 2
+
+    try:
+        kind = archive_kind(out_archive)
+        expected_kind = "tar.gz"
+        if kind != expected_kind:
+            raise AuditError(
+                f"target {target!r} requires a {expected_kind} archive, got {out_archive.name}"
+            )
+        # Clean any stale build state before the recorded compile so the rules
+        # file reflects exactly this run's closure.
+        for stale_suffix in EXCLUDED_SUFFIXES | {".ilg", ".idx", ".toc"}:
+            for stale in stage.glob(f"*{stale_suffix}"):
+                if stale.name != main_tex:
+                    stale.unlink()
+
+        rules = compile_with_rules(stage, main_tex, bundle)
+        audit_rules_closure(rules, stage)
+        # Before check-log: an unstaged publisher style makes BibTeX fail
+        # softly, so the log then shows undefined citations. Reporting the
+        # missing .bst is the actionable diagnosis; the citations are downstream.
+        audit_class_and_bibstyle(stage, stage / main_tex, target)
+        audit_check_log(stage, Path(main_tex).stem)
+        audit_image_closure(rules, stage)
+
+        files = source_files(stage)
+        audit_shell_escape(files)
+        audit_portable_names(stage, files)
+        audit_includegraphics(stage, files)
+
+        engine = "xetex (Tectonic)"
+        manifest = build_manifest(stage, files, target, engine, bundle)
+        manifest_path = write_manifest(stage, manifest)
+
+        archive_deterministically(stage, files, manifest_path, out_archive)
+        recompile_unpacked(out_archive, main_tex, bundle)
+    except AuditError as exc:
+        print(f"bundle-audit: FAIL: {exc}", file=sys.stderr)
+        return 1
+
+    print(f"bundle-audit: PASS: {out_archive}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))

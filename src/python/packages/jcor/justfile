@@ -1,0 +1,48 @@
+# Shared body for the parallel tiers below. $1 is the marker expression.
+#
+# `OMP_NUM_THREADS=1` is the load-bearing half of `-n auto`, not boilerplate.
+# The dev shell defaults it to 2, and jcor's tests parallelise *inside* XLA
+# already — t49 measured host load 7.5 on 8 cores during a serial run — so N
+# workers each granted 2 BLAS threads oversubscribe and the suite gets slower,
+# not faster. Pin it to 1 and the workers are the only source of parallelism.
+# `-p no:monitor` below is load-bearing under `-n auto`, not a preference:
+# pytest-monitor races its own `.pymon` INSERT across workers and the resulting
+# worker crash surfaces as `INTERNALERROR> KeyError: <WorkerController gwN>`.
+# Full derivation in `src/python/apps/pipeline/justfile`.
+_pytest markexpr *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd '{{ source_directory() }}'
+    export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+    exec env -u VIRTUAL_ENV uv run pytest -q -p no:monitor -n auto -m '{{ markexpr }}' {{ args }}
+
+# Run fast unit tests (default) with Testmon's xdist-aware cache. The forced
+# selector is required because `-m` otherwise makes Testmon reorder without
+# deselecting. T51 measured 1,302 passed + 12 skipped in 129s
+# on 8 workers (one run, 2026-08-03, shared 8-vCPU host). This supersedes t49's
+# 545-test range after the T55/T56/T61/T62 property and carrier suites more than
+# doubled collection. One run supports a point measurement, not a timing range;
+# take three otherwise-idle runs before publishing a new range.
+#
+# The historical t49 comparison was 74.6s parallel against 108.5s serial over
+# 399 tests; every worker re-JITs shared kernels, so scaling is compile-bound.
+# Re-measure before editing the current point — this comment once claimed
+# "<30s" against a 215-267s run, the failure mode a bare adjective invites.
+test *args: (_pytest "not slow" "--testmon-forceselect" args)
+
+# Run all tests including slow statistical tests.
+test-all *args: (_pytest "" args)
+
+# Explicit alias for the same cached non-slow path used by `test`.
+test-changed *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd '{{ source_directory() }}'
+    export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+    exec env -u VIRTUAL_ENV uv run pytest --testmon-forceselect -q -p no:monitor -n auto {{ args }}
+
+# Run tests with duration report. Serial on purpose: under `-n auto` each
+# duration is measured on a worker competing with the others, so the numbers are
+# not comparable to a profile you would optimise against.
+test-durations *args:
+    cd '{{ source_directory() }}' && env -u VIRTUAL_ENV uv run pytest -v --durations=20 {{ args }}

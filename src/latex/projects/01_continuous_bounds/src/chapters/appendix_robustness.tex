@@ -1,0 +1,282 @@
+\section{Empirical robustness and diagnostics}
+\label{sec:empirical-robustness}
+
+This appendix first audits the dyadic estimator and inference, then turns to
+representation and finite article sampling, and finally considers the sector
+projection and exploratory return-path display used in \Cref{sec:results}.
+These diagnostics preserve the main estimand and do not add independent theorem tests.
+
+\subsection{Dyadic specification and inference audit}
+\label{sec:dyadic-diagnostics}
+\label{sec:resampling-formulas}
+
+For the reported coefficient, let $X$ and $D$ stack $X_{ij}$ and $D_{ij}$ over
+the observed dyads $i<j$, and let $F$ collect the intercept and one indicator
+per non-omitted firm from the rank-cleaned point design. This nuisance design
+is distinct from the secondary-control vector $z_{ij}$ in
+equation~\ref{eq:dyadic-fixed-effects}, which is zero in the canonical
+specification. Write $M_F=I-F(F^{\top}F)^{-}F^{\top}$, with
+$\widetilde X=M_F X$ and $\widetilde D=M_F D$. The
+Frisch--Waugh--Lovell identity is
+\begin{equation}\label{eq:fwl-identity}
+  \widehat\beta_X
+  =\frac{\widetilde X^{\top}\widetilde D}{\widetilde X^{\top}\widetilde X}.
+\end{equation}
+In words, both axes are first stripped of their average firm-endpoint
+components. The remaining slope therefore measures whether unusually distant
+article distributions for a given pair coincide with unusually weak return
+co-movement for that pair.
+
+The nuisance block has \ppvalue{confound-fwl-nuisance-columns} columns and
+omits the indicator for \texttt{\ppvalue{confound-fwl-omitted-firm}}.
+
+The conditional, or partial, $R^2$ of the article-embedding regressor is
+\begin{equation}\label{eq:partial-r2}
+  R^2_{\mathrm{partial}}
+  =1-\frac{\mathrm{SSE}_{\mathrm{FE}+X}}{\mathrm{SSE}_{\mathrm{FE}}},
+\end{equation}
+where $\mathrm{SSE}_{\mathrm{FE}}$ is the residual sum of squares from the
+intercept and symmetric firm effects, and $\mathrm{SSE}_{\mathrm{FE}+X}$ is
+from that model with $X$ added. It is defined only for the restricted
+fixed-effect model and is therefore omitted on pooled rungs.
+
+The six-rung W$_2$ ladder asks whether the association between
+article-embedding distance and return distance is confined to raw sample
+composition or remains after increasingly stringent adjustment for observable
+and stable firm-level heterogeneity.
+The sequence is increasingly demanding in the heterogeneity it absorbs,
+although the final firm-effect specification changes the adjustment design
+rather than simply adding another pooled control.
+Specification 1 records the unadjusted W$_2$ association.
+Specification 2 adds a same-sector indicator to address broad sector sorting;
+because sector remains a coarse description of firm composition,
+specification 3 introduces the declared pooled controls for firm-size
+differences and crisis-window coverage.
+The preceding firm and window controls do not address differential news
+coverage, so specification 4 adds declared article-count level and imbalance controls.
+Article counts do not capture within-firm content dispersion, so
+specification 5 adds the sum and absolute difference of that dispersion.
+This decomposition diagnostic separates between-firm transport distance from
+heterogeneity in the breadth of the two article clouds.
+Because the pooled controls address only their measured dimensions,
+specification 6 replaces them with symmetric firm effects that absorb stable
+additive endpoint heterogeneity.
+Only this sixth specification is primary; the preceding five document the
+path from raw association to the preferred design.
+
+\Cref{tab:dyadic-ladder} reports these six prespecified specifications.
+Pooled and firm-effect $R^2$ values are not comparable because the latter
+absorb endpoint margins; partial $R^2$ therefore compares the focal regressor
+only with the restricted firm-effect model.
+
+\input{generated/dyadic_ladder}
+
+The focal coefficient remains positive throughout, showing that none of the
+declared adjustments reverses the sample association.
+This sign stability does not establish causality or rule out pair-specific confounding.
+
+To distinguish substantive specification changes from rank or conditioning
+problems, \Cref{tab:dyadic-design-diagnostics} records the observation count,
+design rank, scaled conditioning, and residualized W$_2$ variation for every
+specification.
+The rank-cleaned canonical design omits one firm indicator, and the
+Frisch--Waugh--Lovell coefficient agrees with the direct least-squares fit.
+
+\input{generated/dyadic_design_diagnostics}
+
+With the point design audited, the remaining inference issue is dependence
+among dyads that share a firm.
+For bootstrap draw $b$, the $N=\ppvalue{n-firms}$ firms receive counts
+\begin{equation}\label{eq:node-bootstrap-counts}
+  (w_{1b},\ldots,w_{Nb})
+  \sim\operatorname{Multinomial}(N;1/N,\ldots,1/N),
+\end{equation}
+and dyad $(i,j)$ receives frequency weight $w_{ib}w_{jb}$. The two-sided
+sign-tail probability is
+\begin{equation}\label{eq:dyadic-bootstrap-tail}
+  p_{\mathrm{boot}}
+  =2\min\left\{
+    \frac{1+\sum_{b=1}^{B}\1\{\widehat\beta_{W_2,b}\leq0\}}{B+1},
+    \frac{1+\sum_{b=1}^{B}\1\{\widehat\beta_{W_2,b}\geq0\}}{B+1}
+  \right\}\wedge1.
+\end{equation}
+Resampling firms rather than dyads preserves the shared-endpoint dependence:
+when firm $i$ appears $w_{ib}$ times, every incident dyad inherits that
+multiplicity through $w_{ib}w_{jb}$.
+
+The add-one correction prevents zero simulated tail probabilities
+\citep{phipson2010permutation}. Percentile intervals are first-order summaries
+of firm-level sampling uncertainty; they do not incorporate article selection,
+encoder estimation, or return measurement as additional generated regressors.
+
+\subsection{Representation and article-sampling sensitivity}
+\label{sec:representation-diagnostics}
+\label{sec:wasserstein-sensitivity}
+\label{sec:xmodel-robustness}
+\label{sec:geometry-diagnostics}
+
+Having audited the estimator and inference, we next ask whether the reported
+association depends on the particular encoder, width, or distance.
+\Cref{tab:w2-representation-sensitivity} holds the estimator, return matrix,
+firm sample, and node-bootstrap schedule fixed while changing encoder, width,
+or distance.
+Rank agreement is Spearman correlation with the canonical Qwen3-Embedding-8B,
+128-article W$_2$ matrix; the standardized effect is the change in return
+chord distance associated with one dyadic standard deviation of the row's metric.
+Writing this effect as $s_r$ for representation $r$, every paired contrast is
+$\Delta_{c,r}=s_c-s_r$; a negative value therefore means that the candidate
+has the smaller standardized association.
+All cell-level association intervals remain positive.
+Within these comparisons, W$_1$ nearly preserves the canonical ordering,
+while energy produces a materially different ordering but a similar positive
+association.
+These are sensitivity comparisons, not tests that one representation dominates another.
+
+The lower-cost distance comparators reuse the same deterministic article
+samples and Euclidean chord ground metric, so their formulas isolate the
+distance functional.
+Let $A_{ij}$ denote the cross-sample average chord distance and $V_i,V_j$ the
+corresponding within-firm averages.
+The reported sample $V$-statistic is
+\begin{equation}\label{eq:sample-energy-distance}
+  \widehat{\mathcal E}_{ij}
+  :=\mathcal E(\widehat Q_i,\widehat Q_j) = \sqrt{
+    \frac{2}{N_i N_j} \sum_{n=1}^{N_i} \sum_{m=1}^{N_j}
+    d_\Omega(\bm{e}_{i,n}, \bm{e}_{j,m}) - V_i - V_j
+  }
+\end{equation}
+where $d_\Omega(\bm{x}, \bm{y}) = \norm{\bm{x} - \bm{y}}_2$ is the Euclidean
+ground metric in $\R^{\ppvalue{embed-dim}}$. Each article embedding is
+$L^2$-normalized to unit length, so $d_\Omega$ is the chordal metric on the
+unit sphere and $V_i,V_j$ measure within-firm coverage dispersion. The
+radicand is nonnegative for the biased $V$-statistic, and the resulting matrix
+is symmetric with zero diagonal.
+
+The controlled $W_1$ comparator is the equal-weight balanced assignment
+\begin{equation}\label{eq:empirical-wasserstein}
+  \widehat W_{1,m}(i,j)
+  = \min_{\pi\in S_m}\frac{1}{m}\sum_{a=1}^{m}
+  \norm{x_{ia}-x_{j,\pi(a)}}_2.
+\end{equation}
+It is the minimum average semantic displacement needed to align two firms'
+article distributions. Unlike W$_2$, it does not give larger displacements
+quadratically greater weight.
+
+The seven-row encoder panel organizes three distinct comparisons.
+First, full-width Qwen3-Embedding-8B and 4B compare capacities within one
+causal-attention family, while their common 1,024-coordinate outputs isolate
+capacity at fixed width.
+Second, the 256- and 64-coordinate Qwen3-8B prefixes hold the encoder fixed
+and vary its Matryoshka output width.
+Third, full-width BGE-large-v1.5 introduces a bidirectional
+BERT/RetroMAE-style training lineage from another provider, changing
+architecture, pretraining, and provider jointly rather than isolating one
+mechanism \citep{xiao_cpack_2023,qwen3_embedding_2025}.
+The compact contrast table reports the seven candidate-minus-reference pairs
+descriptively with paired intervals and Holm-adjusted $p$-values; none is a
+causal or encoder-superiority claim.
+
+\input{generated/w2_representation_sensitivity}
+
+Moderate truncation from full width to 1,024 coordinates leaves the 8B
+standardized association statistically indistinguishable from the canonical
+cell. The subsequent 1,024-to-256 and 256-to-64 compression steps are negative
+and remain distinguishable from zero after Holm adjustment. Neither capacity
+comparison nor either BGE contrast is distinguishable after the same
+base-family adjustment. This pattern locates a compression stress boundary for
+the measured association; it does not rank the encoders' general quality.
+
+The base comparisons do not isolate training-data vintage, so Panel C uses a
+matched negative control for that narrower dimension.
+The three EttaX arms hold architecture, recipe, compute budget, tokenizer,
+corpus sampler, and seed fixed while moving the Wikipedia snapshot from
+before the sample through a post-sample date.
+Their standardized associations remain close to the primary estimate.
+Because all cells reuse the same node-bootstrap schedule, the
+later-minus-earlier contrasts are paired.
+The point contrasts and intervals are reported together with the seven base
+contrasts; vintage equivalence retains the symmetric $0.012$ margin
+calibrated to the previously computed Qwen3-8B--BGE-large paired contrast.
+Within this compact architecture and frozen recipe, all three intervals lie
+strictly inside the margin and meet the declared equivalence rule.
+The design does not exclude a vintage effect that emerges only at the much
+larger capacity of the production encoder.
+The positive association is not interpreted as causal, and BGE is not used to
+attribute a difference to architecture alone.
+
+Association stability alone does not show how truncation alters the
+underlying dyad geometry.
+The Matryoshka and deterministic-prefix diagnostics therefore separate
+geometry from association.
+In \Cref{fig:matryoshka-preservation}, the diagonal is exact distance
+preservation and $\rho$ measures dyad-rank agreement with full width.
+The 256-coordinate representation is closer to the full matrix than the
+64-coordinate representation, although neither prefix is identical.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{1}{matryoshka_distance_preservation}
+  \caption{Truncated versus full-width Qwen3-Embedding-8B rooted W$_2$ over the
+    common firm pairs. Both axes are rooted W$_2$ distance in unit-chord
+    embedding space; dashed lines mark equality and $\rho$ is Spearman rank
+    agreement with the full-width matrix. The 256-coordinate prefix preserves
+    the canonical geometry more closely than the 64-coordinate prefix. These
+    projections diagnose truncation, not economic validity. Authors'
+  calculations.}
+  \label{fig:matryoshka-preservation}
+\end{figure}
+
+Compression sensitivity does not address whether the result depends on the
+finite article prefix used to construct each firm distribution.
+\Cref{tab:w2-sampling-diagnostics} therefore varies the deterministic
+per-firm article prefix at fixed encoder and distance.
+Standardized effects remain positive and rank agreement increases toward the
+128-article benchmark.
+The exercise measures sensitivity to the declared sample construction; it is
+not a sampling-theory correction for the latent article distribution.
+
+\input{generated/w2_sampling_diagnostics}
+
+\subsection{Sector structure and projection validity}
+\label{sec:projection-validity}
+\label{sec:geometric-representation}
+
+The remaining diagnostics separate sector structure in the original distance
+geometry from the fidelity of its two-dimensional display in \Cref{fig:sector-mds}.
+DISCO (distance components) addresses the first question by decomposing total
+energy dispersion in the original distance matrix into within- and
+between-sector components \citep{szekely_energy_2013}.
+The labels come from Nasdaq summary metadata without a recorded snapshot date.
+Sector membership accounts for $R^2_{\mathcal E}=\ppnum[3]{disco-r2}$ of
+total dispersion, so sector is relevant but leaves most geometry unexplained.
+The permutation statistic asks whether the observed sector grouping is more
+distinct than relabelled firms; it does not validate the article proxy or
+identify sector as the mechanism behind the W$_2$--return association.
+
+\input{generated/disco_decomposition}
+
+The projection audit addresses the second question.
+Because the MDS projection (\Cref{fig:sector-mds}) compresses
+high-dimensional distances into two coordinates, local-neighbour fidelity is limited.
+\Cref{fig:mds-shepard-diagnostic} quantifies this: the projection supports a
+global description but not local pair selection.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{0.62}{mds_shepard_diagnostic}
+  \caption{Fidelity of the two-dimensional metric MDS projection. The
+    horizontal axis is exact pairwise W$_2$ and the vertical axis is projected
+    Euclidean distance. Stress-1 is \ppnum[3]{mds-stress-1}; Pearson and
+    Spearman Shepard correlations are \ppnum[3]{mds-shepard-pearson} and
+    \ppnum[3]{mds-shepard-spearman}. Mean top-five-neighbour recall is
+    \ppnum[3]{mds-top5-neighbour-recall}, and the exact nearest neighbour is
+    preserved for \ppvalue{mds-exact-nearest-preserved} of
+    \ppvalue{n-firms} firms. The projection supports a global description but
+  not local pair selection. Authors' calculations.}
+  \label{fig:mds-shepard-diagnostic}
+\end{figure}
+
+% Exploratory Later Outcome Paths moved to main-text §5 opening
+% (\Cref{fig:neighbour-outcome-paths}).
+\label{sec:exploratory-geometry-outcomes}
+% pp-interpretation-hash{paper1-neighbour-outcome-split-v2}{14d0af58abc8f7e7de5a2956c26ef0e2170d3722946055a5ad9b44cae4512926}

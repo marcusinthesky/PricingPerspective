@@ -1,0 +1,86 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.3pt}
+\begin{tabular}{lllrrr}
+\toprule
+Encoder & Dim. & Interaction matrix & $\hat\rho$ [95\% CI] & $\hat\lambda$ & Log-likelihood \\
+\midrule
+Qwen3-8B full (primary) & 4096 & Barycentric $W^\flat$ & 0.843 [0.816, 0.869] & 5.36 & 204875.0 \\
+ &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.33 & 199835.0 \\
+\addlinespace[1.5pt]
+Qwen3-4B full & 2560 & Barycentric $W^\flat$ & 0.844 [0.818, 0.870] & 5.42 & 204564.3 \\
+ &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.32 & 199803.8 \\
+\addlinespace[1.5pt]
+Qwen3-8B@1024 & 1024 & Barycentric $W^\flat$ & 0.844 [0.817, 0.870] & 5.40 & 204799.6 \\
+ &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.33 & 199840.0 \\
+\addlinespace[1.5pt]
+Qwen3-4B@1024 & 1024 & Barycentric $W^\flat$ & 0.842 [0.815, 0.868] & 5.33 & 204588.1 \\
+ &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.33 & 199829.6 \\
+\addlinespace[1.5pt]
+BGE-large-v1.5 full & 1024 & Barycentric $W^\flat$ & 0.840 [0.812, 0.866] & 5.24 & 203802.4 \\
+ &  & RBF--Wasserstein $W^h$ & 0.811 [0.777, 0.841] & 4.29 & 199777.8 \\
+\addlinespace[1.5pt]
+Qwen3-8B@256 & 256 & Barycentric $W^\flat$ & 0.839 [0.812, 0.866] & 5.22 & 204600.6 \\
+ &  & RBF--Wasserstein $W^h$ & 0.814 [0.781, 0.844] & 4.37 & 199862.8 \\
+\addlinespace[1.5pt]
+Qwen3-8B@64 & 64 & Barycentric $W^\flat$ & 0.821 [0.790, 0.852] & 4.59 & 203924.6 \\
+ &  & RBF--Wasserstein $W^h$ & 0.816 [0.783, 0.845] & 4.43 & 199950.6 \\
+\addlinespace[1.5pt]
+EttaX V0 & 320 & Barycentric $W^\flat$ & 0.828 [0.797, 0.856] & 4.81 & 201979.3 \\
+ &  & RBF--Wasserstein $W^h$ & 0.809 [0.774, 0.840] & 4.24 & 199701.6 \\
+\addlinespace[1.5pt]
+EttaX V1 & 320 & Barycentric $W^\flat$ & 0.828 [0.798, 0.855] & 4.81 & 202157.7 \\
+ &  & RBF--Wasserstein $W^h$ & 0.809 [0.775, 0.840] & 4.25 & 199704.0 \\
+\addlinespace[1.5pt]
+EttaX V3 & 320 & Barycentric $W^\flat$ & 0.829 [0.799, 0.857] & 4.85 & 202087.1 \\
+ &  & RBF--Wasserstein $W^h$ & 0.809 [0.775, 0.840] & 4.25 & 199706.4 \\
+\addlinespace[1.5pt]
+\midrule
+Embedding-free & -- & Persistent news $W^{\mathrm{news}}$ & 0.667 [0.621, 0.718] & 2.01 & 203224.5 \\
+Primary support & -- & Equal active support & 0.841 [0.815, 0.864] & 5.27 & 201857.1 \\
+\bottomrule
+\end{tabular}
+\caption{Pooled 2023--2026 representation sensitivity of the single-field spatial horse race across seven base representations and three matched EttaX encoder vintages. Each encoder row compares the barycentric interaction field $W^\flat$, obtained by target-anchored Wasserstein-barycentric reconstruction, with the median-bandwidth RBF transform of its matching squared-W$_2$ matrix. Intervals use the same 2,000 joint-date stationary bootstrap on the common 814-date schedule. $\hat\lambda=\hat\rho/(1-\hat\rho)$ is the implied adjustment index; log-likelihood is descriptive. Persistent news co-mentions are embedding-free; equal active support is shown once for the primary barycentric interaction field. These are paired conditional-fit sensitivities, not a representation-selection test.}
+\label{tab:p5-representation-ablation}
+\end{table}
+\medskip
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\begin{tabularx}{\linewidth}{Xrrrrrr}
+\toprule
+Contrast ($c-r$) & Estimate & 95\% CI & Raw $p$ & Holm $p$ & Bound & Joint equiv. \\
+\midrule
+\multicolumn{7}{l}{\textit{Panel A: direct barycentric-$\rho$ contrasts}} \\
+Qwen3-4B full $-$ Qwen3-8B full & 0.00134 & [0.00061, 0.00212] & 0.001 & 0.007 & -- & -- \\
+Qwen3-4B@1024 $-$ Qwen3-8B@1024 & -0.00180 & [-0.00288, -0.00079] & 0.002 & 0.007 & -- & -- \\
+Qwen3-8B@1024 $-$ Qwen3-8B full & 0.00091 & [-0.00000, 0.00165] & 0.052 & 0.052 & -- & -- \\
+Qwen3-8B@256 $-$ Qwen3-8B@1024 & -0.00449 & [-0.00602, -0.00320] & 0.001 & 0.007 & -- & -- \\
+Qwen3-8B@64 $-$ Qwen3-8B@256 & -0.01803 & [-0.02296, -0.01344] & 0.001 & 0.007 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -0.00392 & [-0.00572, -0.00241] & 0.001 & 0.007 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -0.00212 & [-0.00358, -0.00079] & 0.005 & 0.010 & -- & -- \\
+\addlinespace[1.5pt]
+EttaX V1 $-$ EttaX V0 & -0.00005 & [-0.00149, 0.00180] & 0.922 & 0.922 & 0.00572 & Yes \\
+EttaX V3 $-$ EttaX V0 & 0.00124 & [-0.00012, 0.00274] & 0.076 & 0.228 & 0.00572 & Yes \\
+EttaX V3 $-$ EttaX V1 & 0.00129 & [-0.00035, 0.00264] & 0.112 & 0.228 & 0.00572 & Yes \\
+\midrule
+\multicolumn{7}{l}{\textit{Panel B: barycentric-minus-RBF gap contrasts}} \\
+Qwen3-4B full $-$ Qwen3-8B full & 0.00157 & [0.00078, 0.00250] & 0.001 & 0.007 & -- & -- \\
+Qwen3-4B@1024 $-$ Qwen3-8B@1024 & -0.00174 & [-0.00277, -0.00076] & 0.002 & 0.008 & -- & -- \\
+Qwen3-8B@1024 $-$ Qwen3-8B full & 0.00084 & [-0.00008, 0.00158] & 0.082 & 0.164 & -- & -- \\
+Qwen3-8B@256 $-$ Qwen3-8B@1024 & -0.00593 & [-0.00762, -0.00447] & 0.001 & 0.007 & -- & -- \\
+Qwen3-8B@64 $-$ Qwen3-8B@256 & -0.02000 & [-0.02573, -0.01470] & 0.001 & 0.007 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -0.00244 & [-0.00393, -0.00091] & 0.005 & 0.015 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -0.00070 & [-0.00194, 0.00072] & 0.312 & 0.312 & -- & -- \\
+\addlinespace[1.5pt]
+EttaX V1 $-$ EttaX V0 & -0.00035 & [-0.00179, 0.00148] & 0.658 & 0.658 & 0.00393 & Yes \\
+EttaX V3 $-$ EttaX V0 & 0.00092 & [-0.00039, 0.00236] & 0.169 & 0.366 & 0.00393 & Yes \\
+EttaX V3 $-$ EttaX V1 & 0.00126 & [-0.00039, 0.00258] & 0.122 & 0.366 & 0.00393 & Yes \\
+\bottomrule
+\end{tabularx}
+\caption{Paired common-schedule QMLE contrasts. Panel A estimates $\rho^\flat_c-\rho^\flat_r$; Panel B estimates $(\rho^\flat_c-\rho^h_c)-(\rho^\flat_r-\rho^h_r)$. Raw $p$-values are two-sided add-one sign-tail probabilities, and Holm adjustment is applied separately within each metric's seven base and three vintage contrasts. Estimates and intervals retain five decimal places so endpoints near zero remain visible. Vintage equivalence requires both intervals to lie strictly inside their respective BGE-large-minus-Qwen3-8B@1024 benchmark-calibrated, post-specified bounds; the decision shown is joint. No contrast is causal or an encoder-superiority claim.}
+\label{tab:p5-representation-contrasts}
+\end{table}

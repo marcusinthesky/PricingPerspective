@@ -1,0 +1,15 @@
+## Single source for ChkTeX suppression policy (t24.16.4 F10), consumed by
+## both src/latex/justfile (lint) and src/latex/.pre-commit-config.yaml
+## (chktex hook) via `chktex -l .chktexrc`.
+##
+## Correctness (unresolved refs/citations, syntax) is gated by check-log and
+## the compile itself; chktex here is advisory style. We suppress the classes
+## that fire pervasively and falsely on math-heavy manuscript prose: 2 (nbsp
+## before inline math), 12 (interword spacing after a sentence-ending period
+## before \citet), 23 (quote punctuation), 24 (space before \label in the
+## universal \caption/\label float idiom), 35 (\dim false positive on matrix
+## dimensions), plus the display defaults 1/3/8/13/36.
+CmdLine
+{
+    -n1 -n2 -n3 -n8 -n12 -n13 -n23 -n24 -n26 -n35 -n36 -n38
+}

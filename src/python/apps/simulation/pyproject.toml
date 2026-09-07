@@ -1,0 +1,123 @@
+[project]
+name = "simulation"
+version = "0.4.1"
+description = "GPU-capable JAX Monte-Carlo simulation package for energy/Wasserstein metrics and portfolio optimisation."
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+  "dotell",
+  "jax[cpu]>=0.11.0",
+  "jaxtyping>=0.3.2",
+  "jcor",
+  "pandas>=3.0.0, <4.0.0",
+  "pyarrow>=15.0",
+  "pyyaml>=6.0",
+  "typer>=0.12.0",
+]
+
+[project.scripts]
+simulation = "simulation.cli:app"
+
+[dependency-groups]
+dev = [
+  # The typechecker argument to `install_import_hook` in tests/conftest.py.
+  # Declared here rather than relied on transitively: it reaches this venv today
+  # only through jcor's own dev group (packages/jcor/pyproject.toml:49, same
+  # floor), which is an accident of the shared workspace lock, not a contract.
+  "beartype>=0.22.9",
+  "deptry",
+  # Test-time NumPy oracle and fixture construction; the library source is JAX-only.
+  "numpy>=2.0.0, <3.0.0",
+  "pytest",
+  "pytest-cov",
+  "pytest-monitor",
+  "pytest-testmon",
+  "pytest-xdist",
+  "ruff",
+  # Test-time reference oracle only — SciPy is no longer a runtime dependency.
+  # `equivalence_calibration` used `scipy.special.erf` (now stdlib `math.erf`)
+  # and `scipy.optimize.brentq` (now `_bisect_increasing`); the suite pins both
+  # replacements against upstream SciPy. Mirrors the same move in
+  # `packages/jcor/pyproject.toml`, which `deptry` DEP002 surfaced there.
+  # See `docs/numpy-scipy-boundary-ledger.md`.
+  "scipy>=1.14.0",
+  "ty>=0.0.1a16",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# deptry: per-project dependency hygiene (unused / missing / transitive / misplaced).
+# Each workspace member carries its own block (deptry has no config inheritance);
+# PEP 735 dev-groups are auto-exempt from DEP002.
+[tool.deptry]
+extend_exclude = ["notebooks", "scripts"]
+# simulation imports its own package absolutely; mark first-party so self-imports
+# are not reported as transitive dependencies (DEP003).
+known_first_party = ["simulation"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/simulation"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+# Default gate excludes slow (statistical size/power validations); run the full
+# suite with `pytest -m slow` or `pytest -m ""`.
+addopts = "-m 'not slow'"
+markers = [
+  "slow: Statistical tests that take >2s (full CI only)",
+  "gpu: Tests requiring a CUDA device",
+  # Opt-in marker for tests whose assertion IS jaxtyping's import hook — they
+  # check that a wrong shape or dtype is *rejected*. tests/conftest.py skips
+  # them when `simulation` was already imported before it could install the
+  # hook, which is unavoidable in the workspace-level aggregate run. See its
+  # docstring. Spelling matches src/python/justfile:110, which already declares
+  # this exact name for the aggregate run; a new spelling would emit
+  # unknown-marker warnings there.
+  "needs_import_hook: Requires tests/conftest.py's install_import_hook to be live",
+]
+
+# --- ruff (lint + format) ------------------------------------------------
+# Inherit shared workspace settings and add jaxtyping-specific suppressions.
+[tool.ruff]
+extend = "../../pyproject.toml"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"pipeline".msg = "simulation is below pipeline and must not import it."
+
+[tool.ruff.lint.extend-per-file-ignores]
+# jaxtyping shape annotations (e.g. Float[Array, "n d"]) contain spaces that
+# are not valid Python forward-annotation syntax; F722/F821 are false positives.
+# RUF002 is suppressed for en-dash characters used in docstring ranges.
+"src/simulation/generators/**" = ["F722", "F821", "RUF002", "UP037"]
+"src/simulation/metrics/**" = ["F722", "F821", "RUF002", "UP037"]
+"src/simulation/optimize.py" = ["F722", "RUF002", "UP037"]
+"src/simulation/bounds.py" = ["F722", "RUF002", "UP037"]
+"src/simulation/portfolios.py" = ["F722", "RUF002", "UP037"]
+"src/simulation/covariance.py" = ["F722", "RUF002", "RUF003", "UP037"]
+"src/simulation/psd_repair.py" = ["F722", "RUF002", "RUF003", "UP037"]
+"src/simulation/hac.py" = ["F722", "RUF002", "RUF003", "UP037"]
+"src/simulation/inference/**" = ["F722", "RUF002", "RUF003", "UP037"]
+"src/simulation/harness/**" = ["F722", "RUF002", "UP037", "B905"]
+"src/simulation/validation/**" = ["F722", "RUF002", "RUF003", "UP037"]
+# PLC0415: command bodies import their `run_*` stage lazily, *after*
+# `configure_default()`. `backend.py` requires JAX configuration to precede any
+# JAX import, and the validation modules import `jax`/`jax.numpy` at module
+# scope -- so these imports cannot be hoisted. Mirrors the same suppression on
+# `src/pipeline/cli/commands/**` in apps/pipeline/pyproject.toml.
+"src/simulation/cli.py" = ["F722", "RUF002", "UP037", "B008", "PLC0415"]
+# PLC0415: `configure` imports JAX inside the function body on purpose -- this
+# module is the configuration site and must stay importable ahead of the first
+# JAX import (see its module docstring).
+"src/simulation/backend.py" = ["PLC0415"]
+"tests/**" = ["RUF002", "RUF003", "S101"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+jcor = { workspace = true }
+dotell = { workspace = true }

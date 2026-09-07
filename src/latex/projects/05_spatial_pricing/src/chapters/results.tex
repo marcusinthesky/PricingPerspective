@@ -1,0 +1,414 @@
+\section{Results}\label{sec:results}
+
+\subsection{Conditional return dependence and the reconstruction mechanism}
+
+The first empirical question is whether the barycentric interaction field
+organizes conditional cross-sectional return dependence in the subsequent
+2023--2026 panel.
+Table~\ref{tab:qmle-pooled} reports separate working-QMLE estimates for three
+headline fields and one support-fixed diagnostic, all frozen before that return
+panel.
+The headline field $W^\flat$ is the output of target-anchored
+Wasserstein barycentric reconstruction.
+Within the working QMLE, $\hat\lambda$ is a dimensionless adjustment index and
+$\hat\rho$ is its equivalent spatial feedback coefficient.
+The benchmark $\lambda=0$ removes conditional peer alignment from the working
+model.
+
+\begin{table}[H]
+  \centering
+  \caption{Pooled 2023--2026 model-implied adjustment estimates. The 95 per cent
+    intervals use 2,000 joint-date stationary-bootstrap refits, and
+    $\hat\rho=\hat\lambda/(1+\hat\lambda)$. The final column reports the
+  maximized conditional quasi-log-likelihood on the common return sample.}
+  \label{tab:qmle-pooled}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Interaction field & $\hat\lambda$ & 95\% interval & Implied $\hat\rho$
+    & $\ell^Q$ \\
+    \midrule
+    Barycentric field ($W^\flat$) &
+    \ppnum[2]{post-pooled-2023-2026-w-flat-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-pooled-2023-2026-w-flat-rho} &
+    \ppnum[1]{post-pooled-2023-2026-w-flat-loglik} \\
+    RBF--Wasserstein diffusion &
+    \ppnum[2]{post-pooled-2023-2026-w-h-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-w-h-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-w-h-lambda-ci-upper}]$ &
+    \ppnum[3]{post-pooled-2023-2026-w-h-rho} &
+    \ppnum[1]{post-pooled-2023-2026-w-h-loglik} \\
+    Persistent news co-mentions &
+    \ppnum[2]{post-pooled-2023-2026-w-co-mentions-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-w-co-mentions-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-w-co-mentions-lambda-ci-upper}]$ &
+    \ppnum[3]{post-pooled-2023-2026-w-co-mentions-rho} &
+    \ppnum[1]{post-pooled-2023-2026-w-co-mentions-loglik} \\
+    \midrule
+    Equal active support &
+    \ppnum[2]{post-pooled-2023-2026-equal-support-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-equal-support-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-equal-support-lambda-ci-upper}]$ &
+    \ppnum[3]{post-pooled-2023-2026-equal-support-rho} &
+    \ppnum[1]{post-pooled-2023-2026-equal-support-loglik} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The barycentric interaction field organizes substantial conditional dependence
+within the working model.
+Its pooled adjustment index is
+$\hat\lambda=\ppnum[2]{post-pooled-2023-2026-w-flat-lambda}$, with interval
+$[\ppnum[2]{post-pooled-2023-2026-w-flat-lambda-ci-lower},
+\ppnum[2]{post-pooled-2023-2026-w-flat-lambda-ci-upper}]$.
+Because both terms in the quadratic adjustment problem have squared-exposure
+units, this index is a unit-free ratio: the fitted objective places
+approximately
+\ppnum[2]{post-pooled-2023-2026-w-flat-lambda} times as much weight on
+misalignment between a firm's peer-adjusted exposure and its barycentric peer
+average as on departure from its stand-alone exposure.
+The equivalent feedback coefficient is
+$\hat\rho=\ppnum[3]{post-pooled-2023-2026-w-flat-rho}$.
+The bootstrap interval excludes the zero-feedback benchmark but spans a
+meaningful range of relative weights, so the sign is more precisely estimated
+than the magnitude.
+These are conditional working-model quantities, not geometry-invariant
+structural or causal effects.
+
+Given that result, the mechanism question is whether target-anchored
+Wasserstein barycentric reconstruction adds information beyond equal weighting
+of the selected peer support and pairwise RBF proximity computed from the same
+Wasserstein distances.
+The equal-active-support row retains every peer selected by $W^\flat$ but
+replaces the fitted distributional spanning weights with equal weights.
+Its adjustment estimate remains positive, so peer selection itself carries
+conditional signal.
+Its lower conditional quasi-log-likelihood indicates that support alone does not
+reproduce the fit obtained from the fitted coordinates.
+The RBF--Wasserstein row holds fixed the firm distributions, pairwise transport
+distances, and candidate universe, but replaces target-anchored joint
+reconstruction with a separate distance-decay weight for each pair.
+This field also has a positive adjustment estimate, so pairwise proximity
+organizes some conditional dependence.
+Its lower conditional fit provides evidence consistent with joint
+representability carrying information beyond pairwise distance decay in this
+sample.
+These likelihood rankings compare non-nested working models and are therefore
+mechanism diagnostics, not formal likelihood-ratio tests.
+The news-link row also makes clear why feedback magnitude is not a fit ranking:
+it attains higher conditional likelihood than the RBF field with a smaller
+adjustment index.
+Appendix~\ref{sec:p5-representation-ablation} treats model family, capacity,
+output width, and encoder vintage as design-sensitivity diagnostics for the
+barycentric--RBF comparison.
+
+\subsection{Distinctness of the barycentric and news-link fields}
+\label{sec:field-overlap}
+
+The two fields choose substantially different peers but produce related,
+non-interchangeable induced return signals.
+Table~\ref{tab:field-overlap} separates this conclusion into peer selection,
+cardinal weighting, and the resulting peer-return series.
+Support and induced-signal agreement are evaluated against matched-random nulls:
+row sparsity creates a floor for peer overlap, while common cross-sectional
+return variation creates one for induced-signal correlation.
+
+\begin{table}[H]
+  \centering
+  \caption{Agreement between the frozen barycentric interaction field and the
+    persistent co-mention field. The null draws
+    \ppvalue{overlap-support-draws}
+    fixed-seed baskets carrying $W^\flat$'s own row sparsities; $p$ is the
+    share of null draws reaching the observed value. Rows with no mechanical
+  floor carry no null.}
+  \label{tab:field-overlap}
+  \begin{tabular}{llrrr}
+    \toprule
+    Stage & Statistic & Observed & Null & $p$ \\
+    \midrule
+    Peer sets & Directed share of $W^\flat$ peers &
+    \ppnum[3]{overlap-directed-share} &
+    \ppnum[3]{overlap-support-null-share} &
+    \ppnum[3]{overlap-support-null-pvalue} \\
+    & Rank-matched share &
+    \ppnum[3]{overlap-rank-matched-share} & --- & --- \\
+    & Jaccard overlap &
+    \ppnum[3]{overlap-jaccard-mean} & --- & --- \\
+    \midrule
+    Weights & Off-diagonal correlation &
+    \ppnum[3]{overlap-weight-offdiagonal-pearson} & --- & --- \\
+    & Cosine on the support union &
+    \ppnum[3]{overlap-weight-union-cosine} & --- & --- \\
+    & Rank correlation on common edges &
+    \ppnum[3]{overlap-weight-common-spearman} & --- & --- \\
+    \midrule
+    Induced field & Correlation of $W r_t$ &
+    \ppnum[3]{overlap-induced-pearson} &
+    \ppnum[3]{overlap-induced-null-pearson} &
+    \ppnum[3]{overlap-induced-null-pvalue} \\
+    & Coefficient of determination &
+    \ppnum[3]{overlap-induced-r-squared} & --- & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Peer selection provides the clearest evidence of distinctness.
+The barycentric rows are the denser of the two, carrying
+\ppnum[1]{overlap-w-flat-support-size} active peers on average against
+\ppnum[1]{overlap-co-mentions-support-size} for the co-mention graph, and
+\ppnum[3]{overlap-directed-share} of the barycentric peers are also
+co-mention peers.
+A random basket with the same row sparsities reaches
+\ppnum[3]{overlap-support-null-share}, so the observed excess is
+\ppnum[1]{overlap-support-excess-pct} percentage points and exceeds the
+matched-random benchmark at
+$p=\ppnum[3]{overlap-support-null-pvalue}$.
+The null comparison therefore establishes above-chance overlap, not equivalence
+of the peer sets.
+
+The cardinal weights also show only partial agreement.
+Their off-diagonal correlation is
+\ppnum[3]{overlap-weight-offdiagonal-pearson}, while the rank correlation over
+the edges the two constructions share---an average of
+\ppnum[1]{overlap-weight-common-count} per row---is lower, at
+\ppnum[3]{overlap-weight-common-spearman}.
+
+The induced peer-return series are more similar than the underlying supports or
+weights, but this comparison is also the one most in need of a null.
+The two spatial lags correlate at \ppnum[3]{overlap-induced-pearson} over the
+evaluation panel, so one accounts for
+\ppnum[3]{overlap-induced-r-squared} of the other's variation.
+Taken alone, that number would overstate agreement because any two
+row-stochastic averages of a strongly co-moving cross-section are correlated by
+construction: a random basket at $W^\flat$'s sparsity already reaches
+\ppnum[3]{overlap-induced-null-pearson} against the same comparator.
+The observed value exceeds that floor at
+$p=\ppnum[3]{overlap-induced-null-pvalue}$, and the per-firm correlations range
+from \ppnum[3]{overlap-induced-asset-min} to
+\ppnum[3]{overlap-induced-asset-max}.
+Thus common return variation makes the fields look more alike after they are
+applied to returns than they do as peer maps.
+The observed excess over the matched-random floor nevertheless leaves room for
+distinct conditional content, which the joint model evaluates next.
+
+\subsection{Joint-field estimates and incremental conditional fit}
+\label{sec:two-field-results}
+
+Joint estimation reallocates working-model feedback across the two fields rather
+than materially increasing its total.
+The barycentric-only boundary gives
+$\hat\rho=\ppnum[3]{post-pooled-2023-2026-two-field-boundary-w-flat-rho}$,
+whereas the joint estimate is
+$\hat\rho_B+\hat\rho_N=
+\ppnum[3]{post-pooled-2023-2026-two-field-rho-total}$.
+The 95 per cent interval for the joint total,
+$[\ppnum[3]{post-pooled-2023-2026-two-field-rho-total-ci-lower},
+\ppnum[3]{post-pooled-2023-2026-two-field-rho-total-ci-upper}]$, contains the
+barycentric-only point estimate.
+Thus the news-link field absorbs part of the conditional dependence attributed
+to $W^\flat$ when that field is estimated alone, while total feedback remains
+similar.
+
+Table~\ref{tab:two-field-pooled} estimates \eqref{eq:two-field-spatial-lag} on
+the same pooled panel and with the same two frozen matrices.
+It treats them as channels in one conditional return specification rather than
+as rival structural mechanisms.
+Within this working model, each channel has the adjustment index
+$\hat\lambda_k=\hat\rho_k/(1-\hat\rho_B-\hat\rho_N)$, and the relevant null for
+each is $\rho_k=0$: the corresponding field adds no conditional fit once the
+other is present.
+
+\begin{table}[H]
+  \centering
+  \caption{Pooled 2023--2026 joint two-field estimates. The 95 per cent
+    intervals use the same 2,000 joint-date stationary-bootstrap refits as
+    Table~\ref{tab:qmle-pooled}. The single-field rows are the $\theta=1$ and
+    $\theta=0$ boundaries of the same nested family, re-estimated and
+    re-resampled here on those same draws, and the
+    quasi-log-likelihood column is
+  measured against the joint fit.}
+  \label{tab:two-field-pooled}
+  \begin{tabular}{lrrrrr}
+    \toprule
+    Channel & $\hat\rho$ & 95\% interval & $\hat\lambda$ & 95\% interval
+    & $\Delta\ell^Q$ \\
+    \midrule
+    Barycentric ($W^\flat$) &
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-b} &
+    $[\ppnum[3]{post-pooled-2023-2026-two-field-rho-b-ci-lower},
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-b-ci-upper}]$ &
+    \ppnum[2]{post-pooled-2023-2026-two-field-lambda-b} &
+    $[\ppnum[2]{post-pooled-2023-2026-two-field-lambda-b-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-two-field-lambda-b-ci-upper}]$ & \\
+    News-link ($W^{\mathrm{news}}$) &
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-n} &
+    $[\ppnum[3]{post-pooled-2023-2026-two-field-rho-n-ci-lower},
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-n-ci-upper}]$ &
+    \ppnum[2]{post-pooled-2023-2026-two-field-lambda-n} &
+    $[\ppnum[2]{post-pooled-2023-2026-two-field-lambda-n-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-two-field-lambda-n-ci-upper}]$ & \\
+    Total &
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-total} &
+    $[\ppnum[3]{post-pooled-2023-2026-two-field-rho-total-ci-lower},
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-total-ci-upper}]$ &
+    & & \\
+    \midrule
+    \multicolumn{6}{l}{\emph{Nested single-field boundaries}} \\
+    $W^\flat$ only ($\theta=1$) &
+    \ppnum[3]{post-pooled-2023-2026-two-field-boundary-w-flat-rho} &
+    $[\ppnum[3]{post-pooled-2023-2026-two-field-boundary-w-flat-rho-ci-lower},
+    \ppnum[3]{post-pooled-2023-2026-two-field-boundary-w-flat-rho-ci-upper}]$ &
+    \ppnum[2]{post-pooled-2023-2026-two-field-boundary-w-flat-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-two-field-boundary-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-two-field-boundary-w-flat-lambda-ci-upper}]$
+    &
+    $-\ppnum[1]{post-pooled-2023-2026-two-field-loglik-gain-w-flat}$ \\
+    $W^{\mathrm{news}}$ only ($\theta=0$) &
+    \ppnum[3]{post-pooled-2023-2026-two-field-boundary-co-mentions-rho} &
+    $[\ppnum[3]{post-pooled-2023-2026-two-field-boundary-co-mentions-rho-ci-lower},
+    \ppnum[3]{post-pooled-2023-2026-two-field-boundary-co-mentions-rho-ci-upper}]$
+    &
+    \ppnum[2]{post-pooled-2023-2026-two-field-boundary-co-mentions-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-two-field-boundary-co-mentions-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-two-field-boundary-co-mentions-lambda-ci-upper}]$
+    &
+    $-\ppnum[1]{post-pooled-2023-2026-two-field-loglik-gain-co-mentions}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The channel split is economically asymmetric.
+The barycentric channel has the adjustment index
+$\hat\lambda_B=\ppnum[2]{post-pooled-2023-2026-two-field-lambda-b}$, with
+interval
+$[\ppnum[2]{post-pooled-2023-2026-two-field-lambda-b-ci-lower},
+\ppnum[2]{post-pooled-2023-2026-two-field-lambda-b-ci-upper}]$.
+The corresponding news-link index is
+$\hat\lambda_N=\ppnum[2]{post-pooled-2023-2026-two-field-lambda-n}$, with
+interval
+$[\ppnum[2]{post-pooled-2023-2026-two-field-lambda-n-ci-lower},
+\ppnum[2]{post-pooled-2023-2026-two-field-lambda-n-ci-upper}]$.
+As dimensionless penalties relative to the stand-alone exposure term, these
+estimates assign more than twice as much weight to misalignment with the
+barycentric peer average as to misalignment among firms reported alongside one
+another.
+Both intervals exclude zero, and no bootstrap refit is pinned at either
+boundary.
+
+Figure~\ref{fig:two-field-region} describes the likelihood and bootstrap
+geometry behind this channel uncertainty; it does not supply a calibrated
+confidence region.
+
+\begin{figure}[htbp]
+  \centering
+  \ppfigure{1}{two_field_region}
+  \caption{Joint two-field likelihood and bootstrap geometry. The horizontal
+    axis is barycentric-channel feedback $\rho_B$, and the vertical axis is
+    news-link feedback $\rho_N$. The left panel places the joint estimate
+    inside the admissible triangle, with both single-field fits on the axes and
+    the stability boundary $\rho_B+\rho_N=1$ marked. The right panel is the same
+    profiled surface zoomed to the bootstrap cloud, with a descriptive
+    two-parameter quasi-log-likelihood contour. Neither the contour nor the
+    cloud is a calibrated confidence region. The cloud's diagonal tilt records
+    the trade-off between channels, while its dispersion in both directions
+  shows the sampling variation in their allocation.}
+  \label{fig:two-field-region}
+  \figalttext{Two contour panels plot barycentric-channel feedback horizontally
+    and news-link feedback vertically. The left panel shows an interior joint
+    estimate within the triangular stability region and single-field estimates
+    on the axes. The right panel magnifies an elongated downward-sloping
+    bootstrap cloud around the joint estimate, indicating a trade-off in
+    allocating feedback between channels. The contour and resample cloud
+    describe likelihood geometry and sampling variation; neither is a
+  calibrated confidence region.}
+\end{figure}
+
+The two channel coefficients have bootstrap correlation
+\ppnum[3]{post-pooled-2023-2026-two-field-channel-correlation}.
+That pattern is expected given the induced-field correlation of
+\ppnum[3]{overlap-induced-pearson}: when the two peer-return signals move
+together, one coefficient can partly offset the other across refits.
+The draws nevertheless vary in both directions rather than collapsing onto a
+one-dimensional ridge.
+The figure therefore indicates that total feedback is estimated more precisely
+than its allocation across fields, without calibrating a joint confidence set.
+
+The incremental-fit decisions instead come from boundary-calibrated QLR tests.
+Because each nonnegative-channel null lies on the boundary, the reference
+distribution is simulated under the corresponding restricted single-field fit.
+For $H_{0,N}:\rho_N=0$, the observed statistic is
+$QLR_N=\ppnum[1]{post-pooled-2023-2026-two-field-qlr-news-given-distributional-statistic}$,
+with restricted-null
+$p=\ppnum[4]{post-pooled-2023-2026-two-field-qlr-news-given-distributional-pvalue}$.
+For $H_{0,B}:\rho_B=0$, the corresponding values are
+$QLR_B=\ppnum[1]{post-pooled-2023-2026-two-field-qlr-distributional-given-news-statistic}$
+and
+$p=\ppnum[4]{post-pooled-2023-2026-two-field-qlr-distributional-given-news-pvalue}$.
+Both restrictions are rejected under the null-imposed calibration, so each
+field improves conditional fit once the other is included.
+Across \ppvalue{post-pooled-2023-2026-two-field-trading-days} common dates, the
+raw quasi-log-likelihood gains over the barycentric-only and news-only
+boundaries are, respectively,
+\ppnum[1]{post-pooled-2023-2026-two-field-loglik-gain-w-flat} and
+\ppnum[1]{post-pooled-2023-2026-two-field-loglik-gain-co-mentions}.
+The larger loss from dropping the barycentric field is consistent with the
+asymmetric channel indices; it remains a conditional-fit comparison rather than
+a structural or causal decomposition.
+
+\subsection{Descriptive persistence under a frozen field}
+
+The conditional association persists descriptively across all four annual
+evaluation samples.
+Table~\ref{tab:qmle-annual} keeps the 2018--2022 barycentric interaction field
+fixed and re-estimates only the common coefficient and nuisance parameters
+within each non-overlapping return sample.
+The annual refits are reported without a cross-year equality statistic or joint
+calibration, so this exercise describes persistence rather than testing
+coefficient constancy.
+
+\begin{table}[H]
+  \centering
+  \caption{Annual model-implied adjustment under the frozen barycentric
+    interaction field. The 2026 period ends on
+  \ppvalue{post-evaluation-date-end}.}
+  \label{tab:qmle-annual}
+  \begin{tabular}{lrrr}
+    \toprule
+    Evaluation year & $\hat\lambda$ & 95\% interval & Implied $\hat\rho$ \\
+    \midrule
+    2023 & \ppnum[2]{post-eval2023-w-flat-lambda} &
+    $[\ppnum[2]{post-eval2023-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-eval2023-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-eval2023-w-flat-rho} \\
+    2024 & \ppnum[2]{post-eval2024-w-flat-lambda} &
+    $[\ppnum[2]{post-eval2024-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-eval2024-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-eval2024-w-flat-rho} \\
+    2025 & \ppnum[2]{post-eval2025-w-flat-lambda} &
+    $[\ppnum[2]{post-eval2025-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-eval2025-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-eval2025-w-flat-rho} \\
+    2026 & \ppnum[2]{post-eval2026-w-flat-lambda} &
+    $[\ppnum[2]{post-eval2026-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-eval2026-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-eval2026-w-flat-rho} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The annual adjustment indices span
+\ppnum[2]{post-eval2024-w-flat-lambda}--
+\ppnum[2]{post-eval2026-w-flat-lambda}.
+All four bootstrap intervals remain above the zero-feedback benchmark, although
+their widths vary, especially in 2025; the annual evidence therefore supports
+persistence but not equality of magnitudes.
+The 2026 estimate uses only
+\ppvalue{post-eval2026-w-flat-trading-days} dates, so its precision is not
+directly comparable with that of a complete year.
+
+Table~\ref{tab:two-field-annual} in the appendix reports joint annual estimates
+under the same frozen matrices; the exercise is descriptive rather than a
+formal constancy test.
+The next section sets out the economic and empirical limits on that
+interpretation.

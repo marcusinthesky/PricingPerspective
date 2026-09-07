@@ -1,0 +1,72 @@
+set shell := ["bash", "-uc"]
+
+# Run the fast CPU test tier.
+test *args:
+    env -u VIRTUAL_ENV uv run pytest -q -p no:monitor -m 'not slow and not gpu' --testmon-forceselect {{ args }}
+
+# Run every test, including opt-in GPU and benchmark cases.
+test-all *args:
+    env -u VIRTUAL_ENV uv run pytest -q -p no:monitor {{ args }}
+
+# Print the resolved model shape and analytical/actual parameter counts.
+architecture:
+    env -u VIRTUAL_ENV uv run ettax architecture --config configs/base.toml
+
+# Show tokenizer, prepared-corpus, checkpoint, and metrics state for every vintage.
+status:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax ettax vintage status
+
+# Show the three DVC-readable terminal summaries.
+metrics:
+    cd ../../../.. && dvc metrics show data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V0/metrics.json data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V1/metrics.json data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V3/metrics.json
+
+# Render the cross-vintage checkpoint-probe loss curve; pass --show-vega for JSON.
+plot *args:
+    cd ../../../.. && dvc plots show ettax_checkpoint_probe_loss {{ args }}
+
+# Materialize the V0-only tokenizer and per-arm uint16 training shards from the
+# already-built data/.encoder_vintage/corpus/*.txt files. Never downloads data.
+prepare *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax ettax vintage prepare {{ args }}
+
+# Train one arm on the configured JAX backend. Use JAX_PLATFORMS=cuda for NVIDIA.
+train arm *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax --extra cuda ettax vintage train {{ arm }} {{ args }}
+
+# Run a bounded full-architecture train-step benchmark before committing a GPU job.
+benchmark *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax --extra cuda ettax benchmark --config src/python/apps/ettax/configs/base.toml {{ args }}
+
+# Idempotent end-to-end queue: fit the V0 tokenizer from the existing corpus,
+# prepare tokenizer-specific shards, then train V0/V1/V3 sequentially.
+run *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax --extra cuda ettax vintage run {{ args }}
+
+# Run the bounded, outcome-free intrinsic transfer/collapse check over the existing
+# Nasdaq sample and Qwen embeddings. Writes one small JSON evidence artifact.
+semantic-smoke *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax --extra cuda ettax vintage semantic-smoke {{ args }}
+
+# Materialize one vintage's document embeddings as parquet shards.
+embed arm *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax --extra cuda ettax vintage embed {{ arm }} {{ args }}
+
+# Probe capacity in disposable CUDA processes and write the resolved manifest.
+pilot-probe *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax --extra cuda ettax pilot probe {{ args }}
+
+# Prepare the exact V0/V1 pilot sample into deterministic power-of-two buckets.
+pilot-prepare *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax ettax pilot prepare {{ args }}
+
+# Train or resume one named pilot trial to a matched content-token budget.
+pilot-run trial *args:
+    cd ../../../.. && env -u VIRTUAL_ENV JAX_PLATFORMS=cuda uv run --project src/python --package ettax --extra cuda ettax pilot run {{ trial }} {{ args }}
+
+# Evaluate one named checkpoint under all six predeclared inference policies.
+pilot-evaluate trial *args:
+    cd ../../../.. && env -u VIRTUAL_ENV JAX_PLATFORMS=cuda uv run --project src/python --package ettax --extra cuda ettax pilot evaluate {{ trial }} {{ args }}
+
+# Rank eligible recipes, copy compact plan attachments, and freeze after V1.
+pilot-summarize *args:
+    cd ../../../.. && env -u VIRTUAL_ENV uv run --project src/python --package ettax ettax pilot summarize {{ args }}

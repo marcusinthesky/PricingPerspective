@@ -1,0 +1,35 @@
+# Preserve the package's existing shell behavior for repository-root commands.
+set shell := ["bash", "-uc"]
+
+# Shared body for the parallel test tiers. $1 is the marker expression.
+# `-p no:monitor` below is load-bearing under `-n auto`, not a preference:
+# pytest-monitor races its own `.pymon` INSERT across workers and the resulting
+# worker crash surfaces as `INTERNALERROR> KeyError: <WorkerController gwN>`.
+# Full derivation in `src/python/apps/pipeline/justfile`.
+_pytest markexpr *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd '{{ source_directory() }}'
+    exec env -u VIRTUAL_ENV uv run pytest -q -p no:monitor -n auto -m '{{ markexpr }}' {{ args }}
+
+# Run fast unit tests (default) with Testmon's xdist-aware cache.
+test *args: (_pytest "not slow" "--testmon-forceselect" args)
+
+# Run all tests.
+test-all *args: (_pytest "" args)
+
+# Run tests with duration report.
+test-durations:
+    env -u VIRTUAL_ENV uv run pytest -v --durations=20
+
+# Run semflow linting.
+lint:
+    uv run ruff check .
+
+# Check repository fingerprints without writing files.
+check:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && uv run --project src/python --no-sync semflow check
+
+# Format semflow sources and tests.
+format:
+    uv run ruff format .

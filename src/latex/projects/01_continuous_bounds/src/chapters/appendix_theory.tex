@@ -1,0 +1,17 @@
+\clearpage
+\section{Formal verification}\label{sec:lean-proofs}
+
+The main text contains the human-readable proofs of the covariance envelope,
+the reflected lower endpoint, the finite-support transfer, and the metric
+bracket. Standard optimal-transport existence under the cited Polish and
+finite-second-moment conditions supplies the optimizer used in Theorem~1. The
+Lean declaration accepts that optimizer as an input certificate; it does not
+formalize the general existence theorem.
+
+The formal record checks the displayed identities and transfer bounds under
+their stated assumptions. These statements concern systematic covariance and
+do not validate the article proxy, the stochastic map's economic content, the
+observed-return bridge, or the empirical estimator.
+
+The exact machine-checked scope and assumptions are:
+\ppLeanStatusList

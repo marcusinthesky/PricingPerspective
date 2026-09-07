@@ -1,0 +1,135 @@
+\section{Portfolio choice under the certificate}\label{sec:portfolio-choice}
+
+The preceding section establishes how much portfolio variance the
+observed information geometry can certify under the maintained
+transmission model.
+The investor's task is now to turn that risk statement into an
+allocation rule without treating the bound as an estimated covariance matrix.
+At the benchmark with $\delta=0$, the natural decision is to choose the
+feasible capital allocation with the smallest certified upper bound in
+\eqref{eq:p3-raw-cap}.
+
+Let $\mathcal W$ be a nonempty compact subset of the long-only simplex,
+possibly incorporating upper-weight, sector, or turnover constraints.
+Each $x\in\mathcal W$ is a vector of capital weights, whereas $q(x)$
+records the corresponding normalized shares of the
+perfect-positive-dependence volatility budget defined in
+\eqref{eq:p3-risk-weights}.
+Define the certified-variance objective
+\begin{equation}\label{eq:p3-certified-objective}
+  \operatorname{CV}(x)
+  :=A(x)^2\left\{1-\mathcal C(q(x))\right\}.
+\end{equation}
+The information-certified portfolio solves
+\begin{equation}\label{eq:p3-certified-portfolio}
+  x^{\star}\in
+  \operatorname*{arg\,min}_{x\in\mathcal W}\operatorname{CV}(x).
+\end{equation}
+Equation \eqref{eq:p3-certified-portfolio} is a minimum-risk problem.
+Expected returns do not enter its objective, constraints, or identifying
+argument.
+The objective is economically appropriate because it minimizes a
+certified risk cap rather than a point estimate of otherwise unknown
+portfolio variance.
+
+The two components of \eqref{eq:p3-certified-objective} make the
+allocation trade-off explicit.
+The term $A(x)^2$ is the variance benchmark under perfect positive
+dependence, so reducing $A(x)$ lowers the same marginal-volatility
+benchmark used by an inverse-volatility portfolio.
+The deduction $A(x)^2\mathcal C(q(x))$ rewards allocations whose
+information distributions certify that their latent risks cannot all be aligned.
+Inverse volatility is therefore the cleanest empirical benchmark: it
+uses the first channel but not the second.
+
+The first mathematical requirement is that this decision rule
+actually has a solution.
+
+\begin{theorem}[Existence of a certified-variance minimizer]
+  \label{thm:p3-certified-minimizer}
+  Every nonempty compact feasible subset $\mathcal W$ of the long-only
+  simplex admits a minimizer of the continuous objective
+  \eqref{eq:p3-certified-objective}, and the pointwise variance certificate
+  holds at that minimizer.
+\end{theorem}
+
+For fixed distance and marginal-scale inputs, $\operatorname{CV}$ is continuous
+on $\mathcal W$.
+The set is nonempty and compact, so Weierstrass gives a minimizer.
+The pointwise certificate in \eqref{eq:p3-raw-cap} then holds at that
+minimizer.
+
+Existence makes the rule well defined on any compact feasible set;
+curvature is a separate guarantee about how the standardized problem
+can be solved.
+That curvature is a property of the observed geometry rather than an
+assumption about returns.
+For a symmetric zero-diagonal matrix $d$, conditional negative definiteness
+means
+\[
+  \sum_i\sum_j u_i\,u_j\,d_{ij}^2\le0
+  \quad\text{whenever }\sum_i u_i=0.
+\]
+
+\begin{theorem}[Certificate convexity]\label{thm:p3-certificate-convexity}
+  If the pairwise floor matrix $\ell$ is conditionally negative definite, then
+  $q\mapsto1-\mathcal C(q)$ is convex along mixtures of normalized risk weights.
+\end{theorem}
+
+For every tangent direction with $\1^\top u=0$,
+\[
+  \frac{d^2}{dt^2}\mathcal C(q+tu)=u^\top\ell^2u\le0.
+\]
+Hence $\mathcal C$ is concave and $1-\mathcal C$ is convex on the simplex.
+
+By Schoenberg's criterion the condition holds exactly when the double-centred
+matrix
+$-\tfrac12(I-\tfrac1n\1\1^{\top})\ell^2
+(I-\tfrac1n\1\1^{\top})$
+is positive semidefinite, equivalently when the floors embed isometrically in a
+Hilbert space.
+It is therefore checkable directly from the reported W2 matrix, without
+returns and without an estimated parameter, and it holds for the frozen matrix
+used here.
+Under this condition, minimizing the standardized certificate over a convex
+feasible set is a convex program.
+
+A third guarantee concerns sensitivity to the carrier scale rather
+than existence or curvature.
+In the zero-slack boundary case, the carrier constant drops out of
+the normalized decision.
+
+\begin{corollary}[Carrier invariance of the normalized allocation]
+  \label{cor:p3-carrier-invariance}
+  Let $\tau_i=0$ for every asset. Then $\ell_{ij}=L^{-1}W_2(C_i,C_j)$ and
+  \begin{equation}\label{eq:p3-zero-slack-certificate}
+    \mathcal C(q)=\frac{1}{2L^2}\,q^{\top}W_2^2\,q,
+  \end{equation}
+  so for any $L>0$ and any feasible set $\mathcal Q$ of normalized risk
+  weights,
+  \[
+    \operatorname*{arg\,max}_{q\in\mathcal Q}\mathcal C(q)
+    =\operatorname*{arg\,max}_{q\in\mathcal Q}q^{\top}W_2^2q.
+  \]
+\end{corollary}
+
+The factor $L^{-2}$ is positive, so scaling the objective does not change its
+maximizers.
+Under zero slack, $L$ determines how much variance the certificate deducts
+but not which normalized risk allocation achieves the largest deduction.
+That allocation is determined by the observed W2 geometry.
+
+The carrier-invariance statement concerns normalized risk weights
+$q$, which are shares of the perfect-dependence volatility budget,
+not the capital weights $x$ held by the investor.
+The raw objective retains $L$ through the interaction between $A(x)^2$ and
+$\mathcal C(q(x))$, so converting an invariant risk allocation into capital
+still requires the marginal scales $\sigma_i$.
+When slack is nonzero, $\tau_i+\tau_j$ enters the floor additively and the
+truncation depends jointly on $L$ and $\tau$.
+Together, the existence, curvature, and carrier-invariance results
+turn the certificate into an implementable decision rule while
+keeping its dependence on the maintained inputs explicit.
+\Cref{sec:empirical-design} next constructs the zero-slack allocation
+from observed news geometry, and \Cref{sec:news-variance-benchmark}
+evaluates its realized variance against conventional portfolio benchmarks.

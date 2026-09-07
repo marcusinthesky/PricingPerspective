@@ -1,0 +1,61 @@
+# Local build outputs. Two artifacts per target are published rather than
+# ignored — the compiled PDF and the submission archive — so anyone with
+# repository access can read the paper and reproduce an upload without DVC
+# remote or object-store credentials (they are `cache: false` DVC outs).
+# Ignoring the *contents* (`/**`) rather than the directory is required: git
+# cannot re-include a file whose parent directory is itself excluded.
+# The one-level `*/` in the negations keeps `build/<target>/bundle/` staging
+# (including its compiled main.pdf) ignored.
+/projects/*/build/**
+!/projects/*/build/
+!/projects/*/build/arxiv/
+!/projects/*/build/arxiv/arxiv.pdf
+!/projects/*/build/arxiv/arxiv.tar.gz
+# Named per venue rather than `build/*/*.pdf`: only published targets
+# are artifacts. A wildcard also re-included scratch `draft` builds and any
+# stale directory left by an earlier layout. Nested paths such as
+# build/<target>/bundle/ stay ignored — no negation reaches them.
+# The template is scaffolding, not a publication; re-ignored last (last match
+# wins) so it keeps compiling in the smoke gate without publishing a PDF.
+/projects/_template/build/**
+
+# Setup-materialized publisher/template dependencies
+/projects/*/src/interact.cls
+/projects/*/src/rQUF2e.cls
+/projects/*/src/rQUF.bst
+/projects/*/src/enumerate.sty
+/projects/*/src/latexrelease.sty
+/projects/*/src/amsmath-2018-12-01.sty
+/projects/*/src/graphics-2017-06-25.sty
+/projects/*/src/everyshi.sty
+/projects/*/src/everyshi-2001-05-15.sty
+/projects/*/src/siunitx-v2.sty
+/projects/*/src/siunitx-abbreviations.cfg
+/projects/*/src/siunitx-binary.cfg
+/projects/*/src/siunitx-version-1.cfg
+/projects/*/src/rm-lmss9.tfm
+/projects/*/src/rm-lmsso9.tfm
+/projects/*/src/ec-lmcsc10.tfm
+/projects/*/src/lmcsc10.pfb
+/projects/*/src/cmr10.pfb
+/projects/*/src/load-unicode-xetex-classes.tex
+/projects/*/src/LineBreak.txt
+/projects/*/src/EastAsianWidth.txt
+/projects/*/src/xparse.sty
+/projects/*/src/array-2016-10-06.sty
+/projects/*/src/longtable-2020-01-07.sty
+/projects/*/src/pp-manuscript.sty
+/vendor/
+
+# Test inputs with .log extensions are authored fixtures, not build logs.
+!/tools/tests/clean.log
+!/tools/tests/missing-glyph.log
+
+# bundle-audit compiles hostile fixtures in place before rejecting them.
+/tools/tests/fixtures/**/main.mk
+/tools/tests/fixtures/**/main.out
+/tools/tests/fixtures/**/main.pdf
+/tools/tests/fixtures/**/main.idx
+/tools/tests/fixtures/**/main.ilg
+/tools/tests/fixtures/**/main.toc
+/tools/tests/fixtures/**/MANIFEST.json

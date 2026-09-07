@@ -1,0 +1,18 @@
+default_stages: [pre-commit]
+
+repos:
+  - repo: local
+    hooks:
+      - id: references-check
+        name: "reference: closed authored graph"
+        language: system
+        entry: bash -euc 'cd "$(git rev-parse --show-toplevel)" && exec just references::graph-check' --
+        pass_filenames: false
+        files: ^.+/(paper\.md|README\.md)$
+
+      - id: schema-reference-document
+        name: "reference: closed document shape"
+        language: system
+        entry: bash -euc 'prefix="$(git rev-parse --show-prefix)"; root="$(git rev-parse --show-toplevel)"; files=(); for file in "$@"; do files+=("${prefix}${file}"); done; cd "$root"; exec just references::structure "${files[@]}"' --
+        pass_filenames: true
+        files: ^.+/README\.md$

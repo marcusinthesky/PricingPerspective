@@ -1,0 +1,219 @@
+name: Pre-commit (diff) on PR
+
+# Two triggers, one job, different amounts of it.
+#
+# `pull_request` is the gate: provision, then run prek over the PR's diff.
+#
+# `push: main` is the cache seed, and exists because of how GitHub scopes
+# Actions caches. A cache written on `refs/pull/N/merge` is readable by that PR
+# and nothing else — sibling PRs cannot see it, so with a PR-only trigger every
+# PR starts from a cold Nix store and spends ~22 min building the dev-shell
+# closure from source. Only caches on the default branch fall through to all
+# PRs. So on a push to main this job provisions and stops (the prek step is
+# `pull_request`-only): it leaves a Nix store cache that every subsequent PR can
+# restore from the default-branch scope.
+#
+# The workflow name names the gate; renaming it would rename the check runs that
+# branch protection matches on.
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  # `actions: write` is the scope behind DELETE /repos/{o}/{r}/actions/caches —
+  # what the Save step's `purge` calls. Without it the purge 403s, and because
+  # cache-nix-action swallows purge errors into a log line the only symptom is
+  # superseded multi-GB entries quietly accumulating against the 10 GB budget.
+  actions: write
+  # DELIBERATELY NO `id-token: write`, despite nix-installer-action logging
+  # "FlakeHub is disabled because the workflow is misconfigured" on every run.
+  # That warning asks for the OIDC token FlakeHub Cache authenticates with.
+  # cache.nixos.org plus the Nix store cache below is the whole substituter
+  # story; granting a scope nothing exercises buys a quieter log and nothing
+  # else. Add the line back — one line, nothing else changes — if a FlakeHub
+  # plan is ever attached.
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      # Stock ubuntu-latest ships ~14 GB free on /. Reclaim ~20 GB before Nix
+      # realizes the workload-minimal prek closure and its build intermediates.
+      - name: Free up runner disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          large-packages: false
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      # No Tectonic bundle cache: `src/latex/bundle/*.zip` (git-LFS, pulled by the
+      # checkout above) is the bundle, so LaTeX compiles never reach the network
+      # and there is nothing mutable to preserve between runs. A cache here would
+      # be self-poisoning — it saves on failure, so one rate-limited (HTTP 429)
+      # fetch from the upstream host leaves every later run restoring a subset
+      # missing the font it died on. `just latex::bundle-refresh` regenerates the
+      # vendored subset when a \usepackage or font size is added.
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+
+      # Persist the built Nix store across runs. Replaces the sunset Determinate
+      # magic-nix-cache (its GitHub Actions Cache backend was retired), so the
+      # workload-minimal prek closure is restored instead of rebuilt every run.
+      # Keyed on the flake lock + every Nix file + the uv.lock (the Python env's
+      # source of truth). `infra/nix/**/*.nix` rather than `infra/nix/flake.nix`:
+      # the flake is split into one file per vendored derivation, and a
+      # file-scoped key would stop moving when a derivation changes — restoring a
+      # store that no longer matches the flake. `**` matches zero or more
+      # segments, so this still covers infra/nix/flake.nix itself (same rule as
+      # `**/package-lock.json`).
+      #
+      # SPLIT restore/save, not the combined `cache-nix-action@v7`: the combined
+      # action saves from a post step declared `post-if: success()`, so a red
+      # prek run throws away the store it just spent ~22 min building, and the
+      # next run rebuilds from scratch. That is self-reinforcing — the gate is
+      # red exactly when you are iterating, which is exactly when you want the
+      # cache. The save below is a normal step guarded by `!cancelled()`.
+      - name: Restore Nix store
+        id: nix-cache
+        uses: nix-community/cache-nix-action/restore@v7
+        with:
+          primary-key: nix-prek-${{ runner.os }}-${{ hashFiles('infra/nix/flake.lock', 'infra/nix/**/*.nix', 'src/python/uv.lock') }}
+          restore-prefixes-first-match: nix-prek-${{ runner.os }}-
+
+      # Provision the environment the hooks call into. Without this the venv and
+      # node_modules don't exist and hooks fail on setup, not on real defects:
+      # `just setup` runs python::setup (uv sync --all-packages, so pyrefly's
+      # imports resolve) and typescript::setup (bun ci). LaTeX needs no
+      # provisioning — its bundle subset is vendored in the tree, so every
+      # compile is already offline.
+      # `--profile` makes the realized environment a GC root: the cache save
+      # below can prune unrelated paths without deleting the shell the gate step
+      # reuses.
+      - name: Provision prek environment (venv, node_modules)
+        run: >-
+          nix develop
+          --profile "$RUNNER_TEMP/pricing-perspective-prek-profile"
+          ./infra/nix#prek
+          --command just setup
+
+      # Immediately after provisioning and before the gate, so the store survives
+      # a red prek run. `!cancelled()` rather than `always()`: this job is
+      # `cancel-in-progress`, and a superseded run should die at once instead of
+      # spending a minute uploading a store the run that replaced it is already
+      # rebuilding. A partial store from a failed provision is still worth
+      # keeping — Nix is content-addressed, so the next run substitutes what is
+      # there and builds only the remainder.
+      #
+      # Unrooted paths are GC'd toward 8 GB before save to stay inside GitHub's
+      # 10 GB per-repo cache budget, which this job shares with lean.yml's
+      # `nix-lean-*` entries. The prek profile above protects the workload
+      # closure. The purge deletes this ref's superseded entries, so a key that
+      # rotates on every uv.lock bump cannot accumulate 3 GB at a time. `purge`
+      # only ever touches caches scoped to the current ref, and
+      # `purge-primary-key: never` protects the entry being written.
+      - name: Save Nix store
+        if: ${{ !cancelled() }}
+        uses: nix-community/cache-nix-action/save@v7
+        with:
+          primary-key: ${{ steps.nix-cache.outputs.primary-key }}
+          gc-max-store-size-linux: 8G
+          purge: true
+          purge-prefixes: nix-prek-${{ runner.os }}-
+          purge-created: "0"
+          purge-primary-key: never
+
+      # cache-nix-action deliberately reduces archive/upload failures to warnings,
+      # so the step can be green even when no cache was persisted. Query the cache
+      # API after the save: a primary-key hit may reuse its existing entry; every
+      # miss must create a same-ref entry during this workflow run. Retry briefly
+      # because the cache list is eventually consistent after an upload.
+      - name: Verify Nix store cache persisted
+        if: ${{ !cancelled() }}
+        uses: actions/github-script@v9
+        env:
+          NIX_CACHE_HIT: ${{ steps.nix-cache.outputs.hit-primary-key }}
+          NIX_CACHE_KEY: ${{ steps.nix-cache.outputs.primary-key }}
+          NIX_CACHE_REF: ${{ github.ref }}
+        with:
+          script: |
+            const key = process.env.NIX_CACHE_KEY;
+            const ref = process.env.NIX_CACHE_REF;
+            const hitPrimary = process.env.NIX_CACHE_HIT === "true";
+            if (!key || !ref) {
+              core.setFailed("Nix cache verification is missing its key or ref");
+              return;
+            }
+
+            const { owner, repo } = context.repo;
+            const run = await github.request(
+              "GET /repos/{owner}/{repo}/actions/runs/{run_id}",
+              { owner, repo, run_id: context.runId },
+            );
+            const runStartedAt = Date.parse(run.data.run_started_at);
+
+            for (let attempt = 1; attempt <= 6; attempt += 1) {
+              const response = await github.request(
+                "GET /repos/{owner}/{repo}/actions/caches",
+                { owner, repo, key, ref, per_page: 100 },
+              );
+              const exact = response.data.actions_caches.filter(
+                (cache) => cache.key === key && cache.ref === ref,
+              );
+              const persisted = hitPrimary
+                ? exact.length > 0
+                : exact.some(
+                    (cache) => Date.parse(cache.created_at) >= runStartedAt,
+                  );
+              if (persisted) {
+                core.info(`Verified Nix cache ${key} on ${ref}`);
+                return;
+              }
+              if (attempt < 6) {
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+              }
+            }
+
+            core.setFailed(
+              `Nix cache ${key} was not persisted on ${ref}; inspect the Save Nix store warnings`,
+            );
+
+      # Gate the PR's diff, not the whole repo — this is the "Pre-commit (diff) on
+      # PR" job. prek runs each hook only on files changed between the PR base and
+      # head (base is an ancestor of head, so the three-dot change set is exact),
+      # so unrelated pre-existing repo files don't block the PR.
+      # Skipped on the `push: main` seed run, which has no base/head pair to diff;
+      # that path instead refreshes the shared Nix store cache.
+      #
+      # One invocation per config, rather than a bare `prek run`: this repository
+      # carries no root `.pre-commit-config.yaml`, and prek exits nonzero
+      # ("No `prek.toml` or `.pre-commit-config.yaml` found") when it cannot find
+      # one to anchor the workspace on. Collapse this back to a single bare
+      # `prek run --from-ref ... --to-ref ...` the moment a root config lands —
+      # prek's workspace mode then discovers the nested configs on its own.
+      - name: Run Pre-Commit Checks (PR diff)
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          nix develop "$RUNNER_TEMP/pricing-perspective-prek-profile" --command bash -euo pipefail -c '
+            for config in infra/nix/.pre-commit-config.yaml src/typescript/.pre-commit-config.yaml; do
+              echo "::group::prek --config $config"
+              prek run --config "$config" \
+                --from-ref "${{ github.event.pull_request.base.sha }}" \
+                --to-ref "${{ github.event.pull_request.head.sha }}"
+              echo "::endgroup::"
+            done
+          '

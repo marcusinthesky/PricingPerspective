@@ -1,0 +1,5 @@
+/* Companion-only styling. Publication manuscripts do not consume this file. */
+.definition, .theorem, .lemma, .corollary {
+  border-left: 0.2rem solid #315a7d;
+  padding-left: 1rem;
+}

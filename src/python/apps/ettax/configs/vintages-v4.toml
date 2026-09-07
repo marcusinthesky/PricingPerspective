@@ -1,0 +1,39 @@
+# Frozen recipe `v4-256-mask70`, selected by pilot `t69-context-loss-v1`.
+#
+# The queue that trained this run reuses the pilot trainer with a per-arm
+# `output_root`, so its checkpoints live at `<run>/<arm>/checkpoints` rather
+# than the `<run>/checkpoints/<arm>` layout `run_vintages` writes; hence
+# `checkpoint_layout = "frozen"`.
+#
+# The pooling and article policies below are not free parameters. They are the
+# winner recorded in `frozen-recipe.json` (`decoder-mask70:hybrid-first`), hashed
+# before any outcome was read. Changing them here decouples the deployed encoder
+# from the recipe that was actually selected.
+
+tokenizer_arm = "V0"
+tokenizer_documents = 2000000
+prepared_documents = 2000000
+sample_seed = "t69-ettax-vintage-staircase"
+work_root = "data/.encoder_vintage/ettax"
+run_id = "v4-256-mask70"
+budget_manifest = "data/.encoder_vintage/stats/budget.json"
+experiment_config = "src/python/apps/ettax/configs/base.toml"
+
+checkpoint_layout = "frozen"
+pooling_policy = "hybrid"
+article_policy = "first"
+
+[arms.V0]
+identifier = "enwiki-20171220"
+source = "data/.encoder_vintage/corpus/V0.txt"
+role = "zero-exposure floor"
+
+[arms.V1]
+identifier = "enwiki-20201220"
+source = "data/.encoder_vintage/corpus/V1.txt"
+role = "primary outcome-clean arm"
+
+[arms.V3]
+identifier = "enwiki-20260801"
+source = "data/.encoder_vintage/corpus/V3.txt"
+role = "maximum-exposure arm"

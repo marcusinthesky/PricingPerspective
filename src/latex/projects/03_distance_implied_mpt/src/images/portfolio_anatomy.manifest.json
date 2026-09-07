@@ -1,0 +1,67 @@
+{
+  "code_identity": {
+    "kind": "module",
+    "value": "p3_portfolio_anatomy_exhibits"
+  },
+  "environment": {
+    "python": "workspace",
+    "renderer": "matplotlib"
+  },
+  "lane": "p3",
+  "outputs": [
+    {
+      "bytes": 263535,
+      "kind": "pgf",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/images/portfolio_anatomy.pgf",
+      "sha256": "f61990fdf9a004067425e7baed966a77b997251c0dc96ae69615208970509e33"
+    },
+    {
+      "bytes": 450159,
+      "kind": "pgf",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/images/portfolio_evolution.pgf",
+      "sha256": "99e5b274c866c732f8bb4d9072e5e7de93d93fc07085f7bbc0bb9d0451dab05f"
+    },
+    {
+      "bytes": 1144,
+      "kind": "latex",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/generated/portfolio_holdings.tex",
+      "sha256": "9f5fe4d2f319a7d1fbf50ef20d6521503603d9927aa6de5780c651036e1025ec"
+    }
+  ],
+  "parameter_identity": {
+    "kind": "file",
+    "value": "params.yaml"
+  },
+  "phase": "exhibit",
+  "protocol_id": "paper3-publication-v1",
+  "risk_class": "moderate",
+  "schema_version": "1.0",
+  "seed_policy": "deterministic-from-declared-inputs",
+  "stage_key": "p3_portfolio_anatomy_exhibits",
+  "upstream_artifacts": [
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/portfolio_anatomy/firm_anatomy.parquet:b5a3b8458d29f5b91a45c4dccdd832bf7796ad32b8d338f01718116f2f6e71ef"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/portfolio_anatomy/pair_contributions.parquet:5d6423684e11db7b2713d6cbc8ab0aa8d1c0677e31b360c7ca5f659ecccc2b84"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/portfolio_anatomy/sector_summary.parquet:1f49dd8084b1c746771fd699d1eca561d831c80436c7ea99071ccc3545aa76e0"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/portfolio_anatomy/summary.yaml:5c7b2b954b39b3f23a0d9288fb075f3e8b869b8c840a152857f745eb3e1e64f0"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/portfolio_anatomy/vintage_summary.parquet:ec6415c9dddfd08fb892ef1bfa1230829ff4f4f484ee7eca1c883cdebb54c313"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/portfolio_anatomy/vintage_weights.parquet:53bd48a5a41afdbae76c009552c4e3c0d42b1ca28a8884eeecdf6960b439e32b"
+    }
+  ]
+}

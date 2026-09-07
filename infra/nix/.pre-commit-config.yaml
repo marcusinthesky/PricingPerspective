@@ -1,0 +1,36 @@
+# Nix quality gates run by prek.
+# Invoke with `just nix::check` (or via the repo-wide `just check`, which prek's
+# workspace mode auto-discovers this nested config for).
+#
+# `just nix::check` has referenced this file since it was written, but the file
+# never existed — so nixfmt, statix, and deadnix have never run at commit time.
+# They were reachable only by hand, through `just nix::fmt` / `just nix::lint`.
+# That is affordable while the flake is a single file whose author is also the
+# person running those commands; it stops being affordable once the flake is
+# split into one file per vendored derivation plus per-domain devShell groups.
+#
+# Each hook delegates to its justfile recipe instead of restating the command, so
+# the gate and the developer-facing command cannot diverge — the same pattern as
+# the root config's native Python and `just nix::rumdl-lockstep` hooks.
+# Both recipes are directory-scoped sweeps over infra/nix (~one file per vendored
+# derivation, so a full sweep is instant), hence `pass_filenames: false`; the
+# `files:` pattern keeps them off every commit that touches no Nix.
+default_stages: [pre-commit]
+repos:
+  - repo: local
+    hooks:
+      - id: nix-fmt
+        name: nixfmt (format check)
+        description: Assert every .nix file is RFC 166-formatted; fix with `just nix::fmt`.
+        language: system
+        entry: bash -c 'cd "$(git rev-parse --show-toplevel)" && just nix::fmt-check'
+        files: \.nix$
+        pass_filenames: false
+
+      - id: nix-lint
+        name: statix + deadnix (nix anti-patterns, dead code)
+        description: Flag Nix anti-patterns (statix) and unused bindings/arguments (deadnix).
+        language: system
+        entry: bash -c 'cd "$(git rev-parse --show-toplevel)" && just nix::lint'
+        files: \.nix$
+        pass_filenames: false

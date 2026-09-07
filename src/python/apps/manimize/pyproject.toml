@@ -1,0 +1,142 @@
+[project]
+name = "manimize"
+version = "0.1.0"
+description = "Manim animation and Kokoro-82M narration pipeline for the manuscript series."
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+  "imageio-ffmpeg>=0.6.0",
+  "matplotlib>=3.9",
+  "numpy>=2.1",
+  "pillow>=11.0",
+]
+
+[project.scripts]
+manimize-narrate = "manimize.narration:main"
+manimize-render = "manimize.render_all:main"
+
+[project.optional-dependencies]
+narration = ["kokoro>=0.9.4", "soundfile>=0.13.1"]
+native = ["manim==0.21.0"]
+
+[dependency-groups]
+dev = [
+  "deptry",
+  "pytest",
+  "pytest-cov",
+  "pytest-testmon",
+  "pytest-xdist",
+  "ruff",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.deptry]
+known_first_party = ["manimize"]
+
+[tool.deptry.per_rule_ignores]
+# The narration command loads these opt-in extras dynamically so the default
+# preview/typecheck environment does not import heavyweight model packages.
+DEP002 = ["kokoro", "soundfile"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/manimize"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+
+[tool.ruff]
+extend = "../../pyproject.toml"
+
+[tool.ruff.lint.extend-per-file-ignores]
+# Manim's scene DSL exports its animation primitives through a deliberately
+# broad module surface; keep the scene files close to the native API.
+"theme.py" = [
+  "ANN",
+  "D",
+  "E501",
+  "F401",
+  "FBT001",
+  "FBT002",
+  "N803",
+  "RUF001",
+  "TRY003",
+  "F403",
+  "F405",
+]
+"src/manimize/narration.py" = ["EM101", "EM102", "S603", "S607", "TRY003"]
+"src/manimize/render_all.py" = [
+  "D",
+  "EM101",
+  "EM102",
+  "FBT001",
+  "FBT002",
+  "S603",
+  "S607",
+  "T201",
+  "TRY003",
+]
+"tools/preview_renderer.py" = [
+  "ANN",
+  "B007",
+  "B905",
+  "D",
+  "E402",
+  "E501",
+  "E741",
+  "EM101",
+  "EM102",
+  "F401",
+  "FBT001",
+  "FBT002",
+  "FBT003",
+  "FURB136",
+  "I001",
+  "N803",
+  "N806",
+  "N999",
+  "PLR0915",
+  "PLR2004",
+  "PLW2901",
+  "RUF001",
+  "RUF005",
+  "RUF007",
+  "RUF046",
+  "S101",
+  "S603",
+  "S607",
+  "T201",
+  "TC003",
+  "TRY003",
+  "UP035",
+]
+"scenes/**/*.py" = [
+  "ANN",
+  "B007",
+  "B905",
+  "D",
+  "E501",
+  "E741",
+  "F401",
+  "FBT001",
+  "FBT002",
+  "FBT003",
+  "I001",
+  "N803",
+  "N806",
+  "N999",
+  "PLR2004",
+  "RUF001",
+  "S101",
+  "TC003",
+  "TRY003",
+  "F403",
+  "F405",
+]
+"tests/**" = ["ANN", "D", "INP001", "S101"]
+
+[tool.uv]
+package = true

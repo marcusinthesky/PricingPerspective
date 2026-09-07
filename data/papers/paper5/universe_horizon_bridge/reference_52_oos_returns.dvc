@@ -1,0 +1,6 @@
+outs:
+- md5: 8db80b09d6580d1ddede8548a2db7ba4.dir
+  size: 869936
+  nfiles: 52
+  hash: md5
+  path: reference_52_oos_returns

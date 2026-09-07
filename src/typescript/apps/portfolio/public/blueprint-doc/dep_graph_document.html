@@ -1,0 +1,1275 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dependency graph</title>
+  <meta name="generator" content="plasTeX" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles/theme-white.css" />
+  <link rel="stylesheet" href="styles/dep_graph.css" />
+
+  <script type="text/x-mathjax-config">
+
+    MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+
+  </script>
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">  </script>
+
+
+<link rel="stylesheet" href="styles/extra_styles.css" />
+
+</head>
+
+<body>
+<header>
+  <a class="toc" href="index.html">Home</a>
+  <h1 id="doc_title">Dependencies</h1>
+</header>
+<div class="wrapper">
+<div class="content">
+  <div id="Legend">
+    <span id="legend_title" class="title">Legend
+    <div class="btn">
+       <div class="bar"></div>
+       <div class="bar"></div>
+       <div class="bar"></div>
+    </div></span>
+    <dl class="legend">
+
+      <dt>Boxes</dt><dd>definitions</dd>
+
+      <dt>Ellipses</dt><dd>theorems and lemmas</dd>
+
+      <dt>Blue border</dt><dd>the <em>statement</em> of this result is ready to be formalized; all prerequisites are done</dd>
+
+      <dt>Orange border</dt><dd>the <em>statement</em> of this result is not ready to be formalized; the blueprint needs more work</dd>
+
+      <dt>Blue background</dt><dd>the <em>proof</em> of this result is ready to be formalized; all prerequisites are done</dd>
+
+      <dt>Green border</dt><dd>the <em>statement</em> of this result is formalized</dd>
+
+      <dt>Green background</dt><dd>the <em>proof</em> of this result is formalized</dd>
+
+      <dt>Dark green background</dt><dd>the <em>proof</em> of this result and all its ancestors are formalized</dd>
+
+      <dt>Dark green border</dt><dd>this is in Mathlib</dd>
+
+    </dl>
+  </div>
+    <div id="graph"></div>
+<div id="statements">
+
+
+    <div class="dep-modal-container" id="ass:random-common-map_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="ass:random-common-map" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">11</span><span class="definition_thmtitle">Randomized bi-Lipschitz pushforward</span></div>
+    <div class="thm_thmcontent"><p>   The exposure law is generated from an observable characteristic law by one common stochastic map with bounded slack: </p>
+<div class="displaymath" id="a0000000026">
+  \[  B_i=T(X_i,U_i)=t(X_i)+\delta _i(X_i,U_i),\qquad X_i\sim C_i,\qquad \lVert \delta _i(X_i,U_i)\rVert \le \tau _i,  \]
+</div>
+<p> with the common carrier \(t\) bi-Lipschitz, \(\ell \, d(x,y)\le \lVert t(x)-t(y)\rVert \le L\, d(x,y)\) for \(0{\lt}\ell \le L\). The constants \(L\), \(\ell \), and the slack radii \(\tau _i\) are maintained modelling restrictions, not quantities the observed distances identify or the empirical design estimates. </p>
+</div>
+
+    <a class="latex_link" href="sect0003.html#ass:random-common-map">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="cor:approximate-map-bound_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="cor:approximate-map-bound" style="display: none">
+    <div class="thm_thmheading">
+      <span class="corollary_thmcaption">
+      Corollary
+      </span>
+      <span class="corollary_thmlabel">18</span><span class="corollary_thmtitle">Approximate common map</span></div>
+    <div class="thm_thmcontent"><p>   If each exposure deviates from a common map value by at most \(\tau _i\), the covariance floor holds with \(LD\) inflated to \(LD+\tau _i+\tau _j\), and exact transmission is the \(\tau =0\) case. </p>
+<p>The statement fixes no characteristic distance: \(D\) is an arbitrary nonnegative dissimilarity, and energy distance was only ever one instance. Hosting it under the energy development misread that generality, which is why the declaration now lives in <span class="ttfamily">Transmission.Floor</span> and the node here. Contrast ??thm:random-exposure-envelope, which is <em>not</em> distance-agnostic: the sharp envelope needs quadratic transport specifically, because minimising the coupling cost is the same optimisation polarisation turns into an inner product. </p>
+</div>
+
+    <a class="latex_link" href="sect0005.html#cor:approximate-map-bound">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="cor:random-w2-metric_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="cor:random-w2-metric" style="display: none">
+    <div class="thm_thmheading">
+      <span class="corollary_thmcaption">
+      Corollary
+      </span>
+      <span class="corollary_thmlabel">14</span><span class="corollary_thmtitle">Metric-level bracket</span></div>
+    <div class="thm_thmcontent"><p>   At the level of the metric rather than the squared optimized cost, the slack enters additively and no support diameter appears: </p>
+<div class="displaymath" id="a0000000029">
+  \[  \ell ^{-1}W_2(C_i,C_j)-(\tau _i+\tau _j) \le W_{2,\Gamma }(P_i,P_j) \le L\, W_2(C_i,C_j)+(\tau _i+\tau _j).  \]
+</div>
+<p> This sharper form is what the empirical diagnostic uses. </p>
+<p>The upper direction is machine-checked directly at this level: two synchronous-coupling legs bound the slack, one contraction leg carries the transmitted laws, and the \(\mathcal P_2(\mathcal H)\) triangle inequality chains them. The lower direction still needs the reverse Lipschitz half, which supplies injectivity of \(T_\Gamma \) on its image, and remains a prose result. The node keeps <span class="ttfamily">notready</span> because it asserts both directions. </p>
+</div>
+
+    <a class="latex_link" href="sect0003.html#cor:random-w2-metric">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="def:exposure-law_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="def:exposure-law" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">1</span><span class="definition_thmtitle">Random functional exposure law</span></div>
+    <div class="thm_thmcontent"><p>  Asset \(i\) carries a random loading \(B_i\sim P_i\in \mathcal P_2(\mathcal H)\) in a real Hilbert space \(\mathcal H\), and the common factor process has covariance operator \(\Gamma \). The risk coordinates and factor-weighted second moments are </p>
+<div class="displaymath" id="a0000000015">
+  \[  Z_i=\Gamma ^{1/2}B_i,\qquad v_i=\mathbb E\lVert Z_i\rVert ^2 .  \]
+</div>
+<p> For a coupling \(\pi \in \Pi (P_i,P_j)\) the systematic covariance is \(\kappa ^\pi _{ij}=\mathbb E_\pi \langle Z_i,Z_j\rangle \), and the factor-weighted quadratic transport cost is </p>
+<div class="displaymath" id="a0000000016">
+  \[  W_{2,\Gamma }^2(P_i,P_j) =\inf _{\pi \in \Pi (P_i,P_j)}\mathbb E_\pi \lVert Z_i-Z_j\rVert ^2 .  \]
+</div>
+<p> Every object above is now formalized at this level, not only interpreted: risk coordinates as a pushforward under \(\Gamma ^{1/2}\), the second moment and systematic covariance as Bochner integrals, and the transport cost as the infimum defining \(W_2\) on \(\mathcal P_2(\mathcal H)\). The finite instance of ??def:finite-exposure-cloud is the estimator of this object rather than a separate model, and the two agree exactly on finitely supported laws. </p>
+<p>One caveat survives and is unchanged: existence of an optimal plan on \(\mathcal P_2(\mathcal H)\) is <em>not</em> proved. It is supplied as a certificate wherever an optimum is needed, so every attainment statement below reads “given such a plan”, never “one exists”. </p>
+</div>
+
+    <a class="latex_link" href="sect0001.html#def:exposure-law">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="def:finite-exposure-cloud_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="def:finite-exposure-cloud" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">2</span><span class="definition_thmtitle">Finite exposure cloud and coupling</span></div>
+    <div class="thm_thmcontent"><p>   A finite exposure cloud is a finite support together with nonnegative masses summing to one, and a coupling of two clouds is a nonnegative mass matrix with the two clouds as marginals. Over a coupling this fixes the systematic covariance \(\kappa ^\pi _{ij}\), the transport cost \(C(\pi )\), the second moments \(v_i\), and the barycentre, with no measure-theoretic optimal-transport input. A finite optimal-cost certificate is a separate datum: a coupling together with the assertion that its cost is least in the coupling set. </p>
+</div>
+
+    <a class="latex_link" href="sect0001.html#def:finite-exposure-cloud">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="def:frechet-class_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="def:frechet-class" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">5</span><span class="definition_thmtitle">Fréchet class of attainable covariances</span></div>
+    <div class="thm_thmcontent"><p>   The Fréchet class of a pair of clouds is the set of systematic covariances \(\kappa ^\pi _{ij}\) attained as \(\pi \) ranges over their couplings. The coupling set is convex and \(\kappa ^\pi _{ij}\) is affine in \(\pi \), so the class is an interval whenever both endpoints are attained. </p>
+</div>
+
+    <a class="latex_link" href="sect0002.html#def:frechet-class">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="def:perron-limit_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="def:perron-limit" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">31</span><span class="definition_thmtitle">Geometric Perron certificate</span></div>
+    <div class="thm_thmcontent"><p>   For \(P=\mathbf1\pi ^\top \), a geometric Perron certificate records constants \(C\geq 0\) and \(0\leq q{\lt}1\) such that \(\lVert W^k-P\rVert \leq Cq^k\) for every natural number \(k\). </p>
+</div>
+
+    <a class="latex_link" href="sect0012.html#def:perron-limit">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.HasGeometricPerronBound">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="eq:p3-residual-budget-cap_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="eq:p3-residual-budget-cap" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">21</span><span class="theorem_thmtitle">Additive residual-budget cap</span></div>
+    <div class="thm_thmcontent"><p>    If standardized total variance decomposes into the certified systematic term and an aggregate residual contribution bounded by \(\delta \geq 0\), then </p>
+<div class="displaymath" id="a0000000037">
+  \[  \operatorname {Var}(R_q)\leq 1-\mathcal C(q)+\delta .  \]
+</div>
+<p> Multiplication by a nonnegative raw scale gives the corresponding raw-variance inequality. The theorem assumes \(\delta \); it does not estimate it or derive residual orthogonality. </p>
+</div>
+
+    <a class="latex_link" href="sect0007.html#eq:p3-residual-budget-cap">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.totalVariance_le_informationCertificate_add_residualBudget">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="eq:portfolio-envelope_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="eq:portfolio-envelope" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">19</span><span class="theorem_thmtitle">Portfolio variance floor</span></div>
+    <div class="thm_thmcontent"><p>   For a finite book with nonnegative weights, the pairwise floors aggregate termwise into a floor on the squared systematic risk. Nonnegativity is a hypothesis, not a convention: signed weights can reverse individual pairwise inequalities and there is no signed-weight counterpart. No weight normalization is assumed, so the screen applies a fortiori to fully-invested long-only books. </p>
+<p>??chap:distance-implied carries its own label for this declaration under the distance-implied reading; the two manuscripts consume one theorem. </p>
+</div>
+
+    <a class="latex_link" href="sect0005.html#eq:portfolio-envelope">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="eq:random-exposure-excess-nonneg_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="eq:random-exposure-excess-nonneg" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">9</span><span class="theorem_thmtitle">The excess is nonnegative</span></div>
+    <div class="thm_thmcontent"><p>    Against a certified optimal transport cost, \(\operatorname {excess}(\pi )\ge 0\) for every coupling. This is what makes the gap a one-sided moment inequality and hence testable; it is a separate theorem from the identity above, because the identity holds for any reference cost while the sign needs that cost to be the infimum. </p>
+</div>
+
+    <a class="latex_link" href="sect0002.html#eq:random-exposure-excess-nonneg">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.excess_nonneg">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="eq:random-exposure-gap_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="eq:random-exposure-gap" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">8</span><span class="theorem_thmtitle">Transport-excess gap</span></div>
+    <div class="thm_thmcontent"><p>    For any coupling, \(\kappa ^\pi _{ij}=\kappa ^{\max }_{ij}-\tfrac 12\operatorname {excess}(\pi )\). The checked statement is an identity in the reference cost: it holds for any scalar placed where the optimal cost sits, and therefore asserts nothing about the sign of the excess on its own. </p>
+</div>
+
+    <a class="latex_link" href="sect0002.html#eq:random-exposure-gap">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.systCov_eq_ceiling_sub_excess">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="eq:random-kappa-bracket_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="eq:random-kappa-bracket" style="display: none">
+    <div class="thm_thmheading">
+      <span class="corollary_thmcaption">
+      Corollary
+      </span>
+      <span class="corollary_thmlabel">15</span><span class="corollary_thmtitle">Covariance bracket the diagnostic tests</span></div>
+    <div class="thm_thmcontent"><p>   Substituting the metric bracket into the envelope brackets \(\kappa ^{\max }_{ij}\) in observable characteristic distances and the maintained \((L,\ell ,\tau )\). Coverage of this bracket, and the share of unresolved dyads, is the primary reported diagnostic. </p>
+</div>
+
+    <a class="latex_link" href="sect0003.html#eq:random-kappa-bracket">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="eq:random-w2-lower-transfer_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="eq:random-w2-lower-transfer" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">13</span><span class="theorem_thmtitle">Lower transport transfer under slack</span></div>
+    <div class="thm_thmcontent"><p>    Under a positive lower Lipschitz constant and bounded per-endpoint slack, the optimized squared exposure transport cost is at least \(\ell ^{-2}\) times the optimized squared characteristic cost, less a slack term carrying the maintained support diameter. </p>
+</div>
+
+    <a class="latex_link" href="sect0003.html#eq:random-w2-lower-transfer">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.RandomExposure.optimized_transportCost_ge_of_lower_lipschitz_slack">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="eq:random-w2-upper-transfer_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="eq:random-w2-upper-transfer" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">12</span><span class="theorem_thmtitle">Upper transport transfer under slack</span></div>
+    <div class="thm_thmcontent"><p>    Under the upper Lipschitz bound and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at most \(L^2\) times the optimized squared characteristic cost, plus a slack term carrying the maintained support diameter. </p>
+</div>
+
+    <a class="latex_link" href="sect0003.html#eq:random-w2-upper-transfer">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.RandomExposure.optimized_transportCost_le_of_upper_lipschitz_slack">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="lem:polarization_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="lem:polarization" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">3</span><span class="lemma_thmtitle">Polarization</span></div>
+    <div class="thm_thmcontent"><p>   For any \(x,y\) in a real inner-product space, </p>
+<div class="displaymath" id="a0000000018">
+  \[  \langle x,y\rangle =\tfrac 12\left(\lVert x\rVert ^2+\lVert y\rVert ^2-\lVert x-y\rVert ^2\right).  \]
+</div>
+</div>
+
+    <a class="latex_link" href="sect0001.html#lem:polarization">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/norm_sub_sq_real">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="lem:transport-polarization_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="lem:transport-polarization" style="display: none">
+    <div class="thm_thmheading">
+      <span class="lemma_thmcaption">
+      Lemma
+      </span>
+      <span class="lemma_thmlabel">4</span><span class="lemma_thmtitle">Transport polarization for a coupling</span></div>
+    <div class="thm_thmcontent"><p>   For every coupling \(\pi \) of two finite exposure clouds, </p>
+<div class="displaymath" id="a0000000020">
+  \[  \kappa ^\pi _{ij}=\tfrac 12\left(v_i+v_j-C(\pi )\right).  \]
+</div>
+<p> The identity is exact and holds coupling by coupling; no optimality is involved. </p>
+</div>
+
+    <a class="latex_link" href="sect0001.html#lem:transport-polarization">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="prop:finite-rho-bound_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="prop:finite-rho-bound" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">35</span><span class="theorem_thmtitle">Finite-\(\rho \) resolvent bound</span></div>
+    <div class="thm_thmcontent"><p>   If \(\lVert \rho (W-P)\rVert {\lt}1\), then </p>
+<div class="displaymath" id="a0000000051">
+  \[  \left\lVert (1-\rho )(I-\rho W)^{-1}-P\right\rVert \leq |1-\rho |\{ 1-\lVert \rho (W-P)\rVert \} ^{-1}\lVert I-P\rVert .  \]
+</div>
+</div>
+
+    <a class="latex_link" href="sect0013.html#prop:finite-rho-bound">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.normalized_leontief_error_le">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="prop:pairwise-not-psd_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="prop:pairwise-not-psd" style="display: none">
+    <div class="thm_thmheading">
+      <span class="proposition_thmcaption">
+      Proposition
+      </span>
+      <span class="proposition_thmlabel">10</span><span class="proposition_thmtitle">Pairwise envelopes do not assemble</span></div>
+    <div class="thm_thmcontent"><p>   The matrix of independently optimal pairwise envelopes \(\left[\kappa ^{\max }_{ij}\right]\) need not be positive semidefinite, because pairwise-optimal couplings may be mutually inconsistent. A globally coherent covariance requires one joint law, as in ??thm:joint-coherence. Stating this boundary is part of the contribution and is not a defect of the envelope. </p>
+</div>
+
+    <a class="latex_link" href="sect0002.html#prop:pairwise-not-psd">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:ball-inclusion_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:ball-inclusion" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">29</span><span class="theorem_thmtitle">Wasserstein balls sit inside energy balls</span></div>
+    <div class="thm_thmcontent"><p>   If \(W_2(\mu ,\nu )\le \delta \) then \(\mathcal E^2(\mu ,\nu )\le 2\delta \); the Wasserstein ball of radius \(\delta \) is therefore contained in the energy-distance ball of radius \(2\delta \). The inclusion is one-directional, and that direction is the pivot’s justification: a \(W_2\) hypothesis is the stronger one, so results proved under it apply to the energy ball, while the converse fails. This node belongs with the trunk rather than with this chapter. </p>
+</div>
+
+    <a class="latex_link" href="sect0011.html#thm:ball-inclusion">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:box-corner_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:box-corner" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">27</span><span class="theorem_thmtitle">Long-only worst case is the upper corner</span></div>
+    <div class="thm_thmcontent"><p>  For nonnegative weights and a candidate covariance dominated entrywise by \(U\), the quadratic form is dominated by the form at \(U\); the supremum over the box is therefore attained at the upper corner. No positive-semidefiniteness of \(U\) is required, which is what makes the result usable on a bracket that is not itself a covariance matrix. </p>
+</div>
+
+    <a class="latex_link" href="sect0010.html#thm:box-corner">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:covariance-bracket_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:covariance-bracket" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">26</span><span class="theorem_thmtitle">Composed covariance bracket</span></div>
+    <div class="thm_thmcontent"><p>   Under bi-Lipschitz constants stated in the true, unobserved distance and per-asset embedding radii, the covariance inner product is bracketed by polarization expressions evaluated at the radius-inflated and radius-deflated measured distance. The hypothesis that the bi-Lipschitz relation holds in the unobserved distance is the load-bearing one and is not testable from the measured distances. </p>
+</div>
+
+    <a class="latex_link" href="sect0009.html#thm:covariance-bracket">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:dist-bracket_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:dist-bracket" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">24</span><span class="theorem_thmtitle">Radii add on the metric</span></div>
+    <div class="thm_thmcontent"><p>   Under the same radii, \(\lvert \operatorname {dist}(\mu _i',\mu _j')-\operatorname {dist}(\mu _i,\mu _j)\rvert \le \varepsilon _i+\varepsilon _j\). Additivity on the metric, rather than on the squared quantity, is the same structural fact that makes the metric-level bracket of ??cor:random-w2-metric sharper than its squared counterpart. </p>
+</div>
+
+    <a class="latex_link" href="sect0009.html#thm:dist-bracket">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:energy-bracket_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:energy-bracket" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">25</span><span class="theorem_thmtitle">Asymmetric squared bracket</span></div>
+    <div class="thm_thmcontent"><p>   Squaring the metric bracket gives an asymmetric interval, with the lower end truncated at zero. The asymmetry is not cosmetic: it is why the squared-cost formalization cannot simply inherit the metric statement. </p>
+</div>
+
+    <a class="latex_link" href="sect0009.html#thm:energy-bracket">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:factor-return-semantics_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:factor-return-semantics" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">17</span><span class="theorem_thmtitle">Factor-return semantics of the covariance</span></div>
+    <div class="thm_thmcontent"><p>   With a centred isotropic factor and residuals cross-orthogonal to the exposures, the covariance of factor-driven returns equals the systematic covariance of the exposure laws, and the residual cross term vanishes. This is what licenses reading \(\kappa _{ij}\) as a return covariance rather than only as a loading-space inner product; without the orthogonality hypothesis the whole-return claim does not follow. </p>
+</div>
+
+    <a class="latex_link" href="sect0004.html#thm:factor-return-semantics">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:inner-perturbation_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:inner-perturbation" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">23</span><span class="theorem_thmtitle">Inner-product perturbation</span></div>
+    <div class="thm_thmcontent"><p>   For mean embeddings perturbed by at most \(\varepsilon _i\) and \(\varepsilon _j\), the inner product moves by at most \(\varepsilon _i\lVert \mu _j\rVert +\varepsilon _j\lVert \mu _i\rVert +\varepsilon _i\varepsilon _j\). </p>
+</div>
+
+    <a class="latex_link" href="sect0009.html#thm:inner-perturbation">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:joint-coherence_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:joint-coherence" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">16</span><span class="theorem_thmtitle">One joint law gives a coherent covariance</span></div>
+    <div class="thm_thmcontent"><p>   A joint exposure law over all assets reproduces each pairwise systematic covariance on its diagonal coupling, and the induced portfolio quadratic form equals the second moment of the aggregated loading \(B_w=\sum _i w_iB_i\). Coherence is therefore automatic once the object is a single joint law, and the quadratic form is positive semidefinite for that reason alone. This is the honest route around ??prop:pairwise-not-psd. </p>
+</div>
+
+    <a class="latex_link" href="sect0004.html#thm:joint-coherence">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:p3-certified-minimizer_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:p3-certified-minimizer" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">22</span><span class="theorem_thmtitle">Certified minimizer</span></div>
+    <div class="thm_thmcontent"><p>    Every nonempty compact feasible subset of the long-only simplex admits a minimizer of the continuous certified-variance objective. Any pointwise variance certificate on that set is inherited at the minimizer. </p>
+</div>
+
+    <a class="latex_link" href="sect0008.html#thm:p3-certified-minimizer">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.exists_minimumInformationCertifiedVariance">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:p3-information-certified-cap_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:p3-information-certified-cap" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">20</span><span class="theorem_thmtitle">Information-certified coherent portfolio variance</span></div>
+    <div class="thm_thmcontent"><p>    Under the common non-collapsing carrier, asset-specific synchronous slack, coherent joint-law, marginal, and integrability premises, every normalized long-only portfolio satisfies </p>
+<div class="displaymath" id="a0000000035">
+  \[  V_{\mathrm{sys}}(q) \leq \sum _i q_i v_i-\mathcal C(q).  \]
+</div>
+<p> The result is a conditional upper bound on systematic variance, not a covariance point estimate or an empirical coverage statement. </p>
+</div>
+
+    <a class="latex_link" href="sect0006.html#thm:p3-information-certified-cap">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.jointPortfolioVariance_le_informationCertifiedCap">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:perron-from-geometric_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:perron-from-geometric" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">32</span><span class="theorem_thmtitle">Geometric certificate implies the Perron limit</span></div>
+    <div class="thm_thmcontent"><p>    A geometric Perron certificate implies \(W^k\to P\). </p>
+</div>
+
+    <a class="latex_link" href="sect0012.html#thm:perron-from-geometric">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.isPerronLimit_of_geometric_bound">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:random-exposure-envelope_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:random-exposure-envelope" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">6</span><span class="theorem_thmtitle">Covariance envelope from optimal transport</span></div>
+    <div class="thm_thmcontent"><p>    Given a finite optimal transport-cost certificate, the ceiling </p>
+<div class="displaymath" id="a0000000022">
+  \[  \kappa ^{\max }_{ij}=\tfrac 12\left(v_i+v_j-W_{2,\Gamma }^2(P_i,P_j)\right)  \]
+</div>
+<p> is the greatest systematic covariance attainable over the coupling set. This is a statement about what the two marginal laws permit; it does not identify the realized covariance, which requires the economic joint law. It is the <em>upper</em> endpoint only; the lower one is ??thm:random-exposure-lower-endpoint, a separate theorem. </p>
+</div>
+
+    <a class="latex_link" href="sect0002.html#thm:random-exposure-envelope">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.isGreatest_frechetClass">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:random-exposure-lower-endpoint_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:random-exposure-lower-endpoint" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">7</span><span class="theorem_thmtitle">Reflected lower endpoint</span></div>
+    <div class="thm_thmcontent"><p>    Applying the same argument to the reflected law \((-I)_\# P_j\) gives the sharp lower endpoint of the Fréchet class. </p>
+</div>
+
+    <a class="latex_link" href="sect0002.html#thm:random-exposure-lower-endpoint">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.isLeast_frechetClass_of_reflection">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:rankone-collapse_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:rankone-collapse" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">37</span><span class="theorem_thmtitle">Rank-one collapse of rescaled covariance</span></div>
+    <div class="thm_thmcontent"><p>    For innovation covariance \(V\), row-stochastic \(W\), and the Perron power limit, </p>
+<div class="displaymath" id="a0000000054">
+  \[  (1-\rho )^2\Sigma _{\mathrm{SAR}} \longrightarrow (\pi ^\top V\pi )\mathbf1\mathbf1^\top .  \]
+</div>
+</div>
+
+    <a class="latex_link" href="sect0013.html#thm:rankone-collapse">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.sigmaSAR_rankOne_limit_of_perron">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:replication-centrality_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:replication-centrality" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">33</span><span class="theorem_thmtitle">Interaction cascades converge to a constant vector</span></div>
+    <div class="thm_thmcontent"><p>    Under the Perron limit, \(W^kx\to (\pi ^\top x)\mathbf1\) for every vector \(x\). The limit is a constant vector, not a traded basket. </p>
+</div>
+
+    <a class="latex_link" href="sect0012.html#thm:replication-centrality">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.replication_centrality">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:resolvent-from-perron_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:resolvent-from-perron" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">36</span><span class="theorem_thmtitle">Resolvent limit from the power limit</span></div>
+    <div class="thm_thmcontent"><p>    For row-stochastic \(W\), the Perron power limit implies \((1-\rho )(I-\rho W)^{-1}\to P\) as \(\rho \uparrow 1\). </p>
+</div>
+
+    <a class="latex_link" href="sect0013.html#thm:resolvent-from-perron">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.isResolventLimit_of_isPerronLimit">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:robust-envelope_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:robust-envelope" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">28</span><span class="theorem_thmtitle">Robust portfolio envelope</span></div>
+    <div class="thm_thmcontent"><p>   For long-only weights the squared systematic risk lies between the quadratic forms of the entrywise lower and upper brackets built from the per-asset radii. </p>
+</div>
+
+    <a class="latex_link" href="sect0010.html#thm:robust-envelope">LaTeX</a>
+
+
+
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:stationarity_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:stationarity" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">34</span><span class="theorem_thmtitle">Stationarity</span></div>
+    <div class="thm_thmcontent"><p>    Under the Perron limit, the limiting vector obeys \(\pi ^\top W=\pi ^\top \). </p>
+</div>
+
+    <a class="latex_link" href="sect0012.html#thm:stationarity">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.perron_stationary">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+
+
+
+    <div class="dep-modal-container" id="thm:wflat-sar-gate_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+
+  <div class="thm" id="thm:wflat-sar-gate" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">30</span><span class="theorem_thmtitle">SAR compatibility of the Wasserstein operator</span></div>
+    <div class="thm_thmcontent"><p>   A leave-one-out simplex operator is nonnegative, row stochastic, and zero-diagonal. Its induced infinity norm is at most one, so \(\lVert \rho W\rVert _\infty {\lt}1\) whenever \(|\rho |{\lt}1\). </p>
+</div>
+
+    <a class="latex_link" href="sect0012.html#thm:wflat-sar-gate">LaTeX</a>
+
+
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialWasserstein.anchoredW2_sar_gate">Lean</a>
+
+
+
+
+  </div>
+
+      </div>
+    </div>
+</div>
+</div> <!-- content -->
+</div> <!-- wrapper -->
+<script src="js/jquery.min.js" type="text/javascript"></script>
+
+<script src="js/d3.min.js"></script>
+<script src="js/hpcc.min.js"></script>
+<script src="js/d3-graphviz.js"></script>
+
+<script type="text/javascript">
+const graphContainer = d3.select("#graph");
+const width = graphContainer.node().clientWidth;
+const height = graphContainer.node().clientHeight;
+
+
+graphContainer.graphviz({useWorker: true})
+    .width(width)
+    .height(height)
+    .fit(true)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"thm:inner-perturbation"	[label="inner-perturbation",		shape=ellipse];	"thm:covariance-bracket"	[label="covariance-bracket",		shape=ellipse];	"thm:inner-perturbation" -> "thm:covariance-bracket";	"thm:robust-envelope"	[label="robust-envelope",		shape=ellipse];	"thm:covariance-bracket" -> "thm:robust-envelope"	[style=dashed];	"thm:joint-coherence"	[label="joint-coherence",		shape=ellipse];	"thm:factor-return-semantics"	[label="factor-return-semantics",		shape=ellipse];	"thm:joint-coherence" -> "thm:factor-return-semantics"	[style=dashed];	"prop:pairwise-not-psd"	[color="#FFAA33",		label="pairwise-not-psd",		shape=ellipse];	"thm:joint-coherence" -> "prop:pairwise-not-psd"	[style=dashed];	"eq:portfolio-envelope"	[label="portfolio-envelope",		shape=ellipse];	"ass:random-common-map"	[label="random-common-map",		shape=box];	"ass:random-common-map" -> "thm:inner-perturbation"	[style=dashed];	"thm:dist-bracket"	[label="dist-bracket",		shape=ellipse];	"ass:random-common-map" -> "thm:dist-bracket"	[style=dashed];	"eq:random-w2-upper-transfer"	[color=green,		fillcolor="#9CEC8B",		label="random-w2-upper-transfer",		shape=ellipse,		style=filled];	"ass:random-common-map" -> "eq:random-w2-upper-transfer"	[style=dashed];	"eq:random-w2-lower-transfer"	[color=green,		fillcolor="#9CEC8B",		label="random-w2-lower-transfer",		shape=ellipse,		style=filled];	"ass:random-common-map" -> "eq:random-w2-lower-transfer"	[style=dashed];	"cor:approximate-map-bound"	[label="approximate-map-bound",		shape=ellipse];	"ass:random-common-map" -> "cor:approximate-map-bound"	[style=dashed];	"thm:energy-bracket"	[label="energy-bracket",		shape=ellipse];	"thm:dist-bracket" -> "thm:energy-bracket"	[style=dashed];	"cor:random-w2-metric"	[color="#FFAA33",		label="random-w2-metric",		shape=ellipse];	"eq:random-w2-upper-transfer" -> "cor:random-w2-metric"	[style=dashed];	"eq:random-w2-lower-transfer" -> "cor:random-w2-metric"	[style=dashed];	"cor:approximate-map-bound" -> "eq:portfolio-envelope"	[style=dashed];	"thm:energy-bracket" -> "thm:covariance-bracket"	[style=dashed];	"eq:random-kappa-bracket"	[color="#FFAA33",		label="random-kappa-bracket",		shape=ellipse];	"cor:random-w2-metric" -> "eq:random-kappa-bracket"	[style=dashed];	"def:finite-exposure-cloud"	[label="finite-exposure-cloud",		shape=box];	"def:finite-exposure-cloud" -> "thm:joint-coherence"	[style=dashed];	"lem:transport-polarization"	[label="transport-polarization",		shape=ellipse];	"def:finite-exposure-cloud" -> "lem:transport-polarization"	[style=dashed];	"def:frechet-class"	[label="frechet-class",		shape=box];	"def:finite-exposure-cloud" -> "def:frechet-class"	[style=dashed];	"lem:transport-polarization" -> "eq:random-w2-upper-transfer";	"lem:transport-polarization" -> "eq:random-w2-lower-transfer";	"thm:random-exposure-lower-endpoint"	[color=green,		fillcolor="#9CEC8B",		label="random-exposure-lower-endpoint",		shape=ellipse,		style=filled];	"lem:transport-polarization" -> "thm:random-exposure-lower-endpoint";	"thm:random-exposure-envelope"	[color=green,		fillcolor="#9CEC8B",		label="random-exposure-envelope",		shape=ellipse,		style=filled];	"lem:transport-polarization" -> "thm:random-exposure-envelope";	"def:frechet-class" -> "thm:random-exposure-lower-endpoint"	[style=dashed];	"def:frechet-class" -> "thm:random-exposure-envelope"	[style=dashed];	"thm:p3-information-certified-cap"	[color=green,		fillcolor="#1CAC78",		label="p3-information-certified-cap",		shape=ellipse,		style=filled];	"def:frechet-class" -> "thm:p3-information-certified-cap"	[style=dashed];	"eq:random-exposure-excess-nonneg"	[color=green,		fillcolor="#1CAC78",		label="random-exposure-excess-nonneg",		shape=ellipse,		style=filled];	"def:frechet-class" -> "eq:random-exposure-excess-nonneg"	[style=dashed];	"thm:random-exposure-envelope" -> "prop:pairwise-not-psd"	[style=dashed];	"eq:random-exposure-gap"	[color=green,		fillcolor="#9CEC8B",		label="random-exposure-gap",		shape=ellipse,		style=filled];	"thm:random-exposure-envelope" -> "eq:random-exposure-gap";	"thm:random-exposure-envelope" -> "eq:random-kappa-bracket"	[style=dashed];	"thm:p3-certified-minimizer"	[color=green,		fillcolor="#1CAC78",		label="p3-certified-minimizer",		shape=ellipse,		style=filled];	"thm:p3-information-certified-cap" -> "thm:p3-certified-minimizer"	[style=dashed];	"eq:p3-residual-budget-cap"	[color=green,		fillcolor="#1CAC78",		label="p3-residual-budget-cap",		shape=ellipse,		style=filled];	"thm:p3-information-certified-cap" -> "eq:p3-residual-budget-cap"	[style=dashed];	"lem:polarization"	[color=green,		fillcolor="#1CAC78",		label=polarization,		shape=ellipse,		style=filled];	"lem:polarization" -> "thm:inner-perturbation";	"lem:polarization" -> "thm:joint-coherence";	"lem:polarization" -> "cor:approximate-map-bound";	"lem:polarization" -> "lem:transport-polarization";	"thm:stationarity"	[color=green,		fillcolor="#1CAC78",		label=stationarity,		shape=ellipse,		style=filled];	"thm:ball-inclusion"	[label="ball-inclusion",		shape=ellipse];	"thm:wflat-sar-gate"	[color=green,		fillcolor="#1CAC78",		label="wflat-sar-gate",		shape=ellipse,		style=filled];	"def:exposure-law"	[color=blue,		fillcolor="#A3D6FF",		label="exposure-law",		shape=box,		style=filled];	"def:exposure-law" -> "ass:random-common-map"	[style=dashed];	"def:exposure-law" -> "def:finite-exposure-cloud"	[style=dashed];	"def:exposure-law" -> "thm:ball-inclusion"	[style=dashed];	"thm:replication-centrality"	[color=green,		fillcolor="#1CAC78",		label="replication-centrality",		shape=ellipse,		style=filled];	"prop:finite-rho-bound"	[color=green,		fillcolor="#1CAC78",		label="finite-rho-bound",		shape=ellipse,		style=filled];	"thm:resolvent-from-perron"	[color=green,		fillcolor="#1CAC78",		label="resolvent-from-perron",		shape=ellipse,		style=filled];	"thm:rankone-collapse"	[color=green,		fillcolor="#1CAC78",		label="rankone-collapse",		shape=ellipse,		style=filled];	"thm:resolvent-from-perron" -> "thm:rankone-collapse"	[style=dashed];	"def:perron-limit"	[color=green,		fillcolor="#B0ECA3",		label="perron-limit",		shape=box,		style=filled];	"thm:perron-from-geometric"	[color=green,		fillcolor="#1CAC78",		label="perron-from-geometric",		shape=ellipse,		style=filled];	"def:perron-limit" -> "thm:perron-from-geometric"	[style=dashed];	"thm:perron-from-geometric" -> "thm:stationarity"	[style=dashed];	"thm:perron-from-geometric" -> "thm:replication-centrality"	[style=dashed];	"thm:perron-from-geometric" -> "thm:resolvent-from-perron"	[style=dashed];	"thm:box-corner"	[color="#FFAA33",		label="box-corner",		shape=ellipse];	"thm:box-corner" -> "thm:robust-envelope";}`)
+    .on("end", interactive);
+
+latexLabelEscaper = function(label) {
+  return label.replace(/\./g, '\\.').replace(/:/g, '\\:')
+}
+
+clickNode = function() {
+  $("#statements div").hide()
+  var node_id = $('text', this).text();
+  $('.thm').hide();
+  $('#'+latexLabelEscaper(node_id)).show().children().show();
+}
+function interactive() {
+    $("span#legend_title").on("click", function () {
+           $(this).siblings('dl').toggle();
+        })
+
+    d3.selectAll('.node')
+        .attr('pointer-events', 'fill')
+        .on('click', function () {
+           var title = d3.select(this).selectAll('title').text().trim();
+           $('#statements > div').hide()
+           $('.thm').hide();
+           $('#'+latexLabelEscaper(title)+'_modal').show().children().show().children().show();
+           $('#statements').show()
+        });
+
+    d3.selectAll('.dep-closebtn').on('click', function() {
+        var modal =
+            d3.select(this).node().parentNode.parentNode.parentNode ;
+        d3.select(modal).style('display', 'none');
+    });
+}
+
+</script>
+
+</body>
+</html>

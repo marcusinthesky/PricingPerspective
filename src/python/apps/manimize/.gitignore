@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.py[cod]
+audio/
+media/
+native_media/
+native_renders/
+timed_videos/
+thumbnails/
+videos/
+Tex/

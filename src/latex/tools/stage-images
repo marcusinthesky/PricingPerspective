@@ -1,0 +1,163 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+"""Stage only graphics reachable from a bundled LaTeX target."""
+
+from __future__ import annotations
+
+import re
+import shutil
+import sys
+from pathlib import Path
+
+INPUT_PATTERN = re.compile(r"\\(?:input|include)\s*\{([^{}]+)\}")
+GRAPHICS_PATTERN = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\s*\{([^{}]+)\}")
+# Figures are PGF and are pulled in with `\import{images/}{name.pgf}` rather than
+# `\input`, because matplotlib names a figure's raster sidecars by bare filename.
+# `\import` is what makes those resolve next to the `.pgf`; `\input` would look for
+# them beside `main.tex` and silently drop them. See ARCHITECTURE.md §Figure transport.
+IMPORT_PATTERN = re.compile(r"\\import\s*\{([^{}]*)\}\s*\{([^{}]+)\}")
+# Manuscripts do not write `\import` directly: `pp-manuscript.sty` wraps it as
+# `\ppfigure{<authored width fraction>}{<name>}`, so chapters stay content-only and
+# the intended width stays greppable for tests/figures/test_print_size.py. Expand
+# the macro here, since this tool reads the sources rather than the expanded TeX.
+PPFIGURE_PATTERN = re.compile(r"\\ppfigure\s*\{[0-9.]*\}\s*\{([A-Za-z0-9_\-]+)\}")
+# A target adapter can select separately authored variants by redefining the
+# transport suffix declared in `pp-manuscript.sty`. Parse the target entry before
+# following its chapters so clean bundles stage the same files TeX will import.
+PPFIGURE_SUFFIX_MARKER = re.compile(r"\\renewcommand\s*\{\s*\\ppfiguresuffix\s*\}")
+PPFIGURE_SUFFIX_PATTERN = re.compile(
+    r"\\renewcommand\s*\{\s*\\ppfiguresuffix\s*\}\s*"
+    r"\{\s*([A-Za-z0-9_\-]*)\s*\}"
+)
+GRAPHICS_EXTENSIONS = (".pdf", ".png", ".jpg", ".jpeg")
+IMPORT_EXTENSIONS = (".pgf",)
+
+
+class StageError(RuntimeError):
+    pass
+
+
+def strip_comments(text: str) -> str:
+    """Drop LaTeX comments while retaining escaped percent signs."""
+    lines = []
+    for line in text.splitlines():
+        match = re.search(r"(?<!\\)%", line)
+        lines.append(line[: match.start()] if match else line)
+    return "\n".join(lines)
+
+
+def resolve_inside(root: Path, raw: str, suffixes: tuple[str, ...]) -> Path:
+    """Resolve one target within root using deterministic suffix precedence."""
+    target = Path(raw.strip())
+    if target.is_absolute():
+        raise StageError(f"absolute LaTeX dependency is forbidden: {raw}")
+    candidates = (
+        [target] if target.suffix else [target.with_suffix(s) for s in suffixes]
+    )
+    root = root.resolve()
+    for candidate in candidates:
+        resolved = (root / candidate).resolve()
+        try:
+            resolved.relative_to(root)
+        except ValueError as exc:
+            raise StageError(f"LaTeX dependency escapes source root: {raw}") from exc
+        if resolved.is_file():
+            return resolved
+    tried = ", ".join(str(path) for path in candidates)
+    raise StageError(f"missing reachable LaTeX dependency {raw!r}; tried: {tried}")
+
+
+def ppfigure_suffix(entry_text: str) -> str:
+    """Read the optional target-owned PGF filename suffix."""
+    matches = PPFIGURE_SUFFIX_PATTERN.findall(entry_text)
+    if PPFIGURE_SUFFIX_MARKER.search(entry_text) and not matches:
+        raise StageError("unsupported \\ppfiguresuffix target declaration")
+    variants = set(matches)
+    if len(variants) > 1:
+        raise StageError("target declares conflicting \\ppfiguresuffix values")
+    return next(iter(variants), "")
+
+
+def stage_reachable_images(
+    source_root: Path, stage_root: Path, entry: str
+) -> list[Path]:
+    """Copy graphics reachable through the staged target's TeX input graph."""
+    source_root = source_root.resolve()
+    stage_root = stage_root.resolve()
+    entry_path = resolve_inside(stage_root, entry, (".tex",))
+    entry_text = strip_comments(entry_path.read_text(encoding="utf-8"))
+    figure_suffix = ppfigure_suffix(entry_text)
+    pending = [entry_path]
+    visited: set[Path] = set()
+    graphics: set[Path] = set()
+    imported: set[Path] = set()
+
+    while pending:
+        tex_file = pending.pop()
+        if tex_file in visited:
+            continue
+        visited.add(tex_file)
+        text = strip_comments(tex_file.read_text(encoding="utf-8"))
+        for raw_input in INPUT_PATTERN.findall(text):
+            dependency = resolve_inside(stage_root, raw_input, (".tex",))
+            if dependency not in visited:
+                pending.append(dependency)
+        for raw_graphic in GRAPHICS_PATTERN.findall(text):
+            graphics.add(resolve_inside(source_root, raw_graphic, GRAPHICS_EXTENSIONS))
+        for raw_dir, raw_file in IMPORT_PATTERN.findall(text):
+            imported.add(
+                resolve_inside(
+                    source_root, f"{Path(raw_dir) / raw_file}", IMPORT_EXTENSIONS
+                )
+            )
+        for name in PPFIGURE_PATTERN.findall(text):
+            imported.add(
+                resolve_inside(
+                    source_root,
+                    f"images/{name}{figure_suffix}",
+                    IMPORT_EXTENSIONS,
+                )
+            )
+
+    # A PGF figure is not necessarily one file: `imshow` cannot be vector paths, so
+    # matplotlib emits `<name>-imgN.png` beside the `.pgf` and refers to each by bare
+    # filename. Those names are relative to the `.pgf`, which is what `\import` means,
+    # so they resolve against its directory rather than the source root.
+    for pgf_file in imported:
+        graphics.add(pgf_file)
+        text = strip_comments(pgf_file.read_text(encoding="utf-8"))
+        for raw_graphic in GRAPHICS_PATTERN.findall(text):
+            graphics.add(
+                resolve_inside(pgf_file.parent, raw_graphic, GRAPHICS_EXTENSIONS)
+            )
+
+    staged: list[Path] = []
+    for source in sorted(graphics):
+        relative = source.relative_to(source_root)
+        destination = stage_root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+        destination.chmod(0o644)
+        staged.append(relative)
+    return staged
+
+
+def main(argv: list[str]) -> int:
+    if len(argv) != 4:
+        print("usage: stage-images SOURCE_ROOT STAGE_ROOT ENTRY_TEX", file=sys.stderr)
+        return 2
+    try:
+        staged = stage_reachable_images(Path(argv[1]), Path(argv[2]), argv[3])
+    except StageError as exc:
+        print(f"stage-images: FAIL: {exc}", file=sys.stderr)
+        return 1
+    for relative in staged:
+        print(relative.as_posix())
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv))

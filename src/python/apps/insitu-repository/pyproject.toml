@@ -1,0 +1,118 @@
+[project]
+name = "insitu-repository"
+version = "0.1.1"
+description = "Pricing Perspective projectors and orchestration for Insitu."
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+  "insitu",
+  "pydantic>=2.13.4",
+  "pyyaml>=6.0",
+  "rich>=14.0.0",
+  "typer>=0.24.0",
+  "watchfiles>=1.2.0",
+]
+
+[project.scripts]
+insitu-repository = "insitu_repository.cli:app"
+
+[dependency-groups]
+dev = [
+  "deptry",
+  "pytest",
+  "pytest-asyncio",
+  "pytest-monitor",
+  "pytest-testmon",
+  "pytest-xdist",
+  "ruff",
+  "types-PyYAML",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.deptry]
+known_first_party = ["insitu_repository"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/insitu_repository"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+extend = "../../pyproject.toml"
+
+[tool.ruff.lint]
+ignore = [
+  "COM812",
+  "CPY001",
+  "D203",
+  "D213",
+  "DOC201",
+  "DOC402",
+  "EM101",
+  "EM102",
+  "ISC001",
+  "TC001",
+  "TC002",
+  "TC003",
+  "TRY003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/insitu_repository/cli.py" = ["A002", "B008", "FBT002", "T201"]
+# Tested repository CLIs moved intact from the retired tools project. Console
+# output, the git subprocess, and their small parsing helpers are intentional;
+# reusable projector logic remains on the maximal policy.
+"src/insitu_repository/plan_graph.py" = [
+  "ARG001",
+  "B008",
+  "D103",
+  "D400",
+  "D401",
+  "E501",
+  "ISC004",
+  "PERF401",
+  "PLR2004",
+  "PTH120",
+  "S101",
+  "S607",
+  "T201",
+]
+"src/insitu_repository/plan_task.py" = ["D103", "D301", "E501", "T201"]
+"src/insitu_repository/projectors/*.py" = [
+  "A002",
+  "C901",
+  "D102",
+  "D401",
+  "FBT002",
+  "PLR0912",
+  "PLR2004",
+  "S404",
+  "S603",
+  "S607",
+  "T201"
+]
+"tests/**/*.py" = [
+  "ANN",
+  "ARG",
+  "D",
+  "E501",
+  "FBT",
+  "INP001",
+  "PLR2004",
+  "S101",
+  "S404",
+  "S603",
+  "S607",
+  "S108"
+]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+insitu = { workspace = true }

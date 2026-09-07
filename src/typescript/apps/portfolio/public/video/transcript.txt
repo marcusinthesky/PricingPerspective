@@ -1,0 +1,56 @@
+Pricing Perspective - visual companion
+Duration: 5 minutes 39.9 seconds
+
+01 - A firm as a probability law
+
+Finance normally compresses a firm into a point: a characteristic vector, a beta, or a network node. But two firms can have the same average location and very different internal composition. Treating each firm as a probability law preserves spread, multiple modes, and relative mass. A point-valued firm remains available as the special case in which all probability mass is concentrated at one location.
+
+02 - Couplings and quadratic transport
+
+A coupling says which draw from one firm occurs alongside which draw from another, while preserving both marginal distributions. Many assignments are feasible. Quadratic Wasserstein distance selects the assignment with the smallest average squared displacement. The distance therefore describes the least reallocation needed to align the two heterogeneous objects.
+
+03 - Polarization: distance becomes covariance
+
+The polarization identity says that an inner product equals one half of two squared magnitudes minus their squared separation. Once marginal magnitudes are fixed, distance and alignment move in opposite directions. Therefore, among all couplings of two exposure laws, the coupling that minimizes expected squared distance also maximizes expected inner product, and hence attainable systematic covariance.
+
+04 - A sharp covariance envelope
+
+The exposure marginals do not select one joint arrangement. Different couplings can produce different covariances. Wasserstein transport gives the greatest attainable covariance, reflection gives the least, and mixtures fill the interval between them. For any realized coupling, transport excess measures the additional squared displacement above the minimum, which is exactly twice the gap below the covariance ceiling.
+
+05 - Transmission, distortion, and slack
+
+The article distributions live in observable information space, while systematic exposures live in latent risk space. A maintained common carrier controls how much distances may be compressed or expanded, and firm-specific slack permits bounded deviations. The resulting bracket is conditional. It states what information distance can imply under declared assumptions; it does not identify risk distance from text alone.
+
+06 - Target-anchored barycentric reconstruction
+
+Pairwise transport first aligns each candidate peer separately with one fixed target. After those correspondences are frozen, a single simplex vector combines the aligned peer positions to reconstruct the target cloud. Repeating this procedure target by target produces one nonnegative, unit-sum interaction row for every firm. The fitted weights measure joint representational usefulness, not pairwise proximity alone.
+
+07 - A symmetric metric can yield a directed field
+
+Wasserstein distance is symmetric, but reconstruction relevance need not be. Firm B can be highly useful in reconstructing firm A when combined with the rest of A's candidate universe, while A is less useful in reconstructing B. The resulting field is directed because the target changes the optimization problem, not because the underlying distance is asymmetric.
+
+08 - Quadratic adjustment implies spatial closure
+
+A peer-adjusted exposure balances two costs: leaving the firm's stand-alone exposure and disagreeing with the weighted peer profile. Minimizing this quadratic objective yields the spatial exposure equation. The feedback coefficient rho equals lambda over one plus lambda, so it is a monotone index of the peer-misalignment penalty relative to the stand-alone penalty. Iterating the peer operator gives the spatial multiplier.
+
+09 - Pairwise plans need not form one joint law
+
+Here each pair has its own minimum-cost assignment. But following A-zero through the optimal A–B and B–C plans implies that it must pair with C-one. The independently optimal A–C plan instead pairs it with C-zero. These three plans cannot all be pairwise marginals of one joint law. Portfolio aggregation must therefore retain one coherent multi-firm coupling.
+
+10 - Multi-firm transport dispersion
+
+For fixed portfolio weights, multi-firm dispersion asks how close all laws could be under one common coupling. In a Hilbert space, the same infimum can be written as the weighted squared Wasserstein distance to a free centre law. Here the centre varies while the portfolio weights remain fixed. This is a different optimization from target-anchored reconstruction, where the target is fixed and peer weights vary.
+
+11 - Portfolio variance as alignment minus dispersion
+
+Weighted polarization writes systematic portfolio variance as a marginal perfect-alignment benchmark minus cross-firm dispersion. Observable information provides lower floors on that dispersion. Those floors certify that part of perfect positive alignment is impossible, so the same amount can be deducted from the admissible risk cap. The result is a one-sided certificate, not a covariance point estimate.
+
+12 - Geometry can certify convex optimization
+
+The pairwise certificate is quadratic in normalized risk weights. Along any direction that stays in the simplex, conditional negative definiteness makes the certificate concave. Its complement, the certified risk objective, is therefore convex. Schoenberg's double-centering criterion turns this into a direct positive-semidefinite check on the observed floor matrix, without estimating a return covariance matrix.
+
+13 - Three distinct optimization layers
+
+The three essays use related transport geometry, but they do not solve the same optimization. In the pairwise essay, the two marginal exposure laws are fixed and the coupling varies. In the interaction-field essay, the target and pairwise alignments are fixed and simplex peer coordinates vary. In the portfolio essay, portfolio weights are fixed inside the dispersion problem while one coherent coupling, or an equivalent free centre, varies. Only afterwards does the outer allocation problem vary the portfolio weights.
+
+The animation is narrated with the generated Kokoro voice track. This document is the full transcript for the published audio-bearing MP4 and WebM files.

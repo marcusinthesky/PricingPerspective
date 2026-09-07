@@ -1,0 +1,13 @@
+[doc]
+name = "03_distance_implied_mpt"
+bundle = "../../bundle/tlextras-2022.0r0-pricing-perspective.zip"
+
+[[output]]
+name = "draft"
+type = "pdf"
+inputs = ["targets/draft.tex"]
+
+[[output]]
+name = "arxiv"
+type = "pdf"
+inputs = ["targets/arxiv.tex"]

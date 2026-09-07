@@ -1,0 +1,101 @@
+# DVC ignore patterns — exclude dirs DVC should not traverse.
+# See https://dvc.org/doc/user-guide/project-structure/dvcignore-files
+#
+# NEVER give a `!` negation a trailing slash. A trailing slash makes the pattern
+# directory-only, and DVC decides directory-ness by stat-ing the working tree
+# (`dvc/ignore.py`: `pattern.matches(dirname, basename, self.fs.isdir(target))`,
+# then `if dir_only_pattern and not is_dir: continue`). So `!…/V0/model/` rescues
+# `…/V0/model` on a machine that has pulled the data and silently stops
+# rescuing it anywhere the data is absent — where the broader `…/V0/*` above it
+# wins and DVC aborts with "Path … is ignored by .dvcignore:<line>". CI never
+# pulls data, so every such negation was a machine-dependent gate: green
+# locally, red on a fresh clone. Slash-less negations match whether or not the
+# path exists, which is the only form whose meaning is the same everywhere.
+# Keep the `!…/model/**` companions — they cover the contents, not the dir.
+
+# Python bytecode — keep out of source-package directory deps so the dir hash
+# tracks .py content only (jcor / simulation / _kernels are dep'd as dirs).
+__pycache__/
+*.pyc
+
+# Legacy pipeline outputs (pre-recovery backup)
+data/.pre-recovery-backup/
+
+# Embedding content-hash resume cache
+data/.emb_cache/
+
+# Encoder vintage staircase data (t69) — verified Wikipedia inputs, existing
+# corpora, and EttaX preparation/checkpoint scratch. The tokenizer and model-only
+# deliverables enter DVC after training and before downstream adjudication.
+data/.encoder_vintage/*
+!data/.encoder_vintage/ettax
+
+data/.encoder_vintage/ettax/*
+!data/.encoder_vintage/ettax/tokenizer.json
+!data/.encoder_vintage/ettax/tokenizer.json.dvc
+!data/.encoder_vintage/ettax/runs
+
+data/.encoder_vintage/ettax/runs/*
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder
+
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/*
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints
+
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/*
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3
+
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0/*
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1/*
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3/*
+
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0/model
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0/model/**
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0/model.dvc
+
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1/model
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1/model/**
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1/model.dvc
+
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3/model
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3/model/**
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3/model.dvc
+
+!data/.encoder_vintage/ettax/runs/v3-byte-complete
+
+data/.encoder_vintage/ettax/runs/v3-byte-complete/*
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/tokenizer.json
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/tokenizer.json.dvc
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints
+
+data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/*
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3
+
+data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0/*
+data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1/*
+data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3/*
+
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0/model
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0/model/**
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0/model.dvc
+
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1/model
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1/model/**
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1/model.dvc
+
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3/model
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3/model/**
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3/model.dvc
+
+# Retired scrape outputs (replaced by data/raw/nasdaq.jsonlines → normalize_corpus)
+data/raw_articles/
+data/articles/
+
+# Legacy markdown extraction (replaced by normalize_corpus direct output)
+data/markdown_articles/
+
+# PDF conversion benchmark data (not pipeline-tracked)
+data/benchmark_pdf_convert/

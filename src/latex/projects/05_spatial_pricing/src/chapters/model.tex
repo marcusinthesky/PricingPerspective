@@ -1,0 +1,102 @@
+\section{Economic Environment and Stand-Alone Exposures}\label{sec:model}
+
+Begin with the familiar finite-dimensional factor model, in which an exposure
+is a vector of $K$ factor loadings in $\R^K$.
+Firm $i$ belongs to a finite universe of $n$ firms and has a population
+\emph{characteristic law} $C_i$ on an embedding space
+$(\Omega,d_\Omega)$, which summarizes the distribution of its information.
+In the application, observed articles produce the empirical law
+$\widehat C_i$ as a proxy for $C_i$.
+Think of the firm's \emph{stand-alone exposure} $\xi_i$ as the factor-loading
+vector implied by its own information before any peer adjustment.
+Peer adjustment maps $\xi_i$ into the latent, model-implied
+\emph{peer-adjusted exposure} $B_i$, and a maintained factor bridge then links
+$B_i$ to observed centered excess returns.
+The economic sequence is therefore characteristic law, stand-alone exposure,
+peer-adjusted exposure, and return.
+
+The firm's economic object is an exposure, not a return.
+The quadratic criterion introduced in the next section represents, in reduced
+form, the costs of operational, financing, or portfolio reconfiguration.
+It is an as-if adjustment problem and does not require firms literally to choose
+factor loadings each period.
+Keeping $\xi_i$ and $B_i$ separate lets the model ask how much of the exposure
+that enters returns reflects the firm's own information and how much reflects
+alignment with other firms.
+
+Observed information is not itself an exposure: embedding locations describe
+an information distribution, whereas factor loadings measure sensitivity to
+common shocks.
+A transmission map is therefore needed to connect the distribution-valued
+characteristic law to stand-alone exposure in factor-loading units.
+Formally, draw $X_i\sim C_i$ and let $U_i$ collect idiosyncratic transmission
+randomness.
+A common measurable map $T$ converts the information draw and transmission shock
+into the exposure space:
+
+\begin{equation}\label{eq:primitive-exposure}
+  \xi_i = T(X_i,U_i).
+\end{equation}
+
+Together, $C_i$, $U_i$, and $T$ generate the stand-alone exposure $\xi_i$.
+The characteristic law is measured in embedding-space units, whereas $\xi_i$
+is measured in factor-exposure units.
+The map $T$, its latent inputs, and the cross-firm coupling of the resulting
+stand-alone exposures are not identified from the return panel.
+No peer response has yet entered Equation~\eqref{eq:primitive-exposure}.
+
+Moving from $\xi_i$ to $B_i$ requires a peer average and a relative adjustment
+weight.
+Let $W$ be the peer matrix that describes how each firm weights the other firms,
+and let
+$\lambda\geq0$ be the dimensionless weight on peer alignment relative to the
+unit cost of departing from $\xi_i$.
+Because peer alignment is averaging over an economic neighborhood rather than
+forming a signed contrast, each row must use nonnegative weights, exclude the
+firm itself, and sum to one.
+
+\begin{definition}[Row-stochastic, zero-diagonal interaction
+  matrix]\label{def:interaction-matrix}
+  An interaction matrix is any $W \in \R^{n \times n}$ with $W_{ij} \geq 0$ for
+  all $i$ and $j$, $W_{ii} = 0$ for all $i$, and $\sum_j W_{ij} = 1$ for all
+  $i$.
+  A firm never interacts with itself, weights every other firm nonnegatively,
+  and spends exactly one unit of interaction weight on the remaining firms.
+\end{definition}
+
+The definition makes $\sum_{j} W_{ij} B_j$ a peer-weighted average in the same
+factor-exposure units as $B_i$.
+It restricts the economic role of each row but does not select its weights.
+Later, Wasserstein geometry will align the empirical characteristic laws, and
+simplex weights will form a target-specific barycentric interaction field.
+That field will be represented by a matrix satisfying the definition above;
+\Cref{sec:interaction-operator} supplies the formal construction.
+For now, the economic environment takes $W$ as a fixed admissible peer matrix.
+
+In the finite-dimensional case, $\xi_i$ and $B_i$ are ordinary vectors of $K$
+factor loadings, and peer adjustment operates coordinate by coordinate.
+To cover either finitely or countably many risk directions in one statement, we
+now let the exposures take values in a real separable Hilbert space $\mathcal H$
+that generalizes $\R^K$.
+Let $F_t\in\mathcal H$ be a centered common factor innovation with covariance
+operator $\Gamma$, and let $e_t^i$ be a centered idiosyncratic return component.
+The maintained return bridge specifies how the peer-adjusted exposure enters
+centered excess returns:
+
+\begin{equation}\label{eq:hilbert-return}
+  \widetilde r_t^i = \inner{B_i,F_t}_{\mathcal H}+e_t^i.
+\end{equation}
+
+Here $B_i$ has loading units, $F_t$ has factor-innovation units, and their inner
+product has return units.
+This bridge requires the maintained conditions that $e_t^i$ is
+square-integrable, orthogonal to $F_t$, and has zero cross-firm covariance.
+
+The environment now contains the stand-alone exposure $\xi$, the peer-adjusted
+exposure $B$, an admissible peer matrix $W$, and the relative adjustment weight
+$\lambda$.
+The equilibrium is solved pointwise for each realization of $\xi$.
+Consequently, $B$ is random whenever $\xi$ is random, even when $W$ and
+$\lambda$ are fixed.
+The next section asks whether a transparent firm-level objective maps
+stand-alone exposures into a unique peer-adjustment equilibrium.

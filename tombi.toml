@@ -1,0 +1,20 @@
+# tombi — TOML formatter/linter/LSP (https://tombi-toml.github.io/tombi).
+# The binary ships on the dev-shell PATH from infra/nix/flake.nix (## TOML).
+#
+# Syntax validation and formatting are fully native. Repository Python policy is
+# enforced by uv, Ruff, Pyrefly, Deptry, and Tach, so Tombi does not need a
+# vendored copy of the upstream pyproject JSON Schema.
+#
+# NOTE: even with schema off, tombi's formatter still RELOCATES top-level
+# tables (it groups [tool.*] tables and pushes e.g. [dependency-groups] after
+# them). That reorder is idempotent, comment-safe, and semantically a no-op
+# (TOML table order is insignificant) — accepted as a one-time normalisation
+# rather than pure whitespace. tombi has no switch to disable it.
+[schema]
+enabled = false
+strict = false
+catalog.paths = []
+
+# Editor formatting is opt-in per-editor; the gate is the prek hook, not the LSP.
+[lsp]
+formatting.enabled = false

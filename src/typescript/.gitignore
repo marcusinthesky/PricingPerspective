@@ -1,0 +1,15 @@
+# Turborepo workspace artifacts.
+# Depth-independent so new workspaces (apps/*, packages/*, …) are covered
+# without editing this file. Scoped to src/typescript by virtue of location.
+**/node_modules/
+**/.turbo/
+**/.next/
+**/out/
+**/storybook-static/
+**/.lighthouseci/
+**/tsconfig.tsbuildinfo
+
+*.log
+.env
+.env.local
+.DS_Store

@@ -1,0 +1,71 @@
+{
+  "code_identity": {
+    "kind": "module",
+    "value": "p3_exhibits"
+  },
+  "environment": {
+    "python": "workspace",
+    "renderer": "matplotlib"
+  },
+  "lane": "p3",
+  "outputs": [
+    {
+      "bytes": 14317,
+      "kind": "pgf",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/images/conceptual_pipeline.pgf",
+      "sha256": "421ac2a48d013307a1c29843c6d6b5183fbaef51e15bb915978b2cd3fb86fe86"
+    },
+    {
+      "bytes": 114869,
+      "kind": "pgf",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/images/certificate_surface.pgf",
+      "sha256": "a9f8a73127982aba85a595a34570e18229ce2134c5b295f99d4a3fea3de6938b"
+    },
+    {
+      "bytes": 134250,
+      "kind": "pgf",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/images/certificate_validation.pgf",
+      "sha256": "5b3d798a5c4fd3404cb2477f2eb1791e1d3d8ff67ba96dd80c3bce37a3652f03"
+    },
+    {
+      "bytes": 69987,
+      "kind": "pgf",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/images/calibration_coverage.pgf",
+      "sha256": "7b49a278fe4e70dee78ea28c0c25f6eb3589d14a586ad031ac66dbeb08ce8e4e"
+    },
+    {
+      "bytes": 43579,
+      "kind": "pgf",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/images/news_variance_benchmark.pgf",
+      "sha256": "75aca51d5b902a262f32ef0c1831237d845eb1c57e8f2151497be3a5ca6de3a1"
+    }
+  ],
+  "parameter_identity": {
+    "kind": "file",
+    "value": "params.yaml"
+  },
+  "phase": "exhibit",
+  "protocol_id": "paper3-publication-v1",
+  "risk_class": "moderate",
+  "schema_version": "1.0",
+  "seed_policy": "deterministic-from-declared-inputs",
+  "stage_key": "p3_exhibits",
+  "upstream_artifacts": [
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/certificate/summary.yaml:a78fea546a2b25b3dab46a2c7c7b1abaf046cef1178e974a9ff19f4f7d63fef9"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/certificate/surface.parquet:215a15659b3aa5ca5a71a8f69576d9b34c6316af42202b8f6e1099b1b7b8c683"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/certificate_validation/random_portfolios.parquet:5614f3351d50fb07eb2f5a7215257ecda7a88b5746caf61dcee4fdb3074f14cd"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/certificate_validation/summary.yaml:2fe9c8521684bf4469cac3e9768bcb92ec73808da91160f650fcd252f051a880"
+    }
+  ]
+}

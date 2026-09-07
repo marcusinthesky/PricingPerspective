@@ -1,0 +1,183 @@
+# Lean 4 (Lake) workspace task runner.
+# Run `just lean::<recipe>` from the repo root.
+
+set shell := ["bash", "-uc"]
+
+# Fetch Lean dependencies and update the manifest.
+setup:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && lake update
+
+# Fetch mathlib build cache (speeds up the first build).
+cache:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && lake exe cache get
+
+# Build all Lean packages (fetches the mathlib cache first).
+build: cache
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && lake build
+
+# Build = check (Lean has no separate typechecker).
+check:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && lake build
+
+# Generate HTML documentation via doc-gen4.
+docs:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && lake -Kdoc=on build PricingPerspective
+
+# Extract the Lean plane for the DuckDB discovery harness: every declaration in
+# the module closure (name, kind, module, docstring, pretty-printed signature)
+# plus the module import DAG, as operator-domain Parquet under data/graph/.
+#
+# WHY THIS IS EXTRACTED RATHER THAN DOWNLOADED. leanprover-community publishes a
+# 66 MB declaration index, but it is built from mathlib MASTER while this
+# workspace is pinned at v4.31.0 — so it reports declarations that do not exist
+# here, which is exactly the failure this table is meant to remove. Everything
+# below comes out of the environment the proofs actually compile against.
+#
+# HEAVY (~7 min): importing the Mathlib environment and pretty-printing ~470k
+# signatures dominates; the import DAG is ~10s. Requires an already-built
+# workspace (`just lean::check`, or `just lean::warm` from cold) for the same
+# reason claims-render does — it reads oleans, it does not build them.
+#
+# Outputs are DERIVED operator artifacts, not research data: they belong under
+# `dvc add` like data/graph/{nodes,edges}.parquet, never as a dvc.yaml stage
+# (t22.12 D6 — dbt orchestrates introspection marts, DVC stores the blobs).
+
+# THE TWO OUTPUTS HAVE DIFFERENT SCOPES ON PURPOSE.
+#
+# `decls` spans ALL of Mathlib, because the catalog answers "does this lemma
+# exist at our pin, and what is its signature" — a question about the whole
+# library, not about what we happen to import today. Mathlib is named
+# explicitly rather than inherited: it used to arrive for free via
+# PaperReconstructions' wholesale `import Mathlib`, and narrowing those imports
+# (8,170 -> 2,847 Mathlib modules in the closure) would otherwise have silently
+# cut the catalog by the same fraction.
+#
+# `graph` spans only the WORKSPACE CLOSURE, because the import DAG answers
+# "what do our proofs actually depend on, and where is the bloat". Pointed at
+# all of Mathlib it would describe Mathlib's internal structure instead, and
+# fct_lean_module_centrality would rank modules we never import.
+
+# Extract Lean declarations + import DAG to data/graph/*.parquet (heavy, ~7 min).
+decl-dump modules="Mathlib,PricingPerspective,EnergyStatistics,WassersteinGeometry,PaperReconstructions" graph_roots="PricingPerspective,EnergyStatistics,WassersteinGeometry,PaperReconstructions":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    root="$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    cd "$root/src/lean"
+    work="$(mktemp -d)"
+    trap 'rm -rf "$work"' EXIT
+    lake build decl_dump
+    echo "lean: dumping declarations for {{ modules }} (this takes several minutes)"
+    lake exe decl_dump --modules '{{ modules }}' > "$work/decls.jsonl"
+    echo "lean: extracting import DAG for {{ graph_roots }}"
+    lake exe graph --to '{{ graph_roots }}' --include-deps "$work/imports.dot"
+    mkdir -p "$root/data/graph"
+    # `dvc add` replaces the workspace file with a read-only hardlink into the
+    # DVC cache, so a second regeneration would fail with EACCES on a file that
+    # looks perfectly ordinary. Unprotect first when the artifact is already
+    # tracked; the no-op branch keeps the recipe working before the first add.
+    for out in lean_declarations lean_imports; do
+      if [ -f "$root/data/graph/$out.parquet.dvc" ]; then
+        dvc unprotect "$root/data/graph/$out.parquet"
+      fi
+    done
+    duckdb -c "
+      copy (select * from read_json_auto('$work/decls.jsonl', format='newline_delimited'))
+        to '$root/data/graph/lean_declarations.parquet' (format parquet, compression zstd);
+      copy (
+        select regexp_extract(line, '\"([^\"]+)\" -> \"([^\"]+)\"', 1) as src_module,
+               regexp_extract(line, '\"([^\"]+)\" -> \"([^\"]+)\"', 2) as dst_module
+        from (select unnest(string_split(content, chr(10))) as line
+              from read_text('$work/imports.dot'))
+        where regexp_matches(line, '\"[^\"]+\" -> \"[^\"]+\"')
+      ) to '$root/data/graph/lean_imports.parquet' (format parquet, compression zstd);
+    "
+    echo "lean: wrote data/graph/lean_declarations.parquet + lean_imports.parquet"
+    echo "lean: track with 'dvc add data/graph/lean_declarations.parquet data/graph/lean_imports.parquet'"
+
+# Remove build artifacts.
+clean:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && lake clean
+
+# Repair a Lean toolchain orphaned by a nix GC: re-realize the lean4-nix store path via the flake devShell, then warm the cache and rebuild.
+doctor:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && \
+      nix develop ./infra/nix --command bash -c 'cd src/lean && lake exe cache get && lake build'
+
+# Regenerate the claim manifest and its LaTeX projections. HEAVY and Lake-bound:
+# extract.py runs one `lake env lean` #check/#print-axioms per mapping.toml entry
+# against the built workspace, so a claim can only render as "checked" if the
+# declaration really compiles under the allowlisted axiom base. Requires an
+# already-built workspace (`just lean::check`, or `just lean::warm` from cold).
+# Owns the generated artefacts: manifest.json, blueprint claim_bindings.tex, and
+# each paper's src/generated/lean_status.tex. Mirrored as the DVC `lean_claims`
+# stage so a manuscript render cannot outrun the proofs it cites.
+
+# Re-derive Lean claim status from the proofs and project it into each paper (heavy).
+claims-render:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && \
+      uv run tools/claim-manifest/extract.py -v && \
+      uv run tools/claim-manifest/render.py && \
+      uv run tools/claim-manifest/tests/test_manifest.py
+
+# Validate the authored/generated Blueprint boundary against the committed
+# manifest: unique labels, no hand-authored \lean/\leanok, bindings match the
+# manifest projection, and no Lean identifier or Blueprint macro leaked into a
+# publication chapter. CHEAP and text-only — no Lake, no network. Mirrored as
+# the DVC `lean_bindings_check` verify-only stage, so ordinary prose edits
+# re-run this and never the per-claim Lean checks above.
+
+# Validate the authored/generated Blueprint boundary against the manifest (cheap, no Lake).
+claims-check:
+    #!/usr/bin/env bash
+    # `check.py` is the boundary validator and always runs.  Its own negative
+    # tests are a test suite, and test suites are not part of the replication
+    # projection, so run them only where they exist rather than failing a gate
+    # that the validator itself can still enforce.
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean"
+    if [[ -f blueprint/tests/test_blueprint.py ]]; then
+      uv run --project blueprint --locked python blueprint/tests/test_blueprint.py
+    fi
+    uv run --project blueprint --locked python blueprint/check.py
+
+# Regenerate and validate the claim-manifest projections used by LeanBlueprint.
+blueprint-prepare: claims-render claims-check
+
+# Build the pinned upstream declaration checker. This is a SECOND Lake root
+# (blueprint/checkdecls/lakefile.lean) that `lake build` at src/lean never
+# touches, and its git dependency is fetched on first build — so on a fresh
+# worktree `blueprint-check` would otherwise fail at its final step for a
+# provisioning reason, not a proof reason. It reuses the parent workspace's
+# packagesDir, so it clones no second mathlib (~7M of build output).
+
+# Build the pinned upstream checkdecls helper (second Lake root; needed by blueprint-check).
+checkdecls-build:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean/blueprint/checkdecls" && \
+      lake build
+
+# Warm a cold checkout (fresh worktree / post-GC) to the point where every Lean
+# gate runs: mathlib cache, workspace build, and the checkdecls helper root.
+
+# Provision a cold checkout: mathlib cache + workspace + checkdecls helper.
+warm: build checkdecls-build
+    @echo "lean: workspace and checkdecls helper built — blueprint-check is runnable"
+
+# Build the workspace and web extraction, then run upstream checkdecls through
+# the monorepo adapter. The web pass produces blueprint/lean_decls.
+blueprint-check: check checkdecls-build blueprint-prepare
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && \
+      uv run --project blueprint --locked python blueprint/run_leanblueprint.py web && \
+      uv run --project blueprint --locked python blueprint/run_leanblueprint.py checkdecls
+
+# Build the printable proof-development companion (not a submission source).
+blueprint-pdf: blueprint-prepare
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && \
+      uv run --project blueprint --locked python blueprint/run_leanblueprint.py pdf
+
+# Build the HTML proof-development companion.
+blueprint-web: blueprint-prepare
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/lean" && \
+      uv run --project blueprint --locked python blueprint/run_leanblueprint.py web
+
+# Run validation, declaration checks, and both companion renderers.
+blueprint-all: blueprint-check blueprint-pdf

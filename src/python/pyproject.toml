@@ -1,0 +1,293 @@
+# uv workspace root. This package is not published; it only ties the
+# workspace members together and holds shared tool configuration.
+[project]
+name = "pricing-perspective-workspace"
+version = "0.0.0"
+description = "uv workspace root for the pricing-perspective monorepo"
+requires-python = "~=3.13.0"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "pyrefly>=1.1.1",
+  "ruff>=0.16",
+  "tach==0.35.0",
+  "vulture>=2.14",
+]
+
+# --- pyrefly (type checking) ---------------------------------------------
+# Only the importable uv-workspace members (apps/*, packages/*) are type-checked
+# here. scripts/ and notebooks/ are standalone `uv run --script` (PEP 723) and
+# marimo files that declare their own inline dependencies and are executed in
+# ephemeral environments; they cannot be resolved against this venv, so they are
+# checked separately (per-file, in inline-dep envs) by `just python::typecheck-scripts`.
+#
+# pyrefly (not ty) is the type-checker of record: it parses jaxtyping string-shape
+# annotations (Float[Array, "n d"]) natively, so no per-file suppressions are needed
+# for shape strings, and it understands PEP 723 inline metadata for the scripts pass.
+#
+# STRICT: the `strict` preset is on — no lazy `Any`. Unannotated parameters, bare
+# generics (e.g. `dict`, `np.ndarray` without type args), and empty containers that
+# infer to `Any` are ERRORS, not warnings. Fix them with real types (NDArray[...],
+# concrete element types) — never `Any`, never `# pyrefly: ignore` to dodge annotation.
+[tool.pyrefly]
+preset = "strict"
+# Pin the interpreter to the uv project env. Without this, a bare `pyrefly`
+# (i.e. the editor/agent LSP, which is not wrapped in `uv run`) inherits the nix
+# dev shell's VIRTUAL_ENV and queries ITS site-packages — which holds none of the
+# runtime deps, so every third-party and first-party import is reported as
+# `Cannot find module numpy / pandas / pipeline.stages...` at severity Error.
+# Those false errors were measured reaching agent context ~366 times in six days.
+# Querying .venv instead also picks up each workspace member's src/ on the site
+# path, so intra-repo imports resolve too. `just python::typecheck` runs under
+# `uv run` and already used this same interpreter — it is unaffected.
+python-interpreter = ".venv/bin/python"
+python-version = "3.13"
+# The `typecheck` recipe / prek hook pass each member's src/ and tests/ as
+# explicit path args (discovery mode re-roots on nested pyproject.toml files and
+# under-covers; member-root args would over-cover PEP 723 notebooks/scripts).
+# project-includes below is the fallback for a bare `pyrefly check` (e.g. LSP);
+# pyrefly globs, so members are spelled recursively, not as ty-style dir names.
+project-includes = ["apps/**/*.py", "packages/**/*.py"]
+project-excludes = [
+  "**/.venv/**",
+  "**/.lake/**",
+  "**/node_modules/**",
+  "**/__pycache__/**",
+  "apps/harnessme/notebooks/**",
+  "apps/harnessme/scripts/**"
+]
+# jcor's tests/ is a package (__init__.py + sibling _parity.py) that uses relative
+# imports (from ._parity import ...); pyrefly infers the import root as jcor/src, so
+# tests/ needs its package root on the search path to resolve those siblings.
+search-path = ["packages/jcor"]
+
+# `explicit-any` ships at WARN under the `strict` preset, so the green gate does
+# not constrain `Any`: `uv run pyrefly check apps packages` reports "0 errors
+# (58 suppressed, 356 warnings not shown)", and the same run forced with
+# `--error explicit-any` reports 1,278 errors, 1,267 of them [explicit-any].
+# Raised to ERROR here for the two members where it is achievable -- NOT for
+# jcor, and NOT for apps/.
+#
+# Why the split is drawn there rather than at `packages/**`: with the glob set
+# to `packages/**`, `uv run pyrefly check packages` reports **421 errors, every
+# one [explicit-any]** -- 346 in jcor/src, 75 in jcor/tests, 0 in dotell,
+# 0 in semflow. Not one of the 421 is a written `Any`: `rg '\bAny\b' packages`
+# finds 5 tokens in jcor (all docstring prose, "Any object with a string
+# representation") and 0 in semflow. The rule fires on any annotation that
+# *materialises* Any, and numpy spells `NDArray[T]` as `ndarray[Any, dtype[T]]`
+# -- the shape parameter is unconditionally Any. So the 421 are bare
+# `np.ndarray` (172), jcor's own `Float = NDArray[np.float64]` alias, both its
+# definition sites (15) and its uses (126), and `ArrayLike` (25). No spelling
+# of a numpy annotation passes, including the `NDArray[...]` this file
+# recommends at line 118. jcor is excluded on a property of numpy's stubs, not
+# on its discipline.
+#
+# What ERROR still buys for the two numpy-free members: ruff's ANN401 (live
+# everywhere via select = ["ALL"], with no remaining `# noqa: ANN401` in the
+# workspace) rejects a top-level `x: Any` / `-> Any` but says nothing about
+# `dict[str, Any]`, `cast("Any", ...)` or `Alias = Any`. dotell's
+# `_config() -> Any` returning `cast("Any", jax.config)` was exactly that hole;
+# tests/test_jax_cache.py -- and with it both members -- at zero. Probed rather
+# than assumed: a throwaway `def f(x: dict[str, Any]) -> None` (ANN401-clean)
+# dropped into packages/semflow reported 1 error, the same file under
+# packages/jcor/src reported 0, and both were deleted.
+#
+# apps/ is deferred, not forgotten: pipeline carries 186 raw `Any` tokens and
+# simulation 98. But the 1,267 above is dominated by the same numpy artefact,
+# so it must be re-measured before it motivates any cleanup; widening this gate
+# is blocked on numpy's stubs, not on apps/ hygiene.
+#
+# `sub-config` MERGES into this config rather than replacing it -- measured on a
+# scratch config (preset = "strict", [errors] bad-assignment = "ignore", one
+# sub-config setting only explicit-any): a matched file still reported
+# [implicit-any-parameter] (preset inherited) and still suppressed
+# [bad-assignment] (parent [errors] inherited). A nested [tool.pyrefly] in
+# packages/jcor/pyproject.toml is NOT equivalent, and IS honoured even under the
+# explicit `apps packages` path args: `pyrefly dump-config` then names two
+# configurations, and the member's files stop inheriting this file's
+# interpreter, search-path and error severities entirely (the same scratch run
+# re-reported the [bad-assignment] the root had silenced). Hence: one config,
+# scoped by glob. `matches` is one glob per table, resolved relative to THIS
+# file's directory, so the two members are two tables.
+[[tool.pyrefly.sub-config]]
+matches = "packages/dotell/**"
+
+[tool.pyrefly.sub-config.errors]
+explicit-any = "error"
+
+[[tool.pyrefly.sub-config]]
+matches = "packages/semflow/**"
+
+[tool.pyrefly.sub-config.errors]
+explicit-any = "error"
+
+# --- ruff (lint + format) ------------------------------------------------
+[tool.ruff]
+required-version = ">=0.16.0,<0.17"
+target-version = "py313"
+line-length = 88
+src = ["."]
+force-exclude = true
+unsafe-fixes = false
+show-fixes = true
+# vulture_whitelist.py is not real code — it is a list of bare attribute
+# references (undefined names, "useless" expressions) that mark dynamically-used
+# symbols as live for vulture. Linting/formatting it is meaningless, so skip it.
+extend-exclude = ["vulture_whitelist.py"]
+
+[tool.ruff.lint]
+# Stable maximal policy plus the exact preview rules accepted for this campaign.
+# `explicit-preview-rules` prevents future preview additions from entering via a
+# family prefix or `ALL` without an explicit policy decision.
+select = ["ALL"]
+extend-select = [
+  "PLW0717",  # too-many-statements-in-try-clause
+  "PLW1514",  # unspecified-encoding
+  "RUF067",  # non-empty-init-module
+  "RUF069",  # float-equality-comparison
+]
+preview = true
+explicit-preview-rules = true
+fixable = ["ALL"]
+ignore = [
+  # Ruff formatter incompatibilities.
+  "COM812",
+  "COM819",
+  "D206",
+  "D300",
+  "E111",
+  "E114",
+  "E117",
+  "ISC001",
+  "ISC002",
+  "Q000",
+  "Q001",
+  "Q002",
+  "Q003",
+  "W191",
+  # Mutually exclusive pydocstyle conventions: retain D211 and D212.
+  "D203",
+  "D213",
+  # No repository copyright-holder/header convention exists. A generic
+  # placeholder would satisfy the syntax without creating a valid notice.
+  "CPY001",
+  # TODO: Replace high-arity scientific and CLI boundaries with coherent
+  # configuration objects while preserving public and command-line compatibility.
+  "PLR0913",
+  "PLR0917",
+]
+allowed-confusables = [
+  "\u03c3",
+  "\u00d7",
+  "\u03b1",
+  "\u2139",
+  "\u211d",
+  "\u00b5"
+]  # σ, ×, α, ℹ, ℝ, µ (intentional scientific notation)
+# \u00b5 is MICRO SIGN, not \u03bc GREEK SMALL LETTER MU: it is the SI
+# prefix in timing units (`520 µs`), which is what the benchmark prose in
+# `geometry/neighbour.py` quotes. Listed rather than rewritten so a recorded
+# measurement is never silently retyped.
+#
+# \u2013 EN DASH is deliberately NOT listed. It separates numeric ranges in a
+# handful of docstrings, but blanket-allowing it would also mask a
+# hyphen/minus mix-up in `paper3/empirical.py`, which carries three of the
+# seven repo-wide occurrences. The single jcor site is rewritten instead.
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+quote-annotations = true
+runtime-evaluated-decorators = ["typer.Typer.callback", "typer.Typer.command"]
+
+[tool.ruff.lint.per-file-ignores]
+# INP001 (implicit-namespace-package) is disabled for tests, not overlooked.
+# t49 removed every `tests/__init__.py`: six workspace members each ship a
+# `tests/` directory, and with an `__init__.py` present pytest names their
+# modules from the *package* root, so all six compete for the single top-level
+# name `tests` and the aggregate run collects 2 tests with 60 errors. Without
+# one, names are rootdir-relative and unique. Re-adding an `__init__.py` to
+# satisfy this rule would silently re-break `just python::test`.
+"**/tests/**" = ["S101", "INP001"]
+"**/notebooks/**" = ["F821", "B018"]
+# Generated marimo cache mirrors fixed, locally-authored analytical queries;
+# keep S608 active for every hand-maintained Python and notebook source.
+"**/notebooks/__marimo__/**" = ["S608"]
+# This developer-only hook resolves an absolute executable from a runtime
+# enforced Literal["git", "uv"] allowlist and never invokes a shell.
+"**/scripts/version_bump/script.py" = ["S603"]
+# This retained external-API backfill is a bounded PEP 723 operator. Its branch
+# complexity reflects batch upload/poll/fallback recovery, not reusable product
+# logic; all mechanically actionable lint remains enabled.
+"scripts/references/backfill_markdown/script.py" = [
+  "C901",
+  "FBT002",
+  "PERF401",
+  "PLR0915",
+  "PLW0717",
+]
+
+# These settings are also passed explicitly by the dependency/cycle recipes;
+# keeping them here makes a bare `ruff analyze` use the same import graph.
+[tool.ruff.analyze]
+preview = true
+detect-string-imports = true
+string-imports-min-dots = 1
+type-checking-imports = true
+direction = "dependencies"
+
+[tool.ruff.format]
+preview = false
+docstring-code-format = true
+
+[tool.uv.workspace]
+members = [
+  "apps/*",
+  "packages/*",
+]
+
+# --- vulture (dead-code report) ------------------------------------------
+# Advisory only: flags unused module-level symbols (functions/classes/attrs)
+# that ruff's F-group cannot see. NEVER auto-deletes — findings are reviewed by
+# a human (`just python::vulture`). Centralized here (vulture reads one CWD
+# config and scans every path in one pass), so jcor is covered without the ruff
+# `extend` inheritance. min_confidence=60 is required to surface unused
+# funcs/classes; 80 would report only unused imports/unreachable, which ruff
+# F401 already handles.
+#
+# Design choices in `exclude`:
+#   * tests/ ARE scanned — so a library helper exercised only by the test suite
+#     (simulation is a library consumed by pipeline's tests) counts as used
+#     rather than reading as dead. test_* / fixtures are ignored below, so this
+#     adds real signal without flagging test bodies.
+#   * apps/crawler IS excluded — it is a Scrapy project that is ~entirely
+#     framework-dispatched (settings/items/spiders/middlewares read by name or
+#     config), where vulture yields only false positives.
+# ignore_names is kept deliberately SHORT: vulture name-matching is global, so
+# every entry here can mask genuine dead code elsewhere. Structural false
+# positives that need a specific attribute (e.g. TypedDict fields) go in
+# vulture_whitelist.py instead.
+[tool.vulture]
+min_confidence = 60
+paths = ["apps", "packages", "vulture_whitelist.py"]
+exclude = [
+  "*/.venv/*",
+  "*/notebooks/*",
+  "*/__pycache__/*",
+  "*/apps/crawler/*",
+  "*/apps/harnessme/scripts/*",
+]
+ignore_decorators = [
+  "@app.command",
+  "@app.callback",
+  "@*.command",  # Typer sub-apps
+  "@*.callback",
+  "@pytest.fixture",
+  "@agent.output_validator",
+]
+ignore_names = [
+  "test_*",  # pytest test functions (name-collected by pytest)
+  "pytest_*",  # pytest hooks (pytest_configure, pytest_collection_modifyitems)
+  "pytestmark",  # module-level pytest marker, read by pytest by name
+  "emit",  # logging.Handler.emit override (dotell _InterceptHandler)
+]

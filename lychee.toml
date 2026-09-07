@@ -1,0 +1,50 @@
+# Network-link policy for the root `lychee` prek hook.
+# Rumdl and `just docs links` retain ownership of anchors and local paths.
+scheme = ["http", "https"]
+extensions = ["md"]
+hidden = true
+include_verbatim = false
+include_mail = false
+exclude_all_private = true
+
+# Cache only successful responses. A repaired endpoint must be rechecked
+# immediately rather than remaining poisoned by a cached HTTP failure.
+cache = true
+max_cache_age = "7d"
+cache_exclude_status = "400.."
+
+# Bound network load and make transient failures retry without stampeding a host.
+no_progress = true
+timeout = 20
+max_retries = 3
+retry_wait_time = 2
+max_concurrency = 32
+host_concurrency = 4
+host_request_interval = "250ms"
+
+# These maintained destinations resolve in browsers but reject Lychee's
+# automated requests. Keep exclusions exact and documented at the source:
+# Harvard's Writing Economics endpoint appears in four skills; the MIT Press
+# catalog page appears in the literature-review skill. The EchoStar investor
+# release rejects Lychee's HTTP/2 request, while these two SEC exhibits return
+# 403 to automated requests.
+exclude = [
+  '^https://openai\.com/index/harness-engineering/?$',
+  '^https://www\.npmjs\.com/',
+  '^https://www\.scimagojr\.com/journalsearch\.php',
+  '^https://doi\.org/10\.1080/',
+  '^https://writingproject\.fas\.harvard\.edu/file_url/252/?$',
+  '^https://mitpress\.mit\.edu/9780262515894/a-guide-for-the-young-economist/?$',
+  '^https://ir\.echostar\.com/news-releases/news-release-details/echostar-corporation-completes-merger-dish-network-corporation$',
+  '^https://www\.sec\.gov/Archives/edgar/data/1618921/000119312525190603/d87240dex991\.htm$',
+  '^https://www\.sec\.gov/Archives/edgar/data/804753/000119312522169841/d223229d8k\.htm$',
+]
+
+# Historical corpora preserve old URLs as evidence; they are not maintained
+# navigation and would make the network gate noisy and unactionable.
+exclude_path = [
+  '(^|/)\.context/chat/',
+  '(^|/)\.context/reference/',
+  '(^|/)\.context/plan/\.archive/',
+  '(^|/)CHANGELOG\.md$',
+]

@@ -1,0 +1,554 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+r"""Validate generated interpretation contracts against manuscript declarations.
+
+Registration is deterministic: every ``generated/*.interpretation.json`` below
+a selected project source root is registered. Zero registrations is valid. Each
+registered contract requires exactly one declaration in hand-authored chapter or
+target TeX:
+
+    % pp-interpretation-hash{contract-id}{64-lowercase-hex-digest}
+
+The declaration must immediately follow interpretation prose inside the unique
+structural section named by the contract's ``manuscript_anchor`` label. Moving
+the declaration across a sectioning boundary therefore fails the gate.
+
+JSON documents use sorted keys, compact separators, UTF-8, and one terminal LF.
+``semantic_sha256`` is the SHA256 of the same canonical payload with that field
+removed (and without the document's terminal LF). Displayed formatted values
+must exactly match their ``\ppDeclareValue`` bindings in generated/numbers.tex.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import math
+import re
+import sys
+from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
+from typing import Any
+
+
+CONTRACT_GLOB = "*.interpretation.json"
+HASH_RE = re.compile(r"^[0-9a-f]{64}$")
+IDENTIFIER_RE = re.compile(r"^[a-z0-9][a-z0-9._-]*$")
+BINDING_KEY_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+MANUSCRIPT_ANCHOR_RE = re.compile(r"^[a-z][a-z0-9-]*:[a-z0-9][a-z0-9._:-]*$")
+DECLARE_VALUE_RE = re.compile(r"\\ppDeclareValue\{([^{}]+)\}\{([^{}]*)\}")
+LABEL_RE = re.compile(r"\\label\{([^{}]+)\}")
+SECTIONING_RE = re.compile(
+    r"\\(?:part|chapter|section|subsection|subsubsection|paragraph|subparagraph)\*?\{"
+)
+DECLARATION_TOKEN = "pp-interpretation-hash"
+DECLARATION_RE = re.compile(
+    r"^[ \t]*% pp-interpretation-hash"
+    r"\{([a-z0-9][a-z0-9._-]*)\}\{([0-9a-f]{64})\}[ \t]*$"
+)
+REQUIRED_FIELDS = {
+    "schema_version",
+    "contract_id",
+    "protocol_id",
+    "selection_rule",
+    "training_window",
+    "evaluation_window",
+    "model_definition",
+    "normalization_definition",
+    "metric_definition",
+    "manuscript_anchor",
+    "eligible_universe",
+    "exclusions",
+    "tie_break_rule",
+    "comparator_rule",
+    "input_array_sha256s",
+    "selected_pairs",
+    "displayed_values",
+    "output_array_sha256s",
+    "semantic_sha256",
+}
+
+
+class ContractError(ValueError):
+    """Raised for JSON forms that cannot be interpreted unambiguously."""
+
+
+@dataclass(frozen=True)
+class Registration:
+    contract_id: str
+    declared_digest: str
+    manuscript_anchor: str
+    path: Path
+
+
+@dataclass(frozen=True)
+class Declaration:
+    contract_id: str
+    digest: str
+    path: Path
+    line: int
+
+
+def canonical_json_bytes(value: Any) -> bytes:
+    """Return the semantic canonical JSON bytes (no terminal newline)."""
+    try:
+        text = json.dumps(
+            value,
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    except (TypeError, ValueError) as exc:
+        raise ContractError(f"payload is not canonical JSON: {exc}") from exc
+    return text.encode("utf-8")
+
+
+def semantic_digest(value: dict[str, Any]) -> str:
+    """Hash a canonical object after removing its self-referential field."""
+    payload = dict(value)
+    payload.pop("semantic_sha256", None)
+    return hashlib.sha256(canonical_json_bytes(payload)).hexdigest()
+
+
+def _reject_constant(value: str) -> None:
+    raise ContractError(f"nonfinite JSON number is forbidden: {value}")
+
+
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ContractError(f"duplicate JSON key is forbidden: {key}")
+        result[key] = value
+    return result
+
+
+def parse_contract(path: Path) -> tuple[dict[str, Any] | None, list[str]]:
+    """Parse one contract and enforce its byte-level canonical representation."""
+    errors: list[str] = []
+    try:
+        raw = path.read_bytes()
+        text = raw.decode("utf-8")
+    except (OSError, UnicodeDecodeError) as exc:
+        return None, [f"{path}: contract is not readable canonical UTF-8: {exc}"]
+    try:
+        value = json.loads(
+            text,
+            parse_constant=_reject_constant,
+            object_pairs_hook=_unique_object,
+        )
+    except (json.JSONDecodeError, ContractError) as exc:
+        return None, [f"{path}: malformed contract JSON: {exc}"]
+    if not isinstance(value, dict):
+        return None, [f"{path}: contract root must be a JSON object"]
+    try:
+        canonical_document = canonical_json_bytes(value) + b"\n"
+    except ContractError as exc:
+        return None, [f"{path}: {exc}"]
+    if raw != canonical_document:
+        errors.append(
+            f"{path}: contract JSON is not canonical sorted compact UTF-8 with one terminal LF"
+        )
+    return value, errors
+
+
+def _nonempty_definition(value: Any) -> bool:
+    return (isinstance(value, str) and bool(value.strip())) or (
+        isinstance(value, dict) and bool(value)
+    )
+
+
+def _validate_window(path: Path, field: str, value: Any) -> list[str]:
+    if not isinstance(value, dict):
+        return [f"{path}: {field} must be an object with start and end ISO dates"]
+    errors: list[str] = []
+    parsed: dict[str, date] = {}
+    for endpoint in ("start", "end"):
+        raw = value.get(endpoint)
+        if not isinstance(raw, str):
+            errors.append(f"{path}: {field}.{endpoint} must be an ISO date string")
+            continue
+        try:
+            parsed[endpoint] = date.fromisoformat(raw)
+        except ValueError:
+            errors.append(f"{path}: {field}.{endpoint} is not an ISO date: {raw!r}")
+            continue
+        if parsed[endpoint].isoformat() != raw:
+            errors.append(f"{path}: {field}.{endpoint} is not canonical YYYY-MM-DD")
+    if parsed.get("start") and parsed.get("end"):
+        if parsed["start"] > parsed["end"]:
+            errors.append(f"{path}: {field}.start is after {field}.end")
+    return errors
+
+
+def _validate_hash_map(path: Path, field: str, value: Any) -> list[str]:
+    if not isinstance(value, dict) or not value:
+        return [f"{path}: {field} must be a nonempty object of named SHA256 digests"]
+    errors: list[str] = []
+    for name, digest in sorted(value.items()):
+        if not isinstance(name, str) or not name.strip():
+            errors.append(f"{path}: {field} contains an empty array name")
+        if not isinstance(digest, str) or not HASH_RE.fullmatch(digest):
+            errors.append(
+                f"{path}: {field}.{name} must be exactly 64 lowercase hexadecimal characters"
+            )
+    return errors
+
+
+def load_numbers(path: Path) -> tuple[dict[str, str], list[str]]:
+    if not path.is_file():
+        return {}, [f"{path}: generated numeric binding file is missing"]
+    bindings: dict[str, str] = {}
+    errors: list[str] = []
+    for match in DECLARE_VALUE_RE.finditer(path.read_text(encoding="utf-8")):
+        key, value = match.groups()
+        if key in bindings:
+            errors.append(f"{path}: duplicate numeric binding {key!r}")
+        bindings[key] = value
+    return bindings, errors
+
+
+def validate_contract(
+    path: Path, value: dict[str, Any], bindings: dict[str, str]
+) -> tuple[Registration | None, list[str]]:
+    errors: list[str] = []
+    missing = sorted(REQUIRED_FIELDS - value.keys())
+    if missing:
+        errors.append(f"{path}: missing required contract fields: {', '.join(missing)}")
+
+    if value.get("schema_version") != 2:
+        errors.append(f"{path}: schema_version must be integer 2")
+
+    contract_id = value.get("contract_id")
+    if not isinstance(contract_id, str) or not IDENTIFIER_RE.fullmatch(contract_id):
+        errors.append(f"{path}: contract_id must match {IDENTIFIER_RE.pattern}")
+
+    protocol_id = value.get("protocol_id")
+    if not isinstance(protocol_id, str) or not IDENTIFIER_RE.fullmatch(protocol_id):
+        errors.append(f"{path}: protocol_id must match {IDENTIFIER_RE.pattern}")
+
+    manuscript_anchor = value.get("manuscript_anchor")
+    if not isinstance(manuscript_anchor, str) or not MANUSCRIPT_ANCHOR_RE.fullmatch(
+        manuscript_anchor
+    ):
+        errors.append(
+            f"{path}: manuscript_anchor must match {MANUSCRIPT_ANCHOR_RE.pattern}"
+        )
+
+    for field in (
+        "selection_rule",
+        "model_definition",
+        "normalization_definition",
+        "metric_definition",
+        "tie_break_rule",
+        "comparator_rule",
+    ):
+        if not _nonempty_definition(value.get(field)):
+            errors.append(f"{path}: {field} must be a nonempty string or object")
+
+    errors.extend(
+        _validate_window(path, "training_window", value.get("training_window"))
+    )
+    errors.extend(
+        _validate_window(path, "evaluation_window", value.get("evaluation_window"))
+    )
+
+    universe = value.get("eligible_universe")
+    if (
+        not isinstance(universe, list)
+        or not universe
+        or any(not isinstance(item, str) or not item.strip() for item in universe)
+    ):
+        errors.append(f"{path}: eligible_universe must be a nonempty string array")
+    elif len(universe) != len(set(universe)):
+        errors.append(f"{path}: eligible_universe contains duplicate members")
+
+    exclusions = value.get("exclusions")
+    if not isinstance(exclusions, list) or any(
+        not isinstance(item, (str, dict)) for item in exclusions
+    ):
+        errors.append(f"{path}: exclusions must be an array of strings or objects")
+
+    errors.extend(
+        _validate_hash_map(
+            path, "input_array_sha256s", value.get("input_array_sha256s")
+        )
+    )
+    errors.extend(
+        _validate_hash_map(
+            path, "output_array_sha256s", value.get("output_array_sha256s")
+        )
+    )
+
+    pairs = value.get("selected_pairs")
+    if (
+        not isinstance(pairs, list)
+        or not pairs
+        or any(not isinstance(pair, dict) or not pair for pair in pairs)
+    ):
+        errors.append(
+            f"{path}: selected_pairs must be a nonempty array of record objects"
+        )
+
+    displayed = value.get("displayed_values")
+    seen_bindings: set[str] = set()
+    if not isinstance(displayed, list) or not displayed:
+        errors.append(f"{path}: displayed_values must be a nonempty record array")
+    else:
+        for index, record in enumerate(displayed):
+            prefix = f"{path}: displayed_values[{index}]"
+            if not isinstance(record, dict):
+                errors.append(f"{prefix} must be an object")
+                continue
+            required = {"binding_key", "raw_value", "formatted_value"}
+            absent = sorted(required - record.keys())
+            if absent:
+                errors.append(f"{prefix} is missing: {', '.join(absent)}")
+                continue
+            key = record.get("binding_key")
+            raw_value = record.get("raw_value")
+            formatted = record.get("formatted_value")
+            if not isinstance(key, str) or not BINDING_KEY_RE.fullmatch(key):
+                errors.append(f"{prefix}.binding_key is malformed")
+                continue
+            if key in seen_bindings:
+                errors.append(f"{prefix}.binding_key duplicates {key!r}")
+            seen_bindings.add(key)
+            if isinstance(raw_value, bool) or not isinstance(raw_value, (int, float)):
+                errors.append(f"{prefix}.raw_value must be numeric")
+            elif isinstance(raw_value, float) and not math.isfinite(raw_value):
+                errors.append(f"{prefix}.raw_value must be finite")
+            if not isinstance(formatted, str) or not formatted:
+                errors.append(f"{prefix}.formatted_value must be a nonempty string")
+            if key not in bindings:
+                errors.append(
+                    f"{prefix}: numeric binding {key!r} is missing from numbers.tex"
+                )
+            elif isinstance(formatted, str) and bindings[key] != formatted:
+                errors.append(
+                    f"{prefix}: formatted value {formatted!r} does not match "
+                    f"numbers.tex binding {key!r}={bindings[key]!r}"
+                )
+
+    declared_digest = value.get("semantic_sha256")
+    valid_digest = isinstance(declared_digest, str) and HASH_RE.fullmatch(
+        declared_digest
+    )
+    if not valid_digest:
+        errors.append(
+            f"{path}: semantic_sha256 must be exactly 64 lowercase hexadecimal characters"
+        )
+    else:
+        computed = semantic_digest(value)
+        if computed != declared_digest:
+            errors.append(
+                f"{path}: semantic_sha256 mismatch: declared {declared_digest}, computed {computed}"
+            )
+
+    registration = None
+    if isinstance(contract_id, str) and IDENTIFIER_RE.fullmatch(contract_id):
+        registration = Registration(
+            contract_id=contract_id,
+            declared_digest=declared_digest if isinstance(declared_digest, str) else "",
+            manuscript_anchor=(
+                manuscript_anchor if isinstance(manuscript_anchor, str) else ""
+            ),
+            path=path,
+        )
+    return registration, errors
+
+
+def tex_sources(src: Path) -> list[Path]:
+    """Return the deterministic hand-authored TeX search surface."""
+    sources: list[Path] = []
+    for directory in (src / "chapters", src / "targets"):
+        if directory.is_dir():
+            sources.extend(directory.rglob("*.tex"))
+    return sorted(sources)
+
+
+def scan_declarations(src: Path) -> tuple[list[Declaration], list[str]]:
+    declarations: list[Declaration] = []
+    errors: list[str] = []
+    for path in tex_sources(src):
+        for line_number, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            if DECLARATION_TOKEN not in line:
+                continue
+            match = DECLARATION_RE.fullmatch(line)
+            if not match:
+                errors.append(
+                    f"{path}:{line_number}: malformed interpretation declaration; expected "
+                    "% pp-interpretation-hash{contract-id}{64 lowercase hex}"
+                )
+                continue
+            declarations.append(
+                Declaration(match.group(1), match.group(2), path, line_number)
+            )
+    return declarations, errors
+
+
+def validate_adjacency(
+    src: Path, registration: Registration, declaration: Declaration
+) -> list[str]:
+    """Bind a declaration to its registered structural manuscript anchor."""
+    anchors: list[tuple[Path, int]] = []
+    source_lines: dict[Path, list[str]] = {}
+    for path in tex_sources(src):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        source_lines[path] = lines
+        for line_number, line in enumerate(lines, start=1):
+            if registration.manuscript_anchor in LABEL_RE.findall(line):
+                anchors.append((path, line_number))
+
+    if len(anchors) != 1:
+        return [
+            f"{registration.path}: manuscript_anchor {registration.manuscript_anchor!r} "
+            f"must resolve to exactly one hand-authored TeX label; found {len(anchors)}"
+        ]
+
+    anchor_path, anchor_line = anchors[0]
+    if declaration.path != anchor_path or declaration.line <= anchor_line:
+        return [
+            f"{declaration.path}:{declaration.line}: declaration for "
+            f"{registration.contract_id!r} is not structurally adjacent to "
+            f"manuscript_anchor {registration.manuscript_anchor!r} at "
+            f"{anchor_path}:{anchor_line}"
+        ]
+
+    lines = source_lines[anchor_path]
+    between = lines[anchor_line : declaration.line - 1]
+    if any(SECTIONING_RE.search(line) for line in between):
+        return [
+            f"{declaration.path}:{declaration.line}: declaration for "
+            f"{registration.contract_id!r} crosses a sectioning boundary after "
+            f"manuscript_anchor {registration.manuscript_anchor!r}"
+        ]
+
+    preceding = lines[declaration.line - 2].strip()
+    if not preceding or preceding.startswith("%"):
+        return [
+            f"{declaration.path}:{declaration.line}: declaration for "
+            f"{registration.contract_id!r} must immediately follow interpretation prose"
+        ]
+    return []
+
+
+def check_project(src: Path) -> tuple[int, list[str]]:
+    errors: list[str] = []
+    registrations: dict[str, list[Registration]] = {}
+    contract_paths = sorted((src / "generated").glob(CONTRACT_GLOB))
+    bindings: dict[str, str] = {}
+    if contract_paths:
+        bindings, binding_errors = load_numbers(src / "generated" / "numbers.tex")
+        errors.extend(binding_errors)
+    for path in contract_paths:
+        value, parse_errors = parse_contract(path)
+        errors.extend(parse_errors)
+        if value is None:
+            continue
+        registration, validation_errors = validate_contract(path, value, bindings)
+        errors.extend(validation_errors)
+        if registration:
+            registrations.setdefault(registration.contract_id, []).append(registration)
+
+    for contract_id, matches in sorted(registrations.items()):
+        if len(matches) > 1:
+            files = ", ".join(str(match.path) for match in matches)
+            errors.append(
+                f"{src}: duplicate registered contract_id {contract_id!r}: {files}"
+            )
+
+    declarations, declaration_errors = scan_declarations(src)
+    errors.extend(declaration_errors)
+    declarations_by_id: dict[str, list[Declaration]] = {}
+    for declaration in declarations:
+        declarations_by_id.setdefault(declaration.contract_id, []).append(declaration)
+
+    for contract_id, matches in sorted(registrations.items()):
+        related = declarations_by_id.get(contract_id, [])
+        if not related:
+            errors.append(
+                f"{src}: registered contract {contract_id!r} has no TeX declaration"
+            )
+            continue
+        if len(related) > 1:
+            locations = ", ".join(f"{item.path}:{item.line}" for item in related)
+            errors.append(
+                f"{src}: registered contract {contract_id!r} has duplicate TeX declarations: "
+                f"{locations}"
+            )
+        expected = matches[0].declared_digest
+        for declaration in related:
+            if declaration.digest != expected:
+                errors.append(
+                    f"{declaration.path}:{declaration.line}: declaration digest mismatch for "
+                    f"{contract_id!r}: declared {declaration.digest}, contract has {expected}"
+                )
+            errors.extend(validate_adjacency(src, matches[0], declaration))
+
+    registered_ids = set(registrations)
+    for declaration in declarations:
+        if declaration.contract_id not in registered_ids:
+            errors.append(
+                f"{declaration.path}:{declaration.line}: orphan interpretation declaration "
+                f"for unregistered contract {declaration.contract_id!r}"
+            )
+
+    return len(contract_paths), errors
+
+
+def discover_projects(root: Path, selected: list[str]) -> list[Path]:
+    if selected:
+        projects = [(root / item).resolve() for item in selected]
+    else:
+        projects = sorted(path.resolve() for path in (root / "projects").glob("*/src"))
+    errors = [str(path) for path in projects if not path.is_dir()]
+    if errors:
+        raise ContractError(f"project source root does not exist: {', '.join(errors)}")
+    return projects
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", default=".", help="src/latex root")
+    parser.add_argument(
+        "--project",
+        action="append",
+        default=[],
+        help="project src path relative to --root; repeatable (default: all projects)",
+    )
+    args = parser.parse_args(argv)
+    root = Path(args.root).resolve()
+    try:
+        projects = discover_projects(root, args.project)
+    except ContractError as exc:
+        print(f"interpretation-contract: FAIL: {exc}", file=sys.stderr)
+        return 2
+
+    total = 0
+    errors: list[str] = []
+    for project in projects:
+        count, project_errors = check_project(project)
+        total += count
+        errors.extend(project_errors)
+    if errors:
+        for error in errors:
+            print(f"interpretation-contract: FAIL: {error}", file=sys.stderr)
+        return 1
+    print(
+        f"interpretation-contract: checked {total} registered contract(s) "
+        f"across {len(projects)} project(s)"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

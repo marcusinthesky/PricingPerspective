@@ -1,0 +1,17 @@
+# rumdl configuration
+# https://github.com/rvben/rumdl
+
+[global]
+exclude = [
+  "**/.context/**",
+  "CHANGELOG.md",
+  "**/.context/*.md",
+  "**/refs.bib",
+  "**/.agent/**"
+]
+# MD057 is disabled here but not in the source repository: this snapshot
+# withholds AGENTS.md, ARCHITECTURE.md and docs/ by design, so prose that
+# links to them has targets that legitimately do not exist. The links are a
+# real defect for a reader; MD057 flagging every one of them is noise that
+# would train readers to ignore the hook. Fix the prose, then re-enable.
+disable = ["MD013", "MD041", "MD057"]

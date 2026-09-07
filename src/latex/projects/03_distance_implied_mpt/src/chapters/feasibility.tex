@@ -1,0 +1,708 @@
+\section{Empirical design and data}\label{sec:empirical-design}
+
+The information-certified portfolio in \Cref{sec:portfolio-choice} is the
+theoretical class of allocations that minimize the certified variance bound.
+The empirical exercise implements its zero-slack, standardized-asset
+specialization; throughout the empirical sections, the resulting canonical
+implementation is the news-only allocation.
+At this boundary, the carrier scale changes the size of the variance certificate
+but not the normalized allocation selected from the observed information
+geometry.
+With unit marginal scales, $A(x)=1$ and $q=x$, so minimizing the certified
+variance objective is equivalent to maximizing the pairwise certificate over
+normalized weights.
+Implementing the general raw-capital objective would instead require the
+marginal scales in \eqref{eq:p3-risk-weights}.
+The design next defines the reference populations used to evaluate the
+standardized allocation and constructs the news geometry that enters the
+decision.
+Returns assess the news-only allocation only after the decision has been made.
+
+\subsection{Directional hypothesis and reference-population estimand}
+\label{sec:p3-reference-populations}
+
+The directional hypothesis is that the news-only allocation lies in
+the lower tail of conventional variance among feasible portfolios with
+comparable concentration.
+The theory motivates this direction under the maintained return bridge, but it
+does not determine a percentile or imply out-of-sample performance.
+The news-only allocation is
+\[
+  q^{\mathrm{news}}\in
+  \operatorname*{arg\,max}_{q\ge0,\,\1^\top q=1}
+  \frac12q^\top W_2^2q.
+\]
+It is constructed from the observed W$_2$ geometry before the return covariance
+enters the evaluation.
+
+Let
+\[
+  V(q):=q^\top\widehat\Sigma_R q
+\]
+be standardized full-sample return variance.
+For each reference population $\mathcal G_k$, define the lower-tail
+percentile
+\[
+  p_k:=\Pr_{q\sim\mathcal G_k}
+  \{V(q)\le V(q^{\mathrm{news}})\},
+  \qquad
+  \widehat p_k:=B^{-1}\sum_{b=1}^{B}
+  \1\{V(q_k^{(b)})\le V(q^{\mathrm{news}})\},
+  \qquad
+  B=\ppnum[0]{reference-draws}.
+\]
+The estimand $p_k$ is the share of portfolios from reference population
+$\mathcal G_k$ whose variance is no greater than the news-only allocation's.
+Accordingly, a smaller $\widehat p_k$ means that fewer reference portfolios
+achieve equally low or lower variance, placing the candidate nearer the bottom
+of the conventional-variance distribution.
+This quantity is a Monte Carlo estimate of a descriptive reference-population
+percentile, not a classical p-value, and the analysis imposes no rejection
+threshold.
+
+Each $\mathcal G_k$ starts with a symmetric Dirichlet draw on the long-only
+simplex, clips every weight at its cap, and renormalizes until the allocation
+is feasible.
+The four $(\alpha,\mathrm{cap})$ pairs are
+\[
+  (1,12.5\%),\qquad (1,15\%),\qquad
+  (0.8,15\%),\qquad (0.5,15\%).
+\]
+The first two populations isolate cap sensitivity.
+The effective number of names is
+\[
+  N(q):=\left(\sum_i q_i^2\right)^{-1}.
+\]
+The $\alpha=0.8$ law supplies a fixed, moderately concentrated comparison,
+while $\alpha=0.5$ supplies a more concentrated one.
+Their realized mean effective numbers are reported rather than assumed to
+match the candidate.
+The retained populations are transformations of Dirichlet draws rather than
+draws from a truncated Dirichlet law.
+
+These laws define comparison populations rather than portfolio strategies that
+an investor would implement directly.
+Their common feasible set is fully invested, long-only, and subject to a
+single-name cap, a recognizable portfolio-constraint template even though the
+exact thresholds are stylized rather than rules of a named mandate.
+The $12.5\%$ cap rules out portfolios supported on fewer than eight names; the
+$15\%$ cap relaxes that minimum to seven.
+Changing the cap tests sensitivity to the admissible largest position, while
+changing $\alpha$ alters typical concentration within the capped simplex.
+Practical mandates may additionally constrain sectors, liquidity, turnover, or
+tracking error, none of which these reference laws reproduce.
+
+The named strategy benchmarks answer a different question.
+Equal normalized risk weights set $q_i=1/N$ and, through
+\eqref{eq:p3-risk-weights}, correspond to inverse-volatility capital weights.
+They use marginal volatility but not cross-asset covariance.
+The ex post sample GMV instead uses the full return covariance and supplies the
+covariance-informed in-sample optimum.
+Thus the reference populations locate the news-only allocation within declared
+feasible sets, whereas the named benchmarks give its variance an economically
+familiar scale.
+
+\subsection{Returns, news, and Wasserstein construction}
+\label{sec:p3-data-construction}
+
+The analytical sample follows source, restriction, and final-sample order.
+Daily simple returns are Yahoo Finance adjusted-close ratios minus one.
+These are raw rather than excess returns; no risk-free series is subtracted.
+Exact date alignment supplies \ppnum[0]{n-obs} common observations from
+2018-03-19 through 2022-12-30, with missing dates removed rather than imputed.
+
+Nasdaq's per-symbol news archive supplies firm articles from 2018 through 2022.
+The analysis applies one ticker-indexed retrieval rule and retains dated article
+bodies across the prespecified universe.
+This construction is auditable, but the paper neither establishes comprehensive
+coverage relative to proprietary news archives nor treats the ticker assignment
+as manually validated article-level entity annotation.
+The annual coverage screen and balanced-cloud rule then form equal-sized
+empirical article distributions for the canonical 2022 geometry.
+Eligible articles are ordered deterministically by URL hash before the common
+cloud size is imposed, so news volume does not enter the distance merely through
+unequal empirical support.
+The annual cloud-size ladder appears in \Cref{sec:data-appendix}.
+
+Return alignment leaves \ppnum[0]{n-tickers} firms, and each series is
+standardized over the common panel before $\widehat\Sigma_R$ is formed.
+This is a coverage-screened survivor panel rather than historical index
+membership.
+
+An embedding model maps an article body to a fixed-dimensional numerical vector
+and is trained to place semantically related documents nearer in that space.
+The primary representation independently encodes each article with the frozen,
+4,096-coordinate Qwen3-Embedding-8B bi-encoder
+\citep{qwen3_embedding_2025}.
+It is obtained through OpenRouter's OpenAI-compatible embeddings API as
+\texttt{qwen/qwen3-}\allowbreak\texttt{embedding-8b}; rows are normalized.
+This frozen representation is the cross-paper canonical model.
+Rather than average a firm's article vectors into one point, the design treats
+its row-normalized cloud as an equal-mass empirical distribution.
+Balanced quadratic transport then pairs articles across two equal-sized clouds
+to minimize their root-mean-square Euclidean chord displacement.
+The resulting rooted W$_2$ matrix records the least pairwise semantic
+displacement; it does not observe the maintained information-to-exposure
+transmission map.
+The persisted artifact contains rooted W$_2$ distances, which the allocation
+objective above squares once at the certificate boundary.
+\Cref{sec:data-appendix} documents the artifact construction and sample roster.
+
+The variance evaluation, $\widehat\Sigma_R$, uses the same 2018--2022 period
+as the article geometry after the news-only allocation is constructed.
+The exercise is therefore an in-sample descriptive ranking.
+
+\subsection{Allocation-anatomy design}
+\label{sec:p3-anatomy-design}
+
+The variance percentile answers whether the news-only allocation lands in an
+unusual part of the feasible variance distribution, but not what the rule
+selects or which transport separations support that decision.
+The allocation-anatomy design therefore reports the canonical firm weights,
+aggregates them by sector, and decomposes certificate credit into the additive
+unordered terms $q_i q_j W_{2,ij}^{2}$.
+These are interpretations of the constructed allocation rather than new
+return hypotheses.
+
+\subsection{Expanding-cutoff design}
+\label{sec:p3-cutoff-design}
+
+The cutoff diagnostic holds the frozen representation and optimization
+rule fixed while expanding the article window through each year-end from 2018
+to 2022.
+For every cutoff, the analysis reports firm weights, effective $N$, the largest
+position, and one-way turnover from the preceding allocation.
+The terminal cutoff must reproduce the canonical allocation.
+Because the encoder is common across cutoffs and the entire accumulated corpus
+changes at each step, this sequence measures decision sensitivity to observed
+article coverage; it is neither a point-in-time trading backtest nor an event
+study.
+
+\subsection{Representation sensitivity design}
+\label{sec:p3-representation-design}
+
+The representation ladder studies sensitivity in the measurement of
+information geometry rather than introducing new economic hypotheses or
+selecting an encoder from the same return sample.
+Every arm holds fixed the priced firms, source article records,
+standardized-return covariance, reference laws, caps, and paired bootstrap
+schedule while changing one declared representation margin where possible.
+Model-specific input limits can still change the effective article text seen by
+an encoder.
+
+The first margin is output width.
+Qwen3-Embedding-8B is evaluated at its full 4,096 coordinates and at 1,024,
+256, and 64 coordinates.
+Its Matryoshka training is designed to keep leading-coordinate prefixes
+informative, so these arms probe compression within one frozen model rather than
+re-estimating coordinates from the return data.
+The second margin is model capacity.
+The 1,024-coordinate comparison between Qwen3-Embedding-8B and
+Qwen3-Embedding-4B holds width fixed, whereas their native 4,096- and
+2,560-coordinate comparison changes capacity and width jointly.
+Both Qwen models are obtained through OpenRouter.
+
+The third margin is model family.
+At 1,024 coordinates, BAAI BGE-large-en-v1.5 changes model family, pretraining,
+and effective input length jointly relative to Qwen3-Embedding-8B, so the
+comparison is an external sensitivity rather than an identified
+architecture effect
+\citep{xiao_cpack_2023}.
+BGE-large-en-v1.5 is also obtained through OpenRouter.
+
+The final margin is encoder vintage.
+The authors' locally trained, 320-coordinate EttaX V0, V1, and V3 encoders hold
+architecture, optimization recipe, compute, tokenizer, and token budget fixed
+while varying only the Wikipedia training snapshot.
+V0 uses 20 December 2017, V1 uses 20 December 2020, and V3 uses 1 August 2026.
+Because V3 postdates both the article and return sample, it is a post-sample
+negative control rather than a valid point-in-time encoder.
+The EttaX encoders also differ materially in capacity from the production Qwen
+models, so the vintage contrasts remain descriptive sensitivities rather than
+identified vintage effects.
+Their benchmark-calibrated equivalence threshold is post-specified, making the
+equivalence assessment exploratory.
+
+With the allocation, reference-population estimand, anatomy and cutoff
+diagnostics, return evaluation, and four measurement margins defined, the next
+section reports the resulting in-sample evidence.
+
+\section{Results}
+\label{sec:results}\label{sec:news-variance-rank}
+
+\subsection{Main in-sample variance ranking}
+
+The main result uses the prespecified, 4,096-coordinate
+Qwen3-Embedding-8B representation.
+Across the four reference laws, its variance percentile ranges from
+\ppnum[2]{news-only-percentile-uniform-cap-15-pct}\% to
+\ppnum[2]{news-only-percentile-concentrated-cap-15-pct}\%, compared with
+\ppnum[1]{equal-percentile-concentrated-cap-15-pct}\% to
+\ppnum[1]{equal-percentile-uniform-cap-12p5-pct}\% for equal risk weights.
+The variance percentile is the share of feasible reference portfolios with
+variance no greater than the candidate's.
+Lower is therefore better: a smaller percentile means that fewer reference
+portfolios attain equally low or lower variance.
+\Cref{tab:news-percentile} reports this ranking under each prespecified
+reference law.
+
+\begin{table}[H]
+  \centering
+  \scriptsize
+  \caption{In-sample variance percentile inside four prespecified feasible
+    allocation populations. Entries are the share of
+    \ppnum[0]{reference-draws} capped draws whose standardized variance is no
+  greater than the candidate's. Lower is better.}
+  \label{tab:news-percentile}
+  \begin{tabular}{lrrr}
+    \toprule
+    Reference population & Mean effective $N$ & News-only & Equal risk \\
+    \midrule
+    Uniform, 12.5\% cap
+    & \ppnum[2]{reference-effective-n-uniform-cap-12p5}
+    & \ppnum[2]{news-only-percentile-uniform-cap-12p5-pct}\%
+    & \ppnum[1]{equal-percentile-uniform-cap-12p5-pct}\% \\
+    Uniform, 15\% cap
+    & \ppnum[2]{reference-effective-n-uniform-cap-15}
+    & \ppnum[2]{news-only-percentile-uniform-cap-15-pct}\%
+    & \ppnum[1]{equal-percentile-uniform-cap-15-pct}\% \\
+    Fixed $\alpha=0.8$, 15\% cap
+    & \ppnum[2]{reference-effective-n-effective-n-matched}
+    & \ppnum[2]{news-only-percentile-effective-n-matched-pct}\%
+    & \ppnum[1]{equal-percentile-effective-n-matched-pct}\% \\
+    Concentrated, 15\% cap
+    & \ppnum[2]{reference-effective-n-concentrated-cap-15}
+    & \ppnum[2]{news-only-percentile-concentrated-cap-15-pct}\%
+    & \ppnum[1]{equal-percentile-concentrated-cap-15-pct}\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Under the two uniform laws, only
+\ppnum[2]{news-only-percentile-uniform-cap-12p5-pct}\% and
+\ppnum[2]{news-only-percentile-uniform-cap-15-pct}\% of draws have variance no
+greater than the news-only allocation's.
+The corresponding shares are
+\ppnum[2]{news-only-percentile-effective-n-matched-pct}\% under the fixed
+$\alpha=0.8$ law and
+\ppnum[2]{news-only-percentile-concentrated-cap-15-pct}\% under the deliberately
+more concentrated law.
+Thus, a rule constructed without cross-asset return covariance lands near the
+first percentile of conventional variance across all four declared feasible
+populations.
+
+The two concentrated populations make this ranking more informative than the
+uniform comparisons alone, but they do not furnish an effective-$N$ match.
+The fixed $\alpha=0.8$ law has mean effective $N$ of
+\ppnum[2]{reference-effective-n-effective-n-matched}, compared with the
+candidate's \ppnum[2]{news-only-effective-number-assets}, and only
+\ppnum[2]{news-only-percentile-effective-n-matched-pct}\% of its draws attain
+equally low or lower variance.
+Under the more concentrated law, mean effective $N$ falls to
+\ppnum[2]{reference-effective-n-concentrated-cap-15}, and the share is only
+\ppnum[2]{news-only-percentile-concentrated-cap-15-pct}\%.
+The low rank therefore survives comparisons that materially alter the
+concentration profile within the declared feasible class.
+Because both reference laws remain more diffuse than the candidate, this
+sensitivity does not eliminate concentration as an explanation of the rank.
+
+Equal risk weights provide a familiar point of comparison within the same laws.
+Their percentiles are
+\ppnum[1]{equal-percentile-uniform-cap-12p5-pct}\%,
+\ppnum[1]{equal-percentile-uniform-cap-15-pct}\%,
+\ppnum[1]{equal-percentile-effective-n-matched-pct}\%, and
+\ppnum[1]{equal-percentile-concentrated-cap-15-pct}\%, respectively.
+These ranks remain well above the news-only ranks under every reference law.
+The comparison is a descriptive location within prespecified portfolio
+populations, not a hypothesis test or evidence of prospective performance.
+
+\subsection{Portfolio characteristics and conventional benchmarks}
+\label{sec:news-variance-benchmark}
+
+The percentile result says where the candidate lies within feasible reference
+populations but not how far it sits from familiar portfolio strategies.
+The equal-risk benchmark sets $q_i=1/N$.
+Using the mapping $q_i(x)=x_i\sigma_i/A(x)$ gives
+\[
+  q_i=\frac1N
+  \quad\Longleftrightarrow\quad
+  x_i^{\mathrm{IV}}
+  =\frac{\sigma_i^{-1}}{\sum_j\sigma_j^{-1}}.
+\]
+It is therefore the inverse-volatility capital portfolio expressed in the
+normalized risk-weight coordinates of the empirical exercise, not an arbitrary
+second equal-weight portfolio.
+The sample GMV provides the opposite benchmark: it uses the complete in-sample
+covariance matrix that the news-only construction excludes.
+\Cref{tab:news-variance-benchmark} provides that calibration using the same
+standardized return panel.
+
+\begin{table}[H]
+  \centering
+  \scriptsize
+  \caption{In-sample descriptive portfolio benchmarks. Standardized variance
+    is computed on the complete 2018--2022 aligned return panel; relative
+    variance indexes the long-only sample GMV to 100. Returns evaluate the
+  news-only allocation after construction but do not determine its weights.}
+  \label{tab:news-variance-benchmark}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Portfolio & Standardized variance & Rel. to GMV & Max. weight
+    & Effective $N$ \\
+    \midrule
+    News-only
+    & \ppnum[3]{news-only-variance}
+    & \ppnum[1]{news-only-gmv-relative-variance-pct}
+    & \ppnum[1]{news-only-maximum-weight-pct}\%
+    & \ppnum[2]{news-only-effective-number-assets} \\
+    Equal risk weights
+    & \ppnum[3]{equal-standardized-variance}
+    & \ppnum[1]{equal-gmv-relative-variance-pct}
+    & -- & -- \\
+    Sample GMV
+    & \ppnum[3]{sample-gmv-variance}
+    & 100.0 & -- & -- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The news-only standardized variance is
+\ppnum[1]{news-only-equal-variance-reduction-pct}\% lower than the variance of
+the equal-risk benchmark.
+It nevertheless remains
+\ppnum[1]{news-only-gmv-excess-variance-pct}\% above the ex post long-only
+sample GMV.
+The empirical claim is therefore not that information geometry solves the
+conventional GMV problem without a covariance matrix.
+Rather, the news-only allocation lands unusually low in the variance
+distribution generated by the declared feasible laws while remaining short of
+the covariance-informed in-sample optimum.
+
+The concentration diagnostics describe the decision object behind that rank.
+Its largest holding is \ppnum[1]{news-only-maximum-weight-pct}\%, and its
+effective number of names is
+\ppnum[2]{news-only-effective-number-assets}.
+The candidate therefore differs from equal risk weighting and is not reduced to
+a one-name solution.
+Together with the concentration-adjusted reference comparisons, these
+diagnostics show that the low rank survives laws that place more mass on
+concentrated portfolios.
+Because none matches the candidate's realized effective number of names, they
+do not eliminate scalar concentration as a confound.
+They do not establish stability of the individual holdings or performance
+outside this sample.
+
+\subsection{Anatomy of the news-only allocation}
+\label{sec:p3-portfolio-anatomy}
+
+The scalar concentration diagnostics do not reveal which firms the rule
+selects or which parts of the information geometry create its certificate.
+\Cref{fig:p3-portfolio-anatomy} opens that decision object at three levels:
+firm weights, additive firm-pair credits, and sector weights.
+
+The pair layer is the informative attribution level for this optimum.
+To see why, let $M=(W_{2,ij}^{2})_{i,j}$ and write the zero-slack objective as
+$\mathcal C(q)=\tfrac12q^{\top}Mq$.
+For every firm in the positive support of this solution, whose unit cap is
+nonbinding, the simplex first-order condition gives
+$(Mq^{\star})_i=\lambda$.
+Multiplying by $q_i^{\star}$ and summing over the support yields
+$\lambda=q^{\star\top}Mq^{\star}$.
+Consequently, the natural firm-level share proposed by the quadratic
+decomposition satisfies
+\begin{equation}\label{eq:p3-firm-credit-identity}
+  \frac{q_i^{\star}(Mq^{\star})_i}
+  {q^{\star\top}Mq^{\star}}=q_i^{\star}
+  \qquad\text{whenever }q_i^{\star}>0.
+\end{equation}
+Firm certificate shares therefore reproduce the portfolio weights rather than
+provide a second diagnostic.
+The unordered pair terms remain informative:
+\begin{equation}\label{eq:p3-pair-credit-decomposition}
+  c_{ij}:=q_i^{\star}q_j^{\star}W_{2,ij}^{2},
+  \qquad
+  \mathcal C(q^{\star})=\sum_{i<j}c_{ij}.
+\end{equation}
+They identify which weighted separations the optimizer actually uses.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{0.95}{portfolio_anatomy}
+  \caption{Anatomy of the canonical news-only allocation. Panel (a)
+    orders firms by sector and then by weight; horizontal lines mark the equal
+    risk weight and the \ppnum[1]{reference-tight-cap-pct}\% cap used by the
+    tightest reference population.
+    Alternating ticker positions are labelled for legibility; all
+    \ppnum[0]{n-tickers} firm weights remain plotted.
+    Panel (b) reports the twelve largest unordered terms $c_{ij}$ in
+    \eqref{eq:p3-pair-credit-decomposition} as shares of total certificate
+    credit and distinguishes within- from cross-sector pairs. Panel (c)
+    compares sector weights with the sector shares induced by equal risk
+    weights. All panels describe the full-sample news-only allocation; they do
+  not use returns or assign a causal role to sector membership.}
+  \label{fig:p3-portfolio-anatomy}
+\end{figure}
+
+The solution assigns positive weight to
+\ppnum[0]{anatomy-active-firms} of the \ppnum[0]{n-tickers} firms, so the
+effective-$N$ statistic reflects a portfolio with many small positions and a
+limited set of larger ones rather than diffuse weight on every name.
+\Cref{tab:p3-top-holdings} makes the largest positions tangible.
+For each row, the strongest partner is the holding that produces its largest
+pair term in \eqref{eq:p3-pair-credit-decomposition}.
+A large position need not have the largest pair credit: the latter also
+depends on the counterpart's weight and their squared transport separation.
+
+\input{generated/portfolio_holdings}
+
+The sector panels supply a diagnostic rather than an explanation.
+The news-only sector weights differ visibly from the sector shares implied by
+equal risk weights.
+Across the additive pair terms,
+\ppnum[1]{anatomy-cross-sector-credit-pct}\% of certificate credit is
+cross-sector and \ppnum[1]{anatomy-within-sector-credit-pct}\% is
+within-sector.
+Thus the reported certificate is not generated by within-sector separation
+alone.
+The split does not establish that transport geometry contains information
+beyond sector labels: sector sizes, portfolio weights, and the number of
+available cross-sector pairs also affect it.
+It locates the certificate credit while leaving the economic source of those
+separations open.
+
+\subsection{Evolution across expanding information cutoffs}
+\label{sec:p3-portfolio-evolution}
+
+The canonical allocation pools articles through 2022.
+To examine whether that decision is peculiar to the terminal corpus, the same
+zero-slack problem is re-solved after expanding the article window through
+each year-end from 2018 to 2022.
+\Cref{fig:p3-portfolio-evolution} shows the resulting sequence.
+These are expanding information cutoffs, not separate calendar-year article
+samples.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{0.95}{portfolio_evolution}
+  \caption{Evolution of the news-only allocation under expanding
+    article cutoffs. Panel (a) reports firm weights for article windows ending
+    in 2018, 2019, 2020, 2021, and 2022, with firms grouped by sector.
+    Alternating ticker positions are labelled; every firm remains in each
+    heatmap column.
+    Panel (b) reports the effective number of names, the largest weight and its
+    ticker, and one-way turnover
+    $\tfrac12\lVert q_t-q_{t-1}\rVert_1$. The common frozen encoder is held
+    fixed, and the terminal 2022 column reproduces the canonical allocation.
+    The sequence measures decision sensitivity to accumulated articles; it is
+  neither a prospective return test nor an event-study design.}
+  \label{fig:p3-portfolio-evolution}
+\end{figure}
+
+The portfolio changes as the information set grows without becoming either
+one-name concentrated or equal-risk weighted.
+Across the five cutoffs, effective $N$ remains between
+\ppnum[2]{anatomy-vintage-effective-n-min} and
+\ppnum[2]{anatomy-vintage-effective-n-max}, while the largest weight ranges
+from \ppnum[1]{anatomy-vintage-maximum-weight-min-pct}\% to
+\ppnum[1]{anatomy-vintage-maximum-weight-max-pct}\%.
+One-way turnover ranges from \ppnum[1]{anatomy-turnover-min-pct}\% to
+\ppnum[1]{anatomy-turnover-max-pct}\%.
+The largest reallocation occurs when the first one-year corpus is extended
+through 2019:
+\ppnum[1]{anatomy-turnover-2018-2019-pct}\%, compared with
+\ppnum[1]{anatomy-turnover-2019-2020-pct}\% from 2019 to 2020.
+The sequence therefore does not display a uniquely large break at the 2020
+cutoff.
+It cannot isolate a COVID effect in any case, because the design changes the
+entire accumulated article distribution at once and holds a common encoder
+fixed across cutoffs.
+
+\subsection{Representation sensitivity}
+\label{sec:p3-representation-results}
+
+The expanding-cutoff sequence changes the information set while holding the
+representation fixed.
+The final empirical question changes the representation itself.
+\Cref{tab:p3-representation-main} shows the four measurement margins;
+\Cref{sec:p3-representation-ablation} reports the full ladder and paired
+bootstrap contrasts.
+
+\input{generated/representation_ablation_main}
+
+Moderate within-model compression leaves the outcome nearly unchanged:
+Qwen3-8B at 1,024 coordinates is close to the full-width primary representation
+in both reported metrics, and their paired interval includes zero.
+At the same fixed width, Qwen3-4B ranks higher in conventional variance than
+Qwen3-8B, but their paired difference does not survive Holm adjustment.
+BGE-large at 1,024 coordinates is again close to Qwen3-8B, so the sample does
+not support a simple model-family ordering.
+
+The width ladder is non-monotone.
+The 64-coordinate Qwen3-8B stress cell has the lowest conventional-variance
+rank in the ladder, but its contrast with the 256-coordinate cell does not
+survive Holm adjustment.
+That outcome does not make 64 coordinates the preferred specification: the
+full-width 8B representation was prespecified, and every arm is evaluated on
+the same return sample.
+Instead, its point ranking shows that extreme compression can materially alter
+the geometry and selected allocation, in this case in a direction that
+improves the in-sample variance benchmark without an adjusted rejection of
+zero difference against the 256-coordinate cell.
+
+The matched EttaX vintages supply a separate sensitivity.
+Their point outcomes vary across the three training snapshots, but none of the
+three contrasts survives Holm adjustment.
+The post-specified equivalence criterion is met only for V3--V1; the intervals
+comparing V0 with V1 or V3 are too wide to establish equivalence.
+Because V3 postdates the sample and the equivalence threshold is exploratory,
+these comparisons neither identify a causal vintage effect nor establish broad
+representation invariance.
+Taken together, the ladder does not support a monotone ``larger model is
+better'' account.
+It shows instead that the primary result is empirically strong within the
+declared benchmark but remains sensitive to the measurement layer that creates
+the information geometry.
+
+These comparisons are descriptive and in-sample: the same 2018--2022 return
+panel evaluates the news-only allocations after their construction.
+They describe how the rule ranks against the declared reference populations,
+not how it will perform prospectively.
+\Cref{sec:limitations} interprets what these results establish within the
+maintained framework and where their boundaries lie.
+% Temporarily omitted while the chronological-validation
+% implementation is audited.
+\iffalse
+\subsection{Chronological certificate validation}
+\label{sec:chronological-validation}
+
+No prespecified transmission cell clears the calibration coverage rule.
+Following the frozen protocol, the evaluation therefore uses zero credit and
+the benchmark of perfect dependence rather than selecting a more favourable
+holdout cell.  This is a validation failure for an informative certificate,
+not a reason to change the horizon, grid, or transmission specification.
+\Cref{sec:calibration-boundary} states precisely which region that failure
+covers, because a rule the declared grid never reaches is a weaker finding than
+a region the data reject.
+
+\Cref{tab:validation-headline} reports the evidence in its decision order:
+validity first, then informativeness, then portfolio value.  Coverage is shown
+with its one-sided 95\% lower endpoint in brackets.  Daily future variances are
+reported on the raw return scale.  Required $\delta$ is the mean additional
+normalized residual-covariance budget needed by the operational inverse-
+volatility bound; it is a sensitivity diagnostic, not an estimated structural
+parameter.
+
+\begin{table}[H]
+  \centering
+  \caption{Frozen chronological certificate validation.  Coverage entries are
+    rates with one-sided 95\% lower endpoints in brackets.  Credit and floor
+  activation are percentages; future variance is daily raw return variance.}
+  \label{tab:validation-headline}
+  \begin{tabular}{llr}
+    \toprule
+    Order & Outcome & Estimate \\
+    \midrule
+    Validity & Operational coverage
+    & \ppnum[1]{validation-operational-coverage-pct}\%
+    [\ppnum[1]{validation-operational-coverage-lower-pct}\%] \\
+    Validity & Geometry-only coverage
+    & \ppnum[1]{validation-geometry-only-coverage-pct}\%
+    [\ppnum[1]{validation-geometry-only-coverage-lower-pct}\%] \\
+    Informativeness & Mean lower certificate credit
+    & \ppnum[1]{validation-mean-lower-credit-pct}\% \\
+    Informativeness & Active pairwise floors
+    & \ppnum[1]{validation-floor-activation-pct}\% \\
+    Decision & Certificate-portfolio future variance
+    & \ppnume[2]{validation-variance-certificate} \\
+    Decision & Inverse-volatility future variance
+    & \ppnume[2]{validation-variance-inverse-volatility} \\
+    Decision & Certificate minus inverse volatility
+    & \ppnume[2]{validation-variance-difference} \\
+    Sensitivity & Mean required $\delta$
+    & \ppnum[6]{validation-required-delta} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Because calibration activates the fallback, point and lower-endpoint credit are
+both zero in the holdout.  Operational and geometry-only coverage consequently
+test the perfect-dependence benchmark rather than an informative deduction.
+The certificate portfolio also coincides with inverse volatility under the
+fallback, so their future-variance difference is mechanically zero.  The
+sample-GMV and Ledoit--Wolf rows remain governed secondary comparisons, but
+cannot rescue decision value for a certificate that calibration did not admit.
+
+\Cref{fig:certificate-validation} plots certified diversification against
+subsequently realized diversification for 500 fixed-seed capped random
+portfolio identities, averaging each identity across the 40 holdout formations.
+The horizontal axis is the certified deduction from perfect dependence; the
+vertical axis is the realized deduction computed with the same formation-time
+volatility budget.  Points on or above the dashed 45-degree line satisfy the
+bound.  Under the frozen fallback all points have zero certified deduction,
+making the figure a transparent display of the failed informativeness gate
+rather than an ex post refit.
+
+\begin{figure}
+  \centering
+  \ppfigure{0.72}{certificate_validation}
+  \caption{Certified versus subsequently realized diversification.  Each point
+    is the chronological mean for one of 500 seed-42 random portfolio
+    identities across 40 monthly holdout formations.  The dashed 45-degree line
+    is the bound benchmark.  The vertical pile at zero reflects the
+    preregistered zero-credit fallback after no calibration cell passed; it is
+  not evidence that text geometry explains realized risk.}
+  \label{fig:certificate-validation}
+\end{figure}
+
+\subsection{What the declared grid could test}\label{sec:calibration-boundary}
+
+The two calibration conditions do not fail together.  Of the
+\ppvalue{calibration-cells-total} cells,
+\ppvalue{calibration-cells-margin-pass} satisfy the mean-margin condition and
+\ppvalue{calibration-cells-passing} satisfy both.  Coverage alone binds: the
+bound is conservative on average across most of the grid and still misses the
+required share of calibration formations.
+
+\Cref{fig:calibration-coverage} shows where that leaves the design.  Coverage
+increases monotonically in both $L$ and $\tau$, so the best-covering cell is the
+most conservative one the grid contains, at
+$L=\ppnum[1]{calibration-best-coverage-scale}$ and
+$\tau=\ppnum[2]{calibration-best-coverage-slack}$ --- exactly the corner of the
+declared $L\times\tau$ range.  It reaches
+\ppnum[1]{calibration-best-coverage-pct}\% coverage with a
+\ppnum[1]{calibration-best-coverage-lower-pct}\% lower endpoint against a 90\%
+rule, while still carrying
+\ppnum[1]{calibration-best-coverage-credit-pct}\% mean lower credit.
+
+The correct reading is therefore narrower than it may first appear.  The
+evidence establishes that the prespecified transmission region does not reach
+the declared coverage standard, not that no transmission region could.  Because
+coverage is still rising at the grid boundary, a more conservative region
+outside the declared range may satisfy the rule; the credit it could carry would
+be correspondingly smaller, since credit falls as $L$ and $\tau$ rise
+(\Cref{fig:certificate-surface}).  We do not estimate where that crossing lies.
+Extending the grid after observing this outcome would convert a preregistered
+design into a tuned one, which is the specific failure the protocol exists to
+prevent.  Locating the crossing requires a fresh preregistration, and the
+paper's conclusions are stated for the region actually declared.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{0.72}{calibration_coverage}
+  \caption{Calibration coverage lower endpoint across the declared
+    transmission grid.  Each line fixes $\tau$ and varies $L$; the dashed line
+    is the 90\% calibration rule.  Coverage rises with conservatism and is
+    highest at the grid corner, so the rule is never reached inside the declared
+  range rather than being approached and rejected.}
+  \label{fig:calibration-coverage}
+\end{figure}
+
+Ticker, within-sector, stale-2018-geometry, and 1,000 label-permutation placebos
+are retained in the governed results.  Under the zero-credit fallback they are
+necessarily uninformative: relabelling or ageing a geometry that receives zero
+credit cannot change the bound.  Turnover, concentration, and article-draw
+weight stability are likewise diagnostics rather than headline outcomes.  The
+residual sensitivity budgets $\delta\in\{0,0.025,0.05\}$ only show how an
+assumed additive residual allowance changes coverage; they do not reinterpret
+credit against perfect dependence as explained realized risk.
+\fi

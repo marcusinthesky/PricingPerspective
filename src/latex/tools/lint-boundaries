@@ -1,0 +1,161 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+status=0
+
+fail_matches() {
+  local message="$1"
+  local pattern="$2"
+  shift 2
+  local matches
+  if matches=$(rg -n --pcre2 "$pattern" "$@" 2>/dev/null); then
+    echo "$message" >&2
+    echo "$matches" >&2
+    status=1
+  fi
+}
+
+mapfile -t manuscript_content < <(
+  rg --files projects -g '**/chapters/*.tex' -g '**/essays/*.tex' \
+    -g '**/appendices/*.tex' -g '**/body.tex' -g '**/appendix.tex'
+)
+if ((${#manuscript_content[@]})); then
+  fail_matches \
+    "manuscript content is content-only; move classes, packages, and definitions to targets/templates:" \
+    '\\(documentclass|usepackage|RequirePackage|newcommand|renewcommand|providecommand|def|newenvironment|newtheorem)\b' \
+    "${manuscript_content[@]}"
+  fail_matches \
+    "manuscript content may not repair layout manually:" \
+    '\\(vspace\*?|hspace\*?|newgeometry|restoregeometry|pagestyle|thispagestyle|fontsize|setlength|addtolength)\b|\\\\\[[^]]*\]' \
+    "${manuscript_content[@]}"
+  fail_matches \
+    "body prose may not use raw bold or font switches:" \
+    '\\(textbf|bfseries|rmfamily|sffamily|ttfamily)\b' \
+    "${manuscript_content[@]}"
+  # Manuscript boundary: chapters publish math claims and the aggregate
+  # machine-checked status, never the Lean implementation surface. Two robust
+  # signatures are enforced: any '.lean' source-file reference, and a '\texttt'
+  # token carrying an internal lower->upper (Pascal/CamelCase) transition, which
+  # is the shape of Lean type/def identifiers (e.g. 'EnergyKernelEmbedding').
+  # Bare snake_case Lean declarations are NOT mechanically separable from
+  # legitimate snake_case names (e.g. a method 'energy_barycentre' or strategy
+  # 'cert_stale_vol'), so that residual class is covered by review, not lint.
+  fail_matches \
+    "chapters must not leak the Lean implementation surface (source-file paths or declaration identifiers); publish the math claim plus the aggregate machine-checked status instead:" \
+    '\.lean\b|\\texttt\{[^}]*[a-z][A-Z][^}]*\}' \
+    "${manuscript_content[@]}"
+fi
+
+mapfile -t targets < <(rg --files projects -g '**/targets/*.tex')
+if ((${#targets[@]} == 0)); then
+  echo "no target adapters found under projects/*/src/targets" >&2
+  status=1
+fi
+
+mapfile -t tex_sources < <(
+  rg --files projects templates -g '*.tex' -g '*.sty' -g '*.cls' \
+    -g '!projects/*/src/*.sty' -g '!projects/*/src/*.cls'
+)
+if ((${#tex_sources[@]})); then
+  fail_matches \
+    "shell escape and runtime package installation are forbidden:" \
+    '\\(write18|ShellEscape|immediate\s*\\write18)\b|\btlmgr\b' \
+    "${tex_sources[@]}"
+
+  while IFS= read -r hit; do
+    label=${hit#*\\label\{}
+    label=${label%\}}
+    if [[ ! "$label" =~ ^(sec|eq|fig|tab|thm|lem|prop|cor|def|ass|rem|app|hyp|alg):[a-z0-9][a-z0-9:-]*$ ]]; then
+      echo "invalid label '$label' in ${hit%%:*}; use a registered semantic prefix" >&2
+      status=1
+    fi
+  done < <(rg -n -o '\\label\{[^}]+\}' "${tex_sources[@]}" 2>/dev/null || true)
+fi
+
+while IFS= read -r config; do
+  project=${config%/Tectonic.toml}
+  if [[ -f "$project/dissertation.toml" ]]; then
+    required_paths=(
+      src/metadata.tex src/chapters src/essays src/appendices src/targets src/refs.bib
+      src/targets/draft.tex src/targets/uct-thesis.tex
+    )
+    if ! uv run --script tools/assemble-dissertation \
+      list-projects "$project/dissertation.toml" >/dev/null; then
+      status=1
+    fi
+    while IFS= read -r included; do
+      for interface in body.tex appendix.tex; do
+        if [[ ! -f "projects/$included/src/$interface" ]]; then
+          echo "$project includes $included without public interface src/$interface" >&2
+          status=1
+        fi
+      done
+    done < <(
+      uv run --script tools/assemble-dissertation \
+        list-projects "$project/dissertation.toml" 2>/dev/null || true
+    )
+  else
+    required_paths=(
+      src/metadata.tex src/chapters src/targets src/refs.bib
+      src/targets/arxiv.tex
+    )
+  fi
+  for required in "${required_paths[@]}"; do
+    if [[ ! -e "$project/$required" ]]; then
+      echo "$project is missing required boundary $required" >&2
+      status=1
+    fi
+  done
+done < <(rg --files projects -g 'Tectonic.toml')
+
+while IFS= read -r generated; do
+  if ! head -n 1 "$generated" | rg -q '^% AUTO-GENERATED'; then
+    echo "$generated must start with '% AUTO-GENERATED'" >&2
+    status=1
+  fi
+done < <(rg --files projects -g '**/generated/*.tex')
+
+# Provenance attribution: each generated/numbers.tex header must name the CLI
+# verb of the dvc.yaml stage that actually produces it (t24.16.2 F6). The
+# mapping below is the paper-number -> producing-stage table; keep it in sync
+# with dvc.yaml's p{N}_numbers stages.
+dvc_yaml="../dvc.yaml"
+[[ -f "$dvc_yaml" ]] || dvc_yaml="../../dvc.yaml"
+if [[ -f "$dvc_yaml" ]]; then
+  while IFS= read -r generated; do
+    paper_num=$(echo "$generated" | rg -o 'projects/0*([0-9]+)_' -r '$1' || true)
+    [[ -n "$paper_num" ]] || continue
+    stage="p${paper_num}_numbers"
+    stage_block=$(awk -v s="  ${stage}:" '
+      $0 == s {found=1; print; next}
+      found && /^  [A-Za-z0-9_@.-]+:$/ {exit}
+      found {print}
+    ' "$dvc_yaml")
+    [[ -n "$stage_block" ]] || continue
+    verb=$(echo "$stage_block" | rg -o '\$\{py_pipeline\}\s+(\S+)' -r '$1' | head -n1)
+    [[ -n "$verb" ]] || continue
+    if ! head -n 1 "$generated" | rg -qF "pipeline $verb"; then
+      echo "$generated header does not attribute stage '$stage' (expected 'pipeline $verb')" >&2
+      status=1
+    fi
+  done < <(rg --files projects -g '**/generated/numbers.tex')
+fi
+
+# Numeric display-contract gates (t24.16.1): (F1) every \ppnum[N]{key} display
+# precision must be <= the emitted binding's precision, and (F2) no bare empirical
+# decimal may sit in chapters/targets prose (bind it via \ppnum/\ppvalue so the
+# pipeline owns it). Delegated to a stdlib Python sibling because the math-mode /
+# table / length-spec stripping this needs is beyond the rg passes above.
+if ! uv run --script tools/value-gates --root .; then
+  status=1
+fi
+
+# Generated interpretation contracts bind an empirical protocol and displayed
+# values to exactly one adjacent manuscript declaration. Zero registrations is
+# valid; once generated/*.interpretation.json exists, semantic and numeric drift
+# is release-blocking.
+if ! uv run --script tools/interpretation-contract --root .; then
+  status=1
+fi
+
+exit "$status"

@@ -1,0 +1,2848 @@
+# DVC Pipeline for Pricing Perspective Analysis
+
+params:
+- params.yaml
+- data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V0/params.yaml
+- data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V1/params.yaml
+- data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V3/params.yaml
+
+metrics:
+- ${mc}/monte_carlo_validation/summary.yaml
+- ${mc}/hedging_error_validation/summary.yaml
+- ${mc}/pricefree_comparison/summary.yaml
+- ${mc}/test_size_power/summary.yaml
+- ${mc}/equivalence_calibration/summary.yaml
+- data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V0/metrics.json
+- data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V1/metrics.json
+- data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V3/metrics.json
+
+plots:
+- ettax_checkpoint_probe_loss:
+    title: EttaX fixed training-probe loss by corpus vintage
+    x: step
+    y:
+      data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V0/plots/metrics/checkpoint_probe_loss.tsv: checkpoint_probe_loss
+      data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V1/plots/metrics/checkpoint_probe_loss.tsv: checkpoint_probe_loss
+      data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V3/plots/metrics/checkpoint_probe_loss.tsv: checkpoint_probe_loss
+
+vars:
+- py_pipeline: uv run --project src/python pipeline
+- py_sim: uv run --project src/python simulation
+- py_semflow: uv run --project src/python semflow
+- shared: data/shared
+- p1: data/papers/paper1
+- p3: data/papers/paper3
+- p5: data/papers/paper5
+- mc: data/mc
+- py_ettax: uv run --project src/python --package ettax --extra cuda ettax
+- ettax_run_root: data/.encoder_vintage/ettax/runs/v3-byte-complete
+- ettax_arms:
+  - V0
+  - V1
+  - V3
+# Keyed by provider_id so the shard directory basename equals the registered
+# provider, as it does for every other provider. The arm letter stays uppercase
+# because it is the vintage identity the CLI and checkpoint tree use.
+- ettax_embedding_cells:
+    ettax-v0:
+      arm: V0
+    ettax-v1:
+      arm: V1
+    ettax-v3:
+      arm: V3
+stages:
+
+  # ====================================================================
+  # SEMFLOW CONTROL PLANE
+  # ====================================================================
+
+  semflow_refresh:
+    desc: >-
+      Refresh semantic entrypoint fingerprints after source changes. This
+      control-plane stage owns JSON only; semflow instrumentation of dvc.yaml
+      remains an explicit human-reviewed patch.
+    cmd: ${py_semflow} refresh --apply
+    deps:
+    - semflow.toml
+    - src/python/packages/semflow/src/semflow
+    - src/python/apps/pipeline/src
+    - src/python/apps/simulation/src
+    - src/python/apps/ettax/src
+    - src/python/packages/jcor/src
+    outs:
+    - .semflow/hashes:
+        cache: false
+
+  # ====================================================================
+  # SHARED SUBSTRATE
+  # ====================================================================
+
+  ## corpus & embeddings
+
+  normalize_corpus:
+    # FROZEN: reads `data/raw/nasdaq.jsonlines`, a licensed news corpus that the
+    # public replication bucket cannot carry. Its outputs are published instead,
+    # so a replicator verifies this stage by hash rather than re-running it.
+    # To deliberately re-normalize with the corpus present:
+    # `dvc unfreeze normalize_corpus`, repro, then restore this marker.
+    frozen: true
+    desc: >-
+      Deduplicate, date-parse, and filter the raw NASDAQ corpus to the configured
+      ticker universe; output articles.parquet + summary.yaml.
+    cmd: >-
+      ${py_pipeline} normalize-corpus
+      --input data/raw/nasdaq.jsonlines
+      --output-parquet ${shared}/corpus/articles.parquet
+      --output-summary ${shared}/corpus/summary.yaml
+      --params params.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/normalize-corpus.json
+    - data/raw/nasdaq.jsonlines
+    params:
+    # The roster reaches this stage through `--params params.yaml`, not through
+    # the interpolated `cmd`, so without this declaration a universe change
+    # leaves the stage falsely clean and the corpus silently stale.
+    - symbols
+    outs:
+    - ${shared}/corpus/articles.parquet
+    - ${shared}/corpus/summary.yaml
+
+  co_mentions:
+    # FROZEN: reads `data/shared/corpus/articles.parquet` (full article text),
+    # which is not redistributable. Its outputs are published; see
+    # `normalize_corpus` above for the unfreeze procedure.
+    frozen: true
+    desc: >-
+      Build a Ge--Linton--Li-style news co-mention graph from exact-two
+      company tags in the normalized corpus; emit article edges, yearly pair
+      counts, persistent weighted edges, and a JSON audit summary. The source
+      taxonomy has no RavenPack topic IDs, so analyst, rating, and index-topic
+      exclusions from the paper are not applied.
+    cmd: >-
+      bash src/python/apps/pipeline/src/pipeline/stages/substrate/co_mentions.sh
+      ${shared}/corpus/articles.parquet
+      data/universe.csv
+      ${shared}/co_mentions
+      ${start_date}
+      ${end_date}
+      ${co_mentions.min_persistence_years}
+    deps:
+    - ${shared}/corpus/articles.parquet
+    - data/universe.csv
+    - src/python/apps/pipeline/src/pipeline/stages/substrate/co_mentions.sh
+    params:
+    - start_date
+    - end_date
+    - co_mentions.min_persistence_years
+    outs:
+    - ${shared}/co_mentions/events.parquet
+    - ${shared}/co_mentions/pair_year.parquet
+    - ${shared}/co_mentions/adjacency.parquet
+    - ${shared}/co_mentions/summary.json
+
+  subsample:
+    foreach: ${symbols}
+    do:
+      frozen: true
+      desc: >-
+        Subsample normalized corpus articles for a ticker using DuckDB with
+        date and body-length filtering; deterministic md5-ordered sampling.
+      cmd: >-
+        ${py_pipeline} subsample
+        --symbol ${item}
+        --input-path ${shared}/corpus/articles.parquet
+        --output ${shared}/subsampled_headlines/${item}.parquet
+        --start-date ${start_date}
+        --end-date ${end_date}
+        --min-body-chars ${min_body_chars}
+        --n-samples ${n_samples}
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/subsample.json
+      - ${shared}/corpus/articles.parquet
+      outs:
+      - ${shared}/subsampled_headlines/${item}.parquet
+
+  generate_embeddings:
+    matrix:
+      symbol: ${symbols}
+      embedding_model: ${embedding_models}
+    frozen: true
+    desc: >-
+      Generate embeddings for subsampled articles via OpenRouter (OpenAI-compatible).
+    cmd: >-
+      ${py_pipeline} generate-embeddings
+      --symbol ${item.symbol}
+      --parquet-path ${shared}/subsampled_headlines/${item.symbol}.parquet
+      --model-key ${item.embedding_model}
+      --output-file ${shared}/embeddings/${item.embedding_model}/${item.symbol}.parquet
+      --params-file params.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/generate-embeddings.json
+    - ${shared}/subsampled_headlines/${item.symbol}.parquet
+    params:
+    - embedding.models
+    - embedding.base_url
+    - embedding.batch_size
+    - embedding.concurrency
+    - embedding.max_chars
+    outs:
+    - ${shared}/embeddings/${item.embedding_model}/${item.symbol}.parquet
+
+  ettax_embeddings:
+    foreach: ${ettax_embedding_cells}
+    do:
+      frozen: true
+      desc: >-
+        Materialize corrected EttaX document embeddings for one corpus vintage
+        using the shared Paper 1 article sample. This diagnostic roster is
+        intentionally separate from the published off-the-shelf embedding
+        roster.
+      cmd: >-
+        ${py_ettax} vintage embed ${item.arm}
+        --articles-dir ${shared}/subsampled_headlines
+        --output-dir ${shared}/embeddings/${key}
+      deps:
+      - .semflow/hashes/entrypoints/ettax/vintage/embed.json
+      - ${ettax_run_root}/tokenizer.json
+      - ${ettax_run_root}/checkpoints/${item.arm}/model
+      - ${shared}/subsampled_headlines
+      outs:
+      - ${shared}/embeddings/${key}
+
+  embedding_coverage:
+    matrix:
+      embedding_model: ${baseline_embedding_models}
+    desc: >-
+      Validate one embedding file per configured ticker (currently 100/100),
+      the model's configured row range, uniform dimensions, no NaN/zero vectors,
+      and split-half energy-distance sanity check. Qwen3-Embedding-8B is frozen at
+      its preregistered m=128 panel, while the shared source subsample remains
+      n_samples=445.
+    cmd: >-
+      ${py_pipeline} validate-coverage
+      --model-key ${item.embedding_model}
+      --embeddings-dir ${shared}/embeddings/${item.embedding_model}
+      --output-dir ${shared}/validation/${item.embedding_model}
+      --params-file params.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/validate-coverage.json
+    - ${shared}/embeddings/${item.embedding_model}
+    params:
+    - embedding.models
+    - n_samples
+    - symbols
+    outs:
+    - ${shared}/validation/${item.embedding_model}/summary.yaml
+    - ${shared}/validation/${item.embedding_model}/coverage.csv
+
+  ## energy & association
+
+  typed_geometry_components:
+    foreach: ${typed_geometry_component_specs}
+    do:
+      desc: >-
+        Materialize one reusable raw mean-ground-distance or kernel-mean
+        component for an explicit provider/representation/geometry identity.
+      cmd: >-
+        ${py_pipeline} typed-geometry-component
+        --provider-id ${item.provider_id}
+        --representation-id ${item.representation_id}
+        --geometry-id ${item.geometry_id}
+        --output-dir
+        ${shared}/typed_geometry_components/${item.provider_id}/${item.representation_id}/${item.geometry_id}
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-geometry-component.json
+      - ${shared}/embeddings/${item.provider_id}
+      - data/universe.csv
+      params:
+      - typed_geometry_component_specs.${key}
+      - typed_analysis.providers.${item.provider_key}
+      - typed_analysis.representations.${item.representation_key}
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.${item.geometry_id}
+      - market_symbols
+      outs:
+      - ${shared}/typed_geometry_components/${item.provider_id}/${item.representation_id}/${item.geometry_id}
+
+  typed_geometry_windowed_components:
+    foreach: ${typed_geometry_windowed_component_specs}
+    do:
+      desc: >-
+        Materialize one window-scoped raw mean-ground-distance component with
+        an exact provider, representation, geometry, and observation window.
+      cmd: >-
+        ${py_pipeline} typed-geometry-component
+        --provider-id ${item.provider_id}
+        --representation-id ${item.representation_id}
+        --geometry-id ${item.geometry_id}
+        --output-dir
+        ${shared}/typed_geometry_components/${item.provider_id}/${item.representation_id}/${item.geometry_id}
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-geometry-component.json
+      - ${shared}/embeddings/${item.provider_id}
+      - data/universe.csv
+      params:
+      - typed_geometry_windowed_component_specs.${key}
+      - typed_analysis.providers.${item.provider_key}
+      - typed_analysis.representations.${item.representation_key}
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.${item.geometry_id}
+      - typed_analysis.windows.${item.window_key}
+      - market_symbols
+      outs:
+      - ${shared}/typed_geometry_components/${item.provider_id}/${item.representation_id}/${item.geometry_id}
+
+  typed_distance_windowed:
+    foreach: ${typed_distance_windowed_specs}
+    do:
+      desc: >-
+        Materialize one window-scoped final statistical-distance artifact.
+        This family is required for W2, whose balanced transport solve has no
+        reusable mean-ground-distance component.
+      cmd: >-
+        ${py_pipeline} typed-distance
+        --provider-id ${item.provider_id}
+        --representation-id ${item.representation_id}
+        --distance-id ${item.distance_id}
+        --output-dir
+        ${shared}/typed_distances_windowed/${item.provider_id}/${item.representation_id}/${item.distance_id}
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-distance.json
+      - ${shared}/embeddings/${item.provider_id}
+      - data/universe.csv
+      params:
+      - typed_distance_windowed_specs.${key}
+      - typed_analysis.providers.${item.provider_key}
+      - typed_analysis.representations.${item.representation_key}
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.${item.distance_id}
+      - typed_analysis.windows.${item.window_key}
+      - market_symbols
+      outs:
+      - ${shared}/typed_distances_windowed/${item.provider_id}/${item.representation_id}/${item.distance_id}/distances.parquet
+      - ${shared}/typed_distances_windowed/${item.provider_id}/${item.representation_id}/${item.distance_id}/summary.json
+      - ${shared}/typed_distances_windowed/${item.provider_id}/${item.representation_id}/${item.distance_id}/provenance.manifest.json
+
+  typed_distances:
+    foreach: ${typed_distance_providers}
+    do:
+      desc: >-
+        Materialize all declared statistical-distance matrices for one provider.
+      cmd: >-
+        ${py_pipeline} typed-distance
+        --provider-id ${item.provider_id}
+        --roster-key ${key}
+        --output-dir ${shared}/typed_distances/${item.provider_id}
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-distance.json
+      - ${shared}/embeddings/${item.provider_id}
+      - ${shared}/typed_geometry_components/${item.provider_id}
+      - data/universe.csv
+      # The fixed parameter list mirrors TRACKED_PROVIDER_DISTANCE_IDS in
+      # pipeline.io.typed_analysis; every provider must materialize the shared
+      # energy/W1/W2 arms before a stage can execute.
+      params:
+      - typed_distance_providers.${key}
+      - typed_distance_representation_suffixes
+      - typed_distance_ids
+      - typed_analysis.providers.${item.provider_key}
+      - typed_analysis.representations
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.energy_v
+      - typed_analysis.distances.wasserstein_w1
+      - typed_analysis.distances.wasserstein_w2
+      - typed_analysis.distances.linear_mmd
+      - typed_analysis.distances.rbf_mmd
+      - market_symbols
+      outs:
+      - ${shared}/typed_distances/${item.provider_id}
+
+  encoder_vintage_w2_distances:
+    foreach: ${encoder_vintage_ablation_specs}
+    do:
+      desc: >-
+        Materialize one direct rooted-W2 matrix for the encoder-vintage ladder.
+        W2 has no reusable typed-geometry component, and this family must not
+        widen the locked seven-cell base roster.
+      cmd: >-
+        ${py_pipeline} typed-distance
+        --provider-id ${item.provider_id}
+        --representation-id ${item.representation_id}
+        --distance-id wasserstein_w2
+        --output-dir
+        ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-distance.json
+      - ${shared}/embeddings/${item.provider_id}
+      - data/universe.csv
+      params:
+      - encoder_vintage_ablation_specs.${key}
+      - typed_analysis.providers.${item.provider_key}
+      - typed_analysis.representations.${item.representation_key}
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.wasserstein_w2
+      - market_symbols
+      outs:
+      - ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+
+  typed_barycentres:
+    foreach: ${typed_barycentre_specs}
+    do:
+      desc: >-
+        Materialize one validated typed target-projection artifact per
+        barycentre arm.
+      cmd: >-
+        ${py_pipeline} typed-barycentre
+        --provider-id ${scientific_selectors.baseline_model}
+        --representation-id ${scientific_selectors.typed_distance_representation}
+        --arm-id ${key}
+        --geometry-component-dir
+        ${shared}/typed_geometry_components/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${item.geometry_id}
+        --output-dir
+        ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-barycentre.json
+      - ${shared}/embeddings/${scientific_selectors.baseline_model}
+      - ${shared}/typed_geometry_components/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${item.geometry_id}
+      - data/universe.csv
+      params:
+      - scientific_selectors.baseline_model
+      - scientific_selectors.typed_distance_representation
+      - typed_barycentre_specs.${key}
+      - typed_analysis.providers.${scientific_selectors.typed_distance_provider_key}
+      - typed_analysis.representations.${scientific_selectors.typed_distance_representation_key}
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.${item.geometry_id}
+      - typed_analysis.feasible_sets.simplex_nonnegative
+      - typed_analysis.barycentres.${key}
+      - market_symbols
+      outs:
+      - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}/weights.parquet
+      - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}/diagnostics.parquet
+      - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}/summary.json
+      - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}/provenance.manifest.json
+
+  typed_wasserstein_w1_barycentre:
+    desc: >-
+      Preserve the canonical leave-one-out W1 target projection as one exact
+      leaf. W2 publication ablations use the roster-driven family below.
+    cmd: >-
+      ${py_pipeline} typed-barycentre
+      --provider-id ${scientific_selectors.baseline_model}
+      --representation-id ${scientific_selectors.typed_distance_representation}
+      --arm-id wasserstein_w1_loo
+      --output-dir
+      ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/wasserstein_w1_loo
+      --params-file params.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/typed-barycentre.json
+    - ${shared}/embeddings/${scientific_selectors.baseline_model}
+    - data/universe.csv
+    params:
+    - scientific_selectors.baseline_model
+    - scientific_selectors.typed_distance_representation
+    - typed_wasserstein_barycentre_specs.wasserstein_w1_loo
+    - typed_analysis.providers.${scientific_selectors.typed_distance_provider_key}
+    - typed_analysis.representations.${scientific_selectors.typed_distance_representation_key}
+    - typed_analysis.distances.euclidean_chord
+    - typed_analysis.distances.wasserstein_w1
+    - typed_analysis.feasible_sets.simplex_nonnegative
+    - typed_analysis.barycentres.wasserstein_w1_loo
+    - market_symbols
+    outs:
+    - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/wasserstein_w1_loo/weights.parquet
+    - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/wasserstein_w1_loo/diagnostics.parquet
+    - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/wasserstein_w1_loo/summary.json
+    - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/wasserstein_w1_loo/provenance.manifest.json
+
+  typed_wasserstein_w2_barycentres:
+    foreach: ${representation_ablation_specs}
+    do:
+      desc: >-
+        Materialize one independently cached leave-one-out W2 target projection
+        for each governed cross-paper representation cell.
+      cmd: >-
+        ${py_pipeline} typed-barycentre
+        --provider-id ${item.provider_id}
+        --representation-id ${item.representation_id}
+        --arm-id wasserstein_w2_loo
+        --output-dir
+        ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-barycentre.json
+      - ${shared}/embeddings/${item.provider_id}
+      - data/universe.csv
+      params:
+      - representation_ablation_specs.${key}
+      - typed_wasserstein_barycentre_specs.wasserstein_w2_loo
+      - typed_analysis.providers.${item.provider_key}
+      - typed_analysis.representations.${item.representation_key}
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.wasserstein_w2
+      - typed_analysis.feasible_sets.simplex_nonnegative
+      - typed_analysis.barycentres.wasserstein_w2_loo
+      - market_symbols
+      outs:
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo/weights.parquet
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo/diagnostics.parquet
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo/summary.json
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo/provenance.manifest.json
+
+  encoder_vintage_w2_barycentres:
+    foreach: ${encoder_vintage_ablation_specs}
+    do:
+      desc: >-
+        Materialize one independently cached leave-one-out W2 target projection
+        for each EttaX encoder vintage used by Paper 5.
+      cmd: >-
+        ${py_pipeline} typed-barycentre
+        --provider-id ${item.provider_id}
+        --representation-id ${item.representation_id}
+        --arm-id wasserstein_w2_loo
+        --output-dir
+        ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-barycentre.json
+      - ${shared}/embeddings/${item.provider_id}
+      - data/universe.csv
+      params:
+      - encoder_vintage_ablation_specs.${key}
+      - typed_wasserstein_barycentre_specs.wasserstein_w2_loo
+      - typed_analysis.providers.${item.provider_key}
+      - typed_analysis.representations.${item.representation_key}
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.wasserstein_w2
+      - typed_analysis.feasible_sets.simplex_nonnegative
+      - typed_analysis.barycentres.wasserstein_w2_loo
+      - market_symbols
+      outs:
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo/weights.parquet
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo/diagnostics.parquet
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo/summary.json
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo/provenance.manifest.json
+
+  typed_measure_barycentres:
+    foreach: ${typed_measure_barycentre_specs}
+    do:
+      desc: >-
+        Materialize one Wasserstein measure barycentre over the leading clouds
+        of the governed universe order, in the arity its arm declares. A
+        `wasserstein_ot` arm takes exactly two sources and is a closed form: an
+        optimal matching followed by displacement interpolation along each
+        matched segment, which is exactly the W2 geodesic. A
+        `wasserstein_free_support` arm takes K sources and alternates
+        assignment against support updates to a LOCAL optimum, because the
+        free-support objective is non-convex in the support; its summary
+        reports the fixed point it reached, not a global certificate. The
+        artifact records which sources it used. Separate from
+        typed_barycentres because a Wasserstein geometry has no cached
+        mean-ground-distance component to depend on.
+      cmd: >-
+        ${py_pipeline} typed-barycentre
+        --provider-id ${scientific_selectors.baseline_model}
+        --representation-id ${scientific_selectors.typed_distance_representation}
+        --arm-id ${key}
+        --output-dir
+        ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}
+        --params-file params.yaml
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/typed-barycentre.json
+      - ${shared}/embeddings/${scientific_selectors.baseline_model}
+      - data/universe.csv
+      params:
+      - scientific_selectors.baseline_model
+      - scientific_selectors.typed_distance_representation
+      - typed_measure_barycentre_specs.${key}
+      - typed_analysis.providers.${scientific_selectors.typed_distance_provider_key}
+      - typed_analysis.representations.${scientific_selectors.typed_distance_representation_key}
+      - typed_analysis.distances.euclidean_chord
+      - typed_analysis.distances.${item.geometry_id}
+      # Both prescribed feasible sets are tracked by every cell rather than
+      # indexed per arm: `TypedBarycentreCell` forbids extra keys, so the arity
+      # is not addressable from `${item}`. Over-tracking costs a spurious rerun
+      # when the unused arity changes and never leaves a cell stale, which is
+      # the correct direction for a governed artifact.
+      - typed_analysis.feasible_sets.prescribed_source_weights
+      - typed_analysis.feasible_sets.prescribed_source_weights_k3
+      - typed_analysis.barycentres.${key}
+      - market_symbols
+      outs:
+      - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}/barycentre.parquet
+      - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}/summary.json
+      - ${shared}/barycentres/${scientific_selectors.baseline_model}/${scientific_selectors.typed_distance_representation}/${key}/provenance.manifest.json
+
+  ablation:
+    desc: >-
+      Self-contained ablation over (embedding model × Matryoshka dim). Computes
+      exact typed W2 Mantel r_M per cell; skips
+      cells whose embeddings are not yet on disk. Does NOT touch the canonical
+      energy_tests / mantel_tests / dimensionality_analysis paths.
+    cmd: >-
+      ${py_pipeline} run-ablation
+      --embeddings-root ${shared}/embeddings
+      --covariance-matrix ${shared}/covariance_matrix.parquet
+      --output-dir ${shared}/ablations
+      --typed-distance-root ${shared}/typed_distances
+      --params-file params.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/run-ablation.json
+    - ${shared}/embeddings/qwen3-embedding-4b
+    - ${shared}/embeddings/qwen3-embedding-8b
+    - ${shared}/embeddings/bge-m3
+    - ${shared}/embeddings/bge-large-en-v1.5
+    - ${shared}/covariance_matrix.parquet
+    - ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-64-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-256-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-32-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-128-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-32-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-128-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-64-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-256-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2
+    - ${shared}/typed_distances/bge-m3/bge-m3-64-unit/wasserstein_w2
+    - ${shared}/typed_distances/bge-m3/bge-m3-256-unit/wasserstein_w2
+    - ${shared}/typed_distances/bge-m3/bge-m3-unit/wasserstein_w2
+    - ${shared}/typed_distances/bge-large-en-v1.5/bge-large-en-v1.5-unit/wasserstein_w2
+    - data/universe.csv
+    params:
+    - ablation.grid
+    - typed_analysis.representations
+    - market_symbols
+    outs:
+    - ${shared}/ablations/summary.parquet
+    - ${shared}/ablations/summary.yaml
+
+  mantel_tests:
+    matrix:
+      window: ${return_panels}
+      embedding_model: ${baseline_embedding_models}
+    desc: >-
+      Mantel association between the typed W2 distance matrix and the return chord
+      distance sqrt(2(1-rho)) of one evaluation window. Cells are named by matrix
+      axis index: window0 is the in-sample 2018-22 panel and window1 the
+      out-of-sample 2023-26 panel (params.yaml:return_panels, whose order is
+      load-bearing). The W2 matrix is held FIXED at its 2018-22 in-sample
+      estimate in EVERY cell -- the news archive ends 2023-01-02, so every
+      article predates the out-of-sample window by construction and nothing is
+      re-embedded per window. Test convention is fixed in advance by the
+      canonical in-sample spec (t14) and shared by both windows: Pearson Mantel
+      statistic, 10,000 joint row/column permutations, seed 42, one-sided
+      right-tail p-value with add-one smoothing. The out-of-sample lane is
+      baseline-encoder only -- a multi-encoder sweep would open a
+      model-selection channel on the only look-ahead-free evidence in the paper
+      (t16). The baseline-only axis is explicit in
+      params.yaml:baseline_embedding_models, while the all-model
+      params.yaml:embedding_models axis remains available to frozen generation
+      and in-sample robustness consumers.
+    cmd: >-
+      ${py_pipeline} compute-mantel-tests
+      --distance-artifact-dir ${shared}/typed_distances/${item.embedding_model}/${item.embedding_model}-unit/wasserstein_w2
+      --covariance-matrix ${item.window.root}/covariance_matrix.parquet
+      --output-file ${item.window.root}/mantel_tests/${item.embedding_model}/mantel_tests.csv
+      --seed 42
+      --null-output-file ${item.window.root}/mantel_tests/${item.embedding_model}/null_distribution.parquet
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-mantel-tests.json
+    - ${shared}/typed_distances/${item.embedding_model}/${item.embedding_model}-unit/wasserstein_w2
+    - ${item.window.root}/covariance_matrix.parquet
+    - data/universe.csv
+    params:
+    - market_symbols
+    - typed_analysis.distances.wasserstein_w2
+    outs:
+    - ${item.window.root}/mantel_tests/${item.embedding_model}/mantel_tests.csv
+    - ${item.window.root}/mantel_tests/${item.embedding_model}/null_distribution.parquet
+
+  dimensionality_analysis:
+    matrix:
+      embedding_model: ${baseline_embedding_models}
+    desc: >-
+      Compute governed W2 metric-MDS projection fidelity and complete original/
+      projected neighbour rankings on the priced common universe.
+    cmd: >-
+      ${py_pipeline} compute-dimensionality
+      --distance-artifact-dir ${shared}/typed_distances/${item.embedding_model}/${item.embedding_model}-unit/wasserstein_w2
+      --covariance-matrix ${shared}/covariance_matrix.parquet
+      --universe-csv data/universe.csv
+      --output-file ${shared}/dimensionality_analysis/${item.embedding_model}/dimensionality_analysis.csv
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-dimensionality.json
+    - ${shared}/typed_distances/${item.embedding_model}/${item.embedding_model}-unit/wasserstein_w2
+    - ${shared}/covariance_matrix.parquet
+    - data/universe.csv
+    params:
+    - market_symbols
+    - typed_analysis.distances.wasserstein_w2
+    outs:
+    - ${shared}/dimensionality_analysis/${item.embedding_model}/dimensionality_analysis.csv
+    - ${shared}/dimensionality_analysis/${item.embedding_model}/coords_2d.parquet
+    - ${shared}/dimensionality_analysis/${item.embedding_model}/neighbours.parquet
+
+  ## market & returns
+
+  market_data:
+    matrix:
+      window: ${return_panels}
+      symbol: ${market_symbols}
+    # FROZEN: external price-data fetch (yfinance et al.) — flaky/timeout-prone.
+    # Kept out of the run plan like the paid embedding stages so a repro never
+    # re-downloads prices. To deliberately refresh: `dvc unfreeze market_data`,
+    # repro, then re-add the freeze marker below.
+    frozen: true
+    desc: >-
+      Download total return data for one ticker and evaluation window. The
+      window roster supplies raw fetch bounds while retaining a separate
+      complete-case contract for downstream covariance validation.
+    cmd: >-
+      ${py_pipeline} download-market-data
+      --start-date ${item.window.fetch_start_date}
+      --end-date ${item.window.fetch_end_date}
+      --ticker ${item.symbol}
+      --output-dir ${item.window.root}/market_data
+      --universe-csv data/universe.csv
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/download-market-data.json
+    - data/universe.csv
+    outs:
+    - ${item.window.root}/market_data/${item.symbol}.parquet
+
+  compute_returns:
+    matrix:
+      window: ${return_panels}
+      symbol: ${market_symbols}
+    # FROZEN: its input `market_data` is a vendor price panel the public bucket
+    # cannot carry, so no replicator can re-run this stage. It is also the only
+    # place the cross-window seam return could be lost: this stage sees a single
+    # window, and the OOS window's market_data excludes the last in-sample close,
+    # so a re-run writes a null seam return where the published panel carries the
+    # real one. To deliberately refresh: `dvc unfreeze compute_returns`, repro,
+    # then re-backfill with `scripts/strip_close_price` and restore this marker.
+    frozen: true
+    desc: >-
+      Compute daily returns from one ticker's market data for one evaluation
+      window.
+    cmd: >-
+      ${py_pipeline} compute-returns
+      --market-data ${item.window.root}/market_data/${item.symbol}.parquet
+      --start-date ${item.window.fetch_start_date}
+      --end-date ${item.window.fetch_end_date}
+      --output-file ${item.window.root}/returns/${item.symbol}.parquet
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-returns.json
+    - ${item.window.root}/market_data/${item.symbol}.parquet
+    outs:
+    - ${item.window.root}/returns/${item.symbol}.parquet
+
+  compute_covariance:
+    matrix:
+      window: ${return_panels}
+    desc: >-
+      Variance-covariance matrix from every ticker return series of one
+      evaluation window. Cells are named by matrix axis index: window0 is the
+      in-sample 2018-22 panel and window1 the out-of-sample 2023-26 panel
+      (params.yaml:return_panels, whose order is load-bearing). Both windows run
+      on the same configured market-symbol panel, so there is no differential
+      roster attrition between the windows and the out-of-sample Mantel run uses
+      an identical firm set. The complete-case contract carried per window in
+      the roster is a hard guard, not a nominal default.
+    cmd: >-
+      ${py_pipeline} compute-covariance
+      --returns-dir ${item.window.root}/returns
+      --output-file ${item.window.root}/covariance_matrix.parquet
+      --expected-tickers ${item.window.expected_tickers}
+      --expected-observations ${item.window.expected_observations}
+      --expected-start-date ${item.window.expected_start_date}
+      --expected-end-date ${item.window.expected_end_date}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-covariance.json
+    - ${item.window.root}/returns
+    outs:
+    - ${item.window.root}/covariance_matrix.parquet
+
+  backtest_feasibility:
+    # FROZEN: reads `data/shared/corpus/articles.parquet` (full article text),
+    # which is not redistributable. Its outputs are published; see
+    # `normalize_corpus` above for the unfreeze procedure.
+    frozen: true
+    # Single-pass light-compute analysis (counts/aggregations over the configured
+    # return calendar and corpus). The (window_type x T) grid is swept
+    # INTERNALLY from the params roster (t15 single-source-the-axis: the grid
+    # lives only in params.yaml:backtest_feasibility); NOT matrix-ized here
+    # because each cell is milliseconds and per-cell DVC caching buys nothing —
+    # the heavy per-BacktestConfig-cell sweep is t17.4's matrix stage. Additive:
+    # writes new data/shared/backtest_feasibility/* and changes no paper output.
+    desc: >-
+      Assess the minimal feasible backtest estimation window per channel
+      (returns conditioning T>N/5N/10N; news article density >=30/>=100) at the
+      actual rebalance dates for rolling + expanding windows; emits the
+      constructibility cliff table + figure + minimal-T recommendation.
+    cmd: >-
+      ${py_pipeline} backtest-feasibility
+      --returns-dir ${shared}/returns
+      --corpus-path ${shared}/corpus/articles.parquet
+      --params-file params.yaml
+      --output-dir ${shared}/backtest_feasibility
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/backtest-feasibility.json
+    - ${shared}/returns
+    - ${shared}/corpus/articles.parquet
+    params:
+    - backtest_feasibility.window_types
+    - backtest_feasibility.windows
+    - backtest_feasibility.n_assets_nominal
+    - backtest_feasibility.returns_conditioning_multiples
+    - backtest_feasibility.news_thresholds
+    outs:
+    - ${shared}/backtest_feasibility/constructibility.parquet
+    - ${shared}/backtest_feasibility/binding_tickers.parquet
+    - ${shared}/backtest_feasibility/summary.yaml
+    - ${shared}/backtest_feasibility/constructibility_cliff.pgf
+
+  # The out-of-sample market, returns, covariance, and Mantel artifacts are the
+  # window1 cells of their respective matrix families. The window roots keep
+  # artifacts path-disjoint while the command templates stay shared.
+
+  # ====================================================================
+  # PAPER 1 - representation geometry
+  # ====================================================================
+
+  p1_dyadic_confound:
+    # FROZEN: reads `data/shared/market_data`, a vendor price panel the public
+    # bucket cannot carry, so no replicator can re-run this stage.  Its outputs
+    # are published instead; see `normalize_corpus` above for the unfreeze
+    # procedure.
+    frozen: true
+    desc: >-
+      Paper 1 fixed-W2 random-exposure envelope diagnostic, contiguous W2
+      specification ladder, canonical symmetric-firm-effect slope, and one
+      energy comparison row. All reported inference uses the common
+      multinomial node-bootstrap schedule.
+    cmd: >-
+      ${py_pipeline} compute-dyadic-confound
+      --distance-artifact-dir ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+      --energy-comparator-artifact-dir ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/energy_v
+      --covariance-matrix ${shared}/covariance_matrix.parquet
+      --universe-csv data/universe.csv
+      --market-data-dir ${shared}/market_data
+      --returns-dir ${shared}/returns
+      --embeddings-dir ${shared}/embeddings/${paper1_lead_model}
+      --output-file ${p1}/dyadic_confound/summary.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-dyadic-confound.json
+    - ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+    - ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/energy_v
+    - ${shared}/covariance_matrix.parquet
+    - data/universe.csv
+    - ${shared}/market_data
+    - ${shared}/returns
+    - ${shared}/embeddings/${paper1_lead_model}
+    # CACHED, unlike the other Paper 1 diagnostics: every Paper 1 terminal
+    # derives from these, and the stage itself cannot be re-run without the
+    # withheld vendor panel, so they are the public snapshot's only route to
+    # `p1_numbers` and `p1_tables`.  They carry coefficients, residuals, W2
+    # distances and bootstrap draws -- no price levels.
+    outs:
+    - ${p1}/dyadic_confound/summary.yaml
+    - ${p1}/dyadic_confound/node_bootstrap_counts.parquet
+    - ${p1}/dyadic_confound/bootstrap_draws.parquet
+    - ${p1}/dyadic_confound/design_diagnostics.parquet
+    - ${p1}/dyadic_confound/w2_primary_fit.parquet
+    - ${p1}/dyadic_confound/leave_one_firm_out.parquet
+    - ${p1}/dyadic_confound/residual_scale_null.parquet
+    - ${p1}/dyadic_confound/random_exposure_diagnostic.parquet
+
+  p1_dyadic_oos:
+    desc: >-
+      Out-of-sample primary W2 dyadic association (t37). The text-side
+      matrix is held FIXED at its 2018-22 in-sample estimate (the news archive
+      ends 2023-01-02, so every article predates the evaluation window by
+      construction) and only the return chord distance is recomputed, from the
+      2023-2026 out-of-sample correlation matrix; intercept and symmetric
+      additive firm effects are re-estimated on the surviving panel. This is the
+      look-ahead-free counterpart to the manuscript's primary specification,
+      under the same zero-coefficient estimand. The primary text metric is the frozen
+      Qwen3-Embedding 8B W2 matrix. Lead encoder only, deliberately not matrixed
+      over the embedding roster: a sweep would open a model-selection channel
+      on the only look-ahead-free evidence in the paper. Inference convention is fixed in
+      advance by the in-sample design (1,999 multinomial node-bootstrap draws,
+      seed 42, 2.5/97.5 percentile interval); a null result ships unchanged.
+    cmd: >-
+      ${py_pipeline} compute-dyadic-oos
+      --distance-artifact-dir ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+      --covariance-matrix ${shared}/oos/covariance_matrix.parquet
+      --output-file ${p1}/dyadic_oos/summary.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-dyadic-oos.json
+    - ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+    - ${shared}/oos/covariance_matrix.parquet
+    outs:
+    - ${p1}/dyadic_oos/summary.yaml:
+        cache: false
+    - ${p1}/dyadic_oos/bootstrap_draws.parquet:
+        cache: false
+    - ${p1}/dyadic_oos/node_bootstrap_counts.parquet:
+        cache: false
+
+  p1_sample_descriptives:
+    desc: >-
+      Sample descriptives for the Paper 1 estimation universe: per-sector firm
+      counts, article counts (total and per year), daily simple-return volatility,
+      and mean within- vs cross-sector rooted W2 distance.
+    cmd: >-
+      ${py_pipeline} compute-sample-descriptives
+      --universe-csv data/universe.csv
+      --embeddings-dir ${shared}/embeddings/${paper1_lead_model}
+      --returns-dir ${shared}/returns
+      --distance-artifact-dir ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+      --output-file ${p1}/sample_descriptives/summary.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-sample-descriptives.json
+    - data/universe.csv
+    - ${shared}/embeddings/${paper1_lead_model}
+    - ${shared}/returns
+    - ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+    outs:
+    - ${p1}/sample_descriptives/summary.yaml:
+        cache: false
+
+  p1_tables:
+    desc: >-
+      Render Paper 1's sample-descriptives LaTeX table fragment from the
+      p1_sample_descriptives summary. Split from p1_numbers so a table-layout
+      edit does not invalidate the number bindings.
+    cmd: >-
+      ${py_pipeline} render-paper1-tables
+      --summary-file ${p1}/sample_descriptives/summary.yaml
+      --output-file
+      src/latex/projects/01_continuous_bounds/src/generated/sample_descriptives.tex
+      --dyadic-summary ${p1}/dyadic_confound/summary.yaml
+      --disco-summary ${p1}/disco/summary.yaml
+      --representation-summary ${p1}/representation_sensitivity/summary.yaml
+      --oos-dyadic-summary ${p1}/dyadic_oos/summary.yaml
+      --dyadic-design-diagnostics ${p1}/dyadic_confound/design_diagnostics.parquet
+      --output-dir src/latex/projects/01_continuous_bounds/src/generated
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper1-tables.json
+    - ${p1}/sample_descriptives/summary.yaml
+    - ${p1}/dyadic_confound/summary.yaml
+    - ${p1}/disco/summary.yaml
+    - ${p1}/representation_sensitivity/summary.yaml
+    - ${p1}/dyadic_oos/summary.yaml
+    - ${p1}/dyadic_confound/design_diagnostics.parquet
+    outs:
+    - src/latex/projects/01_continuous_bounds/src/generated/sample_descriptives.tex:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/w2_primary_results.tex:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/dyadic_ladder.tex:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/w2_representation_sensitivity.tex:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/w2_sampling_diagnostics.tex:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/dyadic_design_diagnostics.tex:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/random_exposure_diagnostic.tex:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/disco_decomposition.tex:
+        cache: false
+
+  p1_sample_universe_table:
+    desc: >-
+      Render Paper 1's canonical priced W2 ticker, name, and sector roster as
+      a generated appendix longtable.
+    cmd: >-
+      ${py_pipeline} render-sample-universe-table
+      --universe-csv data/universe.csv
+      --returns-dir ${shared}/returns
+      --distance-artifact-dir
+      ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+      --provider-id ${paper1_lead_model}
+      --representation-id ${paper1_lead_model}-unit
+      --distance-id wasserstein_w2
+      --output-file
+      src/latex/projects/01_continuous_bounds/src/generated/sample_universe.tex
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-sample-universe-table.json
+    - data/universe.csv
+    - ${shared}/returns
+    - ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+    outs:
+    - src/latex/projects/01_continuous_bounds/src/generated/sample_universe.tex:
+        cache: false
+
+  p1_diagnostics:
+    desc: >-
+      Render Paper 1's W2 Matryoshka preservation and primary W2
+      residual/curvature/influence diagnostics.
+    cmd: >-
+      ${py_pipeline} render-paper1-diagnostics
+      --full-distance-artifact-dir ${shared}/typed_distances/${scientific_selectors.baseline_model}/${scientific_selectors.baseline_model}-unit/wasserstein_w2
+      --distance-artifact-64-dir ${shared}/typed_distances/${scientific_selectors.baseline_model}/${scientific_selectors.baseline_model}-64-unit/wasserstein_w2
+      --distance-artifact-256-dir ${shared}/typed_distances/${scientific_selectors.baseline_model}/${scientific_selectors.baseline_model}-256-unit/wasserstein_w2
+      --provider-id ${paper1_lead_model}
+      --representation-id ${paper1_lead_model}-unit
+      --representation-64-id ${scientific_selectors.baseline_model}-64-unit
+      --representation-256-id ${scientific_selectors.baseline_model}-256-unit
+      --distance-id wasserstein_w2
+      --output-dir src/latex/projects/01_continuous_bounds/src/images
+      --summary-file ${p1}/diagnostics/summary.yaml
+      --dyadic-summary-file ${p1}/dyadic_confound/summary.yaml
+      --w2-primary-fit-file ${p1}/dyadic_confound/w2_primary_fit.parquet
+      --lofo-file ${p1}/dyadic_confound/leave_one_firm_out.parquet
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper1-diagnostics.json
+    - ${shared}/typed_distances/${scientific_selectors.baseline_model}/${scientific_selectors.baseline_model}-64-unit/wasserstein_w2
+    - ${shared}/typed_distances/${scientific_selectors.baseline_model}/${scientific_selectors.baseline_model}-256-unit/wasserstein_w2
+    - ${shared}/typed_distances/${scientific_selectors.baseline_model}/${scientific_selectors.baseline_model}-unit/wasserstein_w2
+    - ${p1}/dyadic_confound/summary.yaml
+    - ${p1}/dyadic_confound/w2_primary_fit.parquet
+    - ${p1}/dyadic_confound/leave_one_firm_out.parquet
+    outs:
+    - src/latex/projects/01_continuous_bounds/src/images/matryoshka_distance_preservation.pgf:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/images/dyadic_postfit_diagnostics.pgf:
+        cache: false
+    - ${p1}/diagnostics/summary.yaml:
+        cache: false
+
+  p1_disco:
+    desc: >-
+      t19 DISCO (energy-distance ANOVA, Rizzo-Szekely 2010) global
+      sector-separation statistic, implemented in JAX on the canonical
+      square-root energy metric: R^2_E, F-ratio, and an
+      add-one label-permutation p, plus a PCoA distance-to-median dispersion
+      companion (PERMDISP-style) with its own permutation p. Replaces the
+      silhouette table as the reported global sector-separation statistic;
+      p1_dyadic_confound (t13) remains the primary confound-aware result and
+      p1_sector_alignment (t18) is retained as the local companion.
+    cmd: >-
+      ${py_pipeline} compute-disco
+      --distance-artifact-dir ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/energy_v
+      --provider-id ${scientific_selectors.typed_distance_provider}
+      --representation-id ${scientific_selectors.typed_distance_representation}
+      --distance-id energy_v
+      --universe-csv data/universe.csv
+      --output-file ${p1}/disco/summary.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-disco.json
+    - ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/energy_v
+    - data/universe.csv
+    outs:
+    - ${p1}/disco/summary.yaml:
+        cache: false
+
+  p1_distributional_comparator:
+    desc: >-
+      Paper 1's cross-encoder distributional comparison and inference diagnostics.
+      It consumes the shared, typed Wasserstein-W1 artifacts for the common
+      m=128 panel, recomputes matched V-energy and signed-U diagnostics on
+      deterministic url-hash prefixes, and writes the paired metric
+      panel used by Paper 1 tables and headline numbers. It also evaluates the
+      Qwen3-Embedding-8B m=32/64/128 sensitivity curve, same-firm split
+      noise floors for m<=64, and paired node bootstraps excluding duplicate-
+      original self-dyads. This stage compares validated distances; it is not
+      the shared Wasserstein-distance producer.
+    cmd: >-
+      ${py_pipeline} compute-wasserstein-comparator
+      --embeddings-root ${shared}/embeddings
+      --typed-distance-root ${shared}/typed_distances
+      --covariance-matrix ${shared}/covariance_matrix.parquet
+      --output-summary ${p1}/wasserstein_comparator/summary.yaml
+      --output-pairs ${p1}/wasserstein_comparator/pairs.parquet
+      --bootstrap-iters 999
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-wasserstein-comparator.json
+    - ${shared}/embeddings/qwen3-embedding-4b
+    - ${shared}/embeddings/qwen3-embedding-8b
+    - ${shared}/embeddings/bge-m3
+    - ${shared}/embeddings/bge-large-en-v1.5
+    - ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-unit/wasserstein_w1
+    - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w1
+    - ${shared}/typed_distances/bge-m3/bge-m3-unit/wasserstein_w1
+    - ${shared}/typed_distances/bge-large-en-v1.5/bge-large-en-v1.5-unit/wasserstein_w1
+    - ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2
+    - ${shared}/typed_distances/bge-m3/bge-m3-unit/wasserstein_w2
+    - ${shared}/typed_distances/bge-large-en-v1.5/bge-large-en-v1.5-unit/wasserstein_w2
+    - ${shared}/covariance_matrix.parquet
+    outs:
+    - ${p1}/wasserstein_comparator/summary.yaml:
+        cache: false
+    - ${p1}/wasserstein_comparator/pairs.parquet:
+        cache: false
+
+  p1_representation_sensitivity:
+    desc: >-
+      Compare the seven governed encoder/dimension cells, article-count, and statistical-distance choices under
+      Paper 1's canonical symmetric-firm-effect estimator. Every row reuses the
+      same 1,999-draw node schedule and reports rank agreement with canonical
+      W2, a standardized association interval, and partial R-squared.
+    cmd: >-
+      ${py_pipeline} compute-representation-sensitivity
+      --pairs-file ${p1}/wasserstein_comparator/pairs.parquet
+      --node-counts-file ${p1}/dyadic_confound/node_bootstrap_counts.parquet
+      --representation-dir ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-1024-unit/wasserstein_w2
+      --representation-dir ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-1024-unit/wasserstein_w2
+      --representation-dir ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-256-unit/wasserstein_w2
+      --representation-dir ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-64-unit/wasserstein_w2
+      --vintage-dir ${shared}/typed_distances/ettax-v0/ettax-v0-unit/wasserstein_w2
+      --vintage-dir ${shared}/typed_distances/ettax-v1/ettax-v1-unit/wasserstein_w2
+      --vintage-dir ${shared}/typed_distances/ettax-v3/ettax-v3-unit/wasserstein_w2
+      --vintage-equivalence-bound ${encoder_vintage_analysis.effect_one_sd_equivalence_bound}
+      --vintage-confidence-level ${encoder_vintage_analysis.confidence_level}
+      --params-file params.yaml
+      --output-summary ${p1}/representation_sensitivity/summary.yaml
+      --output-draws ${p1}/representation_sensitivity/bootstrap_draws.parquet
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-representation-sensitivity.json
+    - ${p1}/wasserstein_comparator/pairs.parquet
+    - ${p1}/dyadic_confound/node_bootstrap_counts.parquet
+    - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-1024-unit/wasserstein_w2
+    - ${shared}/typed_distances/qwen3-embedding-4b/qwen3-embedding-4b-1024-unit/wasserstein_w2
+    - ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-256-unit/wasserstein_w2
+    - ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-64-unit/wasserstein_w2
+    - ${shared}/typed_distances/ettax-v0/ettax-v0-unit/wasserstein_w2
+    - ${shared}/typed_distances/ettax-v1/ettax-v1-unit/wasserstein_w2
+    - ${shared}/typed_distances/ettax-v3/ettax-v3-unit/wasserstein_w2
+    params:
+    - representation_ablation_specs
+    - encoder_vintage_ablation_specs
+    - encoder_vintage_analysis
+    - representation_contrast_specs
+    outs:
+    - ${p1}/representation_sensitivity/summary.yaml:
+        cache: false
+    - ${p1}/representation_sensitivity/bootstrap_draws.parquet:
+        cache: false
+
+  p1_neighbour_outcome_split:
+    desc: >-
+      Preregistered Paper 1 original-space neighbour outcome split. Select one
+      nearest pair per non-singleton sector on the shared 2018-2020 Qwen3-
+      Embedding-8B windowed rooted W2 distance, then evaluate common-date
+      2021-2022 log1p return paths.
+      NOT a holdout: the 2021-2022 outcome panel is a strict subset of the
+      in-sample panel that also feeds compute_covariance@window0 and
+      p1_dyadic_confound, so only the SELECTION input
+      is date-restricted. The out-of-sample lane is the 2023-2026 panel. Named
+      p1_neighbour_holdout until t80.
+      The selection distance is READ, not recomputed: wasserstein_w2_pit_2020 is
+      the governed Paper 1 distance for that declared window.
+    cmd: >-
+      ${py_pipeline} compute-neighbour-outcome-split
+      --distance-artifact-dir
+      ${shared}/typed_distances_windowed/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2_pit_2020
+      --returns-dir ${shared}/returns
+      --universe-csv data/universe.csv
+      --params-file params.yaml
+      --output-dir ${p1}/neighbour_outcome_split
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-neighbour-outcome-split.json
+    - ${shared}/typed_distances_windowed/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2_pit_2020
+    - ${shared}/returns
+    - data/universe.csv
+    params:
+    - typed_analysis.distances.euclidean_chord
+    - typed_analysis.distances.wasserstein_w2_pit_2020
+    - typed_analysis.windows.pit-2020-12-31
+    outs:
+    # pair_metrics.parquet and returns.parquet were dropped in t80: no stage
+    # declared either as a dependency, and the returns table was a re-slice of
+    # ${shared}/returns over dates every other Paper 1 stage already reads.
+    # Their logical SHA-256s remain in provenance.json.
+    - ${p1}/neighbour_outcome_split/pair_paths.parquet:
+        cache: false
+    - ${p1}/neighbour_outcome_split/selection.json:
+        cache: false
+    - ${p1}/neighbour_outcome_split/summary.json:
+        cache: false
+    - ${p1}/neighbour_outcome_split/provenance.json:
+        cache: false
+
+  p1_illustrations:
+    desc: >-
+      Render Paper 1's analytic bound-construction schematic via the pipeline
+      typer CLI. This is a closed-form illustration with no data
+      inputs, so the dependency closure is just the figure module.
+    cmd: >-
+      ${py_pipeline} render-paper1-illustrations
+      --output-dir src/latex/projects/01_continuous_bounds/src/images
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper1-illustrations.json
+    outs:
+    - src/latex/projects/01_continuous_bounds/src/images/continuous_bound_construction.pgf:
+        cache: false
+
+  p1_figures:
+    desc: >-
+      Generate Paper 1's sector MDS and Shepard diagnostic from the exact W2
+      artifact and universe metadata. LaTeX number bindings are a separate
+      p1_numbers stage (t15 R3 split) so a
+      figure-code-only edit or an unrelated summary refresh doesn't invalidate
+      the other.
+    cmd: >-
+      ${py_pipeline} render-paper1-figures
+      --distance-artifact-dir ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+      --universe-csv data/universe.csv
+      --output-dir src/latex/projects/01_continuous_bounds/src/images
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper1-figures.json
+    - ${shared}/typed_distances/${paper1_lead_model}/${paper1_lead_model}-unit/wasserstein_w2
+    - data/universe.csv
+    outs:
+    - src/latex/projects/01_continuous_bounds/src/images/mds_sector_plot.pgf:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/images/mds_shepard_diagnostic.pgf:
+        cache: false
+  p1_numbers:
+    desc: >-
+      Generate only the LaTeX scalar bindings consumed by Paper 1 from the
+      W2 dyadic, DISCO, sample, projection, and exploratory summaries.
+      Split from p1_figures for cache isolation.
+    cmd: >-
+      ${py_pipeline} render-paper1-numbers
+      --numbers-path src/latex/projects/01_continuous_bounds/src/generated/numbers.tex
+      --dyadic-confound-summary ${p1}/dyadic_confound/summary.yaml
+      --disco-summary ${p1}/disco/summary.yaml
+      --sample-descriptives-summary ${p1}/sample_descriptives/summary.yaml
+      --diagnostics-summary ${p1}/diagnostics/summary.yaml
+      --dimensionality-csv ${shared}/dimensionality_analysis/${scientific_selectors.baseline_model}/dimensionality_analysis.csv
+      --neighbour-outcome-split-summary ${p1}/neighbour_outcome_split/summary.json
+      --covariance-matrix ${shared}/covariance_matrix.parquet
+      --oos-covariance-matrix ${shared}/oos/covariance_matrix.parquet
+      --oos-dyadic-summary ${p1}/dyadic_oos/summary.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper1-numbers.json
+    - ${shared}/corpus/summary.yaml
+    - ${p1}/dyadic_confound/summary.yaml
+    - ${p1}/disco/summary.yaml
+    - ${p1}/sample_descriptives/summary.yaml
+    - ${p1}/diagnostics/summary.yaml
+    - ${p1}/neighbour_outcome_split/summary.json
+    - ${shared}/dimensionality_analysis/${scientific_selectors.baseline_model}/dimensionality_analysis.csv
+    - ${shared}/covariance_matrix.parquet
+    - ${shared}/oos/covariance_matrix.parquet
+    - ${p1}/dyadic_oos/summary.yaml
+    params:
+    - symbols
+    - matryoshka_range
+    - embedding.models.${scientific_selectors.baseline_model_key}.dims
+    - start_date
+    - end_date
+    - n_samples
+    - annual_raw_article_floor
+    outs:
+    - src/latex/projects/01_continuous_bounds/src/generated/numbers.tex:
+        cache: false
+
+  p1_neighbour_outcome_split_render:
+    desc: >-
+      Render the selected-sector 2021-2022 cumulative-log-return exhibit and its
+      canonical registered semantic interpretation contract, which now also
+      registers that the evaluation window is reused in-sample data. The figure
+      stem and the neighbour-holdout-* number bindings deliberately keep their
+      published names -- they are spelled in appendix_robustness.tex -- so only
+      the contract ID moved (t80).
+    cmd: >-
+      ${py_pipeline} render-paper1-neighbour-outcome-split
+      --summary-file ${p1}/neighbour_outcome_split/summary.json
+      --provenance-file ${p1}/neighbour_outcome_split/provenance.json
+      --selection-file ${p1}/neighbour_outcome_split/selection.json
+      --pair-paths-file ${p1}/neighbour_outcome_split/pair_paths.parquet
+      --numbers-path src/latex/projects/01_continuous_bounds/src/generated/numbers.tex
+      --figure-path src/latex/projects/01_continuous_bounds/src/images/neighbour_holdout_paths.pgf
+      --contract-path src/latex/projects/01_continuous_bounds/src/generated/paper1_neighbour_outcome_split.interpretation.json
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper1-neighbour-outcome-split.json
+    - ${p1}/neighbour_outcome_split/summary.json
+    - ${p1}/neighbour_outcome_split/provenance.json
+    - ${p1}/neighbour_outcome_split/selection.json
+    - ${p1}/neighbour_outcome_split/pair_paths.parquet
+    - src/latex/projects/01_continuous_bounds/src/generated/numbers.tex
+    outs:
+    - src/latex/projects/01_continuous_bounds/src/images/neighbour_holdout_paths.pgf:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/paper1_neighbour_outcome_split.interpretation.json:
+        cache: false
+
+  # ------------------------------------------------------------------
+  # CANONICAL MANUSCRIPT RENDER (t24.12 LaTeX cutover)
+  # ------------------------------------------------------------------
+  lean_claims:
+    desc: >-
+      Proof-to-prose coupling: re-derive each paper's Lean verification status
+      from the proofs themselves. extract.py runs one `lake env lean`
+      #check/#print-axioms per mapping.toml entry against the built workspace and
+      records build_result="checked" only when the declaration compiles and its
+      axiom set stays inside the mathlib base {propext, Classical.choice,
+      Quot.sound} — a `sorryAx` or a stray axiom demotes the claim. render.py
+      projects that verdict into the \ppvalue bindings each target \input{}s via
+      generated/lean_status.tex. Placing it in the DAG upstream of `render` is the
+      point of adopting LeanBlueprint: a manuscript can no longer assert
+      "machine-checked" from a stale committed projection, because touching
+      src/lean/packages invalidates every paper's status file and every PDF that
+      inputs it. HEAVY — ~3 min of `lake build` on a warm checkout plus one
+      `lake env lean` invocation per claim (38 today) — but only on a Lean or
+      mapping edit. Run
+      `just lean::warm` once per checkout first; from cold this also pays the
+      mathlib cache fetch. The `outs` paper list is manual: render.py enumerates
+      papers from the manifest, so a sixth paper needs a line added here.
+    cmd: >-
+      just lean::check && just lean::claims-render
+    deps:
+    - src/lean/packages
+    - src/lean/tools/claim-manifest/mapping.toml
+    - src/lean/tools/claim-manifest/extract.py
+    - src/lean/tools/claim-manifest/render.py
+    outs:
+    - src/lean/tools/claim-manifest/generated/manifest.json:
+        cache: false
+    - src/lean/tools/claim-manifest/generated/claim_manifest.tex:
+        cache: false
+    - src/lean/blueprint/src/generated/claim_bindings.tex:
+        cache: false
+    - src/latex/projects/01_continuous_bounds/src/generated/lean_status.tex:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/generated/lean_status.tex:
+        cache: false
+    # The retired energy-robustness manuscript holds no manifest claims, so the renderer
+    # emits no status projection for it and this stage declares no out for it.
+    - src/latex/projects/05_spatial_pricing/src/generated/lean_status.tex:
+        cache: false
+
+  lean_bindings_check:
+    desc: >-
+      Verify-only companion to lean_claims (same pattern as refs_bib_freshness):
+      assert the authored/generated Blueprint boundary still holds against the
+      committed manifest — unique labels, no hand-authored \lean/\leanok
+      (a verified marker may only ever be generated from a passing Lean check),
+      bindings equal to the manifest projection, and no Lean declaration name,
+      source path, or Blueprint macro leaked into a publication chapter. Pure
+      text validation: no Lake, no network, seconds not minutes. Kept separate
+      from lean_claims precisely so an ordinary prose edit re-runs this and never
+      the per-claim Lean invocations. Repair with `just lean::claims-check` for the
+      diagnosis and `just lean::claims-render` when the manifest is genuinely stale.
+      A cache-disabled certification stamp makes this check a real ancestor of
+      every publication render without caching the verification result.
+    cmd: >-
+      just lean::claims-check &&
+      mkdir -p data/publication/certification &&
+      touch data/publication/certification/lean_bindings_check.stamp
+    deps:
+    # The authored blueprint .tex that check.py scans (`authored_tex_files` =
+    # src/**/*.tex minus generated/). Listed file-by-file rather than as the
+    # parent dir: `src/lean/blueprint/src` contains lean_claims' own out
+    # claim_bindings.tex, and a dep enclosing another stage's out is an overlap
+    # DVC only resolves at repro time.
+    - src/lean/blueprint/src/content.tex
+    - src/lean/blueprint/src/chapters
+    - src/lean/blueprint/src/print.tex
+    - src/lean/blueprint/src/web.tex
+    - src/lean/blueprint/src/macros/common.tex
+    - src/lean/blueprint/src/macros/print.tex
+    - src/lean/blueprint/src/macros/web.tex
+    - src/lean/blueprint/src/generated/claim_bindings.tex
+    - src/lean/blueprint/check.py
+    - src/lean/tools/claim-manifest/generated/manifest.json
+    - src/latex/projects/01_continuous_bounds/src/chapters
+    - src/latex/projects/03_distance_implied_mpt/src/chapters
+    - src/latex/projects/05_spatial_pricing/src/chapters
+    outs:
+    - data/publication/certification/lean_bindings_check.stamp:
+        cache: false
+
+  refs_bib_freshness:
+    desc: >-
+      Freshness gate (t24.16.2/F4): assert each paper's committed generated
+      refs.bib still equals the citation-selected projection of canonical CSL
+      reference README frontmatter. This verify-only stage makes drift visible
+      to `dvc status`/`dvc repro`; run `just references::export-bib` to refresh.
+    cmd: >-
+      just references::bibliography-check &&
+      mkdir -p data/publication/certification &&
+      touch data/publication/certification/refs_bib_freshness.stamp
+    deps:
+    - .context/reference
+    - src/python/scripts/references/justfile
+    - src/latex/projects/01_continuous_bounds/src/refs.bib
+    - src/latex/projects/03_distance_implied_mpt/src/refs.bib
+    - src/latex/projects/05_spatial_pricing/src/refs.bib
+    outs:
+    - data/publication/certification/refs_bib_freshness.stamp:
+        cache: false
+
+  render:
+    foreach:
+      01_continuous_bounds-arxiv:
+        paper: 01_continuous_bounds
+        target: arxiv
+        archive: tar.gz
+      03_distance_implied_mpt-arxiv:
+        paper: 03_distance_implied_mpt
+        target: arxiv
+        archive: tar.gz
+      05_spatial_pricing-arxiv:
+        paper: 05_spatial_pricing
+        target: arxiv
+        archive: tar.gz
+    do:
+      desc: >-
+        Canonical manuscript render: compile each paper's LaTeX source to the arXiv
+        target with Tectonic (check-log gated), then
+        stage, hostile-audit, and deterministically archive that venue's submission
+        bundle. Tectonic is the sole renderer; TeX Live and the second build path
+        it served were removed, so `just latex::build` is the only way a PDF is
+        produced here or interactively.
+
+        Both artifacts are published in-tree beside the compile log and .blg, under
+        src/latex/projects/<paper>/build/<target>/, and are `cache: false` — they
+        are tracked in git (LFS) rather than pushed to the DVC remote, so anyone
+        with repository access can read the paper and reproduce an upload without
+        object-store credentials.
+
+        `just latex::bundle` re-compiles the staged sources twice more (clean-room,
+        then unpack-and-recompile from the archive), so a render costs three
+        compiles per target. That is deliberate: the audit is the submission gate,
+        and keeping it on the critical path means a PDF cannot be published from
+        sources that would not survive upload to arXiv or the journal portal.
+      cmd: >-
+        just latex::build ${item.paper} ${item.target} &&
+        just latex::bundle ${item.paper} ${item.target}
+      deps:
+      - src/latex/justfile
+      - src/latex/templates/pp-manuscript.sty
+      # The audit gate is a dependency of the archive, not merely of the decision
+      # to publish it: bundle-audit writes MANIFEST.json, which ships *inside* the
+      # submission archive, so a schema change there alters an out while every source input is
+      # byte-identical. Without this edge `dvc repro` reports "up to date" and the
+      # committed archives keep the old manifest until someone remembers `-f` —
+      # which is exactly what happened when `bundle_digest` was added. The
+      # Semflow covers Python entrypoint closures only, so this LaTeX-side operator
+      # remains an explicit dependency.
+      - src/latex/tools/bundle-audit
+      - src/latex/projects/${item.paper}/src/chapters
+      - src/latex/projects/${item.paper}/src/body.tex
+      - src/latex/projects/${item.paper}/src/appendix.tex
+      - src/latex/projects/${item.paper}/src/targets/${item.target}.tex
+      - src/latex/projects/${item.paper}/src/metadata.tex
+      # The whole generated/ tree, not numbers.tex + lean_status.tex alone:
+      # chapters also \input pipeline-rendered tables (nine in paper 1,
+      # paper-specific tables), which a shared matrix cannot name per paper.
+      # A directory dep closes that staleness gap — previously regenerating a
+      # table left every PDF "up to date" — and covers tables added later. It
+      # carries the lean_claims edge too: every target \input{generated/lean_status},
+      # and without that edge a PDF could ship a "machine-checked" claim from a
+      # projection the proofs no longer support.
+      - src/latex/projects/${item.paper}/src/generated
+      - src/latex/projects/${item.paper}/src/images
+      - src/latex/projects/${item.paper}/src/refs.bib
+      - data/publication/certification/lean_bindings_check.stamp
+      - data/publication/certification/refs_bib_freshness.stamp
+      outs:
+      - src/latex/projects/${item.paper}/build/${item.target}/${item.target}.pdf:
+          cache: false
+      - src/latex/projects/${item.paper}/build/${item.target}/${item.target}.${item.archive}:
+          cache: false
+
+  # ====================================================================
+  # SHARED W2 EXPOSURE FRONTIER
+  # ====================================================================
+
+  ## H1 identification frontier
+
+  w2_exposure_frontier:
+    desc: >-
+      Shared W2 exposure frontier: numerator from returns-based
+      whitened-PCA loadings (independent of the text embeddings, fixes the F1
+      shared-input tautology), denominator the typed text W2 distance. Single
+      ell_lo drives both the degeneracy kill and the
+      certified cap-reduction (F3); block-bootstrap over return time blocks
+      (F6); externally-anchored Wolak test (F4, anchor is a TODO(author)
+      placeholder -- see params.yaml w2_exposure_frontier.wolak_ell0).
+    cmd: >-
+      ${py_pipeline} w2-exposure-frontier
+      --distance-artifact-dir ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${scientific_selectors.typed_distance_id}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/w2-exposure-frontier.json
+    - ${shared}/returns
+    - ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${scientific_selectors.typed_distance_id}
+    params:
+    - w2_exposure_frontier.train_start
+    - w2_exposure_frontier.train_end
+    - w2_exposure_frontier.ks
+    - w2_exposure_frontier.k_target_explained_variance
+    - w2_exposure_frontier.tau_lo
+    - w2_exposure_frontier.tau_hi
+    - w2_exposure_frontier.n_boot
+    - w2_exposure_frontier.n_clusters
+    - w2_exposure_frontier.n_mc
+    - w2_exposure_frontier.n_dirichlet
+    - w2_exposure_frontier.cap_kill_threshold
+    - w2_exposure_frontier.cap_marginal_threshold
+    - w2_exposure_frontier.wolak_alpha
+    - w2_exposure_frontier.wolak_ell0
+    - w2_exposure_frontier.seed
+    outs:
+    - ${shared}/w2_exposure_frontier
+
+  p3_pit_w2:
+    desc: >-
+      Assemble annual point-in-time squared-W2 matrices from the rooted typed
+      artifacts named by `paper3.pit_vintage_grid`. The typed artifacts measure
+      observable characteristic laws C_i; the Paper 3 transmission restriction
+      connects those distances to latent exposure laws P_i. Squaring occurs
+      only in this archive boundary because polarization consumes quadratic
+      transport cost.
+    cmd: >-
+      ${py_pipeline} paper3-pit-w2
+      --params-file params.yaml
+      --out-path ${p3}/pit_w2/matrices.npz
+      --distance-root ${shared}/typed_distances_windowed
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper3-pit-w2.json
+    - ${shared}/typed_distances_windowed/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2_pit_2018
+    - ${shared}/typed_distances_windowed/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2_pit_2019
+    - ${shared}/typed_distances_windowed/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2_pit_2020
+    - ${shared}/typed_distances_windowed/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2_pit_2021
+    - ${shared}/typed_distances_windowed/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2_pit_2022
+    params:
+    - paper3.pit_vintage_grid
+    - typed_analysis.distances.euclidean_chord
+    - typed_analysis.distances.wasserstein_w2_pit_2018
+    - typed_analysis.distances.wasserstein_w2_pit_2019
+    - typed_analysis.distances.wasserstein_w2_pit_2020
+    - typed_analysis.distances.wasserstein_w2_pit_2021
+    - typed_analysis.distances.wasserstein_w2_pit_2022
+    - typed_analysis.windows.pit-2018-12-31
+    - typed_analysis.windows.pit-2019-12-31
+    - typed_analysis.windows.pit-2020-12-31
+    - typed_analysis.windows.pit-2021-12-31
+    - typed_analysis.windows.pit-2022-12-31
+    outs:
+      - ${p3}/pit_w2/matrices.npz
+      - ${p3}/pit_w2/provenance.manifest.json
+
+  p3_certificate:
+    desc: >-
+      Governed full-sample non-vacuity and transmission-sensitivity surface for
+      Paper 3's information-certified diversification bound. This stage is
+      descriptive and independent of the expensive covariance/backtest stage.
+    cmd: >-
+      ${py_pipeline} paper3-certificate
+      --params-file params.yaml
+      --returns-dir ${shared}/returns
+      --distance-artifact ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+      --output-dir ${p3}/certificate
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper3-certificate.json
+    - ${shared}/returns
+    - ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+    params:
+    - paper3.primary_distance_id
+    - paper3.certificate_feasibility
+    outs:
+    - ${p3}/certificate/news_only_weights.parquet
+    - ${p3}/certificate/surface.parquet
+    - ${p3}/certificate/summary.yaml
+    - ${p3}/certificate/provenance.manifest.json
+
+  p3_portfolio_anatomy:
+    desc: >-
+      Decompose Paper 3's canonical information-only allocation into firm,
+      unordered-pair, and sector credit layers, then re-solve the same
+      return-free decision under the five expanding information cutoffs.
+    cmd: >-
+      ${py_pipeline} paper3-portfolio-anatomy
+      --weights-path ${p3}/certificate/news_only_weights.parquet
+      --distance-artifact ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+      --pit-w2-path ${p3}/pit_w2/matrices.npz
+      --universe-csv data/universe.csv
+      --output-dir ${p3}/portfolio_anatomy
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper3-portfolio-anatomy.json
+    - data/universe.csv
+    - ${p3}/certificate/news_only_weights.parquet
+    - ${p3}/pit_w2/matrices.npz
+    - ${p3}/pit_w2/provenance.manifest.json
+    - ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+    params:
+    - paper3.primary_distance_id
+    outs:
+    - ${p3}/portfolio_anatomy
+
+  p3_sample_universe_table:
+    desc: >-
+      Render Paper 3's canonical priced W2 ticker, name, and sector roster as
+      a generated appendix longtable.
+    cmd: >-
+      ${py_pipeline} render-sample-universe-table
+      --universe-csv data/universe.csv
+      --returns-dir ${shared}/returns
+      --distance-artifact-dir
+      ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+      --provider-id ${scientific_selectors.typed_distance_provider}
+      --representation-id ${scientific_selectors.typed_distance_representation}
+      --distance-id ${paper3.primary_distance_id}
+      --output-file
+      src/latex/projects/03_distance_implied_mpt/src/generated/sample_universe.tex
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-sample-universe-table.json
+    - data/universe.csv
+    - ${shared}/returns
+    - ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+    params:
+    - paper3.primary_distance_id
+    outs:
+    - src/latex/projects/03_distance_implied_mpt/src/generated/sample_universe.tex:
+        cache: false
+
+  p3_portfolio_anatomy_exhibits:
+    desc: >-
+      Render Paper 3's firm/pair/sector allocation anatomy, expanding-cutoff
+      heatmap, and generated top-holdings table from the governed anatomy leaf.
+    cmd: >-
+      ${py_pipeline} render-paper3-portfolio-anatomy
+      --anatomy-dir ${p3}/portfolio_anatomy
+      --output-dir src/latex/projects/03_distance_implied_mpt/src/images
+      --table-path
+      src/latex/projects/03_distance_implied_mpt/src/generated/portfolio_holdings.tex
+      --manifest-path
+      src/latex/projects/03_distance_implied_mpt/src/images/portfolio_anatomy.manifest.json
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper3-portfolio-anatomy.json
+    - ${p3}/portfolio_anatomy
+    outs:
+    - src/latex/projects/03_distance_implied_mpt/src/images/portfolio_anatomy.pgf:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/images/portfolio_evolution.pgf:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/images/portfolio_anatomy.manifest.json:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/generated/portfolio_holdings.tex:
+        cache: false
+
+  p3_representation_ablation_cells:
+    foreach: ${representation_ablation_specs}
+    do:
+      desc: >-
+        Recompute only Paper 3's return-free news allocation and fixed-law
+        variance ranks for one governed representation cell.
+      cmd: >-
+        ${py_pipeline} paper3-representation-ablation
+        --cell-id ${key}
+        --params-file params.yaml
+        --returns-dir ${shared}/returns
+        --canonical-distance-artifact ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2
+        --distance-artifact
+        ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+        --output-dir ${p3}/representation_ablation/${key}
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/paper3-representation-ablation.json
+      - ${shared}/returns
+      - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2
+      - ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+      params:
+      - representation_ablation_specs.${key}
+      - paper3.certificate_feasibility.news_reference
+      - paper3.certificate_validation.return_block_replications
+      - paper3.certificate_validation.seed
+      outs:
+      - ${p3}/representation_ablation/${key}/news_only_weights.parquet
+      - ${p3}/representation_ablation/${key}/return_bootstrap.parquet
+      - ${p3}/representation_ablation/${key}/summary.yaml
+      - ${p3}/representation_ablation/${key}/provenance.manifest.json
+
+  p3_encoder_vintage_ablation_cells:
+    foreach: ${encoder_vintage_ablation_specs}
+    do:
+      desc: >-
+        Recompute Paper 3's return-free allocation and fixed-law variance ranks
+        for one matched EttaX encoder vintage.
+      cmd: >-
+        ${py_pipeline} paper3-representation-ablation
+        --cell-id ${key}
+        --params-file params.yaml
+        --returns-dir ${shared}/returns
+        --canonical-distance-artifact ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2
+        --distance-artifact
+        ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+        --output-dir ${p3}/representation_ablation/${key}
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/paper3-representation-ablation.json
+      - ${shared}/returns
+      - ${shared}/typed_distances/qwen3-embedding-8b/qwen3-embedding-8b-unit/wasserstein_w2
+      - ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+      params:
+      - encoder_vintage_ablation_specs.${key}
+      - paper3.certificate_feasibility.news_reference
+      - paper3.certificate_validation.return_block_replications
+      - paper3.certificate_validation.seed
+      outs:
+      - ${p3}/representation_ablation/${key}/news_only_weights.parquet
+      - ${p3}/representation_ablation/${key}/return_bootstrap.parquet
+      - ${p3}/representation_ablation/${key}/summary.yaml
+      - ${p3}/representation_ablation/${key}/provenance.manifest.json
+
+  p3_representation_ablation:
+    desc: >-
+      Merge the ten Paper 3 representation cells and fail unless the canonical
+      cell exactly reproduces the headline certificate benchmark.
+    cmd: >-
+      ${py_pipeline} merge-paper3-representation-ablation
+      --params-file params.yaml
+      --cells-dir ${p3}/representation_ablation
+      --canonical-certificate-summary ${p3}/certificate/summary.yaml
+      --returns-dir ${shared}/returns
+      --contrast-draws-dir ${p3}/representation_ablation
+      --output-summary ${p3}/representation_ablation/summary.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/merge-paper3-representation-ablation.json
+    - ${p3}/certificate/summary.yaml
+    - ${p3}/representation_ablation/qwen8b_full/summary.yaml
+    - ${p3}/representation_ablation/qwen4b_full/summary.yaml
+    - ${p3}/representation_ablation/qwen8b_1024/summary.yaml
+    - ${p3}/representation_ablation/qwen4b_1024/summary.yaml
+    - ${p3}/representation_ablation/qwen8b_256/summary.yaml
+    - ${p3}/representation_ablation/qwen8b_64/summary.yaml
+    - ${p3}/representation_ablation/bge_large_full/summary.yaml
+    - ${p3}/representation_ablation/ettax_v0/summary.yaml
+    - ${p3}/representation_ablation/ettax_v1/summary.yaml
+    - ${p3}/representation_ablation/ettax_v3/summary.yaml
+    - ${p3}/representation_ablation/qwen8b_full/return_bootstrap.parquet
+    - ${p3}/representation_ablation/qwen4b_full/return_bootstrap.parquet
+    - ${p3}/representation_ablation/qwen8b_1024/return_bootstrap.parquet
+    - ${p3}/representation_ablation/qwen4b_1024/return_bootstrap.parquet
+    - ${p3}/representation_ablation/qwen8b_256/return_bootstrap.parquet
+    - ${p3}/representation_ablation/qwen8b_64/return_bootstrap.parquet
+    - ${p3}/representation_ablation/bge_large_full/return_bootstrap.parquet
+    - ${p3}/representation_ablation/ettax_v0/return_bootstrap.parquet
+    - ${p3}/representation_ablation/ettax_v1/return_bootstrap.parquet
+    - ${p3}/representation_ablation/ettax_v3/return_bootstrap.parquet
+    params:
+    - representation_ablation_specs
+    - encoder_vintage_ablation_specs
+    - representation_contrast_specs
+    outs:
+    - ${p3}/representation_ablation/summary.yaml
+
+  p3_representation_ablation_table:
+    desc: >-
+      Generate Paper 3's compact main-text representation summary and the
+      ten-cell variance-rank and paired-contrast appendix tables.
+    cmd: >-
+      ${py_pipeline} render-paper3-representation-ablation-table
+      --summary-path ${p3}/representation_ablation/summary.yaml
+      --output-path
+      src/latex/projects/03_distance_implied_mpt/src/generated/representation_ablation.tex
+      --main-output-path
+      src/latex/projects/03_distance_implied_mpt/src/generated/representation_ablation_main.tex
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper3-representation-ablation-table.json
+    - ${p3}/representation_ablation/summary.yaml
+    outs:
+    - src/latex/projects/03_distance_implied_mpt/src/generated/representation_ablation.tex:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/generated/representation_ablation_main.tex:
+        cache: false
+
+  p3_certificate_validation:
+    desc: >-
+      Calibrate Paper 3's certificate on monthly 2019--2022 inverse-volatility
+      portfolios, freeze the selected transmission cell, and evaluate the
+      untouched 2023--2026 panel with article- and return-block uncertainty,
+      capped certificate portfolios, conventional benchmarks, and placebos.
+    cmd: >-
+      ${py_pipeline} paper3-certificate-validation
+      --params-file params.yaml
+      --returns-dir ${shared}/returns
+      --holdout-returns-dir ${shared}/oos/returns
+      --pit-w2-path ${p3}/pit_w2/matrices.npz
+      --sample-descriptives-path ${p1}/sample_descriptives/summary.yaml
+      --output-dir ${p3}/certificate_validation
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper3-certificate-validation.json
+    - ${shared}/returns
+    - ${shared}/oos/returns
+    - ${shared}/embeddings/qwen3-embedding-8b
+    - ${p3}/pit_w2/matrices.npz
+    - ${p3}/pit_w2/provenance.manifest.json
+    - ${p1}/sample_descriptives/summary.yaml
+    params:
+    - paper3.certificate_validation
+    - paper3.pit_vintage_grid
+    - typed_analysis.providers.qwen3-embedding-8b
+    - typed_analysis.representations.qwen3-embedding-8b-unit
+    - typed_analysis.distances.wasserstein_w2_pit_2018
+    - typed_analysis.distances.wasserstein_w2_pit_2019
+    - typed_analysis.distances.wasserstein_w2_pit_2020
+    - typed_analysis.distances.wasserstein_w2_pit_2021
+    - typed_analysis.distances.wasserstein_w2_pit_2022
+    - typed_analysis.windows.pit-2018-12-31
+    - typed_analysis.windows.pit-2019-12-31
+    - typed_analysis.windows.pit-2020-12-31
+    - typed_analysis.windows.pit-2021-12-31
+    - typed_analysis.windows.pit-2022-12-31
+    outs:
+    - ${p3}/certificate_validation/formation_results.parquet
+    - ${p3}/certificate_validation/portfolio_weights.parquet
+    - ${p3}/certificate_validation/random_portfolios.parquet
+    - ${p3}/certificate_validation/placebos.parquet
+    - ${p3}/certificate_validation/summary.yaml
+    - ${p3}/certificate_validation/provenance.manifest.json
+
+  p3_empirical:
+    desc: >-
+      Paper 3 random-functional-exposure covariance benchmark and
+      minimum-variance empirics on the configured priced panel from rooted W2:
+      pairwise optimal-coupling target, shrinkage, PSD repair,
+      envelope-saturation/coverage tests, and look-ahead-safe OOS backtests.
+    cmd: >-
+      ${py_pipeline} paper3-empirical
+      --returns-dir ${shared}/returns
+      --distance-artifact ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+      --provider-id ${scientific_selectors.typed_distance_provider}
+      --representation-id ${scientific_selectors.typed_distance_representation}
+      --distance-id ${paper3.primary_distance_id}
+      --output-dir ${p3}/empirical
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper3-empirical.json
+    - ${shared}/returns
+    - ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+    - ${p3}/pit_w2/matrices.npz
+    params:
+    - paper3.primary_distance_id
+    outs:
+    - ${p3}/empirical/results.parquet
+    - ${p3}/empirical/summary.yaml
+    - ${p3}/empirical/robustness_gel_gms.yaml
+    - ${p3}/empirical/provenance.manifest.json
+
+  p3_numbers:
+    desc: Generate Paper 3 LaTeX number bindings and a provenance manifest.
+    cmd: >-
+      ${py_pipeline} paper3-numbers
+      --certificate-dir ${p3}/certificate
+      --validation-dir ${p3}/certificate_validation
+      --numbers-path src/latex/projects/03_distance_implied_mpt/src/generated/numbers.tex
+      --manifest-path src/latex/projects/03_distance_implied_mpt/src/generated/numbers.manifest.json
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper3-numbers.json
+    - ${p3}/certificate/summary.yaml
+    - ${p3}/certificate_validation/summary.yaml
+    - ${p3}/portfolio_anatomy/summary.yaml
+    outs:
+    - src/latex/projects/03_distance_implied_mpt/src/generated/numbers.tex:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/generated/numbers.manifest.json:
+        cache: false
+
+  p3_exhibits:
+    desc: Generate Paper 3 certificate and conceptual exhibits with provenance.
+    cmd: >-
+      ${py_pipeline} paper3-exhibits
+      --certificate-dir ${p3}/certificate
+      --validation-dir ${p3}/certificate_validation
+      --output-dir src/latex/projects/03_distance_implied_mpt/src/images
+      --manifest-path src/latex/projects/03_distance_implied_mpt/src/images/exhibits.manifest.json
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper3-exhibits.json
+    - ${p3}/certificate/surface.parquet
+    - ${p3}/certificate/summary.yaml
+    - ${p3}/certificate_validation/random_portfolios.parquet
+    - ${p3}/certificate_validation/summary.yaml
+    params:
+    - paper3.certificate_validation.coverage_target
+    outs:
+    - src/latex/projects/03_distance_implied_mpt/src/images/conceptual_pipeline.pgf:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/images/certificate_surface.pgf:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/images/certificate_validation.pgf:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/images/calibration_coverage.pgf:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/images/news_variance_benchmark.pgf:
+        cache: false
+    - src/latex/projects/03_distance_implied_mpt/src/images/exhibits.manifest.json:
+        cache: false
+
+  # ====================================================================
+  # PAPER 5 - energy-robustness H3 prerequisite
+  # ====================================================================
+
+  p5_energy_robustness:
+    desc: >-
+      Paper 5's energy-bracket H3 prerequisite: calibrate the covariance
+      ambiguity radii on 2018--2022 and evaluate the frozen-design holdout on
+      the governed post-2022 return panel. Its materiality and bracket-coverage
+      records are consumed by p5_empirical; the stage is owned by Paper 5 even
+      though the numerical components are shared with Paper 3.
+
+      The bracket family is named for the *energy* ambiguity set, but the radii
+      are calibrated on the typed rooted-W2 matrix selected by
+      scientific_selectors — NOT on energy_v. The mismatch between that name and
+      the selector is deliberate and load-bearing: reading the name as the
+      selector once silently repointed this stage at energy_v, which moves every
+      H3 coverage and materiality number. Change the selector only as a declared
+      scientific decision, and keep the CLI/contract defaults in step.
+    cmd: >-
+      ${py_pipeline} paper5-energy-robustness
+      --returns-dir ${shared}/returns
+      --eval-returns-dir ${shared}/oos/returns
+      --calib-start ${start_date}
+      --calib-end ${end_date}
+      --eval-start ${oos_start_date}
+      --eval-end ${oos_end_date}
+      --distance-artifact ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${scientific_selectors.typed_distance_id}
+      --provider-id ${scientific_selectors.typed_distance_provider}
+      --representation-id ${scientific_selectors.typed_distance_representation}
+      --distance-id ${scientific_selectors.typed_distance_id}
+      --embeddings-dir ${shared}/embeddings/${scientific_selectors.baseline_model}
+      --frontier-metrics ${shared}/w2_exposure_frontier/frontier_metrics.json
+      --output-dir ${p5}/energy_robustness
+      --n-boot-stat ${paper5.energy_robustness.n_boot_stat}
+      --n-boot-ridge ${paper5.energy_robustness.n_boot_ridge}
+      --n-boot-sharpe ${paper5.energy_robustness.n_boot_sharpe}
+      --seed ${paper5.energy_robustness.seed}
+      --run-folds
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-energy-robustness.json
+    - ${shared}/returns
+    - ${shared}/oos/returns
+    - ${shared}/embeddings/${scientific_selectors.baseline_model}
+    - ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${scientific_selectors.typed_distance_id}
+    - ${shared}/w2_exposure_frontier/frontier_metrics.json
+    params:
+    - start_date
+    - end_date
+    - oos_start_date
+    - oos_end_date
+    - paper5.energy_robustness.n_boot_stat
+    - paper5.energy_robustness.n_boot_ridge
+    - paper5.energy_robustness.n_boot_sharpe
+    - paper5.energy_robustness.seed
+    outs:
+    - ${p5}/energy_robustness/results.json
+    - ${p5}/energy_robustness/results.parquet
+    - ${p5}/energy_robustness/folds/eval2020/results.json
+    - ${p5}/energy_robustness/folds/eval2020/results.parquet
+    - ${p5}/energy_robustness/folds/eval2021/results.json
+    - ${p5}/energy_robustness/folds/eval2021/results.parquet
+
+  p5_wflat_gate:
+    desc: >-
+      Pre-registered economic-validation gate for the frozen 2018--2022
+      target-anchored W2 operator on 2023--2026 returns. Compares W-flat with
+      equal-support, industry, training-window correlation-kNN, and 1,000
+      matched-sparsity random baskets using joint-date stationary bootstrap.
+    cmd: >-
+      ${py_pipeline} paper5-economic-gate
+      --returns-dir ${shared}/returns
+      --oos-returns-dir ${shared}/oos/returns
+      --shared-barycentre-dir
+      ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+      --universe-csv data/universe.csv
+      --output-dir ${p5}/wflat_gate
+      --n-bootstrap ${paper5.gate.n_bootstrap}
+      --n-random ${paper5.gate.n_random}
+      --block-length ${paper5.gate.block_length}
+      --knn-k ${paper5.gate.knn_k}
+      --seed ${paper5.gate.seed}
+      --provider-id ${paper5.provider_id}
+      --representation-id ${paper5.representation_id}
+      --barycentre-arm-id ${paper5.barycentre_arm_id}
+      --geometry-id ${paper5.distance_id}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-economic-gate.json
+    - ${shared}/returns
+    - ${shared}/oos/returns
+    - ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+    - data/universe.csv
+    params:
+    - paper5.gate.n_bootstrap
+    - paper5.gate.n_random
+    - paper5.gate.block_length
+    - paper5.gate.knn_k
+    - paper5.gate.seed
+    - paper5.provider_id
+    - paper5.representation_id
+    - paper5.distance_id
+    - paper5.barycentre_arm_id
+    outs:
+    - ${p5}/wflat_gate/results.json
+    - ${p5}/wflat_gate/results.parquet
+
+  p5_empirical:
+    desc: >-
+      Paper 5 Hilbert/W2 spatial empirics: kNN embedding-graph spatial weights,
+      primary target-anchored Wasserstein-barycentric reconstruction and W2
+      diffusion operator, covariance estimation, the persistent news co-mention
+      comparator, and spatial-dependence hypothesis tests on the configured
+      priced panel.
+      With --oos-returns-dir, every W is frozen at its 2018-22
+      construction and returns roll forward through the per-year OOS folds
+      eval2023..eval2026 (t19 persistence arm); rho is re-estimated per fold.
+    cmd: >-
+      ${py_pipeline} paper5-empirical
+      --returns-dir ${shared}/returns
+      --distance-artifact-dir
+      ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}
+      --embeddings-dir ${shared}/embeddings/${paper5.provider_id}
+      --shared-barycentre-dir
+      ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+      --wasserstein-w1-barycentre-dir
+      ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.wasserstein_w1_arm_id}
+      --co-mentions-adjacency ${shared}/co_mentions/adjacency.parquet
+      --provider-id ${paper5.provider_id}
+      --representation-id ${paper5.representation_id}
+      --distance-id ${paper5.distance_id}
+      --barycentre-arm-id ${paper5.barycentre_arm_id}
+      --wasserstein-w1-arm-id ${paper5.wasserstein_w1_arm_id}
+      --universe-csv data/universe.csv
+      --output-dir ${p5}
+      --n-boot-stat ${paper5.n_boot_stat}
+      --oos-returns-dir ${shared}/oos/returns
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-empirical.json
+    - ${shared}/returns
+    - ${shared}/oos/returns
+    - ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+    - ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.wasserstein_w1_arm_id}
+    - ${shared}/co_mentions/adjacency.parquet
+    - ${shared}/embeddings/${paper5.provider_id}
+    - data/universe.csv
+    - ${p5}/energy_robustness/results.json
+    - ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}
+    params:
+    - paper5.n_boot_stat
+    - paper5.provider_id
+    - paper5.representation_id
+    - paper5.distance_id
+    - paper5.barycentre_arm_id
+    - paper5.wasserstein_w1_arm_id
+    outs:
+    - ${p5}/results.json
+    - ${p5}/results.parquet
+
+  p5_post_corpus_qmle:
+    desc: >-
+      Paper 5 pooled 2023--2026 SAR QMLE with non-overlapping annual stability
+      estimates. The 2018--2022 W2 and co-mention operators remain frozen;
+      uncertainty uses joint-date stationary bootstrap.
+    cmd: >-
+      ${py_pipeline} paper5-post-corpus-qmle
+      --returns-dir ${shared}/returns
+      --oos-returns-dir ${shared}/oos/returns
+      --shared-barycentre-dir
+      ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+      --distance-artifact
+      ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}
+      --co-mentions-adjacency ${shared}/co_mentions/adjacency.parquet
+      --output-dir ${p5}/post_corpus_qmle
+      --n-bootstrap ${paper5.qmle.n_bootstrap}
+      --block-length ${paper5.qmle.block_length}
+      --seed ${paper5.qmle.seed}
+      --provider-id ${paper5.provider_id}
+      --representation-id ${paper5.representation_id}
+      --barycentre-arm-id ${paper5.barycentre_arm_id}
+      --geometry-id ${paper5.distance_id}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-post-corpus-qmle.json
+    - ${shared}/returns
+    - ${shared}/oos/returns
+    - ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+    - ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}
+    - ${shared}/co_mentions/adjacency.parquet
+    params:
+    - paper5.qmle.n_bootstrap
+    - paper5.qmle.block_length
+    - paper5.qmle.seed
+    - paper5.provider_id
+    - paper5.representation_id
+    - paper5.distance_id
+    - paper5.barycentre_arm_id
+    outs:
+    - ${p5}/post_corpus_qmle/results.json
+    - ${p5}/post_corpus_qmle/results.parquet
+
+  p5_universe_horizon_bridge:
+    desc: >-
+      Reconcile the historical 52-firm long-window result with the governed
+      6 April 2026 endpoint, then expand to the current 100-firm operator at
+      that same endpoint. The sequential bridge estimates only observed
+      specifications and treats both step contrasts as descriptive.
+    cmd: >-
+      ${py_pipeline} paper5-universe-horizon-bridge
+      --returns-dir ${shared}/returns
+      --current-oos-returns-dir ${shared}/oos/returns
+      --current-barycentre-dir
+      ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+      --current-results-json ${p5}/post_corpus_qmle/results.json
+      --reference-oos-returns-dir
+      ${p5}/universe_horizon_bridge/reference_52_oos_returns
+      --reference-barycentre-dir
+      ${p5}/universe_horizon_bridge/reference_52_w_flat
+      --reference-results-json
+      ${p5}/universe_horizon_bridge/reference_52_qmle_results.json
+      --output-dir ${p5}/universe_horizon_bridge
+      --start ${paper5.universe_horizon_bridge.evaluation_start}
+      --short-end ${paper5.universe_horizon_bridge.short_end}
+      --long-end ${paper5.universe_horizon_bridge.long_end}
+      --expected-reference-universe
+      ${paper5.universe_horizon_bridge.reference_n_firms}
+      --expected-current-universe
+      ${paper5.universe_horizon_bridge.expanded_n_firms}
+      --n-bootstrap ${paper5.qmle.n_bootstrap}
+      --block-length ${paper5.qmle.block_length}
+      --seed ${paper5.qmle.seed}
+      --shared-return-tolerance
+      ${paper5.universe_horizon_bridge.shared_return_tolerance}
+      --result-tolerance ${paper5.universe_horizon_bridge.result_tolerance}
+      --reference-revision
+      ${paper5.universe_horizon_bridge.reference_revision}
+      --provider-id ${paper5.provider_id}
+      --representation-id ${paper5.representation_id}
+      --barycentre-arm-id ${paper5.barycentre_arm_id}
+      --geometry-id ${paper5.distance_id}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-universe-horizon-bridge.json
+    - ${shared}/returns
+    - ${shared}/oos/returns
+    - ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+    - ${p5}/post_corpus_qmle/results.json
+    - ${p5}/universe_horizon_bridge/reference_52_oos_returns
+    - ${p5}/universe_horizon_bridge/reference_52_w_flat
+    - ${p5}/universe_horizon_bridge/reference_52_qmle_results.json
+    params:
+    - paper5.qmle.n_bootstrap
+    - paper5.qmle.block_length
+    - paper5.qmle.seed
+    - paper5.provider_id
+    - paper5.representation_id
+    - paper5.distance_id
+    - paper5.barycentre_arm_id
+    - paper5.universe_horizon_bridge
+    outs:
+    - ${p5}/universe_horizon_bridge/summary.json
+    - ${p5}/universe_horizon_bridge/bootstrap_draws.parquet
+
+  p5_representation_ablation_cells:
+    foreach: ${representation_ablation_specs}
+    do:
+      desc: >-
+        Estimate pooled single-field QMLE for the barycentric interaction field
+        and its RBF-Wasserstein comparator under one governed representation,
+        with annual and fixed-network work omitted.
+      cmd: >-
+        ${py_pipeline} paper5-post-corpus-qmle
+        --returns-dir ${shared}/returns
+        --oos-returns-dir ${shared}/oos/returns
+        --shared-barycentre-dir
+        ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo
+        --distance-artifact
+        ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+        --output-dir ${p5}/representation_ablation/${key}
+        --n-bootstrap ${paper5.qmle.n_bootstrap}
+        --block-length ${paper5.qmle.block_length}
+        --seed ${paper5.qmle.seed}
+        --provider-id ${item.provider_id}
+        --representation-id ${item.representation_id}
+        --barycentre-arm-id wasserstein_w2_loo
+        --geometry-id wasserstein_w2
+        --pooled-only
+        --focal-matrices-only
+        --output-bootstrap ${p5}/representation_ablation/${key}/bootstrap_draws.parquet
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/paper5-post-corpus-qmle.json
+      - ${shared}/returns
+      - ${shared}/oos/returns
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo
+      - ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+      params:
+      - representation_ablation_specs.${key}
+      - paper5.qmle.n_bootstrap
+      - paper5.qmle.block_length
+      - paper5.qmle.seed
+      outs:
+      - ${p5}/representation_ablation/${key}/results.json
+      - ${p5}/representation_ablation/${key}/results.parquet
+      - ${p5}/representation_ablation/${key}/bootstrap_draws.parquet
+
+  p5_encoder_vintage_ablation_cells:
+    foreach: ${encoder_vintage_ablation_specs}
+    do:
+      desc: >-
+        Estimate pooled single-field QMLE for the barycentric interaction field
+        and its RBF-Wasserstein comparator under one matched EttaX encoder vintage.
+      cmd: >-
+        ${py_pipeline} paper5-post-corpus-qmle
+        --returns-dir ${shared}/returns
+        --oos-returns-dir ${shared}/oos/returns
+        --shared-barycentre-dir
+        ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo
+        --distance-artifact
+        ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+        --output-dir ${p5}/representation_ablation/${key}
+        --n-bootstrap ${paper5.qmle.n_bootstrap}
+        --block-length ${paper5.qmle.block_length}
+        --seed ${paper5.qmle.seed}
+        --provider-id ${item.provider_id}
+        --representation-id ${item.representation_id}
+        --barycentre-arm-id wasserstein_w2_loo
+        --geometry-id wasserstein_w2
+        --pooled-only
+        --focal-matrices-only
+        --output-bootstrap ${p5}/representation_ablation/${key}/bootstrap_draws.parquet
+      deps:
+      - .semflow/hashes/entrypoints/pipeline/paper5-post-corpus-qmle.json
+      - ${shared}/returns
+      - ${shared}/oos/returns
+      - ${shared}/barycentres/${item.provider_id}/${item.representation_id}/wasserstein_w2_loo
+      - ${shared}/typed_distances/${item.provider_id}/${item.representation_id}/wasserstein_w2
+      params:
+      - encoder_vintage_ablation_specs.${key}
+      - paper5.qmle.n_bootstrap
+      - paper5.qmle.block_length
+      - paper5.qmle.seed
+      outs:
+      - ${p5}/representation_ablation/${key}/results.json
+      - ${p5}/representation_ablation/${key}/results.parquet
+      - ${p5}/representation_ablation/${key}/bootstrap_draws.parquet
+
+  p5_representation_ablation:
+    desc: >-
+      Merge ten pooled Paper 5 representation cells, verify canonical equality,
+      and attach the fixed news and primary equal-support comparators once.
+    cmd: >-
+      ${py_pipeline} merge-paper5-representation-ablation
+      --params-file params.yaml
+      --cells-dir ${p5}/representation_ablation
+      --canonical-results ${p5}/post_corpus_qmle/results.json
+      --bootstrap-dir ${p5}/representation_ablation
+      --output-summary ${p5}/representation_ablation/summary.json
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/merge-paper5-representation-ablation.json
+    - ${p5}/post_corpus_qmle/results.json
+    - ${p5}/representation_ablation/qwen8b_full/results.json
+    - ${p5}/representation_ablation/qwen4b_full/results.json
+    - ${p5}/representation_ablation/qwen8b_1024/results.json
+    - ${p5}/representation_ablation/qwen4b_1024/results.json
+    - ${p5}/representation_ablation/qwen8b_256/results.json
+    - ${p5}/representation_ablation/qwen8b_64/results.json
+    - ${p5}/representation_ablation/bge_large_full/results.json
+    - ${p5}/representation_ablation/ettax_v0/results.json
+    - ${p5}/representation_ablation/ettax_v1/results.json
+    - ${p5}/representation_ablation/ettax_v3/results.json
+    - ${p5}/representation_ablation/qwen8b_full/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/qwen4b_full/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/qwen8b_1024/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/qwen4b_1024/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/qwen8b_256/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/qwen8b_64/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/bge_large_full/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/ettax_v0/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/ettax_v1/bootstrap_draws.parquet
+    - ${p5}/representation_ablation/ettax_v3/bootstrap_draws.parquet
+    params:
+    - representation_ablation_specs
+    - encoder_vintage_ablation_specs
+    - representation_contrast_specs
+    outs:
+    - ${p5}/representation_ablation/summary.json
+
+  p5_representation_ablation_table:
+    desc: Generate Paper 5's pooled ten-cell representation/operator and paired-contrast table.
+    cmd: >-
+      ${py_pipeline} render-paper5-representation-ablation-table
+      --summary-path ${p5}/representation_ablation/summary.json
+      --output-path
+      src/latex/projects/05_spatial_pricing/src/generated/representation_ablation.tex
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper5-representation-ablation-table.json
+    - ${p5}/representation_ablation/summary.json
+    outs:
+    - src/latex/projects/05_spatial_pricing/src/generated/representation_ablation.tex:
+        cache: false
+
+  p5_universe_horizon_bridge_table:
+    desc: >-
+      Render the three observed sequential specifications and two descriptive
+      step contrasts for Paper 5's universe-and-horizon bridge.
+    cmd: >-
+      ${py_pipeline} render-paper5-universe-horizon-bridge-table
+      --summary-path ${p5}/universe_horizon_bridge/summary.json
+      --output-path
+      src/latex/projects/05_spatial_pricing/src/generated/universe_horizon_bridge.tex
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper5-universe-horizon-bridge-table.json
+    - ${p5}/universe_horizon_bridge/summary.json
+    outs:
+    - src/latex/projects/05_spatial_pricing/src/generated/universe_horizon_bridge.tex:
+        cache: false
+
+  p5_two_field_qmle:
+    desc: >-
+      Paper 5 joint two-field spatial estimates and interaction-field overlap.
+      The barycentric interaction field, computed by transport-aligned simplex
+      reconstruction, and the persistent news co-mention graph enter one exposure
+      equilibrium as separate adjustment channels; the single-field fits are
+      re-estimated as the pinned boundaries of the same nested family, so the
+      reported likelihood gains are exact. Every matrix stays frozen at 2022.
+    cmd: >-
+      ${py_pipeline} paper5-two-field-qmle
+      --returns-dir ${shared}/returns
+      --oos-returns-dir ${shared}/oos/returns
+      --shared-barycentre-dir
+      ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+      --co-mentions-adjacency ${shared}/co_mentions/adjacency.parquet
+      --output-dir ${p5}/two_field_qmle
+      --figures-dir src/latex/projects/05_spatial_pricing/src/images
+      --n-bootstrap ${paper5.two_field.n_bootstrap}
+      --block-length ${paper5.two_field.block_length}
+      --seed ${paper5.two_field.seed}
+      --n-random ${paper5.two_field.n_random}
+      --theta-points ${paper5.two_field.theta_points}
+      --rho-points ${paper5.two_field.rho_points}
+      --provider-id ${paper5.provider_id}
+      --representation-id ${paper5.representation_id}
+      --barycentre-arm-id ${paper5.barycentre_arm_id}
+      --geometry-id ${paper5.distance_id}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-two-field-qmle.json
+    - ${shared}/returns
+    - ${shared}/oos/returns
+    - ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+    - ${shared}/co_mentions/adjacency.parquet
+    params:
+    - paper5.two_field.n_bootstrap
+    - paper5.two_field.block_length
+    - paper5.two_field.seed
+    - paper5.two_field.n_random
+    - paper5.two_field.theta_points
+    - paper5.two_field.rho_points
+    - paper5.provider_id
+    - paper5.representation_id
+    - paper5.distance_id
+    - paper5.barycentre_arm_id
+    outs:
+    - ${p5}/two_field_qmle/results.json
+    - ${p5}/two_field_qmle/results.parquet
+    - ${p5}/two_field_qmle/surface.parquet
+    - ${p5}/two_field_qmle/bootstrap.parquet
+    - src/latex/projects/05_spatial_pricing/src/images/two_field_region.pgf:
+        cache: false
+
+  p5_network_certificate:
+    desc: >-
+      Float64 structural witness connecting the frozen W2 operator to Paper 5's
+      Lean SAR assumptions: row stochasticity, strict positivity of W squared,
+      Dobrushin geometric contraction, a stationary distribution, and
+      finite-rho normalized-resolvent errors at the pooled QMLE estimates.
+    cmd: >-
+      ${py_pipeline} paper5-network-certificate
+      --shared-barycentre-dir
+      ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+      --qmle-results ${p5}/post_corpus_qmle/results.json
+      --output-json ${p5}/network_certificate.json
+      --provider-id ${paper5.provider_id}
+      --representation-id ${paper5.representation_id}
+      --barycentre-arm-id ${paper5.barycentre_arm_id}
+      --geometry-id ${paper5.distance_id}
+      --tolerance ${paper5.network_certificate.tolerance}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-network-certificate.json
+    - ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+    - ${p5}/post_corpus_qmle/results.json
+    params:
+    - paper5.provider_id
+    - paper5.representation_id
+    - paper5.distance_id
+    - paper5.barycentre_arm_id
+    - paper5.network_certificate.tolerance
+    outs:
+    - ${p5}/network_certificate.json
+
+  p5_mc:
+    desc: >-
+      Paper 5 spatial-weight misspecification and size-power Monte Carlo.
+    cmd: >-
+      ${py_pipeline} paper5-mc
+      --output-dir ${p5}
+      --figures-dir src/latex/projects/05_spatial_pricing/src/images
+      --n-reps ${paper5.n_reps}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-mc.json
+    params:
+    - paper5.n_reps
+    outs:
+    - ${p5}/mc_results.json
+    - src/latex/projects/05_spatial_pricing/src/images/mc_w_misspecification.pgf:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/mc_size_power.pgf:
+        cache: false
+
+  p5_sample_descriptives:
+    desc: >-
+      Sample descriptives for the Paper 5 estimation panel: per-sector firm
+      counts, article counts, daily simple-return volatility, and mean within-
+      vs cross-sector rooted W2 distance under Paper 5's frozen encoder. Shares
+      Paper 1's tabulation; the encoder identity is asserted, not assumed.
+    cmd: >-
+      ${py_pipeline} compute-sample-descriptives
+      --universe-csv data/universe.csv
+      --embeddings-dir ${shared}/embeddings/${paper5.provider_id}
+      --returns-dir ${shared}/returns
+      --distance-artifact-dir
+      ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}
+      --provider-id ${paper5.provider_id}
+      --representation-id ${paper5.representation_id}
+      --distance-id ${paper5.distance_id}
+      --output-file ${p5}/sample_descriptives/summary.yaml
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/compute-sample-descriptives.json
+    - data/universe.csv
+    - ${shared}/embeddings/${paper5.provider_id}
+    - ${shared}/returns
+    - ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}
+    outs:
+    - ${p5}/sample_descriptives/summary.yaml:
+        cache: false
+
+  p5_descriptives_table:
+    desc: >-
+      Render Paper 5's per-sector descriptives LaTeX fragment from the
+      p5_sample_descriptives summary. Split from p5_numbers on the same
+      reasoning as p1_tables: a table-layout edit must not invalidate the
+      number bindings.
+    cmd: >-
+      ${py_pipeline} render-paper5-descriptives
+      --summary-file ${p5}/sample_descriptives/summary.yaml
+      --output-file
+      src/latex/projects/05_spatial_pricing/src/generated/sample_descriptives.tex
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper5-descriptives.json
+    - ${p5}/sample_descriptives/summary.yaml
+    outs:
+    - src/latex/projects/05_spatial_pricing/src/generated/sample_descriptives.tex:
+        cache: false
+
+  p5_sample_universe_table:
+    desc: >-
+      Render Paper 5's canonical priced W2 ticker, name, and sector roster as
+      a generated appendix longtable.
+    cmd: >-
+      ${py_pipeline} render-sample-universe-table
+      --universe-csv data/universe.csv
+      --returns-dir ${shared}/returns
+      --distance-artifact-dir
+      ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}
+      --provider-id ${paper5.provider_id}
+      --representation-id ${paper5.representation_id}
+      --distance-id ${paper5.distance_id}
+      --output-file
+      src/latex/projects/05_spatial_pricing/src/generated/sample_universe.tex
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-sample-universe-table.json
+    - data/universe.csv
+    - ${shared}/returns
+    - ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}
+    params:
+    - paper5.provider_id
+    - paper5.representation_id
+    - paper5.distance_id
+    outs:
+    - src/latex/projects/05_spatial_pricing/src/generated/sample_universe.tex:
+        cache: false
+
+  p5_numbers:
+    desc: >-
+      Generate the focused Paper 5 LaTeX bindings from pooled/annual QMLE and
+      the frozen-operator network certificate, text-geometry summary, governed
+      sample thresholds, and universe-by-horizon bridge.
+    cmd: >-
+      ${py_pipeline} paper5-numbers
+      --results-dir ${p5}
+      --geometry-summary-path
+      ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}/summary.json
+      --params-path params.yaml
+      --universe-horizon-summary-path
+      ${p5}/universe_horizon_bridge/summary.json
+      --out-path src/latex/projects/05_spatial_pricing/src/generated/numbers.tex
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/paper5-numbers.json
+    - ${p5}/post_corpus_qmle/results.json
+    - ${p5}/two_field_qmle/results.json
+    - ${p5}/network_certificate.json
+    - ${p5}/universe_horizon_bridge/summary.json
+    - ${shared}/typed_distances/${paper5.provider_id}/${paper5.representation_id}/${paper5.distance_id}/summary.json
+    params:
+    - annual_raw_article_floor
+    outs:
+    - src/latex/projects/05_spatial_pricing/src/generated/numbers.tex:
+        cache: false
+
+  p5_illustrations:
+    desc: >-
+      Render Paper 5's conceptual exposure arc and restricted target-anchored W2
+      operator construction at the shared 150 mm and 124 mm measures, retaining
+      the unused rank-one SAR covariance illustration as appendix-support
+      infrastructure.
+    cmd: >-
+      ${py_pipeline} render-paper5-illustrations
+      --output-dir src/latex/projects/05_spatial_pricing/src/images
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper5-illustrations.json
+    outs:
+    - src/latex/projects/05_spatial_pricing/src/images/rank_one_collapse.pgf:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/rank_one_collapse-img0.png:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/rank_one_collapse-img1.png:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/rank_one_collapse-img2.png:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/rank_one_collapse-img3.png:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/rank_one_collapse-img4.png:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/rank_one_collapse-img5.png:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/spatial_exposure_arc.pgf:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/w2_operator_construction.pgf:
+        cache: false
+
+  p5_barycentric_mixture_figure:
+    desc: >-
+      Render Paper 5's empirical barycentric interaction field from the frozen
+      leave-one-out artifact. Its target rows use target-anchored
+      Wasserstein-barycentric reconstruction, computed by transport-aligned
+      simplex reconstruction. The shared 150 mm and 124 mm displays keep each
+      target's five largest actual coefficients while the side panels disclose
+      concentration and displayed mass.
+    cmd: >-
+      ${py_pipeline} render-paper5-barycentric-mixtures
+      --barycentre-dir
+      ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+      --universe-csv data/universe.csv
+      --output-file
+      src/latex/projects/05_spatial_pricing/src/images/w2_barycentric_mixture_weights.pgf
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/render-paper5-barycentric-mixtures.json
+    - ${shared}/barycentres/${paper5.provider_id}/${paper5.representation_id}/${paper5.barycentre_arm_id}
+    - data/universe.csv
+    outs:
+    - src/latex/projects/05_spatial_pricing/src/images/w2_barycentric_mixture_weights.pgf:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/w2_barycentric_mixture_weights-img0.png:
+        cache: false
+    - src/latex/projects/05_spatial_pricing/src/images/w2_barycentric_mixture_weights-img1.png:
+        cache: false
+
+  # ====================================================================
+  # PAPER 3 - model robustness
+  # ====================================================================
+
+  p3_model_robustness_qwen3-embedding-8b:
+    desc: >-
+      Referee model-robustness ablation (baseline model, qwen3-embedding-8b):
+      re-run Paper 3's W2 envelope and backtest for this model only, reusing
+      its canonical baseline output. Split from the former monolithic
+      p3_model_robustness stage for per-model caching/resume. Writes only
+      under ${shared}/ablations/paper3_model_robustness/qwen3-embedding-8b.
+      The exact typed W2 arm is consumed directly.
+    cmd: >-
+      ${py_pipeline} run-paper3-model-robustness
+      --returns-dir ${shared}/returns
+      --output-dir ${shared}/ablations/paper3_model_robustness
+      --params-file params.yaml
+      --baseline-model ${scientific_selectors.baseline_model}
+      --distance-artifact-dir ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+      --provider-id ${scientific_selectors.typed_distance_provider}
+      --representation-id ${scientific_selectors.typed_distance_representation}
+      --distance-id ${paper3.primary_distance_id}
+      --canonical-summary ${p3}/empirical/summary.yaml
+      --model ${scientific_selectors.baseline_model}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/run-paper3-model-robustness.json
+    - ${shared}/embeddings/${scientific_selectors.baseline_model}
+    - ${shared}/returns
+    - ${shared}/typed_distances/${scientific_selectors.typed_distance_provider}/${scientific_selectors.typed_distance_representation}/${paper3.primary_distance_id}
+    - ${p3}/empirical/summary.yaml
+    params:
+    - ablation.grid
+    outs:
+    - ${shared}/ablations/paper3_model_robustness/${scientific_selectors.baseline_model}
+
+  p3_model_robustness_model:
+    matrix:
+      model: ${ablation_models}
+    desc: >-
+      Referee model-robustness ablation for the non-baseline ablation_models
+      roster (matrix-ized from the former three hand-rolled
+      p3_model_robustness_<model> stages — homogeneous cmd/dep shape, t15
+      dvc-graph-symmetry). Writes only under
+      ${shared}/ablations/paper3_model_robustness/${item.model}. Per-model
+      consumes the exact model-specific W2 arm and emits the Paper 3 summary.
+    cmd: >-
+      ${py_pipeline} run-paper3-model-robustness
+      --returns-dir ${shared}/returns
+      --output-dir ${shared}/ablations/paper3_model_robustness
+      --params-file params.yaml
+      --baseline-model ${scientific_selectors.baseline_model}
+      --distance-artifact-dir ${shared}/typed_distances/${item.model}/${item.model}-unit/wasserstein_w2
+      --provider-id ${item.model}
+      --representation-id ${item.model}-unit
+      --distance-id wasserstein_w2
+      --canonical-summary ${p3}/empirical/summary.yaml
+      --model ${item.model}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/run-paper3-model-robustness.json
+    - ${shared}/embeddings/${item.model}
+    - ${shared}/returns
+    - ${shared}/typed_distances/${item.model}/${item.model}-unit/wasserstein_w2
+    params:
+    - ablation.grid
+    outs:
+    - ${shared}/ablations/paper3_model_robustness/${item.model}
+
+  p3_model_robustness:
+    desc: >-
+      Merge the per-model p3_model_robustness_<model> summaries into the
+      consolidated ${shared}/ablations/paper3_model_robustness/summary.yaml
+      consumed by the Paper 3 figure renderer. Split from the
+      former monolithic stage: this merge stage is cheap (I/O only), so the
+      expensive per-model work is now independently cacheable/resumable.
+    cmd: >-
+      ${py_pipeline} merge-paper3-model-robustness
+      --output-dir ${shared}/ablations/paper3_model_robustness
+      --params-file params.yaml
+      --baseline-model ${scientific_selectors.baseline_model}
+    deps:
+    - .semflow/hashes/entrypoints/pipeline/merge-paper3-model-robustness.json
+    - ${shared}/ablations/paper3_model_robustness/qwen3-embedding-4b
+    - ${shared}/ablations/paper3_model_robustness/qwen3-embedding-8b
+    - ${shared}/ablations/paper3_model_robustness/bge-m3
+    - ${shared}/ablations/paper3_model_robustness/bge-large-en-v1.5
+    params:
+    - ablation.grid
+    outs:
+    - ${shared}/ablations/paper3_model_robustness/summary.yaml
+
+  # ====================================================================
+  # MONTE-CARLO / VALIDATION (data-free)
+  # ====================================================================
+
+  mc_variance_floor:
+    desc: >-
+      Numerically validate Lean theorem portfolio_variance_lower_bound via Monte-Carlo.
+    cmd: >-
+      ${py_sim} validate-variance-floor
+    deps:
+    - .semflow/hashes/entrypoints/simulation/validate-variance-floor.json
+    params:
+    - monte_carlo.n_assets
+    - monte_carlo.embedding_dim
+    - monte_carlo.n_points_per_asset
+    - monte_carlo.n_clusters
+    - monte_carlo.n_weight_draws
+    - monte_carlo.lipschitz_scale_factors
+    - monte_carlo.lipschitz_tightness_probe_factors
+    - monte_carlo.tolerance
+    - monte_carlo.seed
+    outs:
+    - ${mc}/monte_carlo_validation/results_portfolio_floor.parquet
+    - ${mc}/monte_carlo_validation/violation_summary.csv
+    - ${mc}/monte_carlo_validation/summary.yaml
+
+  mc_hedging_error:
+    desc: >-
+      Monte-Carlo validation: targeted energy barycentre vs hedging-error bound (Papers
+      2/3).
+    cmd: >-
+      ${py_sim} validate-hedging-error
+    deps:
+    - .semflow/hashes/entrypoints/simulation/validate-hedging-error.json
+    params:
+    - monte_carlo.n_assets
+    - monte_carlo.embedding_dim
+    - monte_carlo.n_points_per_asset
+    - monte_carlo.n_clusters
+    - monte_carlo.tolerance
+    - monte_carlo.seed
+    - monte_carlo.hedging_error_solver
+    - monte_carlo.hedging_error_tol
+    - monte_carlo.hedging_error_maxiter
+    outs:
+    - ${mc}/hedging_error_validation/results.parquet
+    - ${mc}/hedging_error_validation/summary.yaml
+
+  mc_pricefree:
+    desc: >-
+      PUNCHLINE experiment: compare price-free portfolio constructions (max-spread,
+      distance-MVO) vs sample-MVO and equal-weight across T in {20,60,250}.
+      Tests hypothesis that price-free beats sample-MVO at small T.
+    cmd: >-
+      ${py_sim} compare-pricefree
+    deps:
+    - .semflow/hashes/entrypoints/simulation/compare-pricefree.json
+    params:
+    - monte_carlo.n_assets
+    - monte_carlo.embedding_dim
+    - monte_carlo.n_points_per_asset
+    - monte_carlo.n_clusters
+    - monte_carlo.seed
+    - monte_carlo.pricefree_T_values
+    - monte_carlo.pricefree_sigma_eps
+    - monte_carlo.pricefree_n_sims
+    - monte_carlo.pricefree_pgd_steps
+    - monte_carlo.replication_batch_size
+    outs:
+    - ${mc}/pricefree_comparison/results.parquet
+    - ${mc}/pricefree_comparison/summary.yaml
+
+  mc_test_size_power:
+    desc: >-
+      Type I / Type II (size/power) validation of the energy permutation test
+      used in Papers 2/3 Monte-Carlo sections (ROADMAP §4.5 / §5).
+    cmd: >-
+      ${py_sim} simulate-size-power
+    deps:
+    - .semflow/hashes/entrypoints/simulation/simulate-size-power.json
+    params:
+    - monte_carlo.test_size_power.n_sims
+    - monte_carlo.test_size_power.num_permutations
+    - monte_carlo.test_size_power.n_values
+    - monte_carlo.test_size_power.d_values
+    - monte_carlo.test_size_power.alpha_levels
+    - monte_carlo.test_size_power.mean_shifts
+    - monte_carlo.test_size_power.scale_factors
+    - monte_carlo.test_size_power.contamination_fracs
+    - monte_carlo.test_size_power.seed
+    - monte_carlo.replication_batch_size
+    outs:
+    - ${mc}/test_size_power/size_results.parquet
+    - ${mc}/test_size_power/power_results.parquet
+    - ${mc}/test_size_power/summary.yaml
+
+  mc_window_size_power:
+    # t17 backtest overlay D6 (ADDITIVE — validates the NEW
+    # simulation.sharpe_tests inference layer; changes no published number).
+    # HEAVY at n_sims=1000; for the main session / author to `dvc repro`.
+    desc: >-
+      Monte-Carlo size/power of the overlap-robust Sharpe-superiority test as a
+      function of the evaluation-window length T: confirms empirical size ~alpha
+      and power rising with T, empirically justifying a minimal feasible window
+      (decision brief D6).
+    cmd: >-
+      ${py_sim} simulate-window-size-power
+      --params-file params.yaml
+      --output-dir ${mc}/window_size_power
+    deps:
+    - .semflow/hashes/entrypoints/simulation/simulate-window-size-power.json
+    params:
+    - monte_carlo.window_size_power.t_values
+    - monte_carlo.window_size_power.phi
+    - monte_carlo.window_size_power.deltas
+    - monte_carlo.window_size_power.alpha_levels
+    - monte_carlo.window_size_power.n_sims
+    - monte_carlo.window_size_power.n_boot
+    - monte_carlo.window_size_power.k_strategies
+    - monte_carlo.window_size_power.seed
+    - monte_carlo.replication_batch_size
+    outs:
+    - ${mc}/window_size_power/size_results.parquet
+    - ${mc}/window_size_power/power_results.parquet
+    - ${mc}/window_size_power/summary.yaml
+
+  mc_equivalence:
+    desc: >-
+      Paper 2 P0-2: calibrate energy-equivalence size at the exact population
+      margin, probability of any rejection across correlated targets, and power. Compares
+      the pre-specified studentized k-minus-1 diagnostic with marginal, BH, and
+      target-scale comparison procedures.
+    cmd: >-
+      ${py_sim} simulate-equivalence-calibration
+    deps:
+    - .semflow/hashes/entrypoints/simulation/simulate-equivalence-calibration.json
+    params:
+    - monte_carlo.equivalence_calibration.n_sims
+    - monte_carlo.equivalence_calibration.n_resamples
+    - monte_carlo.equivalence_calibration.n_target
+    - monte_carlo.equivalence_calibration.n_candidate
+    - monte_carlo.equivalence_calibration.m_values
+    - monte_carlo.equivalence_calibration.target_correlation
+    - monte_carlo.equivalence_calibration.delta
+    - monte_carlo.equivalence_calibration.alpha
+    - monte_carlo.equivalence_calibration.null_fractions
+    - monte_carlo.equivalence_calibration.power_energy_ratio
+    - monte_carlo.equivalence_calibration.variance_cells
+    - monte_carlo.equivalence_calibration.seed
+    - monte_carlo.replication_batch_size
+    outs:
+    - ${mc}/equivalence_calibration/results.parquet
+    - ${mc}/equivalence_calibration/boundary_design.parquet
+    - ${mc}/equivalence_calibration/summary.yaml
+
+  mc_gmm_wolak:
+    desc: >-
+      Paper 3: size/power of the GMM Wald and Wolak inequality tests on synthetic
+      moment panels with a known null. Calibrates the chi-bar-squared weights by
+      Monte Carlo and confirms test size — gates the Wave-2 empirical p-values
+      (ROADMAP §4.5). Data-free.
+    cmd: >-
+      ${py_sim} simulate-gmm-wolak-size-power
+    deps:
+    - .semflow/hashes/entrypoints/simulation/simulate-gmm-wolak-size-power.json
+    params:
+    - monte_carlo.gmm_wolak_size_power.n_sims
+    - monte_carlo.gmm_wolak_size_power.T
+    - monte_carlo.gmm_wolak_size_power.m
+    - monte_carlo.gmm_wolak_size_power.phi
+    - monte_carlo.gmm_wolak_size_power.innov_scale
+    - monte_carlo.gmm_wolak_size_power.alpha_levels
+    - monte_carlo.gmm_wolak_size_power.power_deltas
+    - monte_carlo.gmm_wolak_size_power.power_alpha
+    - monte_carlo.gmm_wolak_size_power.n_mc
+    - monte_carlo.gmm_wolak_size_power.seed
+    - monte_carlo.replication_batch_size
+    outs:
+    - ${mc}/gmm_wolak_size_power/size_results.parquet
+    - ${mc}/gmm_wolak_size_power/power_results.parquet
+    - ${mc}/gmm_wolak_size_power/summary.yaml
+
+  mc_kappa_audit:
+    desc: >-
+      Paper 3: audit which identity form (D², ½κ²D², ½κ_iκ_jD²) makes the
+      residual g_ij vanish under a white-noise factor field, and how coloured
+      (exponential / Matérn-3/2) kernels break it — settles the figure-10 vs
+      figure-22 scaling and calibrates the misspecification tolerance
+      (ROADMAP §4 item 3). Data-free.
+    cmd: >-
+      ${py_sim} audit-kappa-identity
+    deps:
+    - .semflow/hashes/entrypoints/simulation/audit-kappa-identity.json
+    params:
+    - monte_carlo.kappa_audit.n_assets
+    - monte_carlo.kappa_audit.resolution
+    - monte_carlo.kappa_audit.d
+    - monte_carlo.kappa_audit.n_clusters
+    - monte_carlo.kappa_audit.lengthscale
+    - monte_carlo.kappa_audit.kappa_base
+    - monte_carlo.kappa_audit.kappa_spread
+    - monte_carlo.kappa_audit.kernels
+    - monte_carlo.kappa_audit.seed
+    outs:
+    - ${p3}/kappa_audit/results.parquet
+    - ${p3}/kappa_audit/summary.yaml

@@ -1,0 +1,259 @@
+\section{Exposure Adjustment and Spatial Closure}\label{sec:spatial-closure}
+
+How does peer adjustment transform the stand-alone exposures $\xi$ into
+peer-adjusted exposures $B$?
+We answer with an as-if reduced-form adjustment criterion that summarizes costly
+operational, financing, or portfolio reconfiguration.
+The criterion balances fidelity to the firm's stand-alone exposure against
+alignment with its peer-weighted exposure.
+We call the resulting link \emph{spatial closure}: the objective yields, rather
+than assumes, a spatial autoregression in exposures.
+
+To formalize this trade-off, fix an interaction matrix $W$ satisfying
+\Cref{def:interaction-matrix} and an adjustment intensity $\lambda\geq0$.
+For a fixed peer profile $b_{-i}$, let $a\in\mathcal H$ denote firm $i$'s
+candidate exposure, let $\xi_i$ denote its stand-alone exposure, and let
+$b_j\in\mathcal H$ denote the peer exposures.
+The adjustment criterion is the following quadratic problem.
+
+\begin{definition}[Quadratic adjustment problem]\label{def:adjustment-problem}
+  Holding the profile $b_{-i}$ of peer exposures fixed, firm $i$ chooses
+  $a\in\mathcal H$ to minimize
+  \begin{equation}\label{eq:adjustment-objective}
+    \frac{1}{2}\norm{a-\xi_i}^2
+    +\frac{\lambda}{2}\sum_j W_{ij}\norm{a-b_j}^2 .
+  \end{equation}
+  A profile $b$ is an equilibrium when every $b_i$ minimizes
+  \eqref{eq:adjustment-objective} at $b_{-i}$.
+\end{definition}
+
+Both terms are measured in squared exposure units.
+The first penalizes departure from the stand-alone exposure, whereas the second
+penalizes disagreement with the peer profile.
+Row stochasticity keeps the scale of the peer penalty comparable across firms,
+and $\lambda$ measures its weight relative to the stand-alone-exposure penalty.
+The quadratic form and fixed $W$ are maintained inputs to the model.
+
+To characterize equilibrium, first ask when each firm's candidate exposure
+minimizes its criterion.
+Unit row sums collect the quadratic terms and yield a condition that is both
+necessary and sufficient.
+
+\begin{lemma}[Adjustment equilibrium
+  condition]\label{thm:adjustment-equilibrium}
+  For $\lambda\geq0$ and row-stochastic $W$, a profile $b$ is an equilibrium of
+  \Cref{def:adjustment-problem} if and only if
+  \begin{equation}\label{eq:adjustment-stationarity}
+    b_i-\xi_i+\lambda\sum_j W_{ij}(b_i-b_j)=0
+    \qquad\text{for every }i.
+  \end{equation}
+\end{lemma}
+
+Economically, \eqref{eq:adjustment-stationarity} balances displacement from the
+stand-alone exposure against the weighted gap from peer exposures.
+Mathematically, completing the square isolates a linear term whose coefficient
+is the left-hand side of \eqref{eq:adjustment-stationarity}.
+A minimizer forces that coefficient to vanish; once it does, the objective gap
+at any alternative $a$ is
+$\tfrac{1}{2}(1+\lambda)\norm{a-b_i}^2$.
+The condition is therefore necessary and sufficient in any real inner-product
+space, without a finite-dimensional differentiability argument.
+This lemma characterizes equilibrium for a fixed admissible $W$.
+
+To close the firm-level conditions as a simultaneous system, use
+$\sum_{j} W_{ij}=1$ in \eqref{eq:adjustment-stationarity} and rearrange.
+
+\begin{theorem}[Spatial closure]\label{thm:spatial-closure}
+  Under the hypotheses of \Cref{thm:adjustment-equilibrium}, every equilibrium
+  satisfies the Hilbert-valued spatial autoregression
+  \begin{equation}\label{eq:hilbert-sar}
+    B=\rho\,WB+(1-\rho)\,\xi,
+    \qquad
+    \rho=\frac{\lambda}{1+\lambda}.
+  \end{equation}
+\end{theorem}
+
+Equation~\eqref{eq:hilbert-sar} is the spatial closure: the familiar spatial lag
+follows from the two adjustment penalties rather than entering as an assumed
+return equation.
+For each firm, peer-adjusted exposure is a convex balance between its peer
+average and its stand-alone exposure.
+Accordingly, $\rho$ is a model-implied index of relative adjustment, not an
+identified causal share attributable to peers.
+The map $\lambda\mapsto\lambda/(1+\lambda)$ is a strictly increasing bijection
+from nonnegative adjustment intensity to $0\leq\rho<1$.
+Consequently, the relative penalty weight can be recovered from a spatial
+coefficient by
+
+\begin{equation}\label{eq:lambda-from-rho}
+  \lambda=\frac{\rho}{1-\rho}.
+\end{equation}
+
+A value $\rho=1/2$ gives the peer average and the stand-alone exposure equal
+weight, while larger values place more weight on peers.
+At $\rho=0$, peer-adjusted exposure equals stand-alone exposure, whereas values
+approaching one place progressively greater model-implied weight on peer
+alignment.
+
+To express the simultaneous system as a unique reduced form, the spatial
+multiplier must exist.
+We impose the following standard sufficient stability condition.
+
+\begin{hypothesis}[Stability condition]\label{hyp:spectral-gate}
+  The pair $(\rho, W)$ satisfies $\norm{\rho W} < 1$ in the
+  $\ell^\infty$-induced operator norm.
+  That norm is the largest absolute row sum, so the nonnegative unit rows of
+  \Cref{def:interaction-matrix} give $\norm{W}=1$ and $0\leq\rho<1$ is
+  sufficient.
+\end{hypothesis}
+
+Economically, the condition keeps iterated peer feedback anchored by the
+stand-alone exposures.
+Mathematically, rearranging \eqref{eq:hilbert-sar} and applying the convergent
+Neumann series for $(I-\rho W)^{-1}$ gives the following unique equilibrium.
+
+\begin{theorem}[Reduced form]\label{thm:sar-reduced-form}
+  If in addition $\norm{\rho W}<1$, the equilibrium is unique and
+  \begin{equation}\label{eq:hilbert-reduced-form}
+    B=(1-\rho)(I-\rho W)^{-1}\xi .
+  \end{equation}
+\end{theorem}
+
+The multiplier aggregates direct and iterated peer adjustment, while the factor
+$1-\rho$ preserves the scale of the stand-alone exposures.
+This is an equilibrium result for exposures; its observed-return interpretation
+requires the projection argument in \Cref{sec:identification-estimation}.
+
+To connect spatial closure to the pairwise exposure model of
+\citet{gawronsky_continuous_2026}, consider the zero-feedback benchmark.
+
+\begin{corollary}[Zero-feedback nesting]\label{cor:zero-feedback-nesting}
+  At $\rho=0$, $B=\xi$.
+\end{corollary}
+
+The equality is exact rather than limiting: when peer alignment receives zero
+weight, peer-adjusted exposure equals stand-alone exposure.
+The benchmark therefore recovers the exposure object used by their pairwise
+covariance restriction without reproducing that theory.
+
+\subsection{Joint Adjustment Across Two Interaction Fields}
+\label{sec:two-field-closure}
+
+Nothing in the adjustment criterion requires the researcher to settle on one
+definition of a peer.
+Distributional similarity and explicit news links may each carry distinct
+conditional information about peer relevance.
+The economic question is therefore how peer-adjusted exposure balances both
+peer averages against the firm's stand-alone exposure.
+The two-field objective represents that trade-off directly.
+
+Let $W^{B}$ and $W^{N}$ be two matrices satisfying
+\Cref{def:interaction-matrix}.
+Let $\lambda_B,\lambda_N\geq0$ be the relative penalty weights on misalignment
+with each.
+The labels anticipate the two fields the application supplies; the statements
+below use nothing beyond admissibility of each matrix.
+
+\begin{definition}[Two-field adjustment problem]\label{def:two-field-adjustment}
+  Holding the profile $b_{-i}$ fixed, firm $i$ chooses $a\in\mathcal H$ to
+  minimize
+  \begin{equation}\label{eq:two-field-objective}
+    \frac{1}{2}\norm{a-\xi_i}^2
+    +\frac{\lambda_B}{2}\sum_j W^{B}_{ij}\norm{a-b_j}^2
+    +\frac{\lambda_N}{2}\sum_j W^{N}_{ij}\norm{a-b_j}^2 .
+  \end{equation}
+  A profile $b$ is an equilibrium when every $b_i$ minimizes
+  \eqref{eq:two-field-objective} at $b_{-i}$.
+\end{definition}
+
+All three terms carry squared exposure units, so $\lambda_B$ and $\lambda_N$
+are dimensionless penalty weights relative to the stand-alone term.
+Setting either intensity to zero returns \Cref{def:adjustment-problem} at the
+other field.
+
+To connect the two-field objective to the one-field closure, write
+$\lambda=\lambda_B+\lambda_N$ and, when $\lambda>0$,
+$\theta=\lambda_B/\lambda$, and define the mixture
+$W(\theta)=\theta W^{B}+(1-\theta)W^{N}$.
+The two peer penalties in \eqref{eq:two-field-objective} then equal the
+one-field penalty in \eqref{eq:adjustment-objective} at total intensity
+$\lambda$ and matrix $W(\theta)$.
+Before applying the one-field results, the next result verifies that this
+mixture remains an admissible peer matrix.
+
+\begin{corollary}[Mixture nesting]\label{cor:mixture-nesting}
+  For $0\leq\theta\leq1$ and $W^{B},W^{N}$ satisfying
+  \Cref{def:interaction-matrix}, the mixture $W(\theta)$ satisfies
+  \Cref{def:interaction-matrix}.
+  The endpoints $\theta=1$ and $\theta=0$
+  return $W^{B}$ and $W^{N}$.
+\end{corollary}
+
+Economically, the mixture allocates one unit of peer weight across two peer
+definitions while preserving the peer-average interpretation.
+Nonnegativity and the zero diagonal are preserved entrywise, and the row sums
+are a convex combination of two unit row sums.
+Thus the one-field results apply unchanged.
+
+With admissibility established, the joint-field result answers how total
+model-implied adjustment divides across the two channels.
+
+\begin{theorem}[Two-field spatial closure]\label{thm:two-field-closure}
+  For $\lambda_B,\lambda_N\geq0$ and admissible $W^{B},W^{N}$, every
+  equilibrium of \Cref{def:two-field-adjustment} satisfies
+  \begin{equation}\label{eq:two-field-sar}
+    B=\rho_B\,W^{B}B+\rho_N\,W^{N}B+(1-\rho_B-\rho_N)\,\xi,
+    \qquad
+    \rho_k=\frac{\lambda_k}{1+\lambda_B+\lambda_N},
+  \end{equation}
+  for $k\in\{B,N\}$.
+\end{theorem}
+
+Equation~\eqref{eq:two-field-sar} makes the channel allocation explicit:
+$\rho_B+\rho_N$ is the total model-implied peer-adjustment weight, while
+$\rho_B$ and $\rho_N$ assign that total to the two fields.
+The remaining weight $1-\rho_B-\rho_N$ anchors peer-adjusted exposure to the
+firm's stand-alone exposure.
+When $\lambda_N>0$, equivalently $\rho_N>0$, the ratio
+$\lambda_B/\lambda_N=\rho_B/\rho_N$ describes how peer adjustment divides
+between the channels.
+To obtain these coefficients, apply \Cref{thm:spatial-closure} at
+$(\lambda,W(\theta))$ and expand
+$B=\rho\,W(\theta)B+(1-\rho)\xi$ with $\rho=\lambda/(1+\lambda)$.
+
+To establish stability of the joint system and recover each channel's relative
+penalty weight, combine the coefficient levels in the following result.
+
+\begin{proposition}[Two-field stability and channel inversion]
+  \label{prop:channel-inversion}
+  Under the hypotheses of \Cref{thm:two-field-closure},
+  $\rho_B+\rho_N=\lambda/(1+\lambda)<1$, and
+  $\norm{\rho_B\,W^{B}+\rho_N\,W^{N}}\leq\rho_B+\rho_N$ in the
+  $\ell^\infty$-induced operator norm, so \Cref{hyp:spectral-gate} holds and
+  the reduced form of \Cref{thm:sar-reduced-form} applies at the mixture.
+  Each intensity is recovered from the coefficients by
+  \begin{equation}\label{eq:channel-inversion}
+    \lambda_k=\frac{\rho_k}{1-\rho_B-\rho_N},
+    \qquad k\in\{B,N\}.
+  \end{equation}
+\end{proposition}
+
+Equation~\eqref{eq:channel-inversion} generalizes
+\eqref{eq:lambda-from-rho}: each channel's adjustment index is its own spatial
+coefficient measured against the weight the firm still places on its
+stand-alone exposure.
+The norm bound follows from \Cref{cor:mixture-nesting} and
+$\norm{W(\theta)}\leq1$.
+For the inversion, $1-\rho_B-\rho_N=(1+\lambda)^{-1}$, so dividing $\rho_k$ by
+this common stand-alone weight returns $\lambda_k$.
+
+The closure argument is complete conditional on an admissible interaction
+field.
+Where does that field come from when peer relevance must be inferred from
+distributions of firm text?
+The next section develops a \emph{target-anchored Wasserstein barycentric
+reconstruction}: candidate firms are aligned to a fixed target, and their
+distributional spanning weights form the \emph{barycentric interaction field}
+$W^\flat$.
+Each row is admissible, and the computation does not require a conventional
+kernel bandwidth.

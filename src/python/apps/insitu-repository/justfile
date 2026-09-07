@@ -1,0 +1,45 @@
+set shell := ["bash", "-uc"]
+# `graph` and `task-new` forward arguments with "$@", which bash only populates
+# when just passes recipe arguments as positional parameters. Without this the
+# two recipes silently receive nothing: `task-new` fails on a missing PARENT and
+# `graph` ignores every path filter. Matches src/python/scripts/references and
+# packages/agentrail/chat.justfile, which use the same idiom.
+set positional-arguments
+
+_run *args:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && env -u VIRTUAL_ENV uv run --project src/python --package insitu-repository --no-sync insitu-repository {{ args }}
+
+# Check repository projections without writing.
+check: (_run "check")
+
+# Converge repository projections.
+sync: (_run "sync")
+
+# Backward-compatible spelling for the retired Rust CLI.
+write: sync
+
+# Converge now and remain synchronized.
+watch: (_run "watch")
+
+# Maintain plan-region structure; compatibility surface for `just plan board`.
+board *args: (_run "board" args)
+
+# Check plan/task referential integrity and lifecycle consistency.
+graph *args:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && env -u VIRTUAL_ENV uv run --project src/python --package insitu-repository --no-sync python -m insitu_repository.plan_graph "$@"
+
+# Scaffold the next collision-free task under a plan or task.
+task-new *args:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && env -u VIRTUAL_ENV uv run --project src/python --package insitu-repository --no-sync python -m insitu_repository.plan_task "$@"
+
+# Run repository-integration tests.
+test *args:
+    cd '{{ source_directory() }}' && env -u VIRTUAL_ENV uv run pytest -q -p no:monitor -n auto {{ args }}
+
+# Run app-local Ruff checks.
+lint:
+    uv run ruff check .
+
+# Format app sources and tests.
+format:
+    uv run ruff format .

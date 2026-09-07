@@ -1,0 +1,325 @@
+set shell := ["bash", "-uc"]
+
+# The upstream Tectonic bundle these manuscripts are pinned to. Nothing in the
+# build path reads it: it is 2.9 GB on a third-party host, and a build that
+# fetches from it is a build that can fail on someone else's outage. Only
+# `bundle-refresh` below touches it.
+upstream_bundle := "https://data1.fullyjustified.net/tlextras-2022.0r0.tar"
+
+# What every project's Tectonic.toml actually points at — the subset of the
+# upstream bundle these manuscripts resolve, ~7 MB, vendored in git-LFS. Each
+# real paper requests a distinct set of T1 Latin Modern TFM/pfb metrics by font
+# size (e.g. ec-lmr5 subscripts, ec-lmtt8 typewriter, lmbx8 8pt bold), so the
+# subset is the whole matrix's closure, not one target's. With it in the tree
+# there is no provisioning step and no network in any build, local or CI.
+vendored_bundle := "bundle/tlextras-2022.0r0-pricing-perspective.zip"
+
+# Rebuild the vendored bundle subset from the pinned upstream. Needs the network
+# and a working tree whose DVC figures are present (the papers must compile for
+# their font requests to be observed). Run after adding a \usepackage or a font
+# size the subset lacks, then commit the zip — that commit is the provisioning.
+bundle-refresh:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    root="$(pwd)"
+    work="$(mktemp -d)"
+    trap 'rm -rf "$work"' EXIT
+    # A scratch cache, never ~/.cache/Tectonic: the subset must be exactly what
+    # this matrix resolves, not whatever the developer's cache accumulated.
+    export TECTONIC_CACHE_DIR="$work/cache"
+    mkdir -p "$TECTONIC_CACHE_DIR"
+    for p in projects/*/; do
+      slug="$(basename "$p")"
+      just _prepare "$slug"
+      cp -R "$p" "$work/$slug"
+      rm -rf "$work/$slug/build"
+      sed -i 's|^bundle = .*|bundle = "{{ upstream_bundle }}"|' "$work/$slug/Tectonic.toml"
+      targets=(draft arxiv)
+      for t in "${targets[@]}"; do
+        echo "warming $slug/$t"
+        # The upstream host rate-limits (HTTP 429), and Tectonic surfaces that as
+        # a bare fetch failure — the same failure mode that made this bundle
+        # worth vendoring. Back off rather than abandoning a half-warmed cache.
+        for attempt in 1 2 3 4 5 6; do
+          if (cd "$work/$slug" && tectonic -X build --untrusted --target "$t" >/dev/null); then
+            break
+          fi
+          if (( attempt == 6 )); then
+            echo "bundle-refresh: upstream fetch kept failing for $slug/$t" >&2
+            exit 1
+          fi
+          echo "  retrying in $(( attempt * 60 ))s"
+          sleep $(( attempt * 60 ))
+        done
+      done
+    done
+    stage="$work/stage"
+    cp -R "$TECTONIC_CACHE_DIR"/bundles/data/*/ "$stage"
+    # SHA256SUM is how Tectonic identifies a local bundle; it keys the cached
+    # format file, so it must change whenever the contents do.
+    rm -f "$stage/SHA256SUM"
+    manifest() { (cd "$stage" && LC_ALL=C find . -type f -printf '%P\n' | sort); }
+    manifest | (cd "$stage" && xargs -r sha256sum | sha256sum | cut -d' ' -f1) \
+      > "$work/SHA256SUM"
+    mv "$work/SHA256SUM" "$stage/SHA256SUM"
+    # Deterministic archive: sorted entries, no extra attributes, and a fixed
+    # mtime (1980-01-01, the earliest a zip can record), so an unchanged subset
+    # re-zips to an unchanged LFS object instead of churning on every refresh.
+    find "$stage" -exec touch -h -d @315532800 {} +
+    mkdir -p "$root/$(dirname '{{ vendored_bundle }}')"
+    rm -f "$root/{{ vendored_bundle }}"
+    manifest | (cd "$stage" && zip -q -X -D -@ "$root/{{ vendored_bundle }}")
+    echo "wrote {{ vendored_bundle }} ($(du -h "$root/{{ vendored_bundle }}" | cut -f1), $(manifest | wc -l) files)"
+
+# Materialize pinned shared and publisher dependencies into a project workspace.
+_prepare project:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    destination="projects/{{ project }}/src"
+    test -d "$destination"
+    install -m 0644 templates/pp-manuscript.sty "$destination/pp-manuscript.sty"
+    uv run --script tools/interpretation-contract --root . --project "$destination"
+
+# Create a project from the compiling template; refuses invalid or existing paths.
+new slug:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [[ ! "{{ slug }}" =~ ^[0-9A-Za-z][0-9A-Za-z_-]*$ ]]; then
+      echo "project slug must contain only letters, digits, underscores, and hyphens" >&2
+      exit 2
+    fi
+    destination="projects/{{ slug }}"
+    if [[ -e "$destination" ]]; then
+      echo "$destination already exists" >&2
+      exit 2
+    fi
+    cp -R projects/_template "$destination"
+    sed -i 's/name = "latex-template"/name = "{{ slug }}"/' "$destination/Tectonic.toml"
+    just _prepare "{{ slug }}"
+    echo "created src/latex/$destination"
+
+# The one builder — interactive loop, quality gates, and the DVC `render`
+# stage all come through here, so a PDF can only ever be produced one way.
+# Tectonic's V2 layout is the published layout: outputs land in
+# projects/<project>/build/<target>/ as <target>.{pdf,log,blg,aux,bbl}, with
+# the submission archive written alongside them by `just bundle`.
+#
+# Every build resolves against the vendored bundle in the tree, so no build
+# reaches the network whatever `offline` says. offline="1" keeps `--only-cached`
+# on the gates (`smoke`/CI) as a belt-and-braces assertion: it fails closed if a
+# project is ever repointed at a URL. A \usepackage the vendored subset lacks is
+# a `just bundle-refresh` + commit, not a nix closure change.
+
+# Compile a target to build/<target>/ (offline="1" forbids fetching).
+build project="_template" target="draft" offline="0":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    root="$(pwd)"
+    just _prepare "{{ project }}"
+    cached=()
+    if [[ "{{ offline }}" == "1" ]]; then cached=(--only-cached); fi
+    project_dir="projects/{{ project }}"
+    cd "$project_dir"
+    tectonic -X build --untrusted --keep-logs --keep-intermediates \
+      "${cached[@]}" --target "{{ target }}"
+    bash "$root/tools/check-log" "build/{{ target }}/{{ target }}.log"
+
+# Rebuild a named target whenever an input changes.
+watch project="_template" target="draft":
+    just _prepare {{ project }}
+    cd projects/{{ project }} && tectonic -X watch --exec "build --untrusted --keep-logs --target {{ target }}"
+
+# A change-tracked PDF: what a referee or co-author reads to see what moved.
+# `diff-pdf` (groups/documents.nix) answers the complementary question — did the
+# built artifact shift at all — and is the only option when no source exists.
+#
+# Both trees are disposable copies under $(mktemp -d), never the working tree:
+# the diff is a review aid, not a publication artifact, and `_diff.tex` must
+# never reach `fmt`, `lint`, or a bundle. The PDF lands in
+# build/<target>/diff/, which src/latex/.gitignore already excludes (no
+# negation reaches a nested path).
+
+# Render <target> as a marked-up diff of <rev>..working tree (offline="1" forbids fetching).
+diff project="_template" target="draft" rev="HEAD" offline="0":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "{{ project }}" in
+      ''|*[!0-9A-Za-z_-]*) echo "invalid project slug" >&2; exit 2 ;;
+    esac
+    project_dir="projects/{{ project }}"
+    target_tex="$project_dir/src/targets/{{ target }}.tex"
+    test -f "$target_tex" || { echo "no such target: $target_tex" >&2; exit 2; }
+    root="$(pwd)"
+    repo="$(git rev-parse --show-toplevel)"
+    prefix="${root#"$repo"/}"
+
+    # Materializes pp-manuscript.sty, which is not committed and
+    # so is absent from the archived baseline; \usepackage is not flattened, so
+    # only the tree that compiles needs them.
+    just _prepare "{{ project }}"
+
+    work="$(mktemp -d)"
+    trap 'rm -rf "$work"' EXIT
+    mkdir -p "$work/old"
+    git -C "$repo" archive "{{ rev }}" "$prefix/$project_dir/src" | tar -x -C "$work/old" \
+      || { echo "cannot read $project_dir/src at {{ rev }}" >&2; exit 2; }
+    old="$work/old/$prefix/$project_dir/src"
+    test -f "$old/targets/{{ target }}.tex" \
+      || { echo "target {{ target }} does not exist at {{ rev }}" >&2; exit 2; }
+
+    # A Tectonic V2 workspace, so the diff compiles against the SAME pinned
+    # bundle as the real build; `-X compile` would silently use the default one.
+    mkdir -p "$work/new"
+    install -m 0644 "$project_dir/Tectonic.toml" "$work/new/Tectonic.toml"
+    cp -R "$project_dir/src" "$work/new/src"
+    printf '\n[[output]]\nname = "diff"\ntype = "pdf"\ninputs = ["_diff.tex"]\n' \
+      >> "$work/new/Tectonic.toml"
+
+    # GOTCHA: latexdiff --flatten resolves \input relative to the MAIN FILE's
+    # directory, but targets/*.tex use paths relative to the src root (where
+    # Tectonic sets cwd). Without staging the target at the src root, latexdiff
+    # still exits 0 and still writes a diff — of the preamble alone.
+    install -m 0644 "$old/targets/{{ target }}.tex" "$old/_main.tex"
+    install -m 0644 "$work/new/src/targets/{{ target }}.tex" "$work/new/src/_main.tex"
+    latexdiff --flatten "$old/_main.tex" "$work/new/src/_main.tex" > "$work/new/src/_diff.tex"
+    hunks="$(rg -c 'DIFadd|DIFdel' "$work/new/src/_diff.tex" || true)"
+
+    cached=()
+    if [[ "{{ offline }}" == "1" ]]; then cached=(--only-cached); fi
+    (cd "$work/new" && tectonic -X build --untrusted --keep-logs "${cached[@]}" --target diff)
+
+    # check-log is advisory here, not a gate: a diff document legitimately
+    # carries markup artifacts (struck-through labels, duplicated refs) that
+    # would fail the publication policy without indicating a manuscript defect.
+    bash "$root/tools/check-log" "$work/new/build/diff/diff.log" || true
+
+    destination="$project_dir/build/{{ target }}/diff"
+    mkdir -p "$destination"
+    install -m 0644 "$work/new/build/diff/diff.pdf" "$destination/{{ target }}-diff.pdf"
+    echo "wrote $destination/{{ target }}-diff.pdf (${hunks:-0} marked hunks vs {{ rev }})"
+
+# Stage exactly the source files uploaded to arXiv (no compile/audit).
+_stage project target:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    case "{{ project }}" in
+      ''|*[!0-9A-Za-z_-]*) echo "invalid project slug" >&2; exit 2 ;;
+    esac
+    case "{{ target }}" in
+      arxiv) ;;
+      *) echo "bundle target must be arxiv" >&2; exit 2 ;;
+    esac
+    just _prepare "{{ project }}"
+    project="projects/{{ project }}"
+    # Staged beside the compiled target rather than in a sibling bundles/ tree,
+    # so everything an upload needs lives in one directory.
+    stage="$project/build/{{ target }}/bundle"
+    rm -rf "$stage"
+    mkdir -p "$stage"
+    install -m 0644 "$project/src/targets/{{ target }}.tex" "$stage/main.tex"
+    install -m 0644 "$project/src/metadata.tex" "$stage/metadata.tex"
+    install -m 0644 "$project/src/pp-manuscript.sty" "$stage/pp-manuscript.sty"
+    for composition in body appendix; do
+      if [[ -f "$project/src/$composition.tex" ]]; then
+        install -m 0644 "$project/src/$composition.tex" "$stage/$composition.tex"
+      fi
+    done
+    cp -R "$project/src/chapters" "$project/src/generated" "$stage/"
+    if [[ -f "$project/src/refs.bib" ]]; then install -m 0644 "$project/src/refs.bib" "$stage/refs.bib"; fi
+    uv run --script tools/stage-images "$project/src" "$stage" main.tex
+
+# The archive is the arXiv upload artifact, so it is published next to the PDF
+# it corresponds to and tracked in git (LFS).
+
+# Stage, hostile-audit, deterministically archive, and unpack-recompile a bundle.
+bundle project target:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    just _stage "{{ project }}" "{{ target }}"
+    # Pin the audit's compiles to the same bundle the build uses; without this
+    # Tectonic would fall back to its default bundle, which is an older
+    # TeX Live than the manuscripts are pinned to. Tectonic.toml states the
+    # vendored bundle relative to the project directory, but the audit compiles
+    # from the staged bundle directory, so resolve it to an absolute path here.
+    bundle_ref="$(rg -o '^bundle = "([^"]+)"' -r '$1' "projects/{{ project }}/Tectonic.toml")"
+    if [[ "$bundle_ref" != *://* ]]; then
+      bundle_ref="$(realpath "projects/{{ project }}/$bundle_ref")"
+    fi
+    archive_extension=tar.gz
+    uv run --script tools/bundle-audit \
+      "projects/{{ project }}/build/{{ target }}/bundle" \
+      "{{ target }}" \
+      "projects/{{ project }}/build/{{ target }}/{{ target }}.$archive_extension" \
+      "$bundle_ref"
+
+# Run every submission-parity fixture (hostile + positive + cleveref regression).
+harness-test:
+    bash tools/tests/run.sh
+
+# Format all hand-authored TeX sources. Formatting policy (wraplen/tabsize) lives
+# once in src/latex/tex-fmt.toml, auto-discovered from this recipe's cwd (t24.16.4 F10).
+fmt:
+    rg --files -g '*.tex' -g '*.sty' -g '*.cls' -g '!projects/*/src/*.sty' -g '!projects/*/src/*.cls' -g '!projects/*/src/*.bst' -g '!projects/*/src/load-unicode-xetex-classes.tex' -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0 | xargs -0 -r tex-fmt
+
+# Verify formatting without changing files.
+fmt-check:
+    rg --files -g '*.tex' -g '*.sty' -g '*.cls' -g '!projects/*/src/*.sty' -g '!projects/*/src/*.cls' -g '!projects/*/src/*.bst' -g '!projects/*/src/load-unicode-xetex-classes.tex' -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0 | xargs -0 -r tex-fmt --check
+
+# Run prose-aware TeX linting and architectural boundary checks.
+lint:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    while IFS= read -r -d '' file; do
+      # Correctness (unresolved refs/citations, syntax) is gated by check-log and
+      # the compile itself; chktex here is advisory style. The suppression list
+      # lives once in src/latex/.chktexrc (CmdLine block), read via -l here and by
+      # the prek chktex hook (t24.16.4 F10).
+      chktex -q -I0 -l .chktexrc "$file"
+    done < <(rg --files -g '*.tex' -g '*.sty' -g '*.cls' \
+      -g '!projects/*/src/*.sty' -g '!projects/*/src/*.cls' -g '!projects/*/src/*.bst' \
+      -g '!projects/*/src/load-unicode-xetex-classes.tex' \
+      -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0)
+    bash tools/lint-boundaries
+
+# Compile every required publishing target from the cached bundle.
+smoke:
+    just build _template draft 1
+    just build _template arxiv 1
+
+# Full local gate; intentionally uses the cached Tectonic bundle.
+check: fmt-check lint smoke
+
+# Replaces the `.pdf` escape hatch `pipeline.figures._common._save` dropped on
+# 2026-08-01: matplotlib's PGF backend cannot write PDF in this dev shell (its
+# wrapper hard-codes hyperref and geometry, which `pgf-metrics` does not carry),
+# but Tectonic can compile the `.pgf` itself. The three preamble lines are the
+# ones t38 measured as required; `import` is what makes `imshow` raster sidecars
+# resolve, since a `.pgf` refers to them by bare filename.
+
+# Compile one .pgf to a viewable PDF beside it (or to OUT).
+preview pgf out="":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    src="$(realpath "{{ pgf }}")"
+    [[ "$src" == *.pgf ]] || { echo "preview: expected a .pgf, got $src" >&2; exit 2; }
+    [[ -f "$src" ]] || { echo "preview: no such file: $src" >&2; exit 2; }
+    dest="{{ out }}"
+    [[ -n "$dest" ]] || dest="${src%.pgf}.preview.pdf"
+    dest="$(realpath -m "$dest")"
+    work="$(mktemp -d)"
+    trap 'rm -rf "$work"' EXIT
+    cat > "$work/preview.tex" <<TEX
+    \documentclass[11pt]{article}
+    \usepackage{pgf}
+    \usepackage{import}
+    \def\mathdefault#1{#1}
+    \usepackage[margin=10mm]{geometry}
+    \pagestyle{empty}
+    \begin{document}
+    \noindent\import{$(dirname "$src")/}{$(basename "$src")}
+    \end{document}
+    TEX
+    sed -i 's/^    //' "$work/preview.tex"
+    tectonic -X compile --untrusted --outdir "$work" "$work/preview.tex" >/dev/null
+    mv "$work/preview.pdf" "$dest"
+    echo "preview: $dest"

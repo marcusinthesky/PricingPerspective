@@ -1,0 +1,361 @@
+[project]
+name = "jcor"
+version = "0.4.1"
+description = "JAX-based distance correlation and energy statistics for high-dimensional testing."
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+  "jax[cpu]>=0.11.0",
+  "jaxtyping>=0.3.2",
+  "lineax>=0.1.0",
+  # Exact balanced-Wasserstein validates cost matrices and computes the
+  # Hungarian solve directly in NumPy.
+  "numpy>=2.0.0, <3.0.0",
+  "optax>=0.2.0",
+  "optimistix>=0.1.0",
+  "qpax>=0.1.0",
+]
+
+# Shared pytest fixtures, shipped from the wheel (t49 C1). Every workspace
+# member that depends on jcor inherits `prng_key`, `seeded_key` and `tolerances`
+# without a conftest copy. `pytest_plugins` cannot do this: pytest honours it
+# only in the *rootdir* conftest, and this workspace's rootdir (src/python) has
+# none.
+#
+# The target is the `jcor_testing` shim, NOT `jcor.testing.fixtures` directly.
+# Entry points load before any conftest, and importing anything under `jcor`
+# imports the whole package — which forestalls `install_import_hook` and silently
+# disables jaxtyping/beartype checking for the entire suite. The shim's
+# docstring carries the measurement; it registers the real fixture module in
+# `pytest_configure`, by which time the hook is in place.
+[project.entry-points.pytest11]
+jcor_testing = "jcor_testing"
+
+[dependency-groups]
+dev = [
+  "beartype>=0.22.9",
+  "deptry",
+  "hypothesis>=6.164.0",
+  "marimo>=0.8.0",
+  "matplotlib>=3.8.0",
+  "prek",
+  "pydoclint",
+  "pytest",
+  "pytest-monitor",
+  "pytest-testmon",
+  # Process parallelism. JCOR's fast tier is a broad flat tail (T51 measured
+  # 1,302 passed + 12 skipped / 129 s on 8 workers); see the OMP_NUM_THREADS
+  # note in this package's justfile for why the worker thread budget must be
+  # pinned alongside it.
+  "pytest-xdist",
+  "ruff",
+  # Test-only reference oracle. t65 retired the last runtime SciPy call from
+  # `src/jcor` (`SCIPY_BOUNDARIES` is now the empty tuple), so SciPy is no
+  # longer a dependency of the shipped wheel. The suite still checks jcor's
+  # `jax.scipy` ports — chi-bar-square, Sharpe tails, Mantel, NNLS, kappa —
+  # against upstream SciPy, which is what this entry buys.
+  "scipy>=1.14.0",
+  "seaborn>=0.13.0",
+  "ty>=0.0.1a16",
+]
+# Independent software or trusted-library oracles used by the opt-in
+# T75 reference-conformance migration suite. Keep these out of both the
+# runtime wheel and the default `dev` environment: `uv sync --package jcor
+# --group reference` is the explicit opt-in. Every importing test gates its
+# oracle through `optional_reference`, so the default suite remains
+# collectable when this group is absent.
+reference = [
+  "POT>=0.9.5",
+  "PyPortfolioOpt>=1.5.5",
+  "arch>=7.0.0",
+  "dcor>=0.6.0",
+  "linearmodels>=7.0",
+  "scikit-bio>=0.6.0",
+  "scikit-learn>=1.5.0",
+  "statsmodels>=0.14.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# deptry: per-project dependency hygiene (unused / missing / transitive / misplaced).
+# Each workspace member carries its own block (deptry has no config inheritance);
+# PEP 735 dev-groups are auto-exempt from DEP002.
+[tool.deptry]
+extend_exclude = ["notebooks", "scripts"]
+# jcor imports its own package absolutely; mark first-party so self-imports are
+# not reported as transitive dependencies (DEP003).
+known_first_party = ["jcor"]
+
+[tool.deptry.per_rule_ignores]
+# Shape annotations import jaxtyping only under TYPE_CHECKING, which deptry does
+# not count as runtime usage; it remains a required typing dependency.
+DEP002 = ["jaxtyping"]
+# `jcor/testing/fixtures.py` imports pytest at module scope — `@pytest.fixture`
+# is a decorator, so it cannot be deferred the way that module defers `jax`.
+# It ships in the wheel but is only ever imported *by* pytest (through the
+# `pytest11` entry point), so pytest stays a dev dependency rather than becoming
+# a runtime one for every consumer of the library.
+DEP004 = ["pytest"]
+
+[tool.hatch.build.targets.wheel]
+# `src/jcor_testing.py` is a top-level module beside the package, not inside it:
+# it is the pytest11 entry point and must be importable without importing jcor.
+# See its docstring.
+sources = { "src" = "" }
+only-include = ["src/jcor", "src/jcor_testing.py"]
+
+[tool.pydoclint]
+style = "google"
+arg-type-hints-in-docstring = false
+check-return-types = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+# Default gate excludes slow (statistical/QP power validations); run the full
+# suite with `pytest -m slow` or `pytest -m ""`.
+#
+# `--import-mode=importlib` mirrors the workspace-level gate (see the `_pytest`
+# recipe in src/python/justfile) and is what lets `tests/` mirror `src/jcor/`:
+# under the default `prepend` mode two `test_kernels.py` in different
+# sub-directories collide on the bare module name `test_kernels`, so the mirror
+# layout is only expressible here. It requires that no `tests/` directory
+# carries an `__init__.py` — with one present, pytest names modules relative to
+# the package root instead of the rootdir and the collision returns.
+addopts = [
+  "-m",
+  "not slow",
+  "--import-mode=importlib",
+  "--strict-markers",
+]
+markers = [
+  # ─────────────────────────────────────────────────────────────
+  # Scope: exactly one per test
+  # ─────────────────────────────────────────────────────────────
+
+  "unit: isolated function, class, algorithm, or mathematical operation",
+  "component: one coherent estimator, model, diagnostic, covariance estimator, or statistical test",
+  "integration: interaction between package subsystems or a real dependency/backend",
+  "system: substantial package-wide behavior, usually against an installed package",
+  "e2e: complete user-visible workflow through the public API or CLI",
+
+  # ─────────────────────────────────────────────────────────────
+  # Assurance purpose: zero or more
+  # ─────────────────────────────────────────────────────────────
+
+  "smoke: inexpensive viability check that a major capability starts and completes",
+  "regression: reproduces and prevents a previously observed defect",
+  "reference: compares results with independent software, published values, or trusted fixtures",
+  "conformance: validates an externally promised compatibility contract against an independent implementation",
+  "statistical: validates statistical operating characteristics under a known data-generating process",
+  "numerical: validates numerical accuracy, stability, conditioning, or convergence",
+  "contract: validates preconditions, postconditions, invariants, or behavioral contracts",
+  "api: validates public API behavior, compatibility, or deprecation policy",
+  "packaging: validates wheels, sdists, installation, metadata, exports, or entry points",
+  "import_check: validates importability and import-time behavior",
+  "architecture: validates package boundaries, layering, or dependency rules",
+  # The static half of jcor's type discipline. `needs_import_hook` below is the
+  # runtime half; this one covers assertions run against a type checker — the
+  # `tests/core/test_domains.py` fixtures that shell out to pyrefly and assert an
+  # exact `bad-argument-type` count are the only enforcement of the phantom
+  # law/space/equality/authority/evidence lattice, and were previously
+  # unselectable.
+  "typing: validates static typing contracts, usually against a type checker",
+
+  # ─────────────────────────────────────────────────────────────
+  # Statistical properties: imply `statistical`
+  # ─────────────────────────────────────────────────────────────
+
+  "monte_carlo: uses repeated stochastic simulation with Monte Carlo-aware tolerances",
+  "size: validates Type-I error or null rejection probability",
+  "power: validates rejection probability under alternatives",
+  "coverage: validates confidence interval or confidence region coverage",
+  "calibration: validates p-values, probabilities, standard errors, or uncertainty calibration",
+  "bias: validates finite-sample estimator bias",
+  "consistency: validates convergence as sample size or information increases",
+  "robustness: validates behavior under contamination, perturbation, or assumption violations",
+  "invariance: validates invariance or equivariance under transformations",
+
+  # ─────────────────────────────────────────────────────────────
+  # Test technique: zero or more
+  # ─────────────────────────────────────────────────────────────
+
+  "metamorphic: validates relations between transformed inputs and outputs",
+  "stateful: validates sequences of operations or state-machine behavior",
+  "fuzz: explores malformed, adversarial, or broadly generated inputs",
+  # Distinct from `fuzz`, and the distinction is the whole design of
+  # `tests/_cases.py`: its `objects()` strategy builds clouds non-degenerate **by
+  # construction** (`_SEPARATION > 2 * _ELEMENT_BOUND`) precisely so nothing
+  # malformed is ever drawn, because `assume`-filtering is how a property suite
+  # starts failing `filter_too_much`. Generated well-formed inputs plus a
+  # declared invariant is a different technique from adversarial input.
+  "property: validates a declared invariant over generated well-formed inputs",
+
+  # ─────────────────────────────────────────────────────────────
+  # Performance properties: imply `performance`
+  # ─────────────────────────────────────────────────────────────
+
+  "performance: validates a non-functional performance characteristic",
+  "memory: measures allocations, peak memory, retention, or leaks",
+  "scaling: validates runtime or memory growth as problem size increases",
+  "load: validates throughput or concurrency under sustained load",
+  "stress: validates behavior near or beyond supported resource limits",
+
+  # ─────────────────────────────────────────────────────────────
+  # Execution cost and requirements
+  # ─────────────────────────────────────────────────────────────
+
+  # Keep this wording byte-identical with apps/pipeline and apps/simulation, and
+  # keep the number: `addopts` deselects 90 of 1433 collected tests by default,
+  # so a contributor needs a threshold to test a new case against, not a budget
+  # they cannot measure.
+  "slow: outside the normal local or pull-request latency budget (>2s)",
+  "serial: must not run concurrently with other tests",
+  "large_memory: requires materially more memory than the normal suite",
+  "large_data: requires a large generated, bundled, or downloaded dataset",
+  "network: requires network access",
+  "subprocess: launches one or more subprocesses",
+  "requires_optional(name): requires the named optional Python dependency",
+  "requires_program(name): requires an external executable or statistical package",
+
+  # Opt-in marker for tests whose assertion IS jaxtyping's import hook — they
+  # check that a wrong shape or dtype is *rejected*. tests/conftest.py skips
+  # them when jcor was already imported before it could install the hook, which
+  # is unavoidable in the workspace-level aggregate run. See its docstring.
+  "needs_import_hook: Requires tests/conftest.py's install_import_hook to be live",
+]
+
+[tool.ruff]
+extend = "../../pyproject.toml"
+
+[tool.ruff.lint]
+extend-select = [
+  "I",
+  "DOC",
+  # Preview rules are explicit because the workspace enables
+  # `explicit-preview-rules`. These are scoped to JCOR until the rest of the
+  # workspace has a reviewed baseline for the same checks.
+  "PLC2701",
+  "PLR0904",
+  "PLR0914",
+  "PLR0916",
+  "PLR1702",
+  "PLR6301",
+  "RUF029",
+  "RUF047",
+  "RUF050",
+  "RUF052",
+  "RUF066",
+  "RUF072",
+]
+external = ["pydoclint"]
+
+[tool.ruff.lint.flake8-builtins]
+strict-checking = true
+# These are established JCOR stage names, not accidental top-level modules.
+# Keep strict checking for every other stdlib-shaped module name.
+allowed-modules = ["random", "statistics", "typing"]
+
+[tool.ruff.lint.flake8-bandit]
+check-typed-exception = true
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"pipeline".msg = "jcor is the lowest product layer and must not import pipeline."
+"simulation".msg = "jcor is the lowest product layer and must not import simulation."
+"importlib.import_module".msg = "Use a static import; dynamic imports hide dependency edges."
+"importlib.reload".msg = "Do not reload modules; it creates hidden, order-dependent state."
+"importlib.util.find_spec".msg = "Centralize optional-dependency probing in one reviewed boundary module."
+"importlib.util.module_from_spec".msg = "Do not construct modules dynamically outside the approved loader."
+"importlib.util.spec_from_file_location".msg = "Do not load Python files by path outside the approved loader."
+"pkgutil.resolve_name".msg = "Use a static reference; string name resolution evades import analysis."
+"pydoc.locate".msg = "Use a static reference; string lookup evades import and type analysis."
+"runpy.run_module".msg = "Use a normal entry point; runtime module execution hides dependencies."
+"runpy.run_path".msg = "Use a normal entry point; path execution bypasses package boundaries."
+"sys.path".msg = "Do not mutate import search paths; fix packaging and source roots instead."
+"sys.meta_path".msg = "Custom import hooks belong only in a dedicated, reviewed loader."
+"sys.path_hooks".msg = "Custom path hooks belong only in a dedicated, reviewed loader."
+"sys.modules".msg = "Do not inject or replace modules; it creates invisible dependency behavior."
+
+[tool.ruff.lint.extend-per-file-ignores]
+# `extend-per-file-ignores` (not `per-file-ignores`) so the workspace-root
+# entries — notably "**/tests/**" = ["S101"] — survive rather than being
+# shadowed by this table.
+# Ruff parses jaxtyping's space-delimited shape strings as forward references;
+# F722 is therefore a false positive for these checked mathematical dimensions.
+# The t46.5 entries are new: `ground/metrics.py` and the energy implementation
+# carried 29 bare `jnp.ndarray` annotations before the migration, so they had
+# no shape strings and needed no entry; converting them to jaxtyping is what
+# makes F722 fire. The energy family was split behind its stable façade in
+# t50; the live ignores therefore follow the private MMD owner modules.
+#
+# Every entry below is live. t46.10 pruned the three that were not, and each
+# removal was measured with `ruff check --isolated --select F722 <file>` rather
+# than reasoned about:
+#
+#   * `src/jcor/wasserstein.py` and `src/jcor/optimize.py` — the paths no longer
+#     exist. The first was a re-export shim t46.10 deleted; the second became
+#     the `jcor/optimize/` package, so its entry is re-keyed to the two members
+#     that carry the shape strings (`simplex.py` 15 hits, `psd.py` 2).
+#   * `src/jcor/discrepancy/exact.py` and `src/jcor/geometry/neighbour.py` —
+#     0 hits each. t46.5 pre-landed them on the expectation that t46.9 would
+#     convert those two modules to `Float[np.ndarray, ...]`; t46.9 did not, so
+#     the modules still carry `NDArray[np.float64]` / bare `np.ndarray` and the
+#     ignores suppress nothing. An unused ignore is not harmless: it would also
+#     suppress a *genuinely* broken forward annotation in the same file. They
+#     are removed; whoever lands the conversion re-adds them in the same commit.
+#
+# t55.3 added six modules and measured each the same way. Only
+# `_mmd/branded.py` earns an entry (4 hits, all `Float[Array, " d"]` on the
+# `reference` parameter of the overload set it mirrors from `_mmd/matrix.py`).
+# `discrepancy/provenance.py`, `association/decomposition.py`,
+# `core/matrices.py`, `core/statistics.py`, and `sample/evidence.py` are 0 hits
+# and deliberately get none: their shape constraints ride on the domain/law/
+# origin parameters rather than on jaxtyping shape strings.
+#
+# `inference/` deliberately gets no entry here. Those four modules suppress F722
+# inline, per annotation (`# noqa: F722  # jaxtyping shape`), and t56 kept that
+# style when it added the scalar `Float[Array, ""]` boundary — see the comment
+# at the head of `src/jcor/inference/bootstrap.py`. A file-level entry would be
+# the broader tool: it would also suppress a genuinely broken forward annotation
+# elsewhere in those files, which is the failure the note above about unused
+# ignores is guarding against.
+"src/jcor/discrepancy/_mmd/components.py" = ["F722"]
+"src/jcor/discrepancy/_mmd/energy/mixture.py" = ["F722"]
+"src/jcor/discrepancy/_mmd/energy/matrix.py" = ["F722"]
+"src/jcor/discrepancy/_mmd/energy/scalar.py" = ["F722"]
+"src/jcor/discrepancy/_mmd/energy/testing.py" = ["F722"]
+"src/jcor/discrepancy/_mmd/branded.py" = ["F722"]
+"src/jcor/discrepancy/_mmd/functional.py" = ["F722"]
+"src/jcor/discrepancy/_mmd/matrix.py" = ["F722"]
+"src/jcor/discrepancy/_mmd/scalar.py" = ["F722"]
+"src/jcor/discrepancy/metrize.py" = ["F722"]
+"src/jcor/discrepancy/_transport/exact.py" = ["F722"]
+"src/jcor/discrepancy/_transport/sliced.py" = ["F722"]
+"src/jcor/geometry/_barycentre/wasserstein/measure.py" = ["F722"]
+"src/jcor/ground/metrics.py" = ["F722"]
+"src/jcor/ground/_strategy.py" = ["F722"]
+"src/jcor/ground/similarities.py" = ["F722"]
+"src/jcor/optimize/psd.py" = ["F722"]
+"src/jcor/optimize/simplex.py" = ["F722"]
+"src/jcor/sample/alternatives.py" = ["F722"]
+# TID252 (relative-imports) is disabled under tests/, not overlooked. The shared
+# helpers `tests/_cases.py` and `tests/_clouds.py` sit at the tests root and are
+# imported from sub-directories as `from .._cases import ...`. The absolute form
+# the rule asks for is *unavailable*: `tests/` is deliberately not a package and
+# not on `sys.path` — that is exactly what lets six workspace members each ship
+# a `tests/` tree without colliding on the module name `tests` (t49 A1). Putting
+# it back on the path to satisfy this rule would re-break the workspace gate.
+"tests/**" = ["TID252", "TID251", "PLC2701", "PLR6301"]
+# INP001: `jcor_testing.py` is a top-level module beside the `jcor` package, and
+# has to be — it is the pytest11 entry point, and it exists precisely so that
+# loading the entry point does not import `jcor`. Adding `src/__init__.py` to
+# satisfy the rule would make `src` a package and break the src layout.
+"src/jcor_testing.py" = ["INP001"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]

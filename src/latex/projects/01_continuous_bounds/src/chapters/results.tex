@@ -1,0 +1,191 @@
+\section{Empirical results and discussion}\label{sec:results}
+
+The results proceed in three steps.
+First, we ask when the conditional envelope classifies firm pairs informatively.
+Second, we estimate whether article-embedding distance is associated with
+return distance after symmetric firm effects.
+Third, we assess whether the sign survives a later return window and
+alternative representations.
+
+\subsection{Conditional W$_2$ envelope}\label{sec:fixed-w2-test}
+
+How tightly must the characteristic-to-exposure map be restricted for the
+conditional covariance envelope to classify observed firm pairs?
+The envelope classifies pairs informatively only under tight restrictions:
+the zero-slack isometric case is decisive, but informativeness deteriorates
+rapidly once even modest transmission slack is admitted.
+The envelope exercise evaluates \Cref{eq:random-kappa-bracket} with the
+common 128-article exact W$_2$ matrix and standardized total-return moments.
+A covered dyad has nonnegative transport excess throughout the
+scenario-implied latent distance interval; a violated dyad has negative
+excess throughout; and an unresolved dyad has an interval that spans zero.
+The zero-slack isometric cell $(L,\tau)=(1,0)$ covers
+\ppnum[3]{confound-w2-l1-tau0-coverage} of observed dyads and violates the
+restriction for \ppnum[3]{confound-w2-l1-tau0-violation}, leaving no
+dyads unresolved.
+Even the modest relaxation $(L,\tau)=(1,0.05)$ leaves
+\ppnum[3]{confound-w2-l1-tau0p05-unresolved} unresolved, and
+$(L,\tau)=(1,0.10)$ leaves
+\ppnum[3]{confound-w2-l1-tau0p1-unresolved} unresolved.
+The envelope therefore loses informativeness rapidly unless the
+characteristic-to-exposure map is tightly constrained, so its classifications
+should be read as conditional scenario classifications rather than as
+structural systematic-covariance estimates.
+
+\input{generated/random_exposure_diagnostic}
+
+Before estimating an average association, we ask an intuition-building
+question: when two firms are selected because their article distributions are
+nearest neighbours within sector, must their subsequent return paths also
+track one another?
+\Cref{fig:neighbour-outcome-paths} traces cumulative log returns for
+\ppnum[0]{neighbour-holdout-n-selected}
+within-sector pairs whose firms are Wasserstein nearest neighbours in the
+frozen 2018--2020 W$_2$ geometry.
+These selected pairs are informative because they make the envelope's
+permissive implication visible, but they do not constitute a hypothesis test
+or a clean validation sample.
+
+\begin{figure}[htbp]
+  \centering
+  \ppfigure{0.78}{neighbour_holdout_paths}
+  \caption{Illustrative cumulative-log-return paths for
+    \ppnum[0]{neighbour-holdout-n-selected} nearest
+    within-sector pairs in the frozen 2018--2020 exact W$_2$ matrix.
+    Each panel represents one sector, dates run from 4 January 2021 to 30
+    December 2022, and solid and dashed lines identify the printed tickers.
+    Insets report W$_2$ (characteristic distance), RMS gap (root-mean-square
+    path difference), terminal gap (final-date difference), and RMS
+    percentile (rank among all within-sector pairs, with 0 denoting the
+    closest-tracking pair).
+    The selected pairs provide intuition rather than a test, and the
+    evaluation window belongs to the broader return panel rather than
+    a clean holdout.
+  Authors' calculations.}
+  \label{fig:neighbour-outcome-paths}
+\end{figure}
+
+Some neighbouring pairs track closely over 2021--2022, whereas others
+separate materially.
+The display therefore does not validate the envelope.
+Instead, it clarifies the one-sided implication that textually close firms
+\emph{can} comove tightly but need not.
+That heterogeneity motivates estimating the average relation over all dyads
+rather than drawing an inference from selected pairs.
+
+\subsection{Canonical and timing-separated associations}
+\label{sec:post-window-dyadic}
+
+We next ask whether greater article-embedding distance is associated with
+weaker return co-movement after symmetric firm effects absorb stable endpoint
+heterogeneity, and whether the sign persists when the article-embedding
+geometry is held fixed for a later return window.
+The canonical estimate answers the first question affirmatively: at
+representative dyads across the interquartile range, a pair one standard
+deviation farther apart in news content has an implied return correlation
+roughly eight points lower.
+Return-chord distance maps deterministically to the familiar correlation
+scale through \eqref{eq:chord-distance}, because $\hat\rho=1-\hat D^2/2$.
+At the median dyad, a chord distance of \ppnum[3]{chord-median} corresponds
+to a return correlation of \ppnum[3]{chord-rho-median}.
+A one-standard-deviation increase in W$_2$ moves the implied correlation to
+\ppnum[3]{chord-rho-after-median}, a change of
+\ppnum[3]{chord-delta-rho-median}.
+The corresponding changes are \ppnum[3]{chord-delta-rho-q25} at the
+lower-quartile dyad and \ppnum[3]{chord-delta-rho-q75} at the
+upper-quartile dyad.
+
+\Cref{tab:w2-primary-results} reports the same symmetric-firm-effect
+estimator for both return windows.
+In the shared 2018--2022 window, the focal coefficient is
+\ppnum[3]{confound-w2-coef} return-chord units per unit of W$_2$, with
+standard error \ppnum[3]{confound-w2-se} and 95\% interval
+[\ppnum[3]{confound-w2-ci-low}, \ppnum[3]{confound-w2-ci-high}].
+A one-standard-deviation increase in W$_2$ corresponds to
+\ppnum[3]{confound-w2-effect-one-sd} return-chord units, and W$_2$ accounts
+for \ppnum[3]{confound-partial-r2} of residual variation relative to
+symmetric firm effects.
+The positive estimate is consistent with the directional expectation in
+\Cref{hyp:monotonicity}.
+Endpoint margins are absorbed, but pair-specific common causes remain, so the
+coefficient is neither causal nor a numerical estimate of transport excess.
+
+The later-window estimate provides timing-separated corroboration, not
+point-in-time out-of-sample validation.
+The exercise fixes the 2018--2022 article-embedding geometry before
+recomputing return chord distances and firm effects for
+\ppvalue{oos-return-panel-date-start} through
+\ppvalue{oos-return-panel-date-end}.
+The coefficient rises to \ppnum[3]{oos-dyadic-w2-coef}, with 95\% interval
+[\ppnum[3]{oos-dyadic-w2-ci-low}, \ppnum[3]{oos-dyadic-w2-ci-high}], and the
+standardized effect is \ppnum[3]{oos-dyadic-w2-effect-one-sd}.
+The sign persists after separating article selection from the later return
+outcomes, but the encoder has no documented training cutoff and common latent
+drivers may persist across windows.
+Accordingly, the design does not recreate point-in-time feature construction
+or establish predictive validation.
+
+\input{generated/w2_primary_results}
+
+Having established the average magnitude, we ask whether the canonical
+coefficient reflects a visible residual-space relation and whether its sign
+depends on functional form or any single firm.
+By the Frisch--Waugh--Lovell result, Panel A of
+\Cref{fig:dyadic-postfit-diagnostics} residualizes both return distance and
+W$_2$ with respect to the symmetric firm effects, so the slope through those
+residuals equals the canonical coefficient.
+Panels B and C assess functional form and single-firm influence.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{1}{dyadic_postfit_diagnostics}
+  \caption{Post-fit diagnostics for the canonical
+    symmetric-firm-effects specification.
+    Panel A plots firm-effect-residualized return chord distance against
+    residualized W$_2$; the fitted line uses all dyads, while equal-count bin
+    averages are descriptive.
+    Panel B plots raw W$_2$ against the residualized outcome and overlays the
+    prespecified quadratic sensitivity.
+    Panel C reports the ten largest leave-one-firm-out coefficient shifts.
+    The diagnostics show a positive residual-space relation without a single
+    sign-reversing firm, but they do not remove pair-specific confounding.
+  Authors' calculations.}
+  \label{fig:dyadic-postfit-diagnostics}
+\end{figure}
+
+The diagnostics support the stability of the positive association across
+these checks, but neither residualization, the functional-form comparison,
+nor leave-one-firm-out analysis identifies the relation or removes
+pair-specific confounding.
+This distinction motivates asking next whether the association also survives
+changes to the representation itself.
+
+\subsection{Representation sensitivity and limits}
+\label{sec:representation-sensitivity}
+
+What should readers infer when the article-embedding geometry is compressed,
+measured with another encoder or distance metric, or constructed using
+encoders trained on a different data vintage?
+The sensitivity evidence indicates that the positive association is not
+unique to the full-width canonical representation, although sufficiently
+severe compression weakens it and the comparisons do not rank representations.
+Moderate compression preserves the association, whereas the more severe
+compression steps attenuate it, locating a stress boundary at which
+discarding semantic coordinates begins to weaken the measured relation.
+The Qwen capacity variants and the BGE representation retain positive
+associations, and their paired differences from the relevant references are
+not distinguishable after adjustment.
+W$_1$ nearly preserves the canonical dyad ordering, whereas energy retains a
+positive association under a materially different ordering.
+The three matched EttaX vintage contrasts likewise meet their declared
+equivalence rule within the benchmark-calibrated margin when architecture,
+training recipe, compute, tokenizer, sampler, and seed are held fixed across
+pre-, within-, and post-sample Wikipedia snapshots.
+These results and their paired contrasts are reported in
+\Cref{tab:w2-representation-sensitivity}, with construction details and the
+article-sampling checks in \Cref{sec:representation-diagnostics}.
+The evidence therefore supports descriptive robustness to several
+representation choices, not encoder superiority, a causal interpretation, or
+the absence of a vintage effect at the much larger capacity of the
+production encoder.
+These are sensitivity checks rather than additional hypotheses.

@@ -1,0 +1,1542 @@
+start_date: &in_sample_start_date "2018-01-01"
+end_date: &in_sample_end_date "2022-12-31"
+oos_start_date: &oos_start_date "2023-01-01"
+# HOLX completed its take-private on 2026-04-07 and is the binding
+# right-truncation for the complete-case 100-firm panel. The market download's
+# end bound is exclusive, so this yields a last included trading day of
+# 2026-04-06 and makes the cutoff declared rather than emergent.
+oos_end_date: &oos_end_date "2026-04-07"
+oos_last_date: &oos_last_date "2026-04-06"
+
+# The two return-panel evaluation windows, single-sourced for every stage family
+# that is parameterised by window (market_data, compute_returns,
+# compute_covariance, mantel_tests).
+#
+# ORDER IS LOAD-BEARING. DVC names a matrix cell after the axis *index* when the
+# axis value is a mapping, so entry 0 resolves to `@window0` (in-sample) and
+# entry 1 to `@window1` (out-of-sample). Reordering this list silently reassigns
+# every locked cell; `test_oos_mantel_dvc.py` pins the order.
+#
+# `root` mirrors the `shared` var in dvc.yaml, which params interpolation cannot
+# reach; the same test pins the prefix.
+#
+# `expected_*` is a hard complete-case guard, not a nominal default:
+# compute-covariance fails the stage when the realised panel disagrees.
+return_panels:
+- id: in_sample
+  # ZS listed 2018-03-16 and remains the binding left-truncation for the
+  # complete-case panel; every 2026 addition was already listed before 2018.
+  root: data/shared
+  fetch_start_date: *in_sample_start_date
+  fetch_end_date: *in_sample_end_date
+  expected_tickers: 100
+  expected_observations: 1207
+  expected_start_date: "2018-03-19"
+  expected_end_date: "2022-12-30"
+- id: oos
+  # Panel composition: the full 100-firm universe (`symbols`); the projection to
+  # `market_symbols` is the identity, so both windows run on an identical firm
+  # set and there is no differential attrition between them. HOLX completed its
+  # take-private on 2026-04-07 and is the binding right-truncation for the
+  # complete-case panel; `oos_end_date` is set to that date (the market
+  # download's end bound is exclusive) so the cutoff is declared rather than
+  # emergent. The first raw bar of the window carries a null return by
+  # construction.
+  root: data/shared/oos
+  fetch_start_date: *oos_start_date
+  fetch_end_date: *oos_end_date
+  expected_tickers: 100
+  # Measured on the realised 100-firm panel. HOLX is served from a recorded LSEG
+  # total-return archive covering the full window to its 2026-04-07 take-private,
+  # so the delisting -- not the export -- is the binding right-truncation and the
+  # complete-case intersection ends on the last trading day before it.
+  expected_observations: 814
+  expected_start_date: "2023-01-04"
+  expected_end_date: *oos_last_date
+
+n_samples: 445
+# Minimum annual raw-archive count used to freeze the 100-firm news frame.
+# This is the pre-deduplication admission rule recorded by the t92 preflight;
+# the balanced empirical measures below still use their separate 128-article cap.
+annual_raw_article_floor: 47
+min_body_chars: 200
+reader_model: beautifulsoup # or reader-lm:0.5b
+co_mentions:
+  # Retain a pair only when its exact-two co-mention appears in at least this
+  # many calendar years. The Ge--Linton--Li m=1 convention corresponds to 2.
+  min_persistence_years: 2
+baseline_embedding_models:
+- &baseline_embedding_model qwen3-embedding-8b
+# Paper 1's lead encoder and the repository baseline use the same canonical
+# Qwen3-Embedding-8B geometry. Qwen4B remains in the all-model roster as an
+# explicit alternative rather than an implicit baseline.
+paper1_lead_model: qwen3-embedding-8b
+# Single source of truth for the frozen generated-embedding roster. The
+# baseline-only analyses use baseline_embedding_models below; adding a model
+# therefore cannot silently open an out-of-sample Mantel lane.
+embedding_models:
+- *baseline_embedding_model
+- &qwen4_embedding_model qwen3-embedding-4b
+- &bge_m3_embedding_model bge-m3
+- &bge_large_embedding_model bge-large-en-v1.5
+# Non-baseline embedding models used by the ablation-model-roster stage
+# families (energy_tests_ablation_models, p3_model_robustness_model).
+ablation_models:
+- *qwen4_embedding_model
+- *bge_m3_embedding_model
+- *bge_large_embedding_model
+matryoshka_range:
+- 64
+- 256
+- null
+
+# Cross-paper representation-sensitivity roster. These seven cells are the only
+# encoder/dimension comparisons promoted into Papers 1, 3, and 5. The broad
+# `ablation.grid` remains an exploratory computation roster; it must not
+# silently widen publication tables.
+representation_ablation_specs:
+  qwen8b_full:
+    provider_key: qwen3-embedding-8b
+    provider_id: qwen3-embedding-8b
+    representation_key: qwen3-embedding-8b-unit
+    representation_id: qwen3-embedding-8b-unit
+    label: Qwen3-8B
+    effective_dimension: 4096
+    native_dimension: 4096
+    display_order: 1
+    contrast_role: canonical
+    canonical: true
+  qwen4b_full:
+    provider_key: qwen3-embedding-4b
+    provider_id: qwen3-embedding-4b
+    representation_key: qwen3-embedding-4b-unit
+    representation_id: qwen3-embedding-4b-unit
+    label: Qwen3-4B
+    effective_dimension: 2560
+    native_dimension: 2560
+    display_order: 2
+    contrast_role: within_family_capacity_and_native_width
+    canonical: false
+  qwen8b_1024:
+    provider_key: qwen3-embedding-8b
+    provider_id: qwen3-embedding-8b
+    representation_key: qwen3-embedding-8b-1024-unit
+    representation_id: qwen3-embedding-8b-1024-unit
+    label: Qwen3-8B
+    effective_dimension: 1024
+    native_dimension: 4096
+    display_order: 3
+    contrast_role: matryoshka_truncation
+    canonical: false
+  qwen4b_1024:
+    provider_key: qwen3-embedding-4b
+    provider_id: qwen3-embedding-4b
+    representation_key: qwen3-embedding-4b-1024-unit
+    representation_id: qwen3-embedding-4b-1024-unit
+    label: Qwen3-4B
+    effective_dimension: 1024
+    native_dimension: 2560
+    display_order: 4
+    contrast_role: fixed_width_capacity
+    canonical: false
+  bge_large_full:
+    provider_key: bge-large-en-v1_5
+    provider_id: bge-large-en-v1.5
+    representation_key: bge-large-en-v1_5-unit
+    representation_id: bge-large-en-v1.5-unit
+    label: BGE-large-v1.5
+    effective_dimension: 1024
+    native_dimension: 1024
+    display_order: 5
+    contrast_role: external_architecture_training_provider
+    canonical: false
+  qwen8b_256:
+    provider_key: qwen3-embedding-8b
+    provider_id: qwen3-embedding-8b
+    representation_key: qwen3-embedding-8b-256-unit
+    representation_id: qwen3-embedding-8b-256-unit
+    label: Qwen3-8B
+    effective_dimension: 256
+    native_dimension: 4096
+    display_order: 6
+    contrast_role: matryoshka_truncation
+    canonical: false
+  qwen8b_64:
+    provider_key: qwen3-embedding-8b
+    provider_id: qwen3-embedding-8b
+    representation_key: qwen3-embedding-8b-64-unit
+    representation_id: qwen3-embedding-8b-64-unit
+    label: Qwen3-8B
+    effective_dimension: 64
+    native_dimension: 4096
+    display_order: 7
+    contrast_role: matryoshka_truncation
+    canonical: false
+
+# Explicit candidate-minus-reference contrasts used by all three papers.
+representation_contrast_specs:
+  qwen4b_full_minus_qwen8b_full: {candidate_cell_id: qwen4b_full, reference_cell_id: qwen8b_full, family: base, display_order: 1}
+  qwen4b_1024_minus_qwen8b_1024: {candidate_cell_id: qwen4b_1024, reference_cell_id: qwen8b_1024, family: base, display_order: 2}
+  qwen8b_1024_minus_qwen8b_full: {candidate_cell_id: qwen8b_1024, reference_cell_id: qwen8b_full, family: base, display_order: 3}
+  qwen8b_256_minus_qwen8b_1024: {candidate_cell_id: qwen8b_256, reference_cell_id: qwen8b_1024, family: base, display_order: 4}
+  qwen8b_64_minus_qwen8b_256: {candidate_cell_id: qwen8b_64, reference_cell_id: qwen8b_256, family: base, display_order: 5}
+  bge_large_minus_qwen8b_1024: {candidate_cell_id: bge_large_full, reference_cell_id: qwen8b_1024, family: base, display_order: 6}
+  bge_large_minus_qwen4b_1024: {candidate_cell_id: bge_large_full, reference_cell_id: qwen4b_1024, family: base, display_order: 7}
+  ettax_v1_minus_ettax_v0: {candidate_cell_id: ettax_v1, reference_cell_id: ettax_v0, family: vintage, display_order: 8}
+  ettax_v3_minus_ettax_v0: {candidate_cell_id: ettax_v3, reference_cell_id: ettax_v0, family: vintage, display_order: 9}
+  ettax_v3_minus_ettax_v1: {candidate_cell_id: ettax_v3, reference_cell_id: ettax_v1, family: vintage, display_order: 10}
+
+# Encoder-vintage staircase, deliberately NOT part of the locked seven-cell
+# `representation_ablation_specs` base roster. Paper 1 appends these as a paired
+# negative-control panel; Papers 3 and 5 append them as ordinary sensitivity
+# rows. These three hold architecture,
+# parameter count, optimizer, token budget, tokenizer, corpus sampler and seed
+# fixed and vary only the Wikipedia snapshot date the encoder saw, so the
+# informative quantity is the paired contrast BETWEEN them, not any single
+# row's distance from canonical. V0 predates the sample, V1 closes before the
+# evaluation window opens, V3 postdates the sample and the OOS period.
+encoder_vintage_ablation_specs:
+  ettax_v0:
+    provider_key: ettax-v0
+    provider_id: ettax-v0
+    representation_key: ettax-v0-unit
+    representation_id: ettax-v0-unit
+    label: EttaX V0
+    effective_dimension: 320
+    native_dimension: 320
+    display_order: 1
+    contrast_role: encoder_vintage
+    canonical: false
+  ettax_v1:
+    provider_key: ettax-v1
+    provider_id: ettax-v1
+    representation_key: ettax-v1-unit
+    representation_id: ettax-v1-unit
+    label: EttaX V1
+    effective_dimension: 320
+    native_dimension: 320
+    display_order: 2
+    contrast_role: encoder_vintage
+    canonical: false
+  ettax_v3:
+    provider_key: ettax-v3
+    provider_id: ettax-v3
+    representation_key: ettax-v3-unit
+    representation_id: ettax-v3-unit
+    label: EttaX V3
+    effective_dimension: 320
+    native_dimension: 320
+    display_order: 3
+    contrast_role: encoder_vintage
+    canonical: false
+
+# Paper 1 negative-control decision rule. The 0.012 bound is calibrated to the
+# already-computed Qwen3-8B-vs-BGE-large paired interval (approximately
+# [-0.012, 0.008]), before reading the EttaX W2 effects. It is about 17% of the
+# canonical 0.070 standardized effect. Equivalence is declared only when the
+# entire paired interval is inside this symmetric bound; a non-significant
+# contrast alone is insufficient.
+encoder_vintage_analysis:
+  effect_one_sd_equivalence_bound: 0.012
+  confidence_level: 0.95
+symbols:
+- AAL
+- ADBE
+- ADI
+- ADP
+- ADSK
+- AEP
+- AKAM
+- ALGN
+- AMAT
+- AMD
+- AMGN
+- ASML
+- AVGO
+- AZN
+- BIDU
+- BIIB
+- BKNG
+- BMRN
+- CDNS
+- CHKP
+- CHTR
+- CMCSA
+- COST
+- CSCO
+- CSX
+- CTSH
+- DLTR
+- DXCM
+- EA
+- EBAY
+- ENPH
+- EXC
+- EXPE
+- FANG
+- FAST
+- FISV
+- FTNT
+- GILD
+- GOOG
+- HAS
+- HOLX
+- HON
+- IDXX
+- ILMN
+- INCY
+- INTC
+- INTU
+- ISRG
+- JBHT
+- JD
+- KDP
+- KHC
+- KLAC
+- LRCX
+- LULU
+- MAR
+- MAT
+- MCHP
+- MDLZ
+- MELI
+- MNST
+- MRVL
+- MTCH
+- MU
+- NCLH
+- NFLX
+- NTAP
+- NTES
+- NVDA
+- NXPI
+- OKTA
+- ORLY
+- PANW
+- PAYX
+- PCAR
+- PEP
+- PYPL
+- QCOM
+- REGN
+- ROST
+- SBUX
+- SIRI
+- SNPS
+- STX
+- SWKS
+- TCOM
+- TEAM
+- TMUS
+- TRIP
+- TSCO
+- TTWO
+- TXN
+- UAL
+- ULTA
+- VRTX
+- WDAY
+- WDC
+- WYNN
+- XEL
+- ZS
+
+# Price-analysis universe: identical to `symbols` (100 tickers). Every firm in
+# the news/embedding universe is also return-eligible, so the projection is the
+# identity and `market_symbol_exclusions` is empty. EA and HOLX are no longer
+# fetchable live -- EA completed its take-private on 2026-08-04 and HOLX on
+# 2026-04-07 -- so both are served from a recorded price archive rather than a
+# live yfinance request; see `MarketSource` in data/universe.csv. Both traded
+# publicly throughout 2018-2022 and through the OOS panel cutoff, so neither is
+# a survivorship exclusion.
+market_symbol_exclusions: []
+market_symbols:
+- AAL
+- ADBE
+- ADI
+- ADP
+- ADSK
+- AEP
+- AKAM
+- ALGN
+- AMAT
+- AMD
+- AMGN
+- ASML
+- AVGO
+- AZN
+- BIDU
+- BIIB
+- BKNG
+- BMRN
+- CDNS
+- CHKP
+- CHTR
+- CMCSA
+- COST
+- CSCO
+- CSX
+- CTSH
+- DLTR
+- DXCM
+- EA
+- EBAY
+- ENPH
+- EXC
+- EXPE
+- FANG
+- FAST
+- FISV
+- FTNT
+- GILD
+- GOOG
+- HAS
+- HOLX
+- HON
+- IDXX
+- ILMN
+- INCY
+- INTC
+- INTU
+- ISRG
+- JBHT
+- JD
+- KDP
+- KHC
+- KLAC
+- LRCX
+- LULU
+- MAR
+- MAT
+- MCHP
+- MDLZ
+- MELI
+- MNST
+- MRVL
+- MTCH
+- MU
+- NCLH
+- NFLX
+- NTAP
+- NTES
+- NVDA
+- NXPI
+- OKTA
+- ORLY
+- PANW
+- PAYX
+- PCAR
+- PEP
+- PYPL
+- QCOM
+- REGN
+- ROST
+- SBUX
+- SIRI
+- SNPS
+- STX
+- SWKS
+- TCOM
+- TEAM
+- TMUS
+- TRIP
+- TSCO
+- TTWO
+- TXN
+- UAL
+- ULTA
+- VRTX
+- WDAY
+- WDC
+- WYNN
+- XEL
+- ZS
+
+# OpenRouter embedding configuration (T-D4)
+# NOTE: qwen/qwen3-embedding-4b, perplexity/pplx-embed-v1-0.6b, and baai/bge-large-en-v1.5
+# do NOT appear in the /api/v1/models listing (which only covers chat/completion models).
+# They may still be routed by OpenRouter's embeddings endpoint — verify with a live call.
+# pplx-embed-v1-0.6b dims (768) and hf id are inferred from model naming; unverified via API.
+embedding:
+  provider: openrouter
+  base_url: https://openrouter.ai/api/v1
+  batch_size: 32
+  concurrency: 4
+  max_chars: 8000
+  models:
+    qwen3-embedding-4b:
+      id: &qwen3-embedding-4b-model-id qwen/qwen3-embedding-4b
+      dims: &qwen3-embedding-4b-dimensions 2560
+      hf: Qwen/Qwen3-Embedding-4B
+    qwen3-embedding-8b:
+      id: &qwen3-embedding-8b-model-id qwen/qwen3-embedding-8b
+      dims: &qwen3-embedding-8b-dimensions 4096
+      hf: Qwen/Qwen3-Embedding-8B
+      # The frozen canonical embedding artifacts are the preregistered m=128
+      # panel, even though the shared source subsample has n_samples=445.
+      coverage:
+        target_rows: 128
+        minimum_rows: 128
+    bge-m3:
+      id: &bge-m3-model-id baai/bge-m3
+      dims: &bge-m3-dimensions 1024
+      hf: BAAI/bge-m3
+      # Declares the width the frozen artifacts already hold. Previously implicit
+      # in the n_samples value at first-embed time; stated so a roster addition
+      # lands on the same panel geometry.
+      coverage:
+        target_rows: 128
+        minimum_rows: 128
+    pplx-embed-v1-0.6b:
+      id: perplexity/pplx-embed-v1-0.6b
+      dims: 768  # unverified — inferred from 0.6B naming; confirm from live API or HF card
+      hf: perplexity-ai/pplx-embed-v1-0.6b  # unverified — not in OpenRouter /models listing
+    bge-large-en-v1.5:
+      id: &bge-large-en-v1_5-model-id baai/bge-large-en-v1.5
+      dims: &bge-large-en-v1_5-dimensions 1024
+      hf: BAAI/bge-large-en-v1.5
+      max_chars: 1200  # 512-token context window; 1200 chars clears all tickers, overrides global 8000
+      # As for bge-m3: pins the realised m=128 width of the frozen artifacts.
+      coverage:
+        target_rows: 128
+        minimum_rows: 128
+
+# Ablation grid: (embedding model × Matryoshka dim). Self-contained — does NOT
+# touch the canonical embedding_models DAG. matryoshka dims: null = full width.
+# bge-large-en-v1.5 is NOT Matryoshka-trained, so only full width is meaningful.
+ablation:
+  grid:
+    qwen3-embedding-4b:
+    - 32
+    - 64
+    - 128
+    - 256
+    - null
+    qwen3-embedding-8b:
+    - 32
+    - 64
+    - 128
+    - 256
+    - null
+    bge-m3:
+    - 64
+    - 256
+    - null
+    bge-large-en-v1.5:
+    - null
+
+# Permutation test parameters
+permutation_tests:
+  num_permutations: 10000  # Number of permutation resamples
+  exponent: 1.0            # Distance exponent α in (0, 2); 1.0 = standard energy distance
+  seed: 42                 # Random seed for reproducibility
+  max_resamples: 2000      # publication rerun; finest resolvable p-value 1/2001 = 0.0004998 < 0.05/52 = 0.000962 (Bonferroni over 52 targets) -- 1000 was NOT adequate: min p=1/1001=0.000999 > 0.000962 forces 0/53 significant under Bonferroni regardless of the true effect
+  # The permutation stage reproduces the retired diagnosis.  The exact
+  # barycentre is validated separately by validate_hedging_error_bound.
+  weight_method: kernel_balance
+  solver: pgd
+  solver_tol: 1.0e-8
+  solver_maxiter: 10000
+  # Per-target tests fan out across processes (each target is independent).
+  # null/0 ⇒ auto (cpu_count − 2, leaving headroom on the 8-core host); the
+  # result is independent of n_jobs (per-target seeds are position-based).
+  n_jobs: 6
+
+# Shared W2-to-return-exposure frontier consumed by downstream papers.
+w2_exposure_frontier:
+  train_start: "2018-01-01"  # train window: PCA loading coordinates + ell_lo/L_hat calibration
+  train_end: "2021-12-31"
+  test_start: "2022-01-01"   # H2 OOS coverage test window
+  test_end: "2022-12-31"
+  ks: [3, 5, 10]              # K sweep for PCA loading coordinates (plan Author decision #3)
+  k_target_explained_variance: 0.80  # pick smallest swept K reaching this trace share
+  tau_lo: 0.05
+  tau_hi: 0.95
+  n_boot: 2000        # certified H1 frontier rerun (2026-07-11): block-bootstrap replicates
+                      # for ell_lo/L_hat + coverage CIs. Cheap (configured
+                      # N-by-N eigendecomp per replicate), ~minutes; NOT the heavy
+                      # energy-permutation cost (that is permutation_tests).
+  n_clusters: 15
+  n_mc: 500
+  n_dirichlet: 8
+  cap_kill_threshold: 0.05
+  cap_marginal_threshold: 0.10
+  wolak_alpha: 0.05
+  wolak_ell0: 0.0     # TODO(author): external Wolak anchor + target MDE (plan Author decision
+                      # #6, PENDING). 0.0 is the weakest economically-motivated placeholder
+                      # (m_p = y_p >= 0 trivially) -- wolak_stat will read ~0 until a genuine
+                      # nonzero anchor is supplied; see run_h1_pilot docstring / DEFAULT_WOLAK_ELL0.
+  coverage_target: 0.90  # H2 pre-registered coverage floor
+  seed: 42
+  pseudo_ipo_k: 5              # PCA loading dimension for the leave-one-out pseudo-IPO bracket
+  tightest_cap_tol: 1.0e-8     # qpax exact IP-QP tolerance for tightest-cap max-Q portfolio
+  tightest_cap_maxiter: 10000  # qpax exact IP-QP max iterations
+# Paper 3: W2 exposure-envelope estimator roster, sub-period slicing, and the
+# point-in-time (PIT) Wasserstein vintage grid.
+# NOTE: `backtest()`/`_cov_estimators()` in paper3_empirical.py do not yet
+# read this section (their estimator roster/sub-period bounds are still
+# hardcoded — `methods` at paper3_empirical.py:698, `SUB_PERIODS` at :617);
+# wiring `pipeline/cli/commands/p3/estimate.py: cli_paper3_empirical` to plumb
+# these values through is out of this wave's file scope and is left as a
+# follow-up. This section is the source-of-truth
+# config for that follow-up and documents the decisions already applied in
+# code.
+paper3:
+  primary_distance_id: wasserstein_w2
+  certificate_feasibility:
+    # Full-sample non-vacuity/sensitivity grid only. These values are not
+    # calibrated transmission parameters and carry no ex-ante validity claim.
+    L: [1.0, 1.1, 1.25, 1.5]
+    tau: [0.0, 0.025, 0.05, 0.10]
+    portfolios: [equal_weight, inverse_volatility]
+    # Reference population for the Appendix D.1 percentile. A single sampling
+    # law would make the rank an artifact of that law, so the rank is reported
+    # under several. The legacy `effective_n_matched` key is retained for
+    # artifact compatibility, but its concentration-0.8 law is now interpreted
+    # as a fixed, moderately concentrated comparator rather than as matched to
+    # the current news allocation. Descriptive and in-sample.
+    news_reference:
+      draws: 20000
+      seed: 42
+      designs:
+      - {label: uniform_cap_12p5, concentration: 1.0, maximum_weight: 0.125}
+      - {label: uniform_cap_15, concentration: 1.0, maximum_weight: 0.15}
+      - {label: effective_n_matched, concentration: 0.8, maximum_weight: 0.15}
+      - {label: concentrated_cap_15, concentration: 0.5, maximum_weight: 0.15}
+  certificate_validation:
+    formation_frequency: monthly
+    volatility_lookback_days: 252
+    evaluation_horizon_days: 63
+    calibration_start: "2019-01-01"
+    calibration_end: "2022-12-31"
+    evaluation_start: "2023-01-04"
+    evaluation_end: *oos_last_date
+    frozen_vintage: "2022-12-31"
+    L: [1.0, 1.1, 1.25, 1.5]
+    tau: [0.0, 0.025, 0.05, 0.10]
+    coverage_target: 0.90
+    confidence_level: 0.95
+    article_block_replications: 499
+    return_block_replications: 2000
+    seed: 42
+    maximum_weight: 0.10
+    random_portfolios: 500
+    label_permutations: 1000
+    residual_budgets: [0.0, 0.025, 0.05]
+  estimators: [sample, ledoit_wolf, sigma_dist, sigma_shrink, nonlinear_lw, one_over_n, ff5]
+  # `ff5` is a RECORDED BLOCKER: no FF5 factor-return panel is on-graph in this
+  # repo and paper3_empirical.py does not fetch network data, so `_ff5_cov`
+  # returns None and the `ff5` column is omitted from the backtest output
+  # until factor data is staged. See t15 README.
+  sub_periods:
+    - {label: "2018-2019", start: "2018-01-01", end: "2019-12-31"}
+    - {label: "2020", start: "2020-01-01", end: "2020-12-31"}
+    - {label: "2021-2022", start: "2021-01-01", end: "2022-12-31"}
+  # Point-in-time W2 vintage grid for the random-functional-exposure pivot.
+  # Annual vintages retain the t20 one-ticker feasibility decision:
+  # probe (src/python/scripts/paper3_pit_probe.py): early-year per-ticker article
+  # counts are too thin for per-rebalance recomputation (AAL: 49/2018 ->
+  # 445/2022 cumulative). The full configured-panel probe (dc-p3-pit-probe) may
+  # refine this grid before the vintage repro runs.
+  #
+  # Each entry names the `matrices.npz` key and the typed rooted-W2 artifact
+  # that supplies it. The cutoff lives in `typed_analysis.windows`; the
+  # assembler validates the window and squares W2 exactly once because the
+  # covariance envelope consumes quadratic transport cost.
+  pit_vintage_grid:
+    - {vintage: "2018-12-31", distance_id: wasserstein_w2_pit_2018}
+    - {vintage: "2019-12-31", distance_id: wasserstein_w2_pit_2019}
+    - {vintage: "2020-12-31", distance_id: wasserstein_w2_pit_2020}
+    - {vintage: "2021-12-31", distance_id: wasserstein_w2_pit_2021}
+    - {vintage: "2022-12-31", distance_id: wasserstein_w2_pit_2022}
+
+# Paper 5 bootstrap/Monte-Carlo replication scale (t16 B=2000 rerun): the
+# pre-registered anti-snooping scale (R14 lesson, also applied in Paper 3).
+paper5:
+  provider_id: qwen3-embedding-8b
+  representation_id: qwen3-embedding-8b-unit
+  distance_id: wasserstein_w2
+  barycentre_arm_id: wasserstein_w2_loo
+  wasserstein_w1_arm_id: wasserstein_w1_loo
+  energy_robustness:
+    n_boot_stat: 2000   # article-resampling bootstrap replicates
+    n_boot_ridge: 2000  # calibration return-block bootstrap replicates
+    n_boot_sharpe: 2000 # Sharpe-CI circular block bootstrap replicates
+    seed: 0             # random seed
+  n_boot_stat: 2000  # empirical bootstrap replicates (paper5-empirical --n-boot-stat)
+  n_reps: 2000        # Monte-Carlo replications (paper5-mc --n-reps)
+  gate:
+    n_bootstrap: 2000  # stationary joint-date bootstrap draws
+    n_random: 1000     # matched-sparsity random baskets
+    block_length: 21   # expected stationary-bootstrap block length in trading days
+    knn_k: 5           # training-window correlation neighbours
+    seed: 0            # fixed random-support and bootstrap seed
+  qmle:
+    n_bootstrap: 2000  # joint-date bootstrap draws per pooled/annual cell
+    block_length: 21   # expected stationary-bootstrap block length
+    seed: 0            # common resampling seed schedule
+  # The referenced DVC inputs retain the original 52-firm operator and the OOS
+  # histories through the governed 2026-07-15 comparison endpoint.
+  universe_horizon_bridge:
+    reference_revision: "7381033e76244c68835bc232a593f9086384f339"
+    reference_n_firms: 52
+    expanded_n_firms: 100
+    evaluation_start: *oos_start_date
+    short_end: *oos_last_date
+    long_end: "2026-07-15"
+    shared_return_tolerance: 0.0
+    result_tolerance: 1.0e-12
+  # Joint two-field estimation (t33). The barycentric operator and the persistent
+  # news co-mention graph are admitted as two priced channels in one exposure
+  # equilibrium; the separate single-field fits are the theta=1 and theta=0
+  # boundaries of the same nested family. Bootstrap controls deliberately mirror
+  # `qmle` above so the joint and single-field intervals are comparable.
+  two_field:
+    n_bootstrap: 2000  # joint-date bootstrap draws per pooled/annual cell
+    block_length: 21   # expected stationary-bootstrap block length
+    seed: 0            # common resampling and random-support seed schedule
+    n_random: 1000     # matched-sparsity draws calibrating support agreement
+    theta_points: 401  # mixture-weight profile resolution on [0, 1]
+    rho_points: 1000   # total-feedback profile resolution on [0, 0.999]
+  network_certificate:
+    tolerance: 1.0e-12  # float64 structural and contraction witness tolerance
+
+# Backtest minimal-feasible-window feasibility assessment (t17.1 empirical
+# SPEC; additive analysis — changes NO published number). Reproduces+extends
+# the 2026-07-18 news-density constructibility cliff to TRUE trailing/expanding
+# windows at the actual rebalance dates, and adds the shrinkage-adjusted
+# returns view. Consumed by the `backtest_feasibility` DVC stage
+# (pipeline backtest-feasibility). Single source of truth for the T-grid,
+# window-types and thresholds; see
+# .context/plan/infra-tooling/tasks/t17-canonical-backtest-overlay/ and the
+# 2026-07-18 decision brief (D2 returns floor 252/504, D3 news ~756/pooling).
+backtest_feasibility:
+  window_types: [rolling, expanding]        # trailing fixed-width + anchored-expanding
+  windows: [63, 126, 252, 504, 756, 1260]   # estimation-window lengths T (trading days)
+  n_assets_nominal: 100                      # brief N; the return panel realizes all 100 (no exclusions)
+  returns_conditioning_multiples:            # covariance-conditioning thresholds on T
+    singularity: 1                           # T > N (rank sufficiency)
+    comfortable: 5                           # T >= 5N (conditioning-comfortable default)
+    ample: 10                                # T >= 10N (ample)
+  news_thresholds: [30, 100]                 # per-ticker in-window article counts (usable/stability)
+
+# Monte-Carlo validation of Lean theorem portfolio_variance_lower_bound
+monte_carlo:
+  # n=250 DISPOSITION (t22 diagnosis, applied here): KEPT, not removed. The
+  # w1-t22 probe (src/python/scripts/paper3_n250_probe.py) root-caused the T=10 regret
+  # reversal at n=250 to catastrophic ridge-repair ill-conditioning
+  # (60.8% negative Sigma_dist eigenvalues pre-repair -> condition number
+  # 1e9-1e302 post-repair) specifically inside
+  # `simulation.validation.pricefree.pf_dist_mvo_portfolio`'s inline ridge
+  # repair -- a bug in that one call site, not in this shared n_assets grid
+  # (also consumed by hedging_error_bound and other MC stages where n=250
+  # is not known to be broken). Removing 250 here would silently shrink
+  # those unrelated grids too, which is out of this wave's file scope to
+  # verify safe. The recommended fix (swap in `higham_nearest_psd` for
+  # `pf_dist_mvo_portfolio`'s repair) is deferred; the regret table caption
+  # stays pinned to n<=100 per t22 until that fix or an explicit grid split
+  # lands.
+  n_assets: [10, 20, 50, 100, 250]
+  embedding_dim: [8, 64]
+  n_points_per_asset: 128
+  n_clusters: 4
+  n_weight_draws: 5
+  lipschitz_scale_factors: [1.0, 1.5]
+  # Deliberately sub-tight Lipschitz constants for `mc_variance_floor`'s
+  # tightness probe. `lipschitz_scale_factors` are all >= 1, where the theorem's
+  # hypothesis holds and the floor is decreasing in `l`, so zero violations
+  # there is a statement about monotonicity, not about the bound. These factors
+  # break the hypothesis on purpose: violations are the EXPECTED outcome and
+  # their absence would mean the floor is too slack to be informative. Reported
+  # and logged, never gated — see `simulation.validation.variance_floor`.
+  #
+  # The grid brackets the measured knee rather than sampling arbitrarily. On a
+  # {10,20,53} x {8,64} pilot the floor first binds between 0.20 and 0.15:
+  #     0.50 0.40 0.30 0.25 0.20 -> 0/190 violations
+  #     0.15 -> 20/190,  0.10 -> 24/190,  0.05..0.0 -> 24/190 (saturated)
+  # i.e. the certified floor carries roughly a 5x Lipschitz margin, which is the
+  # quantity `probe_binding_scale` reports and the number "zero violations"
+  # alone was concealing.
+  lipschitz_tightness_probe_factors: [0.5, 0.2, 0.15, 0.1]
+  tolerance: 1.0e-9
+  seed: 42
+  # Simulation package precision/batching (apps/simulation T4)
+  precision: float64    # Certificate stages require float64; float32 eligible for statistical stages
+  replication_batch_size: 64  # result-invariant vmap/lax.map replication chunk
+  # Hedging-error bound pilot (validate_hedging_error_bound stage)
+  hedging_error_solver: qp        # exact energy-barycentre solver (deterministic interior-point QP on the tangent-reduced program; qpax)
+  hedging_error_tol: 1.0e-8       # Interior-point optimality-gap tolerance. The convex reduced QP reaches Frank-Wolfe gaps ~1e-11 in float64, so this strict gate passes deterministically (the retired PGD path plateaued non-reproducibly at ~1e-7..1e-5). Loosen only when run in float32 (GPU), where the gap floors near ~1e-6.
+  hedging_error_maxiter: 10000    # Caller iteration budget; the interior-point iteration cap is min(this, 100).
+  hedging_error_vmap_batch: true  # activate the batched vmap barycentre solver (removes per-target
+                                  # Python-loop serialization; ~1.5-2.5x). NOT bit-identical vs serial
+                                  # (qpax lax.while_loop runs to batch-max iters); drift ~1e-15 in
+                                  # float64 << 1e-8 gate. Re-certify outputs before commit.
+  # PUNCHLINE experiment: price-free vs sample-MVO (compare_pricefree_portfolios stage)
+  pricefree_T_values: [10, 20, 60, 250]   # Return sample sizes to compare (T=10,20 for high-dim n>=T regime)
+  pricefree_sigma_eps: 0.1            # Idiosyncratic noise std (σ_ε)
+  pricefree_n_sims: 30                # Return simulations per (config, T)
+  pricefree_pgd_steps: 5000           # Projected gradient descent iterations
+  # Type I/II validation of energy permutation test (simulate_test_size_power stage)
+  test_size_power:
+    n_sims: 200                         # Simulations per (dist, n, d, alpha) cell
+    num_permutations: 199               # Permutations per single test
+    n_values: [32, 64, 128, 256]        # Sample sizes
+    d_values: [2, 8]                    # Dimensions
+    alpha_levels: [0.01, 0.05, 0.10]   # Nominal significance levels
+    mean_shifts: [0.25, 0.5, 1.0]      # Mean-shift deltas (multiples of sigma)
+    scale_factors: [1.25, 1.5, 2.0]    # Scale-shift factors
+    contamination_fracs: [0.10, 0.25]  # Mixture contamination fractions
+    seed: 42
+  # t17 backtest overlay D6: SIZE/POWER of the overlap-robust Sharpe-superiority
+  # test as a function of the evaluation-window length T. Validates that the
+  # inference controls size (~alpha) and gains power with T, empirically
+  # justifying a minimal T (simulate-window-size-power stage). HEAVY at
+  # n_sims=1000 (D6 protocol) x len(t_values) x bootstrap — for the main
+  # session / author to `dvc repro`; tests + the overnight smoke override with
+  # tiny budgets. Additive: validates the NEW simulation.sharpe_tests layer.
+  window_size_power:
+    t_values: [63, 126, 252, 504, 756]  # evaluation-window lengths (trading days)
+    phi: 0.2                            # AR(1) serial dependence (exercises block bootstrap)
+    deltas: [0.1, 0.2, 0.3, 0.5]        # true per-period Sharpe gaps (power sweep)
+    alpha_levels: [0.01, 0.05, 0.10]    # nominal significance levels (alpha_levels[0] primary)
+    n_sims: 1000                        # MC replications per cell (D6: >= 1000)
+    n_boot: 999                         # bootstrap resamples per Sharpe test
+    k_strategies: 5                     # null strategies in the FWER family
+    seed: 42
+  # Paper 2 P0-2: simplified equivalence-boundary rejection/power diagnostic.
+  # The full profile is intentionally heavy; tests override it with tiny budgets.
+  equivalence_calibration:
+    n_sims: 2000               # Monte-Carlo families per design cell
+    n_resamples: 2000          # Joint multiplier draws per family
+    n_target: 64               # Observations in the shared target sample
+    n_candidate: 64            # Observations in each candidate sample
+    m_values: [10, 50]         # Number of correlated equivalence claims
+    target_correlation: 0.30   # Common candidate-innovation share
+    delta: 0.50                # Population energy-distance equivalence margin
+    alpha: 0.05
+    null_fractions: [1.0, 0.5]  # All-boundary and mixed null/alternative families
+    power_energy_ratio: 0.50   # Alternative energy as a fraction of delta
+    variance_cells:
+      - {name: equal, target_sd: 1.0, candidate_sd: 1.0}
+      - {name: unequal, target_sd: 1.0, candidate_sd: 1.5}
+    seed: 4202
+  # Paper 3: GMM Wald + Wolak inequality size/power (gates Wave-2 empirics).
+  # Data-free: synthetic AR(1) moment panels with a KNOWN null; calibrates the
+  # chi-bar-squared weights by Monte Carlo and confirms test size.
+  gmm_wolak_size_power:
+    n_sims: 300              # Replications per size/power cell
+    T: 500                   # Synthetic moment-panel length
+    m: 12                    # Moment dimension after clustering (10-20 portfolios)
+    phi: 0.3                 # AR(1) serial dependence (exercises the HAC)
+    innov_scale: 1.0         # Innovation std of the moment panel
+    alpha_levels: [0.01, 0.05, 0.10]
+    power_deltas: [0.05, 0.1, 0.2, 0.4]   # Mean-deviation grid for the power map
+    power_alpha: 0.05
+    n_mc: 2000               # Monte-Carlo draws for the chi-bar-squared weights
+    seed: 42
+  # Paper 3: kappa identity-form audit (D^2 vs 1/2 kappa^2 D^2 vs 1/2 kappa_i kappa_j D^2).
+  kappa_audit:
+    n_assets: 30
+    resolution: 12           # grid = resolution^d cells on [0,1]^d
+    d: 2
+    n_clusters: 4
+    lengthscale: 0.2         # coloured-kernel length-scale
+    kappa_base: 1.0
+    kappa_spread: 0.3        # heterogeneous-kappa dispersion
+    kernels: [white, exponential, matern32]
+    seed: 42
+
+# Typed analysis registry. Source Parquets remain raw; the declared
+# representation performs the unit-row transform once before any geometry.
+typed_analysis:
+  providers:
+    qwen3-embedding-4b:
+      provider_id: &qwen3-embedding-4b-provider qwen3-embedding-4b
+      kind: openrouter_parquet
+      model_id: *qwen3-embedding-4b-model-id
+      dimensions: *qwen3-embedding-4b-dimensions
+      normalization: raw
+      artifact_root: data/shared/embeddings/qwen3-embedding-4b
+      status: exploratory
+    qwen3-embedding-8b:
+      provider_id: &qwen3-embedding-8b-provider qwen3-embedding-8b
+      kind: openrouter_parquet
+      model_id: *qwen3-embedding-8b-model-id
+      dimensions: *qwen3-embedding-8b-dimensions
+      normalization: raw
+      artifact_root: data/shared/embeddings/qwen3-embedding-8b
+      status: canonical
+    bge-m3:
+      provider_id: &bge-m3-provider bge-m3
+      kind: openrouter_parquet
+      model_id: *bge-m3-model-id
+      dimensions: *bge-m3-dimensions
+      normalization: raw
+      artifact_root: data/shared/embeddings/bge-m3
+      status: exploratory
+    bge-large-en-v1_5:
+      provider_id: &bge-large-en-v1_5-provider bge-large-en-v1.5
+      kind: openrouter_parquet
+      model_id: *bge-large-en-v1_5-model-id
+      dimensions: *bge-large-en-v1_5-dimensions
+      normalization: raw
+      artifact_root: data/shared/embeddings/bge-large-en-v1.5
+      status: exploratory
+    ettax-v0:
+      provider_id: ettax-v0
+      kind: encoder_vintage
+      model_id: ettax
+      vintage: V0
+      dimensions: 320
+      normalization: unit_rows
+      artifact_root: data/shared/embeddings/ettax-v0
+      status: exploratory
+      caveat: "Look-ahead-sensitive diagnostic vintage; not a canonical model."
+    ettax-v1:
+      provider_id: ettax-v1
+      kind: encoder_vintage
+      model_id: ettax
+      vintage: V1
+      dimensions: 320
+      normalization: unit_rows
+      artifact_root: data/shared/embeddings/ettax-v1
+      status: exploratory
+      caveat: "Look-ahead-sensitive diagnostic vintage; not a canonical model."
+    ettax-v3:
+      provider_id: ettax-v3
+      kind: encoder_vintage
+      model_id: ettax
+      vintage: V3
+      dimensions: 320
+      normalization: unit_rows
+      artifact_root: data/shared/embeddings/ettax-v3
+      status: exploratory
+      caveat: "Look-ahead-sensitive diagnostic vintage; not a canonical model."
+  representations:
+    qwen3-embedding-4b-32-unit:
+      representation_id: &qwen3-embedding-4b-32-unit qwen3-embedding-4b-32-unit
+      provider_id: qwen3-embedding-4b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 32
+    qwen3-embedding-4b-64-unit:
+      representation_id: &qwen3-embedding-4b-64-unit qwen3-embedding-4b-64-unit
+      provider_id: qwen3-embedding-4b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 64
+    qwen3-embedding-4b-128-unit:
+      representation_id: &qwen3-embedding-4b-128-unit qwen3-embedding-4b-128-unit
+      provider_id: qwen3-embedding-4b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 128
+    qwen3-embedding-4b-256-unit:
+      representation_id: &qwen3-embedding-4b-256-unit qwen3-embedding-4b-256-unit
+      provider_id: qwen3-embedding-4b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 256
+    qwen3-embedding-4b-1024-unit:
+      representation_id: &qwen3-embedding-4b-1024-unit qwen3-embedding-4b-1024-unit
+      provider_id: qwen3-embedding-4b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 1024
+    qwen3-embedding-4b-unit:
+      representation_id: &qwen3-embedding-4b-unit qwen3-embedding-4b-unit
+      provider_id: qwen3-embedding-4b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: null
+    qwen3-embedding-8b-32-unit:
+      representation_id: &qwen3-embedding-8b-32-unit qwen3-embedding-8b-32-unit
+      provider_id: qwen3-embedding-8b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 32
+    qwen3-embedding-8b-64-unit:
+      representation_id: &qwen3-embedding-8b-64-unit qwen3-embedding-8b-64-unit
+      provider_id: qwen3-embedding-8b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 64
+    qwen3-embedding-8b-128-unit:
+      representation_id: &qwen3-embedding-8b-128-unit qwen3-embedding-8b-128-unit
+      provider_id: qwen3-embedding-8b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 128
+    qwen3-embedding-8b-256-unit:
+      representation_id: &qwen3-embedding-8b-256-unit qwen3-embedding-8b-256-unit
+      provider_id: qwen3-embedding-8b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 256
+    qwen3-embedding-8b-1024-unit:
+      representation_id: &qwen3-embedding-8b-1024-unit qwen3-embedding-8b-1024-unit
+      provider_id: qwen3-embedding-8b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 1024
+    qwen3-embedding-8b-unit:
+      representation_id: &qwen3-embedding-8b-unit qwen3-embedding-8b-unit
+      provider_id: qwen3-embedding-8b
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: null
+    bge-m3-64-unit:
+      representation_id: &bge-m3-64-unit bge-m3-64-unit
+      provider_id: bge-m3
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 64
+    bge-m3-256-unit:
+      representation_id: &bge-m3-256-unit bge-m3-256-unit
+      provider_id: bge-m3
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 256
+    bge-m3-unit:
+      representation_id: &bge-m3-unit bge-m3-unit
+      provider_id: bge-m3
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: null
+    bge-large-en-v1_5-64-unit:
+      representation_id: bge-large-en-v1.5-64-unit
+      provider_id: bge-large-en-v1.5
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 64
+    bge-large-en-v1_5-256-unit:
+      representation_id: bge-large-en-v1.5-256-unit
+      provider_id: bge-large-en-v1.5
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: 256
+    bge-large-en-v1_5-unit:
+      representation_id: &bge-large-en-v1_5-unit bge-large-en-v1.5-unit
+      provider_id: bge-large-en-v1.5
+      transform: l2_normalize_rows
+      normalization: unit_rows
+      dimension: null
+    ettax-v0-unit:
+      representation_id: ettax-v0-unit
+      provider_id: ettax-v0
+      transform: identity
+      normalization: unit_rows
+    ettax-v1-unit:
+      representation_id: ettax-v1-unit
+      provider_id: ettax-v1
+      transform: identity
+      normalization: unit_rows
+    ettax-v3-unit:
+      representation_id: ettax-v3-unit
+      provider_id: ettax-v3
+      transform: identity
+      normalization: unit_rows
+  distances:
+    euclidean_chord:
+      distance_id: euclidean_chord
+      kind: point
+      metric: euclidean
+      domain: unit_sphere
+    energy_v:
+      distance_id: &energy-v-distance energy_v
+      kind: statistical
+      family: energy
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: v_statistic
+      normalization: unhalved
+      sample_design: full_sample
+    linear_mmd:
+      distance_id: linear_mmd
+      kind: statistical
+      family: mmd
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: v_statistic
+      normalization: unhalved
+      kernel: linear
+      sample_design: full_sample
+    rbf_mmd:
+      distance_id: &rbf-mmd-distance rbf_mmd
+      kind: statistical
+      family: mmd
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: v_statistic
+      normalization: unhalved
+      kernel: rbf
+      bandwidth_rule: median_positive_pairwise
+      sample_design: full_sample
+    # `exponent` is the ENERGY ground exponent alpha in (0, 2); it is not the
+    # transport order. Both Wasserstein geometries use the chord ground
+    # distance to the first power and raise the *transport* cost to their
+    # order, which is carried by `estimator`. Do not "fix" the 1.0 below to a
+    # 2.0 for wasserstein_w2 -- the schema rejects it, and it would mean a
+    # different ground geometry rather than a different transport order.
+    wasserstein_w1:
+      distance_id: wasserstein_w1
+      kind: statistical
+      family: wasserstein
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: balanced_wasserstein_1
+      normalization: rooted
+      sample_design: full_sample
+      sample_size: 128
+    # Separate distance ID, not a variant of the one above: the artifact path is
+    # keyed by distance ID, and W2 solves a different assignment problem, so its
+    # matrix is not recoverable from the W1 one.
+    wasserstein_w2:
+      distance_id: wasserstein_w2
+      kind: statistical
+      family: wasserstein
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: balanced_wasserstein_2
+      normalization: rooted
+      sample_design: full_sample
+      sample_size: 128
+    # Point-in-time energy geometries. Identical functional to energy_v above --
+    # same ground distance, exponent, and V-estimator -- differing only in which
+    # observations are averaged. They are separate distance IDs because the
+    # component artifact path is keyed by geometry ID, and an energy component
+    # is NOT reducible across date subsets: A_ij is a mean over the cross
+    # product of two clouds, so restricting dates changes both the row set and
+    # the normalizer. Each window therefore earns its own cached cell.
+    #
+    # Retained for Paper 1; p1_neighbour_outcome_split consumes the 2020 cell,
+    # which is its preregistered
+    # 2018-2020 selection window -- the same window object, not a copy of it).
+    energy_v_pit_2018:
+      distance_id: energy_v_pit_2018
+      kind: statistical
+      family: energy
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: v_statistic
+      normalization: unhalved
+      sample_design: point_in_time
+      sample_window: pit-2018-12-31
+    energy_v_pit_2019:
+      distance_id: energy_v_pit_2019
+      kind: statistical
+      family: energy
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: v_statistic
+      normalization: unhalved
+      sample_design: point_in_time
+      sample_window: pit-2019-12-31
+    energy_v_pit_2020:
+      distance_id: energy_v_pit_2020
+      kind: statistical
+      family: energy
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: v_statistic
+      normalization: unhalved
+      sample_design: point_in_time
+      sample_window: pit-2020-12-31
+    energy_v_pit_2021:
+      distance_id: energy_v_pit_2021
+      kind: statistical
+      family: energy
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: v_statistic
+      normalization: unhalved
+      sample_design: point_in_time
+      sample_window: pit-2021-12-31
+    energy_v_pit_2022:
+      distance_id: energy_v_pit_2022
+      kind: statistical
+      family: energy
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: v_statistic
+      normalization: unhalved
+      sample_design: point_in_time
+      sample_window: pit-2022-12-31
+    # Rooted quadratic Wasserstein distances for Paper 3. These are distinct
+    # typed artifacts from the energy components above: balanced W2 cannot be
+    # reconstructed from a reusable mean-ground-distance component.
+    #
+    # `sample_size` is not a free tuning knob. `balanced_wasserstein_2` requires
+    # equal-size point clouds, so each value is the largest draw EVERY firm can
+    # supply inside that cutoff -- i.e. the roster minimum, rounded down. The
+    # retired 6/19/32/64/128 were exactly the 52-firm minima (6 and 19 matched
+    # the binding firm outright; 32 and 64 were rounded down from 37 and 75).
+    #
+    # The 100-firm roster lowers three of them. The m=128 md5 sample allocates
+    # rows in proportion to a firm's per-year article volume, so a firm whose
+    # coverage is back-loaded cannot fill an early window: NCLH (1,639 pooled
+    # articles, concentrated in the 2020+ cruise-line news cycle) supplies only
+    # 4 rows by 2018-12-31 and 10 by 2019-12-31, and JBHT/ADI supply 56 by
+    # 2021-12-31. 2020 is unchanged because the new minimum, 37, still clears
+    # the existing 32; 2022 is the full panel.
+    #
+    # COST, RECORDED DELIBERATELY: the 2018 vintage now rests on 4 points per
+    # firm in 4096 dimensions and 2019 on 10, down from 6 and 19, for all 100
+    # firms rather than only the binding one. This weakens Paper 3's earliest
+    # point-in-time vintages and is the accepted price of keeping every firm in
+    # the PIT lanes.
+    wasserstein_w2_pit_2018:
+      distance_id: wasserstein_w2_pit_2018
+      kind: statistical
+      family: wasserstein
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: balanced_wasserstein_2
+      normalization: rooted
+      sample_design: point_in_time
+      sample_window: pit-2018-12-31
+      sample_size: 4    # 100-firm minimum; binding firm NCLH
+    wasserstein_w2_pit_2019:
+      distance_id: wasserstein_w2_pit_2019
+      kind: statistical
+      family: wasserstein
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: balanced_wasserstein_2
+      normalization: rooted
+      sample_design: point_in_time
+      sample_window: pit-2019-12-31
+      sample_size: 10   # 100-firm minimum; binding firm NCLH
+    wasserstein_w2_pit_2020:
+      distance_id: wasserstein_w2_pit_2020
+      kind: statistical
+      family: wasserstein
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: balanced_wasserstein_2
+      normalization: rooted
+      sample_design: point_in_time
+      sample_window: pit-2020-12-31
+      sample_size: 32   # unchanged: 100-firm minimum is 37, which still clears 32
+    wasserstein_w2_pit_2021:
+      distance_id: wasserstein_w2_pit_2021
+      kind: statistical
+      family: wasserstein
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: balanced_wasserstein_2
+      normalization: rooted
+      sample_design: point_in_time
+      sample_window: pit-2021-12-31
+      sample_size: 56   # 100-firm minimum; binding firms JBHT and ADI
+    wasserstein_w2_pit_2022:
+      distance_id: wasserstein_w2_pit_2022
+      kind: statistical
+      family: wasserstein
+      ground_distance: euclidean_chord
+      exponent: 1.0
+      estimator: balanced_wasserstein_2
+      normalization: rooted
+      sample_design: point_in_time
+      sample_window: pit-2022-12-31
+      sample_size: 128
+  # Inclusive observation-date windows. `start` is the corpus start date
+  # (`start_date` above), so on the frozen 2018-2022 corpus it is numerically a
+  # no-op and an as-of cutoff and a bounded range coincide -- which is why
+  # Paper 1's preregistered 2018-2020 selection window and Paper 3's 2020
+  # point-in-time vintage are one window here rather than two cells computing
+  # the same matrix. It is declared rather than left open so the artifact states
+  # its coverage instead of inheriting whatever the corpus happens to begin
+  # with, and so extending the corpus backwards cannot silently move a vintage.
+  #
+  # Likewise pit-2022-12-31 is NOT folded into the full-sample energy_v even
+  # though the two agree on today's corpus: a PIT vintage that drifts when the
+  # corpus is extended forwards would not be a vintage.
+  windows:
+    pit-2018-12-31:
+      window_id: pit-2018-12-31
+      start: "2018-01-01"
+      end: "2018-12-31"
+    pit-2019-12-31:
+      window_id: pit-2019-12-31
+      start: "2018-01-01"
+      end: "2019-12-31"
+    pit-2020-12-31:
+      window_id: pit-2020-12-31
+      start: "2018-01-01"
+      end: "2020-12-31"
+    pit-2021-12-31:
+      window_id: pit-2021-12-31
+      start: "2018-01-01"
+      end: "2021-12-31"
+    pit-2022-12-31:
+      window_id: pit-2022-12-31
+      start: "2018-01-01"
+      end: "2022-12-31"
+  feasible_sets:
+    simplex_nonnegative:
+      feasible_set_id: simplex_nonnegative
+      kind: simplex_nonnegative
+    affine_signed:
+      feasible_set_id: affine_signed
+      kind: affine_signed
+    free_signed:
+      feasible_set_id: free_signed
+      kind: free_signed
+    prescribed_source_weights:
+      feasible_set_id: prescribed_source_weights
+      kind: prescribed_source_weights
+      source_weights: [0.5, 0.5]
+    # Three prescribed sources, for the free-support arm. A separate feasible
+    # set rather than a longer weight vector on the one above: the registry
+    # refuses more than two weights on an exact `wasserstein_ot` arm, so the
+    # arity distinction has to be visible in the declaration.
+    prescribed_source_weights_k3:
+      feasible_set_id: prescribed_source_weights_k3
+      kind: prescribed_source_weights
+      source_weights: [0.3333333333333333, 0.3333333333333333, 0.3333333333333334]
+  barycentres:
+    energy_simplex:
+      arm_id: &energy-simplex-arm energy_simplex
+      problem: target_projection
+      geometry: energy_v
+      feasible_set: simplex_nonnegative
+      solver: energy_qp
+      target_policy: leave_one_out
+      tol: 1.0e-8
+      maxiter: 10000
+    energy_affine_signed:
+      arm_id: energy_affine_signed
+      problem: target_projection
+      geometry: energy_v
+      feasible_set: affine_signed
+      solver: energy_qp
+      target_policy: leave_one_out
+      tol: 1.0e-8
+      maxiter: 10000
+    energy_free_signed:
+      arm_id: energy_free_signed
+      problem: target_projection
+      geometry: energy_v
+      feasible_set: free_signed
+      solver: energy_qp
+      target_policy: leave_one_out
+      tol: 1.0e-8
+      maxiter: 10000
+    linear_mmd_simplex:
+      arm_id: &linear-mmd-simplex-arm linear_mmd_simplex
+      problem: target_projection
+      geometry: linear_mmd
+      feasible_set: simplex_nonnegative
+      solver: mmd_qp
+      target_policy: leave_one_out
+      tol: 1.0e-8
+      maxiter: 10000
+    rbf_mmd_simplex:
+      arm_id: &rbf-mmd-simplex-arm rbf_mmd_simplex
+      problem: target_projection
+      geometry: rbf_mmd
+      feasible_set: simplex_nonnegative
+      solver: mmd_qp
+      target_policy: leave_one_out
+      tol: 1.0e-8
+      maxiter: 10000
+    # Paper 5's Wasserstein rows use a target-anchored empirical barycentre:
+    # optimal target-to-candidate couplings are fixed first, then the
+    # candidate simplex is solved exactly within that declared restriction.
+    wasserstein_w1_loo:
+      arm_id: wasserstein_w1_loo
+      problem: target_projection
+      geometry: wasserstein_w1
+      feasible_set: simplex_nonnegative
+      solver: wasserstein_w1_target
+      target_policy: leave_one_out
+      tol: 1.0e-8
+      maxiter: 1000
+    wasserstein_w2_loo:
+      arm_id: wasserstein_w2_loo
+      problem: target_projection
+      geometry: wasserstein_w2
+      feasible_set: simplex_nonnegative
+      solver: wasserstein_w2_target
+      target_policy: leave_one_out
+      tol: 1.0e-8
+      maxiter: 1000
+    wasserstein_w1_measure:
+      arm_id: wasserstein_w1_measure
+      problem: source_barycentre
+      geometry: wasserstein_w1
+      feasible_set: prescribed_source_weights
+      solver: wasserstein_ot
+      target_policy: explicit
+    wasserstein_w2_measure:
+      arm_id: wasserstein_w2_measure
+      problem: source_barycentre
+      geometry: wasserstein_w2
+      feasible_set: prescribed_source_weights
+      solver: wasserstein_ot
+      target_policy: explicit
+    # K-source free-support W2 barycentre. Unlike the two arms above this one
+    # is iterative and lands on a LOCAL optimum -- the free-support objective is
+    # non-convex in the support -- so it declares a solver budget and its
+    # `converged` flag certifies a fixed point, not global optimality.
+    wasserstein_w2_free_support:
+      arm_id: wasserstein_w2_free_support
+      problem: source_barycentre
+      geometry: wasserstein_w2
+      feasible_set: prescribed_source_weights_k3
+      solver: wasserstein_free_support
+      target_policy: explicit
+      tol: 1.0e-12
+      maxiter: 128
+
+
+# DVC expands these axes as a Cartesian product. The registry below remains
+# the source of truth for what each identity means; the matrix intentionally
+# materializes additional model × representation × distance combinations.
+scientific_selectors:
+  baseline_model_key: qwen3-embedding-8b
+  baseline_model: *baseline_embedding_model
+  typed_distance_provider_key: qwen3-embedding-8b
+  typed_distance_provider: *qwen3-embedding-8b-provider
+  typed_distance_representation_key: qwen3-embedding-8b-unit
+  typed_distance_representation: *qwen3-embedding-8b-unit
+  typed_distance_id: wasserstein_w2
+
+# Mapping keys are stable DVC cell identities. The values retain external IDs
+# separately because dotted IDs (notably bge-large-en-v1.5) cannot safely serve
+# as DVC dot-path selectors.
+typed_distance_providers:
+  qwen3-embedding-4b:
+    provider_key: qwen3-embedding-4b
+    provider_id: *qwen3-embedding-4b-provider
+    representation_32_key: qwen3-embedding-4b-32-unit
+    representation_64_key: qwen3-embedding-4b-64-unit
+    representation_128_key: qwen3-embedding-4b-128-unit
+    representation_256_key: qwen3-embedding-4b-256-unit
+    representation_1024_key: qwen3-embedding-4b-1024-unit
+    representation_full_key: qwen3-embedding-4b-unit
+    distance_ids: [energy_v, wasserstein_w1, wasserstein_w2, linear_mmd]
+  qwen3-embedding-8b:
+    provider_key: qwen3-embedding-8b
+    provider_id: *qwen3-embedding-8b-provider
+    representation_32_key: qwen3-embedding-8b-32-unit
+    representation_64_key: qwen3-embedding-8b-64-unit
+    representation_128_key: qwen3-embedding-8b-128-unit
+    representation_256_key: qwen3-embedding-8b-256-unit
+    representation_1024_key: qwen3-embedding-8b-1024-unit
+    representation_full_key: qwen3-embedding-8b-unit
+    distance_ids: [energy_v, wasserstein_w1, wasserstein_w2, linear_mmd]
+    extra_full_distance_ids: [rbf_mmd]
+  bge-m3:
+    provider_key: bge-m3
+    provider_id: *bge-m3-provider
+    representation_64_key: bge-m3-64-unit
+    representation_256_key: bge-m3-256-unit
+    representation_full_key: bge-m3-unit
+  bge-large-en-v1_5:
+    provider_key: bge-large-en-v1_5
+    provider_id: *bge-large-en-v1_5-provider
+    representation_64_key: bge-large-en-v1_5-64-unit
+    representation_256_key: bge-large-en-v1_5-256-unit
+    representation_full_key: bge-large-en-v1_5-unit
+typed_distance_representation_suffixes: [32-unit, 64-unit, 128-unit, 256-unit, 1024-unit, unit]
+# The shared roster supplies W1/W2/Energy for every provider representation.
+# Qwen3 additionally supplies linear MMD at every MRL width; only the canonical
+# full-width arm retains the RBF MMD extra.
+# `typed_distance_ids` remains the fallback roster for non-Qwen providers.
+typed_distance_ids: [energy_v, wasserstein_w1, wasserstein_w2]
+
+# Ragged by design: energy components cover every registered representation;
+# Qwen3's linear MMD components cover every MRL width, while RBF remains a
+# canonical full-width extra. Each mapping is one independently cached artifact.
+typed_geometry_component_specs:
+  qwen3_embedding_4b__32_unit__energy_v: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-32-unit, representation_id: qwen3-embedding-4b-32-unit, geometry_id: energy_v}
+
+  qwen3_embedding_4b__64_unit__energy_v: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-64-unit, representation_id: qwen3-embedding-4b-64-unit, geometry_id: energy_v}
+  qwen3_embedding_4b__256_unit__energy_v: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-256-unit, representation_id: qwen3-embedding-4b-256-unit, geometry_id: energy_v}
+  qwen3_embedding_4b__1024_unit__energy_v: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-1024-unit, representation_id: qwen3-embedding-4b-1024-unit, geometry_id: energy_v}
+  qwen3_embedding_4b__unit__energy_v: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-unit, representation_id: qwen3-embedding-4b-unit, geometry_id: energy_v}
+  qwen3_embedding_4b__128_unit__energy_v: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-128-unit, representation_id: qwen3-embedding-4b-128-unit, geometry_id: energy_v}
+
+  qwen3_embedding_8b__32_unit__energy_v: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-32-unit, representation_id: qwen3-embedding-8b-32-unit, geometry_id: energy_v}
+
+  qwen3_embedding_8b__128_unit__energy_v: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-128-unit, representation_id: qwen3-embedding-8b-128-unit, geometry_id: energy_v}
+  qwen3_embedding_8b__64_unit__energy_v: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-64-unit, representation_id: qwen3-embedding-8b-64-unit, geometry_id: energy_v}
+  qwen3_embedding_8b__256_unit__energy_v: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-256-unit, representation_id: qwen3-embedding-8b-256-unit, geometry_id: energy_v}
+  qwen3_embedding_8b__1024_unit__energy_v: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-1024-unit, representation_id: qwen3-embedding-8b-1024-unit, geometry_id: energy_v}
+  qwen3_embedding_8b__unit__energy_v: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, geometry_id: energy_v}
+  qwen3_embedding_8b__unit__rbf_mmd: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, geometry_id: rbf_mmd}
+  bge_m3__64_unit__energy_v: {provider_key: bge-m3, provider_id: bge-m3, representation_key: bge-m3-64-unit, representation_id: bge-m3-64-unit, geometry_id: energy_v}
+  bge_m3__256_unit__energy_v: {provider_key: bge-m3, provider_id: bge-m3, representation_key: bge-m3-256-unit, representation_id: bge-m3-256-unit, geometry_id: energy_v}
+  bge_m3__unit__energy_v: {provider_key: bge-m3, provider_id: bge-m3, representation_key: bge-m3-unit, representation_id: bge-m3-unit, geometry_id: energy_v}
+  bge_large_en_v1_5__64_unit__energy_v: {provider_key: bge-large-en-v1_5, provider_id: bge-large-en-v1.5, representation_key: bge-large-en-v1_5-64-unit, representation_id: bge-large-en-v1.5-64-unit, geometry_id: energy_v}
+  bge_large_en_v1_5__256_unit__energy_v: {provider_key: bge-large-en-v1_5, provider_id: bge-large-en-v1.5, representation_key: bge-large-en-v1_5-256-unit, representation_id: bge-large-en-v1.5-256-unit, geometry_id: energy_v}
+  bge_large_en_v1_5__unit__energy_v: {provider_key: bge-large-en-v1_5, provider_id: bge-large-en-v1.5, representation_key: bge-large-en-v1_5-unit, representation_id: bge-large-en-v1.5-unit, geometry_id: energy_v}
+  qwen3_embedding_4b__32_unit__linear_mmd: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-32-unit, representation_id: qwen3-embedding-4b-32-unit, geometry_id: linear_mmd}
+  qwen3_embedding_4b__64_unit__linear_mmd: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-64-unit, representation_id: qwen3-embedding-4b-64-unit, geometry_id: linear_mmd}
+  qwen3_embedding_4b__128_unit__linear_mmd: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-128-unit, representation_id: qwen3-embedding-4b-128-unit, geometry_id: linear_mmd}
+  qwen3_embedding_4b__256_unit__linear_mmd: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-256-unit, representation_id: qwen3-embedding-4b-256-unit, geometry_id: linear_mmd}
+  qwen3_embedding_4b__1024_unit__linear_mmd: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-1024-unit, representation_id: qwen3-embedding-4b-1024-unit, geometry_id: linear_mmd}
+  qwen3_embedding_8b__32_unit__linear_mmd: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-32-unit, representation_id: qwen3-embedding-8b-32-unit, geometry_id: linear_mmd}
+  qwen3_embedding_8b__64_unit__linear_mmd: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-64-unit, representation_id: qwen3-embedding-8b-64-unit, geometry_id: linear_mmd}
+  qwen3_embedding_8b__128_unit__linear_mmd: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-128-unit, representation_id: qwen3-embedding-8b-128-unit, geometry_id: linear_mmd}
+  qwen3_embedding_8b__256_unit__linear_mmd: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-256-unit, representation_id: qwen3-embedding-8b-256-unit, geometry_id: linear_mmd}
+  qwen3_embedding_8b__1024_unit__linear_mmd: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-1024-unit, representation_id: qwen3-embedding-8b-1024-unit, geometry_id: linear_mmd}
+  qwen3_embedding_8b__unit__linear_mmd: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, geometry_id: linear_mmd}
+  qwen3_embedding_4b__unit__linear_mmd: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-unit, representation_id: qwen3-embedding-4b-unit, geometry_id: linear_mmd}
+
+# Point-in-time cells are a separate family so a window edit invalidates only
+# its exact cell rather than every full-sample component.
+typed_geometry_windowed_component_specs:
+  # Baseline provider and full-width representation only. The 2020 cell is
+  # shared by Paper 1 and Paper 3; comparator providers remain frozen at their
+  # preregistered m=128 panel and cannot be window-subset honestly.
+  qwen3_embedding_8b__unit__energy_v_pit_2018: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, geometry_id: energy_v_pit_2018, window_key: pit-2018-12-31}
+  qwen3_embedding_8b__unit__energy_v_pit_2019: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, geometry_id: energy_v_pit_2019, window_key: pit-2019-12-31}
+  qwen3_embedding_8b__unit__energy_v_pit_2020: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, geometry_id: energy_v_pit_2020, window_key: pit-2020-12-31}
+  qwen3_embedding_8b__unit__energy_v_pit_2021: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, geometry_id: energy_v_pit_2021, window_key: pit-2021-12-31}
+  qwen3_embedding_8b__unit__energy_v_pit_2022: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, geometry_id: energy_v_pit_2022, window_key: pit-2022-12-31}
+
+# W2 has no reusable mean component, so its windowed cells materialize final
+# rooted distance artifacts directly rather than entering the geometry roster.
+typed_distance_windowed_specs:
+  qwen3_embedding_4b__unit__wasserstein_w2_pit_2018: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-unit, representation_id: qwen3-embedding-4b-unit, distance_id: wasserstein_w2_pit_2018, window_key: pit-2018-12-31}
+  qwen3_embedding_4b__unit__wasserstein_w2_pit_2019: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-unit, representation_id: qwen3-embedding-4b-unit, distance_id: wasserstein_w2_pit_2019, window_key: pit-2019-12-31}
+  qwen3_embedding_4b__unit__wasserstein_w2_pit_2020: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-unit, representation_id: qwen3-embedding-4b-unit, distance_id: wasserstein_w2_pit_2020, window_key: pit-2020-12-31}
+  qwen3_embedding_4b__unit__wasserstein_w2_pit_2021: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-unit, representation_id: qwen3-embedding-4b-unit, distance_id: wasserstein_w2_pit_2021, window_key: pit-2021-12-31}
+  qwen3_embedding_4b__unit__wasserstein_w2_pit_2022: {provider_key: qwen3-embedding-4b, provider_id: qwen3-embedding-4b, representation_key: qwen3-embedding-4b-unit, representation_id: qwen3-embedding-4b-unit, distance_id: wasserstein_w2_pit_2022, window_key: pit-2022-12-31}
+  qwen3_embedding_8b__unit__wasserstein_w2_pit_2020: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, distance_id: wasserstein_w2_pit_2020, window_key: pit-2020-12-31}
+  qwen3_embedding_8b__unit__wasserstein_w2_pit_2018: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, distance_id: wasserstein_w2_pit_2018, window_key: pit-2018-12-31}
+  qwen3_embedding_8b__unit__wasserstein_w2_pit_2019: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, distance_id: wasserstein_w2_pit_2019, window_key: pit-2019-12-31}
+  qwen3_embedding_8b__unit__wasserstein_w2_pit_2021: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, distance_id: wasserstein_w2_pit_2021, window_key: pit-2021-12-31}
+  qwen3_embedding_8b__unit__wasserstein_w2_pit_2022: {provider_key: qwen3-embedding-8b, provider_id: qwen3-embedding-8b, representation_key: qwen3-embedding-8b-unit, representation_id: qwen3-embedding-8b-unit, distance_id: wasserstein_w2_pit_2022, window_key: pit-2022-12-31}
+
+typed_barycentre_specs:
+  energy_simplex: {arm_id: energy_simplex, geometry_id: energy_v}
+  linear_mmd_simplex: {arm_id: linear_mmd_simplex, geometry_id: linear_mmd}
+  rbf_mmd_simplex: {arm_id: rbf_mmd_simplex, geometry_id: rbf_mmd}
+
+# Paper 5's W1/W2 cells are target projections rather than the separate
+# source-measure cells below: each output has one leave-one-out weight row per
+# governed firm and is consumed by the Paper 5 spatial-weight stage.
+typed_wasserstein_barycentre_specs:
+  wasserstein_w1_loo: {arm_id: wasserstein_w1_loo, geometry_id: wasserstein_w1}
+  wasserstein_w2_loo: {arm_id: wasserstein_w2_loo, geometry_id: wasserstein_w2}
+
+# A separate family from `typed_barycentre_specs` because the two DVC stages
+# differ in their dependency set, not merely in their arms: a target projection
+# reads a cached mean-ground-distance or kernel-mean component, while a source
+# measure barycentre reads the clouds directly. Wasserstein geometries have no
+# component artifact at all, so reusing the projection stage would declare a
+# dependency on a path nothing produces.
+typed_measure_barycentre_specs:
+  wasserstein_w1_measure: {arm_id: wasserstein_w1_measure, geometry_id: wasserstein_w1}
+  wasserstein_w2_measure: {arm_id: wasserstein_w2_measure, geometry_id: wasserstein_w2}
+  wasserstein_w2_free_support: {arm_id: wasserstein_w2_free_support, geometry_id: wasserstein_w2}
+
+# These fields intentionally document a future Paper 3 CLI cutover and are not
+# runtime sources of truth until that task wires them into the stage.
+parameter_classification:
+  paper3.estimators: planned
+  paper3.sub_periods: planned

@@ -1,0 +1,69 @@
+;FFMETADATA1
+title=Distributional Information Geometry for Financial Dependence — Manim Series
+artist=Generated explanatory animation package
+
+[CHAPTER]
+TIMEBASE=1/1000
+START=0
+END=7500
+title=01 — A firm as a probability law
+[CHAPTER]
+TIMEBASE=1/1000
+START=7500
+END=15000
+title=02 — Couplings and quadratic transport
+[CHAPTER]
+TIMEBASE=1/1000
+START=15000
+END=22500
+title=03 — Polarization: distance becomes covariance
+[CHAPTER]
+TIMEBASE=1/1000
+START=22500
+END=30000
+title=04 — A sharp covariance envelope
+[CHAPTER]
+TIMEBASE=1/1000
+START=30000
+END=37500
+title=05 — Transmission, distortion and slack
+[CHAPTER]
+TIMEBASE=1/1000
+START=37500
+END=45000
+title=06 — Target-anchored barycentric reconstruction
+[CHAPTER]
+TIMEBASE=1/1000
+START=45000
+END=52500
+title=07 — Symmetric distance, directed field
+[CHAPTER]
+TIMEBASE=1/1000
+START=52500
+END=60000
+title=08 — Quadratic adjustment and spatial closure
+[CHAPTER]
+TIMEBASE=1/1000
+START=60000
+END=67500
+title=09 — Pairwise plans are not jointly coherent
+[CHAPTER]
+TIMEBASE=1/1000
+START=67500
+END=75000
+title=10 — Multi-firm dispersion and barycentre
+[CHAPTER]
+TIMEBASE=1/1000
+START=75000
+END=82500
+title=11 — Portfolio variance certificate
+[CHAPTER]
+TIMEBASE=1/1000
+START=82500
+END=90000
+title=12 — Certificate convexity
+[CHAPTER]
+TIMEBASE=1/1000
+START=90000
+END=97500
+title=13 — Three distinct optimization layers

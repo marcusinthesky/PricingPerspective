@@ -1,0 +1,63 @@
+{
+  "name": "distributional-information-geometry-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Research website for three papers on distributional information geometry in finance.",
+  "engines": {
+    "bun": ">=1.4.0"
+  },
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build --webpack",
+    "preview": "bun scripts/serve.ts",
+    "start": "bun scripts/serve.ts",
+    "sync:blueprint": "bun scripts/sync-blueprint.ts",
+    "generate:blog-audio": "bun scripts/generate-blog-audio.ts",
+    "clean": "rm -rf .next out storybook-static",
+    "typecheck": "tsc --noEmit",
+    "lint": "bun run lint:ox && bun run lint:biome",
+    "lint:ox": "oxlint src scripts .storybook",
+    "lint:biome": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "audit:links": "bun scripts/check-links.ts",
+    "audit:schema": "bun scripts/audit-structured-data.ts",
+    "verify:export": "bun scripts/verify-static-export.ts",
+    "verify": "bun run typecheck && bun run lint && bun run build && bun run verify:export && bun run audit:links && bun run audit:schema",
+    "ui:add": "shadcn add",
+    "lighthouse:ci": "lhci autorun",
+    "verify:full": "bun run verify && bun run build-storybook && bun run lighthouse:ci"
+  },
+  "dependencies": {
+    "@mdx-js/loader": "3.1.1",
+    "@mdx-js/react": "3.1.1",
+    "@next/mdx": "16.3.4",
+    "gray-matter": "4.0.3",
+    "kokoro-js": "1.2.1",
+    "lucide-react": "1.39.0",
+    "next": "16.3.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remark-frontmatter": "5.0.0",
+    "remark-gfm": "4.0.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.11",
+    "@lhci/cli": "0.15.1",
+    "@storybook/addon-a11y": "10.5.10",
+    "@storybook/nextjs-vite": "10.6.0",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/bun": "1.4.0",
+    "@types/mdx": "2.0.14",
+    "@types/node": "26.4.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "oxlint": "1.80.0",
+    "shadcn": "4.19.0",
+    "storybook": "10.6.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "7.0.2"
+  }
+}

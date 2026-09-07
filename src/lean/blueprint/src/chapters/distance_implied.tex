@@ -1,0 +1,72 @@
+\chapter{Paper 3: information-certified portfolio variance}
+\label{chap:distance-implied}
+
+Paper 3 aggregates observable pairwise characteristic-law distances through one
+joint exposure law.  Its checked spine is a coherent systematic-variance cap,
+an additive residual-budget wrapper, and existence of a portfolio minimizer.
+The transmission restrictions and residual budget are maintained assumptions;
+the formal claims do not calibrate them.
+
+\section{Coherent certificate}
+
+\begin{theorem}[Information-certified coherent portfolio variance]
+  \label{thm:p3-information-certified-cap}
+  \ppClaimBinding{thm:p3-information-certified-cap}
+  \uses{def:exposure-law, def:frechet-class}
+  Under the common non-collapsing carrier, asset-specific synchronous slack,
+  coherent joint-law, marginal, and integrability premises, every normalized
+  long-only portfolio satisfies
+  \[
+    V_{\mathrm{sys}}(q)
+    \leq \sum_i q_i v_i-\mathcal C(q).
+  \]
+  The result is a conditional upper bound on systematic variance, not a
+  covariance point estimate or an empirical coverage statement.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:p3-information-certified-cap}
+  The carrier-and-slack restriction supplies pairwise W2 floors.  Applying each
+  floor to the coordinate pairs of one coherent joint law and summing with the
+  portfolio weights deducts $\mathcal C(q)$ from the weighted marginal term.
+\end{proof}
+
+\section{Return bridge}
+
+\begin{theorem}[Additive residual-budget cap]
+  \label{eq:p3-residual-budget-cap}
+  \ppClaimBinding{eq:p3-residual-budget-cap}
+  \uses{thm:p3-information-certified-cap}
+  If standardized total variance decomposes into the certified systematic term
+  and an aggregate residual contribution bounded by $\delta\geq0$, then
+  \[
+    \operatorname{Var}(R_q)\leq1-\mathcal C(q)+\delta.
+  \]
+  Multiplication by a nonnegative raw scale gives the corresponding raw-variance
+  inequality.  The theorem assumes $\delta$; it does not estimate it or derive
+  residual orthogonality.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{eq:p3-residual-budget-cap}
+  Add the assumed residual budget to the systematic certificate and preserve
+  the inequality under multiplication by the square of the raw scale.
+\end{proof}
+
+\section{Portfolio choice}
+
+\begin{theorem}[Certified minimizer]
+  \label{thm:p3-certified-minimizer}
+  \ppClaimBinding{thm:p3-certified-minimizer}
+  \uses{thm:p3-information-certified-cap}
+  Every nonempty compact feasible subset of the long-only simplex admits a
+  minimizer of the continuous certified-variance objective.  Any pointwise
+  variance certificate on that set is inherited at the minimizer.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:p3-certified-minimizer}
+  Continuity of the objective and compactness of the nonempty feasible set give
+  existence by the extreme-value theorem; the pointwise certificate then holds
+  at the selected feasible point.
+\end{proof}

@@ -1,0 +1,242 @@
+# Line endings
+* text=auto eol=lf
+# Lock files
+uv.lock linguist-generated
+dvc.lock linguist-generated
+flake.lock linguist-generated
+# Auto-generated files
+**/objects.json linguist-generated
+.context/** linguist-generated
+CHANGELOG.md linguist-generated
+src/python/packages/jcor/CHANGELOG.md linguist-generated
+
+# Public replication snapshot (`git archive`).  This is a one-way projection of
+# the private research tree: paths are preserved, while development history,
+# agent material, research notes, tests, and non-DVC implementation code are
+# omitted.  Keep this policy deny-by-default within the named private/non-core
+# areas.  `src/python/scripts/replication_release/script.py check` verifies the
+# resulting archive against the DVC/Semflow source closure.
+
+# Private development and coordination material.  The CSL README records are
+# the only `.context` content retained because the bibliography freshness stage
+# reads their frontmatter.  Full papers, extracted text, chat, plans, and
+# correspondence never enter the replication snapshot.
+/.agents/* export-ignore
+/.agents/justfile -export-ignore
+/.agents/workflows -export-ignore
+/.agents/workflows/* export-ignore
+/.agents/workflows/justfile -export-ignore
+/.benchmarks export-ignore
+/.benchmarks/** export-ignore
+/.claude export-ignore
+/.claude/** export-ignore
+/.codex export-ignore
+/.codex/** export-ignore
+/.github export-ignore
+/.github/** export-ignore
+/.serena export-ignore
+/.serena/** export-ignore
+/.context/archive export-ignore
+/.context/archive/** export-ignore
+/.context/chat export-ignore
+/.context/chat/** export-ignore
+/.context/correspondence export-ignore
+/.context/correspondence/** export-ignore
+/.context/plan export-ignore
+/.context/plan/** export-ignore
+/.context/.pre-commit-config.yaml export-ignore
+/.context/AGENTS.md export-ignore
+/.context/README.md export-ignore
+/.context/justfile export-ignore
+/.context/manifest.json export-ignore
+/.context/reference/.pre-commit-config.yaml export-ignore
+/.context/reference/.staging export-ignore
+/.context/reference/README.md export-ignore
+/.context/reference/TODO.md export-ignore
+/.context/reference/*/* export-ignore
+/.context/reference/*/README.md -export-ignore
+
+# Local automation and repository-maintenance surfaces are not analysis inputs.
+# `.dvc/config` is deliberately absent from this list: the snapshot ships it, so
+# that `dvc pull` resolves against the public bucket out of the box. It names
+# only that read-only remote; the private operational remote lives in the
+# gitignored `.dvc/config.local`.
+/.env.example export-ignore
+/.envrc export-ignore
+/.codespellrc export-ignore
+/.kilocodeignore export-ignore
+/.pre-commit-config.yaml export-ignore
+/.prekignore export-ignore
+/.rumdl.toml export-ignore
+/AGENTS.md export-ignore
+/CHANGELOG.md export-ignore
+/REGISTRY.md export-ignore
+/ROADMAP.md export-ignore
+/TODO.md export-ignore
+/insitu.toml export-ignore
+/lychee.toml export-ignore
+/tombi.toml export-ignore
+/infra/schemas/** export-ignore
+/infra/terraform/* export-ignore
+/infra/terraform/justfile -export-ignore
+
+# DVC/Semflow runtime workspace closure.  The six implementations retained in
+# full are pipeline, simulation, ettax, jcor, dotell, and semflow.  Other uv
+# workspace members retain only metadata (plus imported justfiles) so the
+# existing frozen workspace lock and root task file remain valid, but none of
+# their implementation, model, notebook, or test code is exported.
+/src/python/apps/crawler/* export-ignore
+/src/python/apps/crawler/README.md -export-ignore
+/src/python/apps/crawler/justfile -export-ignore
+/src/python/apps/crawler/pyproject.toml -export-ignore
+/src/python/apps/harnessme/* export-ignore
+/src/python/apps/harnessme/README.md -export-ignore
+/src/python/apps/harnessme/justfile -export-ignore
+/src/python/apps/harnessme/pyproject.toml -export-ignore
+/src/python/apps/insitu-repository/* export-ignore
+/src/python/apps/insitu-repository/README.md -export-ignore
+/src/python/apps/insitu-repository/justfile -export-ignore
+/src/python/apps/insitu-repository/pyproject.toml -export-ignore
+/src/python/apps/nasdaq-pilot/* export-ignore
+/src/python/apps/nasdaq-pilot/README.md -export-ignore
+/src/python/apps/nasdaq-pilot/pyproject.toml -export-ignore
+/src/python/packages/agentrail/* export-ignore
+/src/python/packages/agentrail/README.md -export-ignore
+/src/python/packages/agentrail/chat.justfile -export-ignore
+/src/python/packages/agentrail/pyproject.toml -export-ignore
+/src/python/packages/insitu/* export-ignore
+/src/python/packages/insitu/LICENSE -export-ignore
+/src/python/packages/insitu/README.md -export-ignore
+/src/python/packages/insitu/justfile -export-ignore
+/src/python/packages/insitu/pyproject.toml -export-ignore
+/src/python/notebooks/* export-ignore
+
+# Test, benchmark, notebook, and developer-documentation tails of the retained
+# runtime packages are outside the DVC execution closure.
+/src/python/.pre-commit-config.yaml export-ignore
+/src/python/ARCHITECTURE.md export-ignore
+/src/python/README.md export-ignore
+/src/python/tach.toml export-ignore
+/src/python/vulture_whitelist.py export-ignore
+/src/python/apps/pipeline/.benchmarks/** export-ignore
+/src/python/apps/pipeline/ARCHITECTURE.md export-ignore
+/src/python/apps/pipeline/tests/** export-ignore
+/src/python/apps/simulation/.benchmarks/** export-ignore
+/src/python/apps/simulation/.pre-commit-config.yaml export-ignore
+/src/python/apps/simulation/ARCHITECTURE.md export-ignore
+/src/python/apps/simulation/docs/** export-ignore
+/src/python/apps/simulation/tests/** export-ignore
+/src/python/apps/ettax/.benchmarks/** export-ignore
+/src/python/apps/ettax/ARCHITECTURE.md export-ignore
+/src/python/apps/ettax/tests/** export-ignore
+/src/python/packages/jcor/.benchmarks/** export-ignore
+/src/python/packages/jcor/.pre-commit-config.yaml export-ignore
+/src/python/packages/jcor/AGENTS.md export-ignore
+/src/python/packages/jcor/CHANGELOG.md export-ignore
+/src/python/packages/jcor/docs/** export-ignore
+/src/python/packages/jcor/notebooks/** export-ignore
+/src/python/packages/jcor/tests/** export-ignore
+/src/python/packages/dotell/.benchmarks/** export-ignore
+/src/python/packages/dotell/tests/** export-ignore
+/src/python/packages/semflow/.benchmarks/** export-ignore
+/src/python/packages/semflow/ARCHITECTURE.md export-ignore
+/src/python/packages/semflow/tests/** export-ignore
+/src/python/notebooks/* export-ignore
+/src/python/notebooks/justfile -export-ignore
+/src/python/scripts/* export-ignore
+/src/python/scripts/references -export-ignore
+/src/python/scripts/references/* export-ignore
+/src/python/scripts/references/justfile -export-ignore
+
+# Standalone manuscript/proof sources remain available; the thesis aggregate,
+# generated submission binaries, generic templates, and tool fixtures do not.
+# The three standalone paper render stages can rebuild their omitted outputs.
+/src/latex/.pre-commit-config.yaml export-ignore
+/src/latex/AGENTS.md export-ignore
+/src/latex/projects/00_dissertation export-ignore
+/src/latex/projects/00_dissertation/** export-ignore
+/src/latex/projects/_template/** export-ignore
+/src/latex/projects/*/build/** export-ignore
+/src/latex/tools/assemble-dissertation export-ignore
+/src/latex/tools/tests/** export-ignore
+/src/lean/AGENTS.md export-ignore
+/src/lean/TODO.md export-ignore
+/src/lean/blueprint/tests/** export-ignore
+
+# Superseded encoder experiments and repository-introspection artifacts are not
+# inputs to the dissertation analyses.  Canonical raw/model DVC pointers and
+# the v3 EttaX vintage records remain included.
+/data/.encoder_vintage/ettax/dvclive/** export-ignore
+/data/.encoder_vintage/ettax/runs/v2-untied-decoder/** export-ignore
+/data/graph/** export-ignore
+# The raw-corpus README names the vendor endpoint, the scrape window and the
+# retained record counts -- a reconstruction recipe for a corpus we cannot
+# redistribute.  The `.dvc` pointers beside it still ship, so every frozen
+# stage stays verifiable by hash without publishing that recipe.
+/data/raw/README.md export-ignore
+/data/papers/paper5/RUN_MANIFEST.md export-ignore
+/data/papers/paper5/validate_estimators_summary.json export-ignore
+# Auto-generated bibliographies (CSL reference README frontmatter → refs.bib).
+# Regenerated by the bibliography pipeline hook; do not hand-edit.
+src/latex/projects/*/src/refs.bib linguist-generated
+# Auto-generated paper numbers (written from data/*/summary.yaml by `pipeline render-paper{1,2,3}-figures`)
+# Input via `\input{generated/numbers.tex}` so paper prose reflects the latest `dvc repro`.
+src/latex/projects/*/src/generated/*.tex linguist-generated
+# Any `generated/` artifact tree — paper-number manifests (numbers.manifest.json), the Lean
+# claim manifest (src/lean/tools/claim-manifest/generated/manifest.json), blueprint output.
+# Regenerated by pipeline/prek hooks; collapse in review and drop from language stats.
+**/generated/** linguist-generated
+# Git LFS — images
+**.png filter=lfs diff=lfs merge=lfs -text
+**.jpg filter=lfs diff=lfs merge=lfs -text
+**.jpeg filter=lfs diff=lfs merge=lfs -text
+**.webp filter=lfs diff=lfs merge=lfs -text
+**.svg filter=lfs diff=lfs merge=lfs -text
+**.avif filter=lfs diff=lfs merge=lfs -text
+**.gif filter=lfs diff=lfs merge=lfs -text
+**.pgf filter=lfs diff=lfs merge=lfs -text
+# Git LFS — video
+**.webm filter=lfs diff=lfs merge=lfs -text
+**.mp4 filter=lfs diff=lfs merge=lfs -text
+**.mov filter=lfs diff=lfs merge=lfs -text
+# Git LFS — fonts
+**.woff2 filter=lfs diff=lfs merge=lfs -text
+**.ttf filter=lfs diff=lfs merge=lfs -text
+**.otf filter=lfs diff=lfs merge=lfs -text
+# Git LFS — documents
+**.pdf filter=lfs diff=lfs merge=lfs -text
+**.ipynb filter=lfs diff=lfs merge=lfs -text
+# Git LFS — data
+**.zip filter=lfs diff=lfs merge=lfs -text
+# Submission archives are byte-deterministic outputs of `just latex::bundle`, so
+# an unchanged manuscript re-renders to the same blob rather than growing
+# history. QF ZIPs use the existing document ZIP rule above; tarballs use this.
+**.tar.gz filter=lfs diff=lfs merge=lfs -text
+**.csv filter=lfs diff=lfs merge=lfs -text
+**.tsv filter=lfs diff=lfs merge=lfs -text
+**.parquet filter=lfs diff=lfs merge=lfs -text
+**.xlsx filter=lfs diff=lfs merge=lfs -text
+**.db filter=lfs diff=lfs merge=lfs -text
+# Git LFS — models
+**.pkl filter=lfs diff=lfs merge=lfs -text
+**.safetensors filter=lfs diff=lfs merge=lfs -text
+# Git LFS — exceptions
+# The rules above match on extension alone, which catches hand-authored fixtures
+# whose entire value is being readable as a diff in review. A pointer would also
+# be LARGER than this file. `-filter -diff -merge` unsets the three LFS hooks;
+# `text` puts it back under the `* text=auto eol=lf` rule at the top.
+#
+# This is not cosmetic. A path declared `filter=lfs` whose committed blob is
+# plain text is reported by git-lfs on checkout as "should have been a pointer,
+# but wasn't", and `git status` then calls it modified forever on any fresh
+# clone — the clean filter produces a pointer that never matches the stored
+# blob. A local worktree hides this behind the index stat cache, so it shows up
+# only in CI, where prek stashes the phantom change, re-dirties it mid-run, and
+# blames whichever hook happened to be running. Keep declaration and blob in
+# agreement: either the path is excepted here, or it is `git add --renormalize`d
+# into LFS.
+.agents/**/tests/*.tsv -filter -diff -merge text
+# Language overrides
+*.lean linguist-language=Lean
+# Git LFS — chat attachments (any file under a .context/chat/**/figures/ dir)
+.context/chat/**/figures/* filter=lfs diff=lfs merge=lfs -text

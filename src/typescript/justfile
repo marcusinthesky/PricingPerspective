@@ -1,0 +1,30 @@
+set shell := ["bash", "-uc"]
+
+workspace := source_directory()
+
+# Bun/Turbo workspace task runner. Run `just typescript` to list these recipes
+# from the polyglot repository root.
+
+setup:
+    cd "{{ workspace }}" && bun ci
+
+build:
+    cd "{{ workspace }}" && bun run build
+
+dev:
+    cd "{{ workspace }}" && bun run dev
+
+lint:
+    cd "{{ workspace }}" && bun run lint
+
+typecheck:
+    cd "{{ workspace }}" && bun run typecheck
+
+fmt:
+    cd "{{ workspace }}" && bun run format
+
+fmt-check:
+    cd "{{ workspace }}" && bun run format:check
+
+verify:
+    cd "{{ workspace }}" && bun run verify:full

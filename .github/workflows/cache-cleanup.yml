@@ -1,0 +1,65 @@
+name: Delete closed PR caches
+
+on:
+  # This job never checks out or executes PR code. `pull_request_target` gives
+  # the default-branch workflow an actions:write token even for fork PRs.
+  pull_request_target:
+    branches: [main]
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Closed PR number whose merge-ref caches should be deleted
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: cache-cleanup-pr-${{ github.event.pull_request.number || inputs.pr_number }}
+  cancel-in-progress: false
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete caches scoped to the PR merge ref
+        uses: actions/github-script@v9
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+        with:
+          script: |
+            const prNumber = Number(process.env.PR_NUMBER);
+            if (!Number.isSafeInteger(prNumber) || prNumber < 1) {
+              core.setFailed(`Invalid PR number: ${process.env.PR_NUMBER}`);
+              return;
+            }
+
+            const { owner, repo } = context.repo;
+            const ref = `refs/pull/${prNumber}/merge`;
+            const caches = [];
+            for (let page = 1; ; page += 1) {
+              const response = await github.request(
+                "GET /repos/{owner}/{repo}/actions/caches",
+                { owner, repo, ref, per_page: 100, page },
+              );
+              caches.push(...response.data.actions_caches);
+              if (response.data.actions_caches.length < 100) break;
+            }
+
+            let bytes = 0;
+            for (const cache of caches) {
+              await github.request(
+                "DELETE /repos/{owner}/{repo}/actions/caches/{cache_id}",
+                { owner, repo, cache_id: cache.id },
+              );
+              bytes += cache.size_in_bytes;
+              core.info(`Deleted ${cache.key} (${cache.size_in_bytes} bytes)`);
+            }
+
+            core.notice(
+              `Deleted ${caches.length} cache(s) scoped to ${ref} ` +
+              `(${(bytes / 1024 ** 3).toFixed(3)} GiB)`,
+            );

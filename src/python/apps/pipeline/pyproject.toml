@@ -1,0 +1,111 @@
+[project]
+name = "pipeline"
+version = "0.2.1"
+description = "DVC data-pipeline stages: corpus normalization, embeddings, market data, statistical tests, and figure rendering."
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+  "cvxpy>=1.5.0",
+  "dotell",
+  "duckdb>=1.0.0",
+  "httpx>=0.27.0",
+  "jax[cpu]>=0.11.0",
+  "jcor",
+  "libpysal>=4.15.0",
+  "matplotlib",
+  "numpy>=2.0.0, <3.0.0",
+  "optax>=0.2.8",
+  "pandas>=3.0.0, <4.0.0",
+  "pyarrow>=15.0",
+  "pydantic>=2.13.4",
+  "pydantic-settings>=2.14.2",
+  "pyyaml>=6.0",
+  "scikit-learn",
+  "scipy>=1.14.0",
+  "semflow",
+  "simulation",
+  "spreg>=1.9.0",
+  "threadpoolctl>=3.6.0",
+  "tqdm",
+  "typer>=0.12.0",
+  "yfinance",
+]
+
+[project.scripts]
+pipeline = "pipeline.cli:app"
+
+[dependency-groups]
+dev = [
+  "deptry",
+  "pytest",
+  "pytest-cov",
+  "pytest-monitor",
+  "pytest-testmon",
+  "pytest-xdist",
+  "ruff",
+  "types-PyYAML",
+]
+# Validation-only extras for the energy-robustness optimizer (cvxpy PSD min-max solver
+# backends) and paper5/validate_estimators.py (pysal.spreg ML_Lag/GM_Lag);
+# cvxpy/libpysal/spreg themselves are direct runtime deps above.
+# infra/pipeline-deps: merges robust-optimization cvxpy + paper5/t14 pysal adds.
+validation = [
+  "clarabel",
+  # pysal->segregation pulls numba<0.54 by default, which fails to build on
+  # py3.13; force a py3.13-compatible numba/llvmlite pair.
+  "numba>=0.60",
+  "pysal",
+  "scs",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# deptry: per-project dependency hygiene (unused / missing / transitive / misplaced).
+# deptry has no config inheritance, so every workspace member carries its own
+# block; the runner cd's into each member (`just python::deptry`). PEP 735
+# [dependency-groups] are auto-treated as dev deps (exempt from DEP002); PEP-723
+# notebooks/scripts carry their own inline deps and are excluded.
+[tool.deptry]
+extend_exclude = ["notebooks", "scripts"]
+# pipeline imports its own package absolutely (`from pipeline.x import y`); the
+# workspace installs pipeline into the shared venv, so without this deptry reports
+# every self-import as a transitive dependency (DEP003).
+known_first_party = ["pipeline"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pipeline"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+# Default gate excludes slow; run the full suite with `pytest -m slow` or
+# `pytest -m ""`.
+addopts = "-m 'not slow'"
+markers = [
+  "slow: Statistical/backtest tests that take >2s (full CI only)",
+  "integration: interaction between package subsystems or a real dependency/backend",
+  "reference: compares results with independent software, published values, or trusted fixtures",
+  "requires_optional(name): requires the named optional Python dependency",
+]
+
+[tool.ruff]
+extend = "../../pyproject.toml"
+
+[tool.ruff.lint.extend-per-file-ignores]
+"src/pipeline/cli/commands/**/*.py" = ["B008", "PLC0415"]
+# RUF002/RUF003 suppressed for en-dash / minus-sign in scientific docstrings.
+# The `_empirical` glob (t42) carries the same docstrings, moved verbatim out of
+# `empirical.py` when it was split into its private step package.
+"src/pipeline/stages/papers/paper3/empirical.py" = ["RUF002", "RUF003"]
+"src/pipeline/stages/papers/paper3/_empirical/*.py" = ["RUF002", "RUF003"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+jcor = { workspace = true }
+simulation = { workspace = true }
+dotell = { workspace = true }
+semflow = { workspace = true }

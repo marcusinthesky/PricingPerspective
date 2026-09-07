@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = {
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Radii propagate through the embedding</title>
+<link rel="next" href="sect0010.html" title="Maximizing over the box" />
+<link rel="prev" href="chap-robust-slack.html" title="Robust envelopes under measurement slack" />
+<link rel="up" href="chap-robust-slack.html" title="Robust envelopes under measurement slack" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Pricing Perspective: Formalization Blueprint</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="chap-random-exposure.html"><span class="toc_ref">1</span> <span class="toc_entry">Random functional exposures and the covariance envelope</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0001.html"><span class="toc_ref">1.1</span> <span class="toc_entry">The exposure law and its risk coordinates</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1.2</span> <span class="toc_entry">The Fréchet class and its endpoints</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">1.3</span> <span class="toc_entry">Transfer from observable characteristics</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">1.4</span> <span class="toc_entry">Coherent aggregation</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">1.5</span> <span class="toc_entry">Rehomed from the retired deterministic chapter</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-distance-implied.html"><span class="toc_ref">2</span> <span class="toc_entry">Paper 3: information-certified portfolio variance</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0006.html"><span class="toc_ref">2.1</span> <span class="toc_entry">Coherent certificate</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">2.2</span> <span class="toc_entry">Return bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">2.3</span> <span class="toc_entry">Portfolio choice</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active">
+  <a href="chap-robust-slack.html"><span class="toc_ref">3</span> <span class="toc_entry">Robust envelopes under measurement slack</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class=" active current">
+  <a href="sect0009.html"><span class="toc_ref">3.1</span> <span class="toc_entry">Radii propagate through the embedding</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">3.2</span> <span class="toc_entry">Maximizing over the box</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">3.3</span> <span class="toc_entry">Reconciling the two geometries</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-spatial.html"><span class="toc_ref">4</span> <span class="toc_entry">Spatial interaction and the rank-one boundary</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0012.html"><span class="toc_ref">4.1</span> <span class="toc_entry">Operator and convergence certificate</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">4.2</span> <span class="toc_entry">Finite interaction and the strong-interaction boundary</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000010">3.1 Radii propagate through the embedding</h1>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:inner-perturbation">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">23</span>
+    <span class="theorem_thmtitle">Inner-product perturbation</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#thm:inner-perturbation">#</a>
+
+    <a class="icon proof" href="sect0009.html#a0000000039"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="sect0003.html#ass:random-common-map">Definition 11</a></li>
+
+          <li><a href="sect0001.html#lem:polarization">Lemma 3</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   For mean embeddings perturbed by at most \(\varepsilon _i\) and \(\varepsilon _j\), the inner product moves by at most \(\varepsilon _i\lVert \mu _j\rVert +\varepsilon _j\lVert \mu _i\rVert +\varepsilon _i\varepsilon _j\). </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000039">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> Expand the perturbed inner product and bound each cross term. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:dist-bracket">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">24</span>
+    <span class="theorem_thmtitle">Radii add on the metric</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#thm:dist-bracket">#</a>
+
+    <a class="icon proof" href="sect0009.html#a0000000040"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="sect0003.html#ass:random-common-map">Definition 11</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Under the same radii, \(\lvert \operatorname {dist}(\mu _i',\mu _j')-\operatorname {dist}(\mu _i,\mu _j)\rvert \le \varepsilon _i+\varepsilon _j\). Additivity on the metric, rather than on the squared quantity, is the same structural fact that makes the metric-level bracket of ??cor:random-w2-metric sharper than its squared counterpart. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000040">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p>Two applications of the triangle inequality. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:energy-bracket">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">25</span>
+    <span class="theorem_thmtitle">Asymmetric squared bracket</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#thm:energy-bracket">#</a>
+
+    <a class="icon proof" href="sect0009.html#a0000000041"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="sect0009.html#thm:dist-bracket">Theorem 24</a></li>
+
+          <li><a href="sect0009.html#thm:dist-bracket">Theorem 24</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Squaring the metric bracket gives an asymmetric interval, with the lower end truncated at zero. The asymmetry is not cosmetic: it is why the squared-cost formalization cannot simply inherit the metric statement. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000041">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> Square both ends of ??thm:dist-bracket and truncate. </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:covariance-bracket">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">26</span>
+    <span class="theorem_thmtitle">Composed covariance bracket</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0009.html#thm:covariance-bracket">#</a>
+
+    <a class="icon proof" href="sect0009.html#a0000000042"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+
+
+    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
+</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Uses</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+
+        <ul class="uses">
+
+          <li><a href="sect0003.html#ass:random-common-map">Definition 11</a></li>
+
+          <li><a href="sect0009.html#thm:energy-bracket">Theorem 25</a></li>
+
+          <li><a href="sect0009.html#thm:energy-bracket">Theorem 25</a></li>
+
+          <li><a href="sect0009.html#thm:inner-perturbation">Theorem 23</a></li>
+
+          <li><a href="sect0001.html#lem:polarization">Lemma 3</a></li>
+
+        </ul>
+
+      </div>
+    </div>
+
+
+
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>   Under bi-Lipschitz constants stated in the true, unobserved distance and per-asset embedding radii, the covariance inner product is bracketed by polarization expressions evaluated at the radius-inflated and radius-deflated measured distance. The hypothesis that the bi-Lipschitz relation holds in the unobserved distance is the load-bearing one and is not testable from the measured distances. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000042">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  <p> Compose ??thm:energy-bracket with the bi-Lipschitz relation and apply polarization at both ends. </p>
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="chap-robust-slack.html" title="Robust envelopes under measurement slack"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="chap-robust-slack.html" title="Robust envelopes under measurement slack"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0010.html" title="Maximizing over the box"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

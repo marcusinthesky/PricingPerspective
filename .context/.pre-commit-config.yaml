@@ -1,0 +1,31 @@
+# Spanning `.context/` policy for native prek workspace discovery.
+#
+# Once `.context/` is discovered as its own project, path filters and hook cwd
+# handling are project-relative to this directory. Root-owned hygiene, schema,
+# `docs-exec`, and bibliography hooks therefore stay out of this file; child
+# projects own their corpus-local schema/graph checks.
+default_stages: [pre-commit]
+
+repos:
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+
+
+  - repo: https://github.com/rvben/rumdl-pre-commit
+    rev: v0.2.31
+    hooks:
+      - id: rumdl
+        name: "context: prose link integrity (MD051/MD057)"
+        args:
+          - --no-config
+          - --enable
+          - MD051,MD057
+          - --include
+          - "**/README.md"
+          - --exclude
+          - "plan/**"
+          - .
+        pass_filenames: false
+        files: ^.*\.md$

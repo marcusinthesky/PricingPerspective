@@ -1,0 +1,136 @@
+[project]
+name = "ettax"
+version = "0.1.0"
+description = "Vintage-locked compact document encoders in JAX NNX."
+readme = "README.md"
+requires-python = "~=3.13.0"
+license = "Apache-2.0"
+dependencies = [
+  "dotell",
+  "dvclive>=3.48.0",
+  "flax>=0.12.0",
+  "grain>=0.2.18",
+  "jax>=0.11.0",
+  "jaxtyping>=0.3.2",
+  "numpy>=2.2,<3",
+  "optax>=0.2.5",
+  "orbax-checkpoint>=0.11.24",
+  "orjson>=3.10",
+  "pyarrow>=24.0",
+  "scipy>=1.18",
+  "tokenizers>=0.21",
+  "typer>=0.16",
+  "zstandard>=0.25.0",
+]
+
+[project.scripts]
+ettax = "ettax.cli:app"
+
+[project.optional-dependencies]
+cuda = ["jax[cuda13]>=0.11.0,<0.12; platform_system == 'Linux'"]
+
+[dependency-groups]
+dev = [
+  "deptry",
+  "pytest",
+  "pytest-monitor",
+  "pytest-testmon",
+  "pytest-xdist",
+  "ruff",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.deptry]
+known_first_party = ["ettax"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ettax"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+markers = [
+  "unit: pure, fast tests with no filesystem or accelerator requirement",
+  "integration: tests spanning package boundaries or a compiled train step",
+  "benchmark: opt-in performance measurements",
+  "gpu: tests requiring a CUDA device",
+  "slow: tests unsuitable for the default local gate",
+  "numerical: dtype, stability, or numerical-invariant checks",
+]
+filterwarnings = [
+  "error::DeprecationWarning:ettax.*",
+  "error::RuntimeWarning:ettax.*",
+  "ignore:.*JAX.*x64.*:UserWarning",
+]
+
+[tool.ruff]
+extend = "../../pyproject.toml"
+
+[tool.ruff.lint.extend-per-file-ignores]
+# Typer command bodies load JAX only after environment/backend selection.
+"src/ettax/cli.py" = ["FBT002", "PLC0415"]
+# Domain validation errors are deliberately direct ValueError/RuntimeError messages.
+"src/ettax/config.py" = ["EM101", "TRY003"]
+"src/ettax/data.py" = ["EM101", "EM102", "PLC0415", "TRY003"]
+"src/ettax/model.py" = ["EM101", "EM102", "F722", "TRY003"]
+"src/ettax/semantic.py" = ["EM101", "EM102", "PLC0415", "PLR2004", "TRY003"]
+"src/ettax/train.py" = ["EM101", "TRY003"]
+"src/ettax/evaluation.py" = ["EM101", "TRY003"]
+"src/ettax/inference.py" = ["EM101", "EM102", "TC001", "TC002", "TRY003"]
+"src/ettax/producer.py" = ["EM101", "EM102", "PLC0415", "TC001", "TRY003"]
+"src/ettax/pooling.py" = ["EM101", "EM102", "PLR2004", "TRY003"]
+"src/ettax/pilot/config.py" = [
+  "C901",
+  "EM101",
+  "EM102",
+  "PLR0912",
+  "PLR2004",
+  "TRY003"
+]
+"src/ettax/pilot/data.py" = [
+  "C901",
+  "EM101",
+  "EM102",
+  "PLR0912",
+  "PLR0915",
+  "TC003",
+  "TRY003"
+]
+"src/ettax/pilot/evaluation.py" = [
+  "EM101",
+  "EM102",
+  "PLC0415",
+  "PLR0915",
+  "PLR2004",
+  "TC003",
+  "TRY003"
+]
+"src/ettax/pilot/frozen.py" = ["EM101", "EM102", "TC003", "TRY003"]
+"src/ettax/pilot/probe.py" = ["EM101", "EM102", "S603", "TRY003"]
+"src/ettax/pilot/selection.py" = [
+  "EM101",
+  "EM102",
+  "PLR2004",
+  "S607",
+  "TC003",
+  "TRY003"
+]
+"src/ettax/pilot/training.py" = [
+  "EM101",
+  "EM102",
+  "PLC0415",
+  "PLR0915",
+  "TC003",
+  "TRY003"
+]
+"src/ettax/pilot/worker.py" = ["PLC0415", "T201"]
+"tests/**" = ["ANN", "D", "INP001", "PLR2004", "S101", "TC003"]
+
+[tool.uv]
+package = true
+
+[tool.uv.sources]
+dotell = { workspace = true }

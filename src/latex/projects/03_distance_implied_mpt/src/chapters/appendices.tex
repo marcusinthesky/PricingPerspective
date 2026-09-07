@@ -1,0 +1,179 @@
+\section{Formal verification}\label{sec:lean-proofs}
+
+The main text contains the human-readable proofs of the barycentre
+representation, the aggregate transfer inequality, the information-certified
+cap, the sharp certificate, envelope exactness, certificate convexity, and the
+pairwise bridge.
+Where the bound is sharp, attainment of the optimal multi-marginal plan is
+supplied as a premise; the Lean record does not formalize the general existence
+theorem.
+
+The formal record checks the displayed identities and bounds under their
+stated assumptions.
+These results concern the algebraic structure of the coherent portfolio
+certificate and do not validate the article-embedding proxy, the economic
+content of the carrier-and-slack restrictions, the empirical distance
+estimator, or the chronological evaluation design.
+
+The exact machine-checked scope and assumptions are:
+\ppLeanStatusList
+
+\section{Barycentre representation of dispersion}\label{sec:barycentre-appendix}
+
+\begin{proposition}[Barycentre representation]
+  \label{prop:p3-barycenter-representation}
+  For laws $P_1,\dots,P_n$ on $\mathcal H$ with finite second moments,
+  \eqref{eq:p3-barycenter-representation} holds.
+\end{proposition}
+
+For weights $q$ on the simplex, set
+$\bar x_q:=\sum_i q_i x_i$.
+The pointwise weighted-variance identity
+\[
+  \sum_{i<j}q_i q_j\lVert x_i-x_j\rVert^2
+  =\sum_i q_i\lVert x_i-\bar x_q\rVert^2
+\]
+is the bridge between the two representations.
+Given any multimarginal coupling of $P_1,\dots,P_n$, the random barycentre
+$\bar X_q=\sum_i q_i X_i$ induces a law $Q$.
+Applying the identity and then minimizing over multimarginal couplings gives
+the direction from the joint-coupling infimum to the barycentre infimum.
+
+Conversely, take couplings of $(P_i,Q)$ whose costs approach
+$W_2^2(P_i,Q)$ and glue their conditional laws given the common
+$Q$-distributed variable.
+The resulting multimarginal coupling has the required marginals.
+Conditionally on that common variable, the pointwise weighted-variance
+minimum gives
+\[
+  \sum_{i<j}q_i q_j\lVert X_i-X_j\rVert^2
+  \le \sum_i q_i\lVert X_i-Q\rVert^2.
+\]
+Taking expectations, then infima over the couplings and over $Q$, gives the
+reverse inequality.
+Thus the infimum values agree without assuming that either infimum is
+attained.
+
+\section{Data and W2 artifact construction}\label{sec:data-appendix}
+
+The empirical universe contains \ppnum[0]{n-tickers} firms with both article
+embeddings and compatible local return histories. Return alignment leaves
+\ppnum[0]{n-obs} common daily observations.
+Each article carries a creation date, URL hash, firm identifier, and a
+4,096-dimensional Qwen3-Embedding-8B embedding. The representation normalizes
+every row to unit Euclidean norm, and the ground cost is Euclidean chord
+distance.
+
+The registry distinguishes transport order from ground-cost exponent. The W2
+entries use balanced quadratic transport, rooted normalization, and ground
+exponent one. The persisted artifact is rooted W2; Paper 3 squares it once at
+the certificate boundary, with regression tests enforcing that transition.
+
+Balanced assignment currently requires equal empirical cloud sizes. Rows are
+first restricted by article date and then ordered by URL hash. At each annual
+cutoff, the governed artifact registry fixes a common cloud size supported by
+every firm. This rule retains all \ppnum[0]{n-tickers} priced firms rather than
+deleting thin-coverage firms; the early vintages consequently use fewer
+articles per firm and should be read as noisier geometries.
+
+The canonical priced W$_2$ roster used by the certificate and its diagnostics
+is listed in \Cref{tab:sample-universe}.
+
+\input{generated/sample_universe}
+
+% Temporarily omitted while the chronological-validation
+% implementation is audited.
+\iffalse
+\section{Chronological validation protocol}\label{sec:validation-appendix}
+
+Formation occurs monthly. Marginal volatility uses 252 strictly prior trading
+days, and realized variance uses the next 63 trading days. Calibration ends in
+2022; the evaluation panel runs from 2023-01-04 through 2026-07-15, and its
+feasible monthly formations run through 2026-04-01 so every one retains a full
+63-day outcome. All use the frozen 2022 information geometry. Holdout returns
+never enter transmission-cell selection.
+
+Article uncertainty is evaluated with per-firm stationary time blocks. The
+reported lower certificate endpoint is conditional on that resampling design
+and on the fixed portfolio; it is not a portfolio-uniform confidence statement.
+Return-block intervals govern calibration margin and coverage. The primary
+comparison is inverse volatility, with equal weight, sample GMV, and
+Ledoit--Wolf GMV as secondary benchmarks. Required residual slack and the
+predeclared budgets $\delta\in\{0,0.025,0.05\}$ are sensitivity diagnostics.
+
+\section{Full-sample numerical non-vacuity}\label{sec:nonvacuity-appendix}
+
+The full-sample surface is retained only to show that the algebraic certificate
+can be numerically nonzero before chronological validity is imposed. It uses
+equal-weight and inverse-volatility portfolios fixed on the complete
+2018--2022 panel and varies the prespecified transmission grid. It therefore
+does not calibrate $(L,\tau)$, establish historical coverage, or explain
+realized risk.
+
+\Cref{fig:certificate-surface} plots $100\mathcal C(q)$ against common slack.
+Increasing either $L$ or $\tau$ weakens the pairwise floor and lowers credit.
+The floor-activation rate is the share of ordered firm pairs for which
+$[W_{2,ij}/L-2\tau]_+$ is positive; positive-floor quantiles summarize its
+squared magnitude conditional on activation. These quantities diagnose why a
+surface becomes vacuous, but they are not sampling probabilities.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{0.95}{certificate_surface}
+  \caption{Full-sample certificate sensitivity. Each line reports
+    $100\mathcal C(q)$ as common slack $\tau$ increases for one $L$. The
+    calculation is descriptive numerical non-vacuity only and is not the
+  frozen chronological validation.}
+  \label{fig:certificate-surface}
+\end{figure}
+
+At $L=1$ and $\tau=0$, the deductions are
+\ppnum[1]{certificate-equal-weight-least-conservative-pct}\% for equal weight
+and \ppnum[1]{certificate-inverse-volatility-least-conservative-pct}\% for
+inverse volatility. At $L=1.5$ and $\tau=0.10$, they are
+\ppnum[1]{certificate-equal-weight-most-conservative-pct}\% and
+\ppnum[1]{certificate-inverse-volatility-most-conservative-pct}\%.
+Their numerical size cannot overturn the main result that no grid cell passed
+the frozen calibration coverage rule.
+\fi
+
+\section{Supplementary empirical results}
+\label{sec:p3-supplementary-results}
+
+The main text reports the conventional benchmark values in
+\Cref{tab:news-variance-benchmark}.
+\Cref{fig:news-variance-benchmark} provides the corresponding visual comparison.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{0.72}{news_variance_benchmark}
+  \caption{Standardized in-sample variance relative to the full-sample
+    long-only GMV benchmark. The news-only allocation is a descriptive
+  zero-slack maximizer of the news certificate.}
+  \label{fig:news-variance-benchmark}
+\end{figure}
+
+\subsection{Complete embedding-representation sensitivity}
+\label{sec:p3-representation-ablation}
+
+The sensitivity tables hold the priced firms, standardized-return covariance,
+reference laws, caps, and bootstrap scheme fixed while changing the
+representation.
+For representation $r$, let
+$I_r=100\,V(q_r)/V(q_{\mathrm{GMV}})$ denote its relative-GMV index.
+Each paired estimand is $\Delta_{c,r}=I_c-I_r$ in index points, so a negative
+contrast favours the candidate allocation on conventional variance.
+The common return bootstrap re-standardizes returns and recomputes the GMV
+denominator in each draw.
+Consequently, a dash means that the news-only allocation violates the fixed
+law's cap; the cap is not relaxed to manufacture a percentile.
+
+\input{generated/representation_ablation}
+
+The full-width-to-1,024 Qwen3-8B contrast includes zero, so moderate truncation
+does not reject zero difference in relative variance.
+At fixed 1,024 width, the Qwen3-4B comparison and the 64-coordinate
+Qwen3-8B stress-cell comparison with 256 coordinates do not survive Holm
+adjustment.
+Among the EttaX vintages, only the V3--V1 interval satisfies the stated
+post-specified equivalence bound; neither comparison involving V0 does.

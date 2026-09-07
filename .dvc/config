@@ -1,0 +1,11 @@
+[core]
+    remote = hf-bucket
+[cache]
+    type = hardlink,symlink
+# Read-only, anonymous. The Hugging Face S3 gateway rejects unsigned requests
+# even for a public bucket, but the Hub's `resolve` path serves bucket objects
+# without a token, so `dvc pull` needs no credentials here. Writing to the
+# bucket is a separate, credentialed operation that this snapshot deliberately
+# does not configure.
+['remote "hf-bucket"']
+    url = https://huggingface.co/buckets/marcusinthesky/PricingPerspective/resolve/dvc-store

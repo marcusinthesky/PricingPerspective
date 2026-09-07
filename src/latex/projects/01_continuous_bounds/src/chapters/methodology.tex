@@ -1,0 +1,462 @@
+\section{Randomized bi-Lipschitz pushforward and W$_2$ covariance
+envelope}\label{sec:methodology}
+
+\subsection{Theoretical framework}
+
+The framework converts distance between distribution-valued firm
+characteristics into a conditional restriction on systematic covariance.
+To make that argument transparent, the construction separates
+characteristic-side information, the mechanism that transmits characteristics
+into exposures, and the joint arrangement of the resulting exposure draws.
+For firm $i$, the law $C_i$ records a distribution over risk-relevant
+locations rather than collapsing heterogeneous information to one vector.
+A common map sends draws from these laws to factor exposures, while a
+Lipschitz restriction controls how much the map can distort characteristic distance.
+The map, its distortion and slack bounds, and exposure magnitudes are
+maintained rather than estimated.
+
+Because the restriction concerns systematic covariance, the return
+representation is written to accommodate either a finite or an infinite
+collection of common risk directions.
+A real separable Hilbert space generalizes the familiar Euclidean loading
+space: its inner product measures alignment and its norm measures magnitude.
+Let $\mathcal H$ be such a space, let $F_t\in\mathcal H$ be a centered factor
+innovation with covariance operator $\Gamma$, let $e_t^i$ be a centered
+idiosyncratic component, and write $\widetilde r_t^i$ for firm $i$'s centered return:
+\begin{equation}\label{eq:hilbert-return}
+  \widetilde r_t^i = \inner{B_i,F_t}_{\mathcal H}+e_t^i.
+\end{equation}
+The return equation contains two familiar sources of randomness: $F_t$
+represents shocks common to firms, whereas $e_t^i$ represents the centered
+firm-specific return component.
+The random element $B_i$ adds a distinct source of variation by allowing a
+firm's loading on common shocks to follow an exposure law.
+To connect that loading law to distribution-valued characteristics, let
+$B_i=T(X_i,U_i)$, where $X_i\sim C_i$ is a characteristic draw and $U_i$
+allows the same characteristic to map to different exposures.
+Thus $X_i$ represents heterogeneity within the firm's characteristic law,
+while $U_i$ represents transmission variation conditional on a
+characteristic; both differ from the return innovations $F_t$ and $e_t^i$.
+Equivalently, a stochastic kernel $K(x,\cdot)=\mathcal L(T(x,U))$ maps
+characteristics to exposure laws and $P_i=C_i\,K=\mathcal L(B_i)$.
+The deterministic map and additive-slack cases are special cases of this construction.
+
+Transport comparisons require the firm laws to share a characteristic domain
+whose metric supplies the cost of moving between risk-relevant locations.
+Let $(\Omega,d_\Omega)$ be a metric space of semantic risk locations with
+Borel $\sigma$-algebra $\mathcal B$.
+Fix any $\omega_0\in\Omega$ and define the admissible characteristic domain
+\begin{equation}\label{eq:characteristic-domain}
+  \mathcal P_1(\Omega)
+  :=\left\{C:\ C\text{ is a Borel probability measure on }\Omega,\quad
+  \int_\Omega d_\Omega(\omega,\omega_0)\,C(d\omega)<\infty\right\}.
+\end{equation}
+The definition is independent of the chosen base point by the triangle inequality.
+
+The object to be bounded is the covariance of systematic components, so
+exposures are first expressed in the factor-risk geometry induced by $\Gamma$.
+Under a coupling $\pi$ of two exposure laws, define
+\begin{equation}\label{eq:hilbert-systematic-covariance}
+  \kappa_\pi=\E_\pi\inner{Z_i,Z_j}_{\mathcal H},
+  \qquad Z_i:=\Gamma^{1/2}B_i.
+\end{equation}
+Thus $\Gamma$ weights factor directions by their contribution to systematic
+risk, and $Z_i$ measures exposure in the covariance-relevant geometry.
+Unlike $X_i$ or $U_i$, the coupling $\pi$ is not a further marginal shock; it
+specifies how draws from two already-defined exposure laws occur jointly.
+
+The envelope itself concerns systematic covariance, whereas its
+interpretation using total returns requires a separate return bridge.
+Under that bridge, the residual is square-integrable and centered, is
+orthogonal to $F_t$, and has zero cross-firm residual covariance under the
+same coupling $\pi$.
+The full exposure laws $P_i$ are the objects entering the transport envelope.
+The article cloud is only a finite-support proxy for $C_i$, and the data do
+not identify the latent draws, the kernel, or the joint coupling of the exposure laws.
+
+\subsection{Randomized bi-Lipschitz pushforward and the W$_2$ covariance
+envelope}\label{sec:random-exposure}
+
+Characteristic distance can restrict covariance only if differences in
+characteristics survive their transmission into systematic exposures.
+The formulation therefore treats the characteristic-to-exposure link as a
+randomized pushforward: a common carrier captures the shared part of the
+link, while the kernel draw allows exposure heterogeneity around it.
+This structure also isolates the object later linked to returns: the excess
+of exposure distance under a realized coupling over the least possible
+transport cost of the latent exposure laws.
+
+Quadratic transport and covariance both require second moments, so this
+subsection strengthens the characteristic domain accordingly.
+Let $\Omega$ be a Polish metric space with its Borel $\sigma$-algebra, let
+$\mathcal H$ be the exposure Hilbert space, and let $\Gamma:\mathcal
+H\to\mathcal H$ be a bounded, positive self-adjoint operator.
+Its unique bounded positive square root is denoted by $\Gamma^{1/2}$.
+Write
+\begin{equation}\label{eq:random-p2-domain}
+  \mathcal P_2(\Omega)
+  :=\left\{C\in\mathcal P_1(\Omega):
+  \int_\Omega d_\Omega(\omega,\omega_0)^2\,C(d\omega)<\infty\right\}.
+\end{equation}
+The lower transfer bound will need to pull a coupling on the carrier image
+back to characteristic space, which motivates the inverse condition stated next.
+The common carrier $t:\Omega\to\mathcal H$ is Borel measurable, and
+$t_\Gamma:=\Gamma^{1/2}\circ t$ is a Borel embedding with a Borel inverse on its image.
+The stochastic map $T:\Omega\times\mathcal U\to\mathcal H$ is Borel
+measurable, and the maintained integrability conditions put the induced
+exposure laws in $\mathcal P_2(\mathcal H)$.
+
+The assumption below allows two controlled departures from exact common transmission.
+Economically, $L$ measures how faithfully characteristic differences survive
+as systematic-exposure differences: $L=1$ preserves distances, whereas $L>1$
+permits multiplicative compression or expansion.
+The bound $\tau_i$ permits an additive firm-level departure from the common
+carrier in the same risk units.
+This slack is a transmission tolerance rather than article-measurement error,
+and the kernel draw $U_i$ that generates it remains distinct from the
+cross-firm coupling $\pi$ used to join the firm-level exposure laws.
+\begin{assumption}[Common bi-Lipschitz random map]
+  \label{ass:random-common-map}
+  Let $C_i,C_j\in\mathcal P_2(\Omega)$ and let $t:\Omega\to\mathcal H$ be
+  the common carrier. Assume that, for some $L\ge1$,
+  \begin{equation}\label{eq:random-bilipschitz}
+    L^{-1}d_\Omega(x,y)\le\norm{t_\Gamma(x)-t_\Gamma(y)}_{\mathcal H}
+    \le Ld_\Omega(x,y).
+  \end{equation}
+  If $X_i\sim C_i$ and $U_i$ is drawn from the common transmission kernel,
+  define the exposure random element
+  \begin{equation}\label{eq:random-exposure-pushforward}
+    B_i=T(X_i,U_i)
+    =t(X_i)+\varepsilon_i(X_i,U_i),
+    \qquad \norm{\Gamma^{1/2}\varepsilon_i(x,u)}_{\mathcal H}\le\tau_i,
+    \qquad P_i:=\mathcal L(B_i).
+  \end{equation}
+  The slack maps $\varepsilon_i$ are Borel measurable, and the preceding
+  integrability condition ensures that $P_i$ has a finite
+  $\Gamma$-weighted second moment. The map, the common Lipschitz scale $L$,
+  and the deviation bounds $\tau_i$ are maintained over the analyzed regime.
+  Both scales are stated in risk coordinates:
+  equation~\ref{eq:random-bilipschitz}
+  constrains $\Gamma^{1/2}t$ rather than $t$ alone, and $\tau_i$ bounds the
+  deviation after the same factor weighting. Every transport quantity
+  displayed below therefore lives in the one geometry that the covariance
+  envelope is defined in, and no step silently exchanges
+  $\norm{\cdot}_{\mathcal H}$ for $\norm{\Gamma^{1/2}\cdot}_{\mathcal H}$.
+\end{assumption}
+
+The common-map restriction does the economic work of connecting
+characteristic and exposure geometry; once the exposure laws are fixed, the
+covariance envelope follows from an elementary inner-product identity.
+We state that identity first because every bound below is an instance of it.
+
+\begin{lemma}[Polarization Identity]\label{lem:polarization}
+  For any $x,y$ in a real inner-product space,
+  \begin{equation}\label{eq:polarization}
+    \inner{x,y}
+    =\frac12\left(\norm{x}^2+\norm{y}^2-\norm{x-y}^2\right).
+  \end{equation}
+\end{lemma}
+
+Polarization supplies the specific link between quadratic transport and
+covariance: its squared ground cost is exactly the quantity that
+equation~\ref{eq:polarization} converts into an inner product.
+Minimizing squared transport cost over couplings therefore maximizes
+covariance over couplings, which gives W$_2$ a theoretical role not shared by
+the alternative distances used later as empirical comparisons.
+
+To determine what the marginal exposure laws alone can say about covariance,
+we must compare their possible joint arrangements.
+A coupling is a joint probability law with the prescribed firm-level
+marginals; economically, it records which exposure draws occur together while
+leaving each firm's marginal exposure law unchanged.
+W$_2$ searches across these dependence arrangements for the smallest expected
+squared exposure distance.
+
+Three quantities summarize the pair in factor-risk coordinates: the marginal
+second moment $v_i$, the coupling-specific covariance $\kappa_\pi$, and the
+minimum squared exposure distance $W_{2,\Gamma}^2$.
+For $Z_i=\Gamma^{1/2}B_i$, write
+\begin{equation}\label{eq:random-covariance-objects}
+  v_i:=\E\norm{Z_i}^{2},\qquad
+  \kappa_\pi:=\E_\pi\inner{Z_i,Z_j},\qquad
+  W_{2,\Gamma}^{2}(P_i,P_j):=\inf_\pi
+  \E_\pi\norm{Z_i-Z_j}^{2}.
+\end{equation}
+The infimum ranges over couplings of $P_i$ and $P_j$ after the covariance
+geometry induced by $\Gamma$.
+Because the marginal second moments remain fixed as the coupling changes,
+define the candidate upper endpoint
+\begin{equation}\label{eq:random-covariance-envelope}
+  \bar\kappa_{ij}:=\frac12\left(v_i+v_j-W_{2,\Gamma}^{2}(P_i,P_j)\right).
+\end{equation}
+
+The central result establishes that this endpoint is the attainable
+covariance ceiling and identifies the gap between that ceiling and any
+particular coupling.
+
+\begin{theorem}[Random-exposure covariance envelope]
+  \label{thm:random-exposure-envelope}
+  Under \Cref{ass:random-common-map}, for every coupling $\pi$ of the exposure
+  laws,
+  \begin{equation}\label{eq:random-exposure-gap}
+    \kappa_\pi
+    =\bar\kappa_{ij}-\frac12\Delta_\pi,
+    \qquad
+    \Delta_\pi:=\E_\pi\norm{Z_i-Z_j}^{2}
+    -W_{2,\Gamma}^{2}(P_i,P_j).
+  \end{equation}
+  The excess is nonnegative,
+  \begin{equation}\label{eq:random-exposure-excess-nonneg}
+    \Delta_\pi\ge0 ,
+  \end{equation}
+  and consequently $\bar\kappa_{ij}$ is the greatest covariance attainable by
+  a coupling of the two exposure laws, with every realized coupling satisfying
+  $\kappa_\pi\le\bar\kappa_{ij}$.
+\end{theorem}
+
+\begin{proof}
+  Polarization in $\mathcal H$ gives
+  $\norm{Z_i-Z_j}^2=\norm{Z_i}^2+\norm{Z_j}^2-2\inner{Z_i,Z_j}$ pointwise.
+  Integrating against $\pi$ and using that its marginals are $P_i$ and $P_j$
+  replaces the first two terms by $v_i$ and $v_j$, which depend on the
+  marginals alone, so $\E_\pi\norm{Z_i-Z_j}^2=v_i+v_j-2\kappa_\pi$.
+  Subtracting $W_{2,\Gamma}^2(P_i,P_j)$ and dividing by two gives
+  equation~\ref{eq:random-exposure-gap}. That step is an identity in
+  $W_{2,\Gamma}^2$ and holds for any reference cost placed there;
+  equation~\ref{eq:random-exposure-excess-nonneg} is the separate consequence
+  of that particular reference cost being the infimum of the same expectation
+  over the same coupling set. The ceiling is attained rather than merely
+  approached because
+  the quadratic cost is lower semicontinuous and the coupling set is weakly
+  compact, so an optimal plan exists and realizes $\bar\kappa_{ij}$
+  \citep[Ch.~1]{panaretos_invitation_2020}.
+\end{proof}
+
+Conditional on the maintained exposure laws, the theorem restricts feasible
+systematic covariance rather than selecting the realized coupling or
+determining expected returns.
+Holding $v_i$ and $v_j$ fixed, a larger latent exposure distance lowers the
+greatest systematic covariance that the two laws can attain.
+The transport excess $\Delta_\pi$ measures how much the realized joint
+arrangement exceeds the minimum transport cost and, equivalently, how far its
+covariance falls below the ceiling.
+This is a covariance-envelope result, not a no-arbitrage pricing model.
+
+To characterize the entire feasible covariance set rather than only its
+ceiling, the same argument is applied to the reflected law $\check P_j:=(-I)_\#P_j$.
+
+\begin{theorem}[Reflected lower endpoint]
+  \label{thm:random-exposure-lower-endpoint}
+  Under \Cref{ass:random-common-map}, the least systematic covariance
+  attainable over the coupling set is
+  \begin{equation}\label{eq:random-exposure-floor}
+    \underline\kappa_{ij}
+    =\frac12\left(W_{2,\Gamma}^{2}(P_i,\check P_j)-v_i-v_j\right).
+  \end{equation}
+\end{theorem}
+
+\begin{proof}
+  Define the reflection map
+  \[
+    R(z_i,z_j):=(z_i,-z_j).
+  \]
+  For every coupling $\pi$ of $(P_i,P_j)$, the pushforward
+  $R_\#\pi$ is a coupling of $(P_i,\check P_j)$, where
+  $\check P_j:=(-I)_\#P_j$. Since $R$ is involutive, this operation bijects
+  the couplings of $(P_i,P_j)$ with those of $(P_i,\check P_j)$. Reflection
+  leaves the two second moments unchanged and negates the covariance:
+  \[
+    \E_{R_\#\pi}\inner{Z_i,Z_j}_{\mathcal H}
+    =-\E_\pi\inner{Z_i,Z_j}_{\mathcal H}.
+  \]
+  Apply \Cref{thm:random-exposure-envelope} to the reflected pair. Its
+  greatest covariance is
+  $\frac12(v_i+v_j-W_{2,\Gamma}^{2}(P_i,\check P_j))$; negating this value
+  gives the least covariance for the original pair, which is
+  equation~\ref{eq:random-exposure-floor}.
+\end{proof}
+
+Economically, the reflected endpoint describes the weakest systematic
+covariance compatible with the two marginal exposure laws under their most
+oppositely aligned feasible coupling.
+It completes the envelope; it does not predict that realized co-movement will
+be negative.
+
+Together with \Cref{thm:random-exposure-envelope}, this brackets systematic
+covariance in $[\underline\kappa_{ij},\bar\kappa_{ij}]$.
+If $\pi^-$ and $\pi^+$ attain the lower and upper endpoints, respectively,
+then for every $\lambda\in[0,1]$ the mixture
+\[
+  \pi_\lambda:=(1-\lambda)\pi^-+\lambda\pi^+
+\]
+preserves both marginals and, by linearity of covariance, attains
+$(1-\lambda)\underline\kappa_{ij}+\lambda\bar\kappa_{ij}$.
+Thus every interior covariance is attainable.
+The marginal laws therefore bound covariance but do not generally determine
+its sign; the restriction that survives empirically is the nonnegative
+transport excess in equation~\ref{eq:random-exposure-excess-nonneg}.
+
+The covariance envelope still depends on the latent distance
+$W_{2,\Gamma}(P_i,P_j)$, which is not observed in the application.
+The next step is therefore to use \Cref{ass:random-common-map} to transfer
+bounds from characteristic-side distance, later proxied by article
+embeddings, to exposure-side distance.
+The finite-support result first shows how this bridge operates for
+characteristic clouds of the form used empirically.
+It pairs each characteristic atom with an indexed transmission draw so that
+the characteristic and exposure clouds retain the same atom masses.
+Because additive slack changes squared distances through a cross-term, the
+comparison also needs a maintained support-diameter bound.
+
+\begin{proposition}[Finite-support transfer]\label{prop:random-w2-transfer}
+  Write each finite characteristic cloud as
+  \[
+    \widehat C_i=\sum_a p_{ia}\delta_{x_{ia}},
+    \qquad
+    \widehat C_j=\sum_b p_{jb}\delta_{x_{jb}}.
+  \]
+  Fix one transmission draw $u_{ia}$ for each characteristic atom and define
+  the indexed exposure clouds by
+  \[
+    \widehat P_i:=\sum_a p_{ia}\delta_{T(x_{ia},u_{ia})},
+    \qquad
+    \widehat P_j:=\sum_b p_{jb}\delta_{T(x_{jb},u_{jb})}.
+  \]
+  $G_{ij}:=W_{2,d_\Omega}(\widehat C_i,\widehat C_j)$ and
+  $\tau_{ij}:=\tau_i+\tau_j$. Let $D_{ij}$ be any maintained bound on the
+  risk-coordinate support diameter, that is on
+  $\norm{t_\Gamma(x)-t_\Gamma(y)}$ and on $\norm{Z_i-Z_j}$ across all pairs of
+  indexed support points. Then, under \Cref{ass:random-common-map},
+  \begin{align}
+    L^{-2}G_{ij}^{2}-2\tau_{ij}D_{ij}-\tau_{ij}^{2}
+    &\le W_{2,\Gamma}^{2}(\widehat P_i,\widehat P_j)
+    \label{eq:random-w2-lower-transfer}\\
+    W_{2,\Gamma}^{2}(\widehat P_i,\widehat P_j)
+    &\le L^{2}G_{ij}^{2}+2\tau_{ij}D_{ij}+\tau_{ij}^{2}.
+    \label{eq:random-w2-upper-transfer}
+  \end{align}
+\end{proposition}
+
+\begin{proof}
+  Let $M=(m_{ab})$ be a transport matrix. Because the indexed characteristic
+  and exposure clouds use the same atom masses, every nonnegative matrix with
+  row sums $p_{ia}$ and column sums $p_{jb}$ is feasible for both the
+  characteristic and exposure problems. Thus both Wasserstein costs minimize
+  over the same coupling-matrix polytope.
+  Write $Y_{ia}:=t_\Gamma(x_{ia})$ and
+  $Z_{ia}:=\Gamma^{1/2}T(x_{ia},u_{ia})$, and define $Y_{jb},Z_{jb}$
+  analogously. The indexed slack bounds imply
+  $\norm{Z_{ia}-Y_{ia}}\le\tau_i$ and
+  $\norm{Z_{jb}-Y_{jb}}\le\tau_j$.
+  For each entry $(a,b)$, the bi-Lipschitz inequality gives
+  \[
+    L^{-2}d_\Omega(x_{ia},x_{jb})^2
+    \le \norm{t_\Gamma(x_{ia})-t_\Gamma(x_{jb})}^2
+    \le L^2d_\Omega(x_{ia},x_{jb})^2.
+  \]
+  The indexed slack vectors have norms at most $\tau_i$ and $\tau_j$, so the
+  triangle inequality gives, entry by entry,
+  \[
+    \left|
+    \norm{Z_{ia}-Z_{jb}}^2
+    -\norm{t_\Gamma(x_{ia})-t_\Gamma(x_{jb})}^2
+    \right|
+    \le 2\tau_{ij}D_{ij}+\tau_{ij}^2.
+  \]
+  Combining the two entrywise displays, average against an arbitrary feasible
+  $M$. Because every admissible $M$ is available in both problems, minimizing
+  the lower and upper comparisons over the shared polytope gives
+  equations~\ref{eq:random-w2-lower-transfer}--\ref{eq:random-w2-upper-transfer}.
+\end{proof}
+
+The finite-support proposition shows why matching atom masses matter: the
+same transport weights can be evaluated before and after transmission, so
+bounded distortion and slack carry characteristic-cloud distance into an
+exposure-distance interval.
+Economically, the interval is conditional on the declared values of $L$,
+$\tau_{ij}$, and $D_{ij}$; permitting more transmission distortion or a
+larger support bound weakens what a finite characteristic cloud can imply
+about its indexed exposure cloud.
+
+For the full characteristic and exposure laws, the empirical bridge needs a
+metric-level bracket that does not depend on a finite support diameter.
+The following corollary supplies that population statement by comparing each
+exposure law with the pushforward of its characteristic law through the common carrier.
+
+\begin{corollary}[Metric transfer bracket]\label{cor:random-w2-metric}
+  Under \Cref{ass:random-common-map}, with
+  $G_{ij}:=W_{2,d_\Omega}(C_i,C_j)$, $\tau_{ij}:=\tau_i+\tau_j$, and
+  $(x)_+:=\max\{x,0\}$,
+  \begin{align}
+    \left(L^{-1}G_{ij}-\tau_{ij}\right)_+
+    &\le W_{2,\Gamma}(P_i,P_j)
+    \label{eq:random-w2-lower-metric}\\
+    W_{2,\Gamma}(P_i,P_j)
+    &\le LG_{ij}+\tau_{ij}.
+    \label{eq:random-w2-upper-metric}
+  \end{align}
+\end{corollary}
+
+\begin{proof}
+  Write $W_{2,\Gamma}(\mu,\nu):=W_2\bigl((\Gamma^{1/2})_\#\mu,
+  (\Gamma^{1/2})_\#\nu\bigr)$, so that every leg below is measured after the
+  same factor weighting and $(\Gamma^{1/2})_\#(t_\#C_i)=(t_\Gamma)_\#C_i$.
+  Coupling $B_i$ with $t(X_i)$ through the shared draw $X_i$ gives
+  $W_{2,\Gamma}^2(P_i,t_\#C_i)
+  \le\E\norm{\Gamma^{1/2}\varepsilon_i(X_i,U_i)}^2\le\tau_i^2$, and pushing an
+  optimal plan for $(C_i,C_j)$ forward through $t_\Gamma$ gives
+  $W_{2,\Gamma}(t_\#C_i,t_\#C_j)\le LG_{ij}$ by the upper
+  half of equation~\ref{eq:random-bilipschitz}. The $W_2$ triangle inequality
+  on $\mathcal P_2(\mathcal H)$ chains the three legs into
+  equation~\ref{eq:random-w2-upper-metric}.
+  For the lower endpoint, let $\gamma$ be an arbitrary coupling of
+  $(t_\Gamma)_\#C_i$ and $(t_\Gamma)_\#C_j$. Its marginals are supported on
+  $t_\Gamma(\Omega)$, so $\gamma$ is supported on
+  $t_\Gamma(\Omega)^2$. The Borel inverse on this image therefore defines
+  \[
+    \widetilde\gamma
+    :=\bigl((t_\Gamma)^{-1},(t_\Gamma)^{-1}\bigr)_\#\gamma.
+  \]
+  Its marginals are $C_i$ and $C_j$. The lower half of
+  equation~\ref{eq:random-bilipschitz} gives, after integration,
+  \[
+    G_{ij}^{2}
+    \le L^{2}\int
+    \norm{t_\Gamma(x)-t_\Gamma(y)}^{2}\,d\widetilde\gamma(x,y).
+  \]
+  Taking infima over $\gamma$ yields
+  $W_{2,\Gamma}(t_\#C_i,t_\#C_j)\ge L^{-1}G_{ij}$. The same
+  triangle inequality subtracts the two slack legs, and the positive part is
+  taken because a Wasserstein distance is nonnegative.
+\end{proof}
+
+The bracket makes the role of the transmission assumptions transparent.
+When $L=1$ and $\tau_i=\tau_j=0$, characteristic distance is preserved in
+factor-risk coordinates; as multiplicative distortion or additive slack
+increases, the lower endpoint falls and the upper endpoint rises.
+The result therefore transfers distance conditionally rather than identifying
+the latent exposure map.
+
+To pass this exposure-distance bracket into the covariance ceiling, write
+\begin{equation}\label{eq:random-w2-bracket}
+  w^-_{ij}:=\left(L^{-1}W_{2,d_\Omega}(C_i,C_j)-\tau_i-\tau_j\right)_+,
+  \qquad
+  w^+_{ij}:=LW_{2,d_\Omega}(C_i,C_j)+\tau_i+\tau_j,
+\end{equation}
+and substitute \Cref{cor:random-w2-metric} into
+equation~\ref{eq:random-covariance-envelope} to obtain the conditional
+interval implied by characteristic-side distance and the maintained scales:
+\begin{equation}\label{eq:random-kappa-bracket}
+  \frac12\left(v_i+v_j-(w^+_{ij})^2\right)
+  \le \bar\kappa_{ij}
+  \le \frac12\left(v_i+v_j-(w^-_{ij})^2\right).
+\end{equation}
+The interval $[w^-_{ij},w^+_{ij}]$ is the range of latent exposure distances
+allowed by the maintained transmission inputs.
+Its lower endpoint has the direct economic implication used below: a larger
+$w^-_{ij}$ tightens the covariance ceiling because characteristics that
+cannot be brought close under any admissible transmission leave less room for
+shared systematic exposure.
+The next section evaluates this restriction using article distance as a proxy
+for characteristic distance and treats $(L,\tau)$ as declared sensitivity
+inputs rather than estimated transmission parameters.

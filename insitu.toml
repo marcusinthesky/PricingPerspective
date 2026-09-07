@@ -1,0 +1,32 @@
+version = 1
+
+[sources]
+include = ["**/README.md", "ROADMAP.md"]
+respect_gitignore = true
+exclude = [
+  ".git/**",
+  ".insitu/**",
+  ".venv/**",
+  ".direnv/**",
+  ".pytest_cache/**",
+  ".ruff_cache/**",
+  ".pyrefly/**",
+  ".context/chat/.staging/**",
+  ".context/reference/.staging/**",
+  "**/__pycache__/**",
+  "src/python/packages/insitu/tests/fixtures/**",
+  "dist/**",
+  "site/**",
+]
+
+[paths]
+models = "src/python/apps/insitu-repository/models"
+templates = "src/python/apps/insitu-repository/templates"
+state = ".insitu/index.db"
+
+[watch]
+debounce_ms = 100
+step_ms = 25
+
+[[extensions]]
+path = "src/python/apps/insitu-repository"

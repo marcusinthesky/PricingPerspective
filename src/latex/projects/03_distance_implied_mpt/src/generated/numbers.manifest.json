@@ -1,0 +1,43 @@
+{
+  "code_identity": {
+    "kind": "module",
+    "value": "p3_numbers"
+  },
+  "environment": {
+    "python": "workspace",
+    "renderer": "matplotlib"
+  },
+  "lane": "p3",
+  "outputs": [
+    {
+      "bytes": 4248,
+      "kind": "latex",
+      "path": "src/latex/projects/03_distance_implied_mpt/src/generated/numbers.tex",
+      "sha256": "88fe59b4f9a0cc2a53a7109d49840f9d0cccb60eb78fbc3435a25e172b1ca5e2"
+    }
+  ],
+  "parameter_identity": {
+    "kind": "file",
+    "value": "params.yaml"
+  },
+  "phase": "exhibit",
+  "protocol_id": "paper3-publication-v1",
+  "risk_class": "moderate",
+  "schema_version": "1.0",
+  "seed_policy": "deterministic-from-declared-inputs",
+  "stage_key": "p3_numbers",
+  "upstream_artifacts": [
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/certificate/summary.yaml:a78fea546a2b25b3dab46a2c7c7b1abaf046cef1178e974a9ff19f4f7d63fef9"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/certificate_validation/summary.yaml:2fe9c8521684bf4469cac3e9768bcb92ec73808da91160f650fcd252f051a880"
+    },
+    {
+      "kind": "path-sha256",
+      "value": "data/papers/paper3/portfolio_anatomy/summary.yaml:5c7b2b954b39b3f23a0d9288fb075f3e8b869b8c840a152857f745eb3e1e64f0"
+    }
+  ]
+}

@@ -1,0 +1,302 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.ty_cache/
+.insitu/
+# pytest-testmon dependency database (regenerable local cache)
+**/.testmondata
+**/.testmondata-*
+# pytest-monitor’s local SQLite resource database (regenerable cache)
+**/.pymon
+*.pickle
+*.tmp
+
+# TypeScript workspace
+# Build artifacts and caches are owned by src/typescript/.gitignore, which uses
+# depth-independent globs so new workspaces need no edit here. Do not duplicate
+# those rules in this file — two copies drifted apart once already.
+
+# Nix
+result
+result-*
+
+# OpenTofu / Terragrunt (infra/terraform)
+# State, provider mirrors, and caches are never committed; the provider lock
+# (.terraform.lock.hcl) IS committed — do not add it here.
+**/.terraform/
+**/.terragrunt-cache/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+# Provider credentials / variable files may hold secrets — use dotenvx instead.
+*.tfvars
+!*.example.tfvars
+# Transient HCL from `gcloud ... bulk-export` and `tofu plan -generate-config-out`.
+infra/terraform/_export/
+infra/terraform/**/generated.tf
+
+# JAX persistent compilation cache (regenerable build artefact; t05.7)
+.jax_cache/
+
+# Lychee HTTP response cache (regenerable; restored/saved by PR CI)
+.lycheecache
+
+# visual-document-analysis image cache — renders keyed by document content hash
+# (regenerable, VLM-only; deliberately NOT git/LFS/DVC — see the skill).
+.cache/
+
+# DVC
+.dvc/cache/
+.dvc/tmp/
+.dvc/config.local
+/data/*
+!/data/raw/
+/data/raw/*
+!/data/raw/*.dvc
+!/data/raw/README.md
+!/data/README.md
+!data/universe.csv.dvc
+# Recorded price histories for delisted roster firms under data/archive/. A firm
+# whose listing has ended cannot be refetched, so its series is an input artifact
+# rather than a stage output; `market_data` reads it when universe.csv declares
+# MarketSource=archive. Same un-ignore/re-ignore ladder as /data/graph/ below:
+# the `.dvc` pointers and DVC's managed .gitignore are trackable, the blobs are
+# not.
+!/data/archive/
+/data/archive/*
+!/data/archive/README.md
+!/data/archive/market_data/
+/data/archive/market_data/*
+!/data/archive/market_data/*.dvc
+!/data/archive/market_data/.gitignore
+
+# DVC-tracked operator artifacts under data/graph/ (t22.12 D6): un-ignore the dir so
+# `.dvc` pointer files + DVC's managed .gitignore are trackable; DVC's own
+# data/graph/.gitignore then ignores the tracked blobs. The blobs stay ignored here.
+!/data/graph/
+/data/graph/*
+!/data/graph/*.dvc
+!/data/graph/.gitignore
+# Chunk-grain embedding shards under data/graph/embeddings/ (t07.8/t07.12):
+# `dvc add`-blob, never a dvc.yaml stage. Same un-ignore/re-ignore ladder as
+# /data/graph/ above; the blobs stay ignored by the re-ignore lines.
+!/data/graph/embeddings/
+/data/graph/embeddings/*
+!/data/graph/embeddings.dvc
+# Ablation-model embeddings under data/shared/embeddings/: no producing stage
+# (generate_embeddings matrixes over embedding_models only), so they are DVC-added
+# directly and must be pullable in a fresh worktree/CI. Same un-ignore/re-ignore
+# ladder as data/graph/ above; the blobs stay ignored by the re-ignore lines.
+!/data/shared/
+/data/shared/*
+!/data/shared/embeddings/
+/data/shared/embeddings/*
+!/data/shared/embeddings/*.dvc
+# Per-run provenance artifacts (small text/JSON): git-tracked so they resolve in CI
+# and give committed run provenance. Un-ignore each dir on the path, re-ignore its
+# contents, then un-ignore the specific files.
+!/data/papers/
+/data/papers/*
+!/data/papers/paper4/
+/data/papers/paper4/*
+!/data/papers/paper4/RUN_MANIFEST.md
+!/data/papers/paper5/
+/data/papers/paper5/*
+!/data/papers/paper5/RUN_MANIFEST.md
+!/data/papers/paper5/validate_estimators_summary.json
+# Main-revision reference inputs for the Paper 5 universe-by-horizon bridge.
+# The blobs remain DVC-managed; only their pointers and local ignore file enter Git.
+!/data/papers/paper5/universe_horizon_bridge/
+/data/papers/paper5/universe_horizon_bridge/*
+!/data/papers/paper5/universe_horizon_bridge/*.dvc
+/models/
+
+# direnv (auto-generated cache — never commit)
+.direnv/
+
+# Temporary work files and directories
+.tmp/
+*.log
+
+# dotenvx (plaintext secrets and keys — never commit)
+.env
+.env.local
+.env.keys
+
+# Editor / OS
+.DS_Store
+
+# Human scratchpad, not tracked
+/TODO.md
+
+# Obsidian ecosystem probe (2026-07-19): open .context/ as a vault via this
+# symlink without renaming anything or committing vault config. See
+# .context/README.md "Obsidian compatibility".
+/notes
+.obsidian/
+.context/bases/
+
+# .research notes
+**/.research/
+
+# Agent Config (agentsync-managed symlinks)
+.kilo/
+.dirac-symbol-index/
+
+# Streamlit / app configs
+.streamlit/
+
+# Lean
+src/lean/.lake/
+src/lean/build/
+*.olean
+*.ilean
+*.trace
+
+# Quarto docs site
+_site/
+.quarto/
+
+# Document build output
+/dist/
+/pricing-perspective-replication*.tar.gz
+/pricing-perspective-replication*.tar.gz.sha256
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+
+# Scrapy
+.scrapy
+
+# Harness local artefacts (regenerable build/query outputs)
+*.duckdb
+src/python/apps/harnessme/logs/
+
+# Data files
+*.parquet
+*.jsonlines
+*.jsonl
+*.csv
+*.pkl
+*.zip
+# …except the vendored Tectonic bundle: it is not data, it is the TeX asset set
+# every manuscript compiles against, and committing it is what keeps LaTeX
+# builds offline. Regenerated by `just latex::bundle-refresh`.
+!src/latex/bundle/*.zip
+
+# Generated docs
+src/python/packages/*/docs/*.qmd
+!src/python/packages/*/docs/_sidebar.yml
+
+# Claude Code harness: personal settings stay local.
+!.claude/commands/
+!.claude/commands/*.md
+.claude/settings.local.json
+
+# Encoder vintage staircase data (t69): verified dumps, existing corpora, and
+# EttaX tokenizer/shards/checkpoints. Governed by the t69 manifests; never committed.
+data/.encoder_vintage/
+# DVCLive's small text summaries and curves are Git-versioned so DVC can compare
+# EttaX arms and revisions; all model/corpus/checkpoint artifacts remain ignored.
+!data/.encoder_vintage/
+data/.encoder_vintage/*
+!data/.encoder_vintage/ettax/
+data/.encoder_vintage/ettax/*
+!data/.encoder_vintage/ettax/.gitignore
+!data/.encoder_vintage/ettax/tokenizer.json.dvc
+!data/.encoder_vintage/ettax/dvclive/
+!data/.encoder_vintage/ettax/dvclive/**
+!data/.encoder_vintage/ettax/runs/
+data/.encoder_vintage/ettax/runs/*
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/*
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/manifests/
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/manifests/**
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/metrics/
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/metrics/**
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/dvclive/
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/dvclive/**
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/evaluations/
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/evaluations/**
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/*
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0/
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1/
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3/
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0/*
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1/*
+data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3/*
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0/.gitignore
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V0/model.dvc
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1/.gitignore
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V1/model.dvc
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3/.gitignore
+!data/.encoder_vintage/ettax/runs/v2-untied-decoder/checkpoints/V3/model.dvc
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/
+data/.encoder_vintage/ettax/runs/v3-byte-complete/*
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/tokenizer.json.dvc
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/tokenizer.manifest.json
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/manifests/
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/manifests/**
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/metrics/
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/metrics/**
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/**
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/evaluations/
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/evaluations/**
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/
+data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/*
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0/
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1/
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3/
+data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0/*
+data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1/*
+data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3/*
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0/.gitignore
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0/model.dvc
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1/.gitignore
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V1/model.dvc
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3/.gitignore
+!data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V3/model.dvc
+# START AI Agent Symlinks
+.agents/skills/*.bak
+.claude/README.md
+.claude/README.md.bak
+.claude/agents
+.claude/agents.bak
+.claude/commands
+.claude/commands.bak
+.claude/commands/
+.claude/settings.json
+.claude/settings.json.bak
+.claude/skills
+.claude/skills.bak
+.claude/skills/
+.claude/workflows
+.claude/workflows.bak
+.codex/agents
+.codex/agents.bak
+.codex/config.toml
+.codex/config.toml.bak
+.kilocode/mcp.json
+.omp/lsp.json
+.omp/lsp.json.bak
+.opencode/command/
+.opencode/skills/
+/.mcp.json
+/AGENTS.md
+/AGENTS.md.bak
+/CLAUDE.md
+/CLAUDE.md.bak
+/kilo.jsonc
+/kilo.jsonc.bak
+/opencode.json
+/opencode.json.bak
+# END AI Agent Symlinks

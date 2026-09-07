@@ -1,0 +1,6 @@
+[codespell]
+quiet-level = 2
+# The LeanBlueprint web copy includes third-party runtime and minified bundles;
+# its source of truth is the LeanBlueprint generator, not this repository's prose.
+skip = *.lock,node_modules,.git,.context,*.json,*.svg,*.bib,*.bbl,*.pyc,*.jsonlines,data,dvc.lock,*.pdf,.agents,*.cls,src/typescript/apps/portfolio/public/blueprint-doc/js/*
+ignore-words-list = ty,nd,te,ine,ned,ane,mor,ture,ative,ond,sise,ure,tral,ment,fpR,Ser,Certi,arithmetics,Commun,OT,ot,fro,pre-empt,strat,statics,multline,Shepard,supportt,annote,resset,Synopsys

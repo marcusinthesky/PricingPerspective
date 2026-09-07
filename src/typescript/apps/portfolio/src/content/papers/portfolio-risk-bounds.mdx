@@ -1,0 +1,25 @@
+## Abstract
+
+Portfolio risk normally begins from cross-asset return covariances, which are difficult to estimate in short and high-dimensional panels. This paper asks what observable differences between firms' information distributions can rule out before those covariances are estimated.
+
+Under maintained links from information to systematic exposure and from exposure to returns, multi-firm Wasserstein-2 dispersion yields a sharp one-sided upper bound on systematic portfolio variance. A weighted pairwise relaxation gives a practical allocation objective requiring marginal volatility scales but not cross-asset return covariances.
+
+## Mathematical sequence
+
+1. Use observed Wasserstein-2 separation to place lower floors on latent exposure separation.
+2. Require one coherent joint law for all exposures; independently optimal pairwise couplings need not coexist.
+3. Apply weighted Hilbert-space polarization to write systematic variance as a marginal benchmark minus cross-firm dispersion.
+4. Deduct information-certified dispersion from the perfect-alignment benchmark.
+5. Choose portfolio weights by minimizing the certified upper bound rather than an estimated covariance objective.
+
+## The certificate
+
+For normalized long-only risk weights, the pairwise form has the structure
+
+> V_sys(q) ≤ Σᵢ qᵢvᵢ − ½ ΣᵢΣⱼ qᵢqⱼℓ²ᵢⱼ.
+
+The second term is the amount of perfect alignment ruled out by observable separation floors. The sharp construction replaces the sum of pairwise relaxations with coherent multi-firm transport dispersion, equivalently represented through a free Wasserstein centre.
+
+<Callout title="Boundary">
+The output is a one-sided risk certificate, not a covariance estimate. Its interpretation depends on the maintained transmission, joint-law, and return restrictions, and the empirical ranking is descriptive rather than a guarantee of future portfolio variance.
+</Callout>

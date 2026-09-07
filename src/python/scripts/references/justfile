@@ -1,0 +1,147 @@
+set shell := ["bash", "-uc"]
+set positional-arguments
+
+# Validate reference records/notes through canonical static document schemas.
+structure *paths:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    files=("$@")
+    if (( ${#files[@]} == 0 )); then
+        files=(.context/reference/*/README.md)
+    fi
+    records=()
+    notes=()
+    for file in "${files[@]}"; do
+        if awk '
+            NR == 1 && /^[[:space:]]*---[[:space:]]*$/ { frontmatter = 1; next }
+            frontmatter {
+                if (/^[[:space:]]*---[[:space:]]*$/) { frontmatter = 0 }
+                next
+            }
+            /^[[:space:]]*<!--[[:space:]]*insitu:begin / { generated = 1; next }
+            generated && /^[[:space:]]*<!--[[:space:]]*insitu:end[[:space:]]*-->/ { generated = 0; next }
+            generated { next }
+            !title && /^#[[:space:]]+/ { title = 1; next }
+            /^[[:space:]]*$/ { next }
+            { authored = 1; exit }
+            END { exit authored ? 0 : 1 }
+        ' "$file"; then
+            notes+=("$file")
+        else
+            records+=("$file")
+        fi
+    done
+    schema_root=infra/schemas/documents
+    status=0
+    if (( ${#records[@]} )); then
+        code=0
+        schematter validate --schema "$schema_root/reference-record.document-schema.yaml" "${records[@]}" || code=$?
+        (( code > status )) && status=$code
+    fi
+    if (( ${#notes[@]} )); then
+        code=0
+        schematter validate --schema "$schema_root/reference-note.document-schema.yaml" "${notes[@]}" || code=$?
+        (( code > status )) && status=$code
+    fi
+    exit "$status"
+
+# Check authored citation/relation targets without producing an intermediate graph.
+graph-check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Byte collation: keep glob/sort ordering identical across developer and CI locales.
+    export LC_ALL=C
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    graph_input=$(mktemp /tmp/pricing-perspective-reference-graph.XXXXXX)
+    trap 'rm -f "$graph_input"' EXIT
+    for readme in .context/reference/*/README.md; do
+        cite_key=$(basename "$(dirname "$readme")")
+        frontmatter get "$readme" | yq -c '.' | jq -c --arg cite_key "$cite_key" '. + {_cite_key: $cite_key}'
+    done > "$graph_input"
+    jq -s -e '
+        . as $items
+        | map(._cite_key) as $keys
+        | [
+            $items[] as $item
+            | (($item.cites // []) + (($item.relations // []) | map(.target)))[]? as $target
+            | {source: $item._cite_key, target: $target} as $edge
+            | select(($edge.source == $edge.target) or (($keys | index($edge.target)) == null))
+          ] as $errors
+        | if ($errors | length) == 0
+          then "OK: \($items | length) CSL items; all authored edges resolve"
+          else error("invalid reference edges: \($errors | tojson)")
+          end
+    ' "$graph_input"
+
+# Generate or compare each manuscript's citation-selected BibTeX projection.
+_bibliography check:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Byte collation: the reference glob below fixes emitted entry order, and
+    # `sort`/`comm` must agree with it, so pin it rather than inherit LC_COLLATE.
+    export LC_ALL=C
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    work=$(mktemp -d /tmp/pricing-perspective-bibliography.XXXXXX)
+    trap 'rm -rf "$work"' EXIT
+    for readme in .context/reference/*/README.md; do
+        cite_key=$(basename "$(dirname "$readme")")
+        frontmatter get "$readme" \
+          | yq -c '.' \
+          | jq -c --arg id "$cite_key" 'del(.description, .tags, .cites, .relations) + {id: $id}'
+    done > "$work/catalog.jsonl"
+    jq -s '.' "$work/catalog.jsonl" > "$work/catalog.json"
+    jq -r '.[].id' "$work/catalog.json" | sort > "$work/corpus-keys"
+
+    for project in src/latex/projects/[0-9][0-9]_*; do
+        project_src="$project/src"
+        target="$project_src/refs.bib"
+        [[ -f "$target" ]] || continue
+        scan_paths=("$project_src/chapters" "$project_src/targets")
+        rg --pcre2 -U --no-filename -o -r '$1' \
+          '\\(?:cite|citet|citep|citealt|citealp|citeauthor|citeyear|citepalias|Citet|Citep)\*?(?:\[[^\[\]]*\])?(?:\[[^\[\]]*\])?\{([^{}]*)\}' \
+          "${scan_paths[@]}" --glob '*.tex' \
+          | tr ',' '\n' \
+          | sed -E 's/^[[:space:]]+|[[:space:]]+$//g' \
+          | sed '/^$/d' \
+          | sort -u > "$work/cited-keys"
+        if missing=$(comm -23 "$work/cited-keys" "$work/corpus-keys") && [[ -n "$missing" ]]; then
+            printf 'unresolved citations in %s:\n%s\n' "$project" "$missing" >&2
+            exit 1
+        fi
+        jq --rawfile keys "$work/cited-keys" \
+          '[.[] | select(.id as $id | ($keys | split("\n") | index($id)))]' \
+          "$work/catalog.json" > "$work/selected.json"
+        {
+            printf '%% GENERATED from .context/reference/*/README.md - do not hand-edit.\n'
+            pandoc --ascii -f csljson -t bibtex "$work/selected.json" \
+              | awk '
+                  /^@techreport\{/ { techreport = 1 }
+                  techreport && /^  publisher = / {
+                    sub(/^  publisher = /, "  institution = ")
+                  }
+                  { print }
+                  techreport && /^}$/ { techreport = 0 }
+                ' \
+              | sed -e "s/’/'/g" -e 's/‐/-/g' -e 's/—/---/g'
+        } > "$work/refs.bib"
+        if [[ "{{ check }}" == "true" ]]; then
+            cmp -s "$work/refs.bib" "$target" || {
+                echo "STALE: $target (run: just references::export-bib)" >&2
+                exit 1
+            }
+        else
+            cp "$work/refs.bib" "$target"
+            echo "wrote $target"
+        fi
+    done
+
+# Regenerate citation-selected BibTeX projections.
+export-bib: (_bibliography "false")
+
+# Validate graph closure and byte-for-byte bibliography freshness.
+bibliography-check: graph-check (_bibliography "true")
+
+# Convert staged PDFs into authoritative Markdown with the configured parser.
+backfill *args:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && dotenvx run -- uv run --script src/python/scripts/references/backfill_markdown/script.py "$@"

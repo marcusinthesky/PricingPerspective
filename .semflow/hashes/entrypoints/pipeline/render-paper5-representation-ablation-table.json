@@ -1,0 +1,27 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p5.exhibit:cli_render_paper5_representation_ablation_table",
+  "digest": "sha256:dc2ed2149f399d8da77026cbb7e4eb0d3b1a0d67f1375938cffe89adbf53589c",
+  "entrypoint": "pipeline render-paper5-representation-ablation-table",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:<binding:typer=typer>"},
+    {"digest":"sha256:680d80c3f9e0b130ec2e1f3bbffb577fdfc469d1029c185864da472eb823e1a5","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:cli_render_paper5_representation_ablation_table"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/exhibit.py","symbol":"pipeline.cli.commands.p5.exhibit:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:f5b270e78401abfa55a4047c331b1199b42df2ba4065a6f1882f58a0a906008b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:<binding:cast=typing:cast>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:<binding:json=json>"},
+    {"digest":"sha256:8c795ab0cfd25f254259d0d0674b225e9f8a564487dce2b662ee87e2d5deac9b","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_CONTRAST_PRECISION"},
+    {"digest":"sha256:12136fd65ad6b6bfdc18d530b4c1d9585fcad45617896edac0f9358657d132b9","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_OPERATOR_LABELS"},
+    {"digest":"sha256:04a37b12e0ee55c628b320616f212d0fb17702d7fef7264f0f3c60c671ab8d43","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_cell_label"},
+    {"digest":"sha256:ab6a8e55bf0b178d09661dcd65439cc9b0b8a895ab156730f4419e6dd79ae5cd","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_contrast_rows"},
+    {"digest":"sha256:50878b8a0e551618a98eccf7dda194799e11a90ab3313b2823024a3253e92e12","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_number"},
+    {"digest":"sha256:57d2f309a532f4d7695e308b7171c639a56ea3205e5d9a6a5ecad798527e2e8a","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_result_row"},
+    {"digest":"sha256:dad085150833a87c2b4a715aa40350323c54b6e533310ecd42268582487ac31b","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:render_paper5_representation_ablation_table"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

@@ -1,0 +1,241 @@
+set shell := ["bash", "-uc"]
+
+# Pipeline app (DVC-stage producer): tests, lint, format.
+mod pipeline 'apps/pipeline/justfile'
+# Simulation app (Monte-Carlo): tests.
+mod simulation 'apps/simulation/justfile'
+# Ettax app: vintage-locked GPU document-encoder training.
+mod ettax 'apps/ettax/justfile'
+# jcor package (core energy/distance library): tests.
+mod jcor 'packages/jcor/justfile'
+# semflow package (semantic DVC dependency fingerprints): tests, lint, format.
+mod semflow 'packages/semflow/justfile'
+# insitu package (typed in-place document reconciliation): tests, lint, format.
+mod insitu 'packages/insitu/justfile'
+# Repository projectors and Insitu orchestration.
+mod insitu-repository 'apps/insitu-repository/justfile'
+# Manim animation and Kokoro narration application.
+mod manimize 'apps/manimize/justfile'
+
+# Sync the uv workspace.
+setup:
+    uv sync --all-packages
+
+# Ruff lint.
+lint:
+    uv run ruff check .
+
+# Reject hidden import edges and import-system mutation in JCOR source.
+import-policy:
+    uv run --script scripts/import_policy/script.py
+
+# Ruff format + auto-fix.
+fmt:
+    uv run ruff format .
+    uv run ruff check --fix .
+
+# Type check importable source and tests across apps/* and packages/*. Passing
+# member roots would also force Pyrefly through PEP 723 notebooks/scripts despite
+# project-excludes; those use isolated inline environments in typecheck-scripts.
+# Explicit src/tests globs retain full product/test coverage without config
+# discovery re-rooting on each member's pyproject.toml.
+typecheck:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/python" && uv run pyrefly check apps/*/src apps/*/tests packages/*/src packages/*/tests
+
+# Check Tach's module-boundary pilot and uv workspace external dependencies.
+tach:
+    uv run --locked tach check
+    uv run --locked tach check-external
+
+# Type check standalone PEP 723 scripts and marimo notebooks per-file, each
+# against its own inline (`# /// script`) dependency environment rather than the
+# workspace venv. `uv sync --script` materialises (and caches) that env from the
+# inline metadata; we point pyrefly at its interpreter so third-party imports
+# resolve. `-c /dev/null` forces single-file mode so the workspace [tool.pyrefly]
+# config (which scopes to apps/+packages/) is not applied here.
+typecheck-scripts:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    root="$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/python"
+    cd "$root"
+    rc=0
+    while IFS= read -r f; do
+        echo "=== pyrefly: $f ==="
+        if ! uv sync --script "$f" >/dev/null 2>&1; then
+            echo "  ERROR: could not materialise inline-dependency environment" >&2
+            rc=1
+            continue
+        fi
+        if ! interp="$(uv python find --script "$f" 2>/dev/null)"; then
+            echo "  ERROR: could not resolve inline-dependency interpreter" >&2
+            rc=1
+            continue
+        fi
+        uv run pyrefly check -c /dev/null --python-interpreter-path "$interp" "$f" || rc=1
+    done < <(grep -rl '# /// script' scripts notebooks apps --include='*.py')
+    exit "$rc"
+
+# Native Ruff dependency graph, including TYPE_CHECKING and string imports.
+# `--min-dots 1` is required for Scrapy's `crawler.spiders` plugin boundary;
+# it also resolves the five distinct Scrapy/Twisted dynamic module edges.
+analyze-dependencies:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    env -u VIRTUAL_ENV uv run --project src/python ruff analyze graph src/python/apps src/python/packages --python src/python/.venv/bin/python --direction dependencies --detect-string-imports --min-dots 1 --type-checking-imports --preview | jq -cS .
+
+# Reverse native Ruff graph: each source file maps to its dependents.
+analyze-dependents:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    env -u VIRTUAL_ENV uv run --project src/python ruff analyze graph src/python/apps src/python/packages --python src/python/.venv/bin/python --direction dependents --detect-string-imports --min-dots 1 --type-checking-imports --preview | jq -cS .
+
+# Fail on an internal Python import cycle using Ruff's resolved graph.
+analyze-cycles:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    env -u VIRTUAL_ENV uv run --project src/python ruff analyze graph \
+        src/python/apps src/python/packages \
+        --python src/python/.venv/bin/python \
+        --direction dependencies \
+        --detect-string-imports \
+        --min-dots 1 \
+        --type-checking-imports \
+        --preview \
+        | jq -r '
+            to_entries as $entries
+            | ($entries | map({key: .key, value: true}) | from_entries) as $nodes
+            | $entries[]
+            | .key as $source
+            | .value[]
+            | select($nodes[.] == true)
+            | if (($source | test("\\s")) or (. | test("\\s")))
+              then error("Ruff graph paths containing whitespace are unsupported by tsort")
+              # GNU tsort ignores a self-edge, so expand it into a real
+              # two-node cycle that preserves the failing source path.
+              elif . == $source
+              then [$source, ($source + "#self")], [($source + "#self"), $source]
+              else [$source, .]
+              end
+            | @tsv
+          ' \
+        | tsort >/dev/null
+
+# Aggregate pytest across every workspace member — the body `test` / `test-all`
+# share. $1 is the marker expression; the rest is forwarded to pytest.
+#
+# `--import-mode=importlib` is load-bearing, not a style preference. Six members
+# each ship a `tests/` directory, so under pytest's default `prepend` mode they
+# all compete for the single top-level module name `tests`: one wins and the
+# rest die with `ModuleNotFoundError: No module named 'tests.conftest'`. That is
+# why this gate collected **2 tests with 60 errors** before t49 while every
+# package was green on its own. importlib derives a rootdir-unique module name
+# per file, so the six coexist — provided no `tests/` carries an `__init__.py`
+# (t49 removed all six; re-adding one restores the collision).
+#
+# Markers are registered on the command line because the workspace root carries
+# no `[tool.pytest.ini_options]`: each member registers its own, and in an
+# aggregate run rooted at `src/python` none of those configs is read. For the
+# same reason each member's own `addopts = -m 'not slow'` does not apply here,
+# which is why the tier is passed in explicitly rather than inherited.
+#
+# `OMP_NUM_THREADS=1` (the flake defaults to 2): JAX/XLA already parallelises
+# inside each test, so N xdist workers × 2 BLAS threads oversubscribe and run
+# slower than serial. Pinning to 1 is what makes `-n auto` a win.
+# `-p no:monitor` below is load-bearing under `-n auto`, not a preference:
+# pytest-monitor races its own `.pymon` INSERT across workers and the resulting
+# worker crash surfaces as `INTERNALERROR> KeyError: <WorkerController gwN>`.
+# Full derivation in `src/python/apps/pipeline/justfile`.
+_pytest markexpr *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/python"
+    export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+    markers=$'markers=slow: statistical/QP/backtest tests that take >2s (full tier only)\ngpu: tests requiring a CUDA device\nneeds_import_hook: requires jcor\'s jaxtyping import hook (skipped in this run)'
+    common=(--import-mode=importlib -o "$markers")
+    # Collect first and print the number. The failure this gate exists to catch
+    # is silent under-collection, which a green "2 passed" hides perfectly; the
+    # floor turns it into a red gate. Raise the floor only alongside a measured
+    # count, never to match whatever today's run happened to produce.
+    if ! collected=$(env -u VIRTUAL_ENV uv run pytest "${common[@]}" --collect-only -q | tail -1 | grep -oE '^[0-9]+'); then
+        echo "collection failed — rerun without --collect-only for the traceback" >&2
+        exit 1
+    fi
+    echo "collected ${collected} tests across the workspace (floor 1200; t49 measured 1407)"
+    if [ "${collected}" -lt 1200 ]; then
+        echo "under-collection: ${collected} < 1200 — a tests/ tree is not being imported" >&2
+        exit 1
+    fi
+    exec env -u VIRTUAL_ENV uv run pytest "${common[@]}" -p no:monitor -n auto -m '{{ markexpr }}' {{ args }}
+
+# Run the Python test suite (fast tier — mirrors every member's own default).
+# Testmon's forced selector is used only for this non-slow default; `test-all`
+# remains an explicit full-suite run independent of the affected-test cache.
+test *args: (_pytest "not slow" "--testmon-forceselect" args)
+
+# Run the Python test suite including slow statistical/backtest validations.
+test-all *args: (_pytest "" args)
+
+# Bump semver from conventional commits (commit-msg hook; receives the commit-msg
+# file path). version_bump is a residual research one-shot that stays under
+# src/python/scripts/; this verb is its stable public surface for the prek hook.
+version-bump *args:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && uv run --script src/python/scripts/version_bump/script.py {{ args }}
+
+# Dependency hygiene across all workspace members (unused / missing / transitive /
+# misplaced deps). uv is the member authority; its list includes this non-package
+# workspace root, which is the only entry skipped. deptry reads [tool.deptry] from
+# its CWD, so we cd into each member; rc is aggregated so every member reports.
+deptry:
+    #!/usr/bin/env bash
+    set -uo pipefail
+    root="$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/python"
+    cd "$root"
+    if ! members="$(uv workspace list --paths)"; then
+        echo "ERROR: could not resolve uv workspace members" >&2
+        exit 1
+    fi
+    rc=0
+    count=0
+    while IFS= read -r member; do
+        [[ -n "$member" && "$member" != "$root" ]] || continue
+        relative="${member#"$root"/}"
+        # A member that ships as packaging metadata only has no Python to scan,
+        # so deptry reports every declared dependency as DEP002 "not used". That
+        # is an artefact of the projection, not a dependency problem: skip a
+        # member with no source rather than let it fail the gate.
+        if [[ -z "$(find "$member" -name '*.py' -not -path '*/.venv/*' -print -quit)" ]]; then
+            echo "== deptry $relative == (skipped: no Python sources)"
+            continue
+        fi
+        echo "== deptry $relative =="
+        ( cd "$member" && env -u VIRTUAL_ENV uv run deptry . ) || rc=1
+        count=$((count + 1))
+    done <<< "$members"
+    if (( count == 0 )); then
+        echo "ERROR: uv reported no non-root workspace members" >&2
+        exit 1
+    fi
+    exit "$rc"
+
+# Docstring/signature agreement over the test surface and the shipped test
+# helpers (t49 C2). `pytest --fixtures` prints docstrings and is the only
+# documentation surface pytest has, so a fixture without one is invisible; ruff's
+# D rules already require *a* docstring, and this checks it still describes the
+# signature. pydoclint reads [tool.pydoclint] from its CWD, so the config is
+# passed explicitly rather than relying on discovery.
+pydoclint:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/python/packages/jcor"
+    exec env -u VIRTUAL_ENV uv run pydoclint --config pyproject.toml tests src/jcor/testing
+
+# Dead-code report (advisory — never auto-deletes; findings are human-reviewed).
+vulture:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)/src/python" && uv run vulture
+
+# Run Python prek hooks against the whole tree.
+check:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && prek run src/python --all-files

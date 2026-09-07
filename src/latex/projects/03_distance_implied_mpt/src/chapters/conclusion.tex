@@ -1,0 +1,85 @@
+\section{Conclusion}\label{sec:conclusion}
+
+Mean--variance portfolio choice conventionally begins by estimating a return
+covariance matrix, precisely the object that short and high-dimensional panels
+make difficult to estimate reliably.
+This paper takes a different route.
+It asks what observed differences between firms' information distributions can
+certify about portfolio risk before cross-asset covariance is estimated.
+The resulting information certificate is a one-sided restriction on admissible
+portfolio variance, not a point estimate of the covariance matrix.
+
+Related work establishes neighbouring implications of the same distributional
+geometry at other levels of aggregation.
+At the pairwise level, \citet{gawronsky_continuous_2026} derive a covariance
+envelope from Wasserstein separation.
+At the cross-sectional level, \citet{gawronsky_spatial_2027} form a barycentric
+interaction field through target-anchored Wasserstein barycentric
+reconstruction.
+The distinct step here is portfolio aggregation.
+An antilipschitz carrier with bounded firm-specific slack transfers observed W2
+separation into lower bounds on latent exposure separation; one coherent joint
+exposure law then aggregates those restrictions into a portfolio-risk bound.
+A maintained return bridge translates the exposure result into standardized and
+raw-return variance statements.
+The text determines the observed geometry, but it does not identify any of these
+transmission restrictions.
+
+Within this bridge, multi-firm transport dispersion supplies the sharp
+certificate, while the weighted pairwise certificate provides the
+computationally simpler decision rule used in the empirical analysis.
+The investor minimizes the certified upper bound rather than an estimated
+portfolio variance.
+When firm-specific slack is zero, the common carrier scale changes how much
+variance is certified away but not the selected normalized risk allocation,
+which depends only on the observed W2 geometry.
+Capital implementation still requires marginal volatility scales, but expected
+returns and cross-asset return covariance do not enter the allocation's
+construction.
+
+In the \ppnum[0]{n-tickers}-firm 2018--2022 panel, the
+Qwen3-Embedding-8B news-only allocation
+falls between the
+\ppnum[2]{news-only-percentile-uniform-cap-15-pct}\% and
+\ppnum[2]{news-only-percentile-concentrated-cap-15-pct}\% variance percentiles
+across four prespecified capped reference populations, while equal risk weights
+rank higher under each corresponding comparison.
+Its standardized variance is
+\ppnum[1]{news-only-equal-variance-reduction-pct}\% below the variance of the
+equal-risk benchmark but
+\ppnum[1]{news-only-gmv-excess-variance-pct}\% above the ex post long-only
+sample GMV.
+The evidence is therefore an unusually low location among ordinary feasible
+allocations, not covariance-free replication of the covariance-informed
+optimum.
+Portfolio anatomy further shows that
+\ppnum[1]{anatomy-cross-sector-credit-pct}\% of the additive certificate credit
+comes from cross-sector pairs.
+This attribution locates the geometry used by the allocation; it does not
+identify a sector mechanism.
+Both the information geometry and the covariance used for evaluation draw on the
+same 2018--2022 period.
+The resulting ranking is therefore descriptive and in-sample: it illustrates
+the allocation implied by the maintained framework rather than identifying the
+information-to-risk transmission or predicting future portfolio variance.
+
+As a theoretical restriction, the certificate can complement conventional
+covariance estimation with information about admissible portfolio risk that
+originates outside joint returns.
+The present paper does not incorporate the certificate into a shrinkage or
+constrained covariance estimator, nor does it establish the properties of such
+an estimator.
+Doing so is a natural extension when return histories are short or unstable.
+
+More broadly, the construction is not intrinsically tied to corporate news or
+equities.
+Where economically relevant objects admit distribution-valued representations
+and a defensible transmission restriction links their observed geometry to
+latent risk, the same logic can generate one-sided restrictions on aggregate
+risk.
+The immediate empirical priorities are point-in-time construction, genuinely
+out-of-sample evaluation, and identified or calibrated counterparts to the
+maintained carrier, firm-specific slack, and return bridge.
+Those extensions would test the certificate's practical value; the present
+contribution is the coherent portfolio-level object and the explicit bridge on
+which it depends.

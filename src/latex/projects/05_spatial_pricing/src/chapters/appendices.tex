@@ -1,0 +1,298 @@
+\section{Supporting Interaction-Field Results and Implementation}
+\label{sec:supporting-results}
+
+The main analysis leaves four supporting questions.
+The first two ask whether the distinction between joint reconstruction and
+pairwise proximity survives a conventional distance-to-weight map and
+alternative text representations.
+The third asks whether the pooled division between the barycentric and news-link
+fields recurs across annual samples.
+The fourth verifies the estimation and operator conditions used in the main
+text.
+This appendix answers those questions in order and then records the
+reproducibility and formal-verification boundaries.
+
+The firms used to construct the primary barycentric interaction field are
+listed in \Cref{tab:sample-universe}.
+
+\input{generated/sample_universe}
+
+\subsection{Diffusion-Kernel Construction Benchmark}
+\label{sec:p5-rbf-implementation}
+
+The first question is whether the fitted relation reflects target-anchored
+joint reconstruction or only pairwise proximity.
+The RBF comparator defined in \Cref{sec:interaction-comparators} retains the
+pairwise quadratic Wasserstein distances but changes how those distances become
+peer weights.
+Its implementation uses the median off-diagonal squared distance as the
+bandwidth, excludes self-links, and row-normalizes the resulting dense matrix.
+The pooled comparison estimates this operator beside the barycentric interaction
+field and the persistent news-link field on the same return panel and bootstrap
+schedule.
+Because the empirical laws, candidate universe, and Wasserstein distances remain
+fixed, the contrast isolates the distance-to-weight rule.
+The RBF operator weights each source separately by its distance from the target,
+whereas $W^\flat$ selects simplex coordinates jointly to reconstruct that fixed
+target.
+The comparison is therefore a diagnostic of pairwise proximity versus joint
+barycentric reconstruction, not a generic model-selection exercise.
+
+\subsection{Embedding-Representation Sensitivity}
+\label{sec:p5-representation-ablation}
+
+The second question is whether the field comparison is specific to one text
+representation.
+The sensitivity roster separates four design margins: output width, model
+capacity, model family, and information vintage.
+An encoder maps each article into a vector, whose dimension determines the
+coordinates entering both the pairwise $W_2$ distances and the target-anchored
+reconstruction.
+
+The output-width comparison uses Qwen3-Embedding 8B at full width and at 1,024,
+256, and 64 coordinates.
+Qwen's Matryoshka training is designed to keep leading coordinate prefixes
+informative, so the shorter vectors test how much compression the interaction
+geometry tolerates.
+The common 1,024-coordinate Qwen3-Embedding 8B and 4B rows then vary model
+capacity while holding output width fixed.
+Their full-width comparison changes capacity and output width together, so it
+does not isolate capacity.
+The 1,024-coordinate BGE-large-v1.5 row changes model family and pretraining
+relative to Qwen3-Embedding 8B, making it an external sensitivity check rather
+than an identified training-mechanism effect
+\citep{qwen3_embedding_2025,xiao_cpack_2023}.
+
+The information-vintage comparison uses the three 320-coordinate EttaX
+encoders.
+EttaX V0 and V1 use Wikipedia snapshots from 20 December 2017 and 20 December
+2020, respectively.
+The V3 snapshot, dated 1 August 2026, postdates both the
+article-construction and
+return-evaluation windows.
+It is therefore a deliberately post-window negative control, not a
+point-in-time specification.
+The three encoders are matched on architecture, optimization recipe, compute
+budget, and training-token budget; only the Wikipedia snapshot changes.
+Their capacity differs materially from the production Qwen encoders, so the
+vintage rows remain descriptive sensitivities rather than identified vintage
+effects.
+
+Every row in \Cref{tab:p5-representation-ablation} uses the same article inputs
+through 2022, the same 2023--2026 return dates, and one common joint-date
+bootstrap schedule.
+Pairing each contrast within the same resample removes common bootstrap
+variation, while the Holm correction accounts for testing several
+representations in each family.
+The table reports direct differences in $\rho$ for the barycentric field and
+changes in its $\rho$ gap relative to RBF.
+For representation $r$, write
+$g_r=\rho^\flat_r-\rho^h_r$.
+The two candidate-minus-reference estimands are
+$\rho^\flat_c-\rho^\flat_r$ and $g_c-g_r$; negative values indicate,
+respectively, weaker fitted feedback for the barycentric field and a smaller
+advantage over the matching RBF operator.
+The persistent co-mention graph is embedding-free and is therefore reported
+once.
+The equal-active-support comparator replaces the fitted coordinate magnitudes
+with uniform weights on the same selected support, so it asks whether the
+barycentric coordinate magnitudes improve conditional spatial fit beyond peer
+selection.
+
+The contrast table states one joint equivalence rule for the vintage rows and
+reports its two benchmark-calibrated bounds.
+A pair meets the rule only when the adjusted intervals for both estimands lie
+strictly inside their corresponding bounds.
+These post-specified thresholds organize a descriptive sensitivity exercise;
+they are not prespecified confirmatory equivalence margins.
+
+\input{generated/representation_ablation}
+
+For moderate Qwen3-8B truncation from full width to 1,024 coordinates, the
+direct-$\rho$ contrast narrowly rejects zero after Holm adjustment, whereas the
+barycentric-minus-RBF gap interval contains zero.
+The subsequent 1,024-to-256 and 256-to-64 steps yield lower fitted feedback for
+the barycentric field and smaller gaps relative to RBF after Holm adjustment.
+The full-width 4B cell raises both estimands, whereas the fixed-width 4B
+cell lowers both after Holm adjustment; the opposing native- and fixed-width
+comparisons therefore cannot be read as one pure capacity effect.
+BGE-large lowers both estimands relative to Qwen3-8B@1,024, but the comparison
+does not isolate architecture.
+
+All three EttaX pairs meet the table's joint equivalence rule, including both
+contrasts involving the post-window V3 negative control.
+This stability shows that the reported comparison is not uniquely tied to the
+two earlier EttaX snapshots; it does not make V3 a valid point-in-time encoder.
+Log-likelihood remains descriptive throughout.
+
+\subsection{Annual Joint-Field Persistence}
+\label{sec:p5-two-field-annual}
+
+Does the pooled division between barycentric and news-link fields recur in
+shorter samples?
+Table~\ref{tab:two-field-annual} re-estimates both coefficients within each
+non-overlapping annual return sample while holding the two 2018--2022 matrices
+fixed.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Annual joint estimates under the frozen barycentric and news-link
+  fields. The 2026 period ends on \ppvalue{post-evaluation-date-end}.}
+  \label{tab:two-field-annual}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Evaluation year & $\hat\rho_B$ & $\hat\rho_N$ & $\hat\lambda_B$
+    & $\hat\lambda_N$ \\
+    \midrule
+    2023 & \ppnum[3]{post-eval2023-two-field-rho-b} &
+    \ppnum[3]{post-eval2023-two-field-rho-n} &
+    \ppnum[2]{post-eval2023-two-field-lambda-b} &
+    \ppnum[2]{post-eval2023-two-field-lambda-n} \\
+    2024 & \ppnum[3]{post-eval2024-two-field-rho-b} &
+    \ppnum[3]{post-eval2024-two-field-rho-n} &
+    \ppnum[2]{post-eval2024-two-field-lambda-b} &
+    \ppnum[2]{post-eval2024-two-field-lambda-n} \\
+    2025 & \ppnum[3]{post-eval2025-two-field-rho-b} &
+    \ppnum[3]{post-eval2025-two-field-rho-n} &
+    \ppnum[2]{post-eval2025-two-field-lambda-b} &
+    \ppnum[2]{post-eval2025-two-field-lambda-n} \\
+    2026 & \ppnum[3]{post-eval2026-two-field-rho-b} &
+    \ppnum[3]{post-eval2026-two-field-rho-n} &
+    \ppnum[2]{post-eval2026-two-field-lambda-b} &
+    \ppnum[2]{post-eval2026-two-field-lambda-n} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Both channel coefficients remain positive in every year, and the barycentric
+estimate is larger throughout.
+The gap narrows in the incomplete 2026 period, which uses only
+\ppvalue{post-eval2026-two-field-trading-days} dates and is not directly
+comparable with a complete-year estimate.
+The table therefore documents descriptive persistence, not structural constancy
+or a formal test of equality across years.
+
+\subsection{Joint-Field Estimation and Restricted-Null Simulation}
+\label{sec:p5-two-field-implementation}
+
+The fourth question concerns implementation, boundary inference, and field
+admissibility.
+The main text states the estimand and inference design; this subsection begins
+with the details needed to reproduce them.
+The pooled sample uses the fixed base seed, and each successive annual fold adds
+one to that seed in period order.
+Within a period, the resulting stationary-bootstrap bank is shared by the joint
+fit and both single-field boundaries, so corresponding intervals compare the
+same joint-date resamples.
+These interval draws preserve the cross-section observed on each resampled
+date.
+Numerical-Hessian standard errors from the one-field QMLE are retained only as
+diagnostics; all reported intervals use bootstrap quantiles.
+
+The two-field search profiles the mixture weight and total feedback on a
+\ppvalue{two-field-theta-points} by \ppvalue{two-field-rho-points} grid.
+The maximum is then refined continuously within its grid cell, and every
+bootstrap draw receives the same refinement.
+Consequently, reported coefficients are not restricted to grid nodes and their
+intervals do not inherit the grid spacing.
+On the grid, the Jacobian term is evaluated from the eigenvalue spectrum of each
+field mixture, which amortizes the calculation across candidate values of total
+feedback.
+The continuous refinement instead evaluates each candidate by direct LU
+factorization, which is cheaper than computing a new eigendecomposition at every
+isolated point.
+Tests verify that the two determinant routes agree to floating-point tolerance.
+This agreement is a numerical cross-check; the routes do not define different
+estimators.
+
+The QLR calibration is used only for the nested restrictions $\rho_B=0$ and
+$\rho_N=0$, under which the joint model reduces to one of its single-field
+boundaries.
+It is not applied to the non-nested comparison between the RBF and barycentric
+fields.
+For each nested null, the procedure first recovers the residual series from the
+corresponding restricted fit.
+For null draw $b$, each asset receives a stationary-block path from the shared
+bank by offsetting the path index by asset and wrapping cyclically.
+Cycling uses each precomputed path equally often across the null draws.
+The asset-specific offsets preserve each series' temporal blocks while removing
+the excluded field's contemporaneous residual alignment under the null.
+The resampled innovations are mapped back through the restricted spatial
+inverse, after which both the joint and restricted models are refitted with the
+same continuous refinement.
+The reported probability is
+$(1+\#\{QLR_k^*\geq QLR_k\})/(B+1)$ over the null draws.
+Here, $B$ is the number of null draws.
+This restricted-null simulation accommodates the nonnegative-channel boundary;
+no chi-square reference is used.
+
+The remaining checks establish that the constructed field and the joint
+specification retain the peer-average interpretation required by the adjustment
+model.
+
+\subsection{Compatibility of the Barycentric Interaction Field}
+\label{sec:p5-operator-compatibility}
+
+The target-anchored Wasserstein barycentric reconstruction returns one simplex
+row for each firm, and the main text uses the resulting $W^\flat$ as an
+economically admissible peer-average field.
+The required algebra follows directly from the leave-one-out simplex rather
+than from an empirical normalization: nonnegativity and unit row sums come from
+$\Delta_{-i}$, the zero diagonal comes from excluding the target, and the
+$\ell^\infty$ norm is the maximum absolute row sum.
+
+\begin{proposition}[SAR compatibility]\label{thm:wflat-sar-gate}
+  Every operator satisfying \Cref{def:w-flat} is entrywise nonnegative,
+  row-stochastic, and zero-diagonal. In the induced $\ell^\infty$ operator
+  norm, $\lVert W^\flat\rVert\leq1$; hence $|\rho|<1$ implies
+  $\lVert\rho W^\flat\rVert<1$ and is sufficient for the SAR resolvent.
+\end{proposition}
+
+The proposition verifies that the constructed field can enter the spatial
+multiplier without further normalization.
+It concerns the fitted distributional spanning weights and their matrix
+properties.
+
+\subsection{Why the Two Fields Are Not Orthogonalized}
+\label{sec:p5-nonorthogonalization}
+
+The two supplied fields enter jointly because each must remain a nonnegative,
+unit-sum peer-average operator if its fitted coefficient is to retain the
+model's economic interpretation.
+Orthogonalizing one matrix against the other would sacrifice that admissibility
+for algebraic separation.
+A natural residualization would replace $W^\flat$ by
+
+\[
+  W^\flat-\frac{\langle W^\flat,W^{\mathrm{news}}\rangle_F}
+  {\lVert W^{\mathrm{news}}\rVert_F^2}\,W^{\mathrm{news}}.
+\]
+
+The Frobenius residual is generally neither entrywise nonnegative nor
+row-stochastic, so it fails \Cref{def:interaction-matrix} and
+$\sum_j W_{ij}B_j$ ceases to be a peer-weighted average in exposure units.
+The construction would therefore buy statistical separation by discarding the
+economic interpretation that \Cref{thm:two-field-closure} supplies, and its
+coefficient would not map to an adjustment intensity.
+Residualizing the induced signals $W^\flat r_t$ and
+$W^{\mathrm{news}}r_t$ instead preserves return units but occurs only after the
+contemporaneous $r_t$ has entered both signals.
+It therefore does not produce an alternative pair of predetermined admissible
+fields for the spatial likelihood.
+The joint model is used in preference to both alternatives because it leaves
+each supplied field admissible and estimates their coefficients within the same
+spatial equilibrium.
+
+\section{Formal Verification Status}\label{sec:lean-status}
+
+The generated claim manifest records the scope and hypotheses of each
+machine-checked declaration.
+It distinguishes algebraic results from assumptions about the empirical
+operator and from statistical interpretation of the return estimates.
+
+\ppLeanStatusList
+
+Together, these records close the algebraic audit trail without extending formal
+verification to empirical identification, representation validity, or causal
+interpretation; those remain governed by the statistical design and limitations
+stated in the paper.

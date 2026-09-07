@@ -1,0 +1,25 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.substrate.market:cli_compute_returns",
+  "digest": "sha256:a6110957fc0c85ca5241c9e3787eb9837bc31cc9bd88fd40721d058baaa0301f",
+  "entrypoint": "pipeline compute-returns",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:701b162d541e1c9506cca310ef2b8a90b9ce4ab016c5aeb67a529eb0e89c9e8f","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:<binding:typer=typer>"},
+    {"digest":"sha256:32484719bbe9788a978206358be8a935666d8d3529eea1461e3519d28e40b9b1","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:cli_compute_returns"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/market.py","symbol":"pipeline.cli.commands.substrate.market:commands"},
+    {"digest":"sha256:911902b064541c4739c488b6460a292e4817f0780aa010075f2846dcf619abad","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:Template=string:Template>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:d8fc3cf7f30b6468160c361f2e9a70b680e5225efaa2198c56aacc1ba85de45b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:duckdb=duckdb>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:<binding:typer=typer>"},
+    {"digest":"sha256:762ed82e2853843b977f20060d6fe7f85e85b1d961e5b426712569986e1e41d1","kind":"class","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:_MissingReturnCountError"},
+    {"digest":"sha256:46ec2bd48b7c8ce7751f95bd6c4fb8b500b853074a1c3fb8c0ad81001b3a5c35","kind":"function","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:_quote_duckdb_identifier"},
+    {"digest":"sha256:d79c42cac6f90af885734067f46f52c3901d63e7f0e1720a0927dd663982be2a","kind":"function","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/market.py","symbol":"pipeline.stages.substrate.market:compute_returns"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

@@ -1,0 +1,21 @@
+set shell := ["bash", "-uc"]
+
+_pytest markexpr *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd '{{ source_directory() }}'
+    exec env -u VIRTUAL_ENV uv run pytest -q -p no:monitor -n auto -m '{{ markexpr }}' {{ args }}
+
+# Run the maintained unit and integration tests.
+test *args: (_pytest "not benchmark" "--testmon-forceselect" args)
+
+# Run all tests, including the opt-in benchmark.
+test-all *args: (_pytest "" args)
+
+# Run package-local Ruff checks.
+lint:
+    uv run ruff check .
+
+# Format package sources and tests.
+format:
+    uv run ruff format .

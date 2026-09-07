@@ -1,0 +1,356 @@
+\chapter{Random functional exposures and the covariance envelope}
+\label{chap:random-exposure}
+
+This is the trunk of the development.
+An asset's factor loading is a probability law rather than a coefficient, and
+the quadratic transport distance between two such laws is exactly the geometry
+that polarization converts into a covariance bound.
+Everything in the later chapters is either a specialization of this chapter or a
+separate model that borrows its polarization step.
+
+\section{The exposure law and its risk coordinates}
+
+\begin{definition}[Random functional exposure law]
+  \label{def:exposure-law}
+  Asset \(i\) carries a random loading \(B_i\sim P_i\in\mathcal P_2(\mathcal H)\)
+  in a real Hilbert space \(\mathcal H\), and the common factor process has
+  covariance operator \(\Gamma\).
+  The risk coordinates and factor-weighted second moments are
+  \[
+    Z_i=\Gamma^{1/2}B_i,\qquad v_i=\mathbb E\lVert Z_i\rVert^2 .
+  \]
+  For a coupling \(\pi\in\Pi(P_i,P_j)\) the systematic covariance is
+  \(\kappa^\pi_{ij}=\mathbb E_\pi\langle Z_i,Z_j\rangle\), and the
+  factor-weighted quadratic transport cost is
+  \[
+    W_{2,\Gamma}^2(P_i,P_j)
+      =\inf_{\pi\in\Pi(P_i,P_j)}\mathbb E_\pi\lVert Z_i-Z_j\rVert^2 .
+  \]
+  Every object above is now formalized at this level, not only interpreted:
+  risk coordinates as a pushforward under \(\Gamma^{1/2}\), the second moment
+  and systematic covariance as Bochner integrals, and the transport cost as the
+  infimum defining \(W_2\) on \(\mathcal P_2(\mathcal H)\).
+  The finite instance of \Cref{def:finite-exposure-cloud} is the estimator of
+  this object rather than a separate model, and the two agree exactly on
+  finitely supported laws.
+
+  One caveat survives and is unchanged: existence of an optimal plan on
+  \(\mathcal P_2(\mathcal H)\) is \emph{not} proved.
+  It is supplied as a certificate wherever an optimum is needed, so every
+  attainment statement below reads ``given such a plan'', never ``one exists''.
+\end{definition}
+
+\begin{definition}[Finite exposure cloud and coupling]
+  \label{def:finite-exposure-cloud}
+  \uses{def:exposure-law}
+  A finite exposure cloud is a finite support together with nonnegative masses
+  summing to one, and a coupling of two clouds is a nonnegative mass matrix with
+  the two clouds as marginals.
+  Over a coupling this fixes the systematic covariance
+  \(\kappa^\pi_{ij}\), the transport cost \(C(\pi)\), the second moments
+  \(v_i\), and the barycentre, with no measure-theoretic optimal-transport
+  input.
+  A finite optimal-cost certificate is a separate datum: a coupling together
+  with the assertion that its cost is least in the coupling set.
+\end{definition}
+
+\begin{lemma}[Polarization]
+  \label{lem:polarization}
+  \ppClaimBinding{lem:polarization}
+  For any \(x,y\) in a real inner-product space,
+  \[
+    \langle x,y\rangle
+      =\tfrac12\left(\lVert x\rVert^2+\lVert y\rVert^2-\lVert x-y\rVert^2\right).
+  \]
+\end{lemma}
+
+\begin{proof}
+  \ppClaimProofBinding{lem:polarization}
+  Expand the squared norm of the difference.
+\end{proof}
+
+\begin{lemma}[Transport polarization for a coupling]
+  \label{lem:transport-polarization}
+  \uses{def:finite-exposure-cloud}
+  For every coupling \(\pi\) of two finite exposure clouds,
+  \[
+    \kappa^\pi_{ij}=\tfrac12\left(v_i+v_j-C(\pi)\right).
+  \]
+  The identity is exact and holds coupling by coupling; no optimality is
+  involved.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:polarization}
+  Apply \Cref{lem:polarization} inside the coupling expectation and use that
+  the marginals reproduce \(v_i\) and \(v_j\).
+\end{proof}
+
+\section{The Fréchet class and its endpoints}
+
+\begin{definition}[Fréchet class of attainable covariances]
+  \label{def:frechet-class}
+  \uses{def:finite-exposure-cloud}
+  The Fréchet class of a pair of clouds is the set of systematic covariances
+  \(\kappa^\pi_{ij}\) attained as \(\pi\) ranges over their couplings.
+  The coupling set is convex and \(\kappa^\pi_{ij}\) is affine in \(\pi\), so
+  the class is an interval whenever both endpoints are attained.
+\end{definition}
+
+\begin{theorem}[Covariance envelope from optimal transport]
+  \label{thm:random-exposure-envelope}
+  \ppClaimBinding{thm:random-exposure-envelope}
+  \uses{def:frechet-class}
+  Given a finite optimal transport-cost certificate, the ceiling
+  \[
+    \kappa^{\max}_{ij}=\tfrac12\left(v_i+v_j-W_{2,\Gamma}^2(P_i,P_j)\right)
+  \]
+  is the greatest systematic covariance attainable over the coupling set.
+  This is a statement about what the two marginal laws permit; it does not
+  identify the realized covariance, which requires the economic joint law.
+  It is the \emph{upper} endpoint only; the lower one is
+  \Cref{thm:random-exposure-lower-endpoint}, a separate theorem.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:random-exposure-envelope}
+  \uses{lem:transport-polarization}
+  \Cref{lem:transport-polarization} turns least cost into greatest covariance
+  monotonically, and the certificate supplies leastness.
+\end{proof}
+
+\begin{theorem}[Reflected lower endpoint]
+  \label{thm:random-exposure-lower-endpoint}
+  \ppClaimBinding{thm:random-exposure-lower-endpoint}
+  \uses{def:frechet-class}
+  Applying the same argument to the reflected law \((-I)_\#P_j\) gives the
+  sharp lower endpoint of the Fréchet class.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{thm:random-exposure-lower-endpoint}
+  \uses{lem:transport-polarization}
+  Covariance is odd and the second moment even under reflection of one
+  argument, so the greatest covariance against the reflected law is the least
+  covariance against the original.
+\end{proof}
+
+\begin{theorem}[Transport-excess gap]
+  \label{eq:random-exposure-gap}
+  \ppClaimBinding{eq:random-exposure-gap}
+  \uses{def:finite-exposure-cloud}
+  For any coupling,
+  \(\kappa^\pi_{ij}=\kappa^{\max}_{ij}-\tfrac12\operatorname{excess}(\pi)\).
+  The checked statement is an identity in the reference cost: it holds for any
+  scalar placed where the optimal cost sits, and therefore asserts nothing
+  about the sign of the excess on its own.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{eq:random-exposure-gap}
+  \uses{thm:random-exposure-envelope, lem:transport-polarization}
+  Subtract the reference cost from the coupling cost inside
+  \Cref{lem:transport-polarization} and rearrange.
+\end{proof}
+
+\begin{theorem}[The excess is nonnegative]
+  \label{eq:random-exposure-excess-nonneg}
+  \ppClaimBinding{eq:random-exposure-excess-nonneg}
+  \uses{def:frechet-class}
+  Against a certified optimal transport cost, \(\operatorname{excess}(\pi)\ge0\)
+  for every coupling.
+  This is what makes the gap a one-sided moment inequality and hence testable;
+  it is a separate theorem from the identity above, because the identity holds
+  for any reference cost while the sign needs that cost to be the infimum.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{eq:random-exposure-excess-nonneg}
+  \uses{def:frechet-class}
+  Immediate from minimality of the certified cost over the coupling set.
+\end{proof}
+
+\begin{proposition}[Pairwise envelopes do not assemble]
+  \label{prop:pairwise-not-psd}
+  \notready
+  \uses{thm:random-exposure-envelope, thm:joint-coherence}
+  The matrix of independently optimal pairwise envelopes
+  \(\left[\kappa^{\max}_{ij}\right]\) need not be positive semidefinite,
+  because pairwise-optimal couplings may be mutually inconsistent.
+  A globally coherent covariance requires one joint law, as in
+  \Cref{thm:joint-coherence}.
+  Stating this boundary is part of the contribution and is not a defect of the
+  envelope.
+\end{proposition}
+
+\section{Transfer from observable characteristics}
+
+\begin{definition}[Randomized bi-Lipschitz pushforward]
+  \label{ass:random-common-map}
+  \uses{def:exposure-law}
+  The exposure law is generated from an observable characteristic law by one
+  common stochastic map with bounded slack:
+  \[
+    B_i=T(X_i,U_i)=t(X_i)+\delta_i(X_i,U_i),\qquad X_i\sim C_i,\qquad
+    \lVert\delta_i(X_i,U_i)\rVert\le\tau_i,
+  \]
+  with the common carrier \(t\) bi-Lipschitz,
+  \(\ell\,d(x,y)\le\lVert t(x)-t(y)\rVert\le L\,d(x,y)\) for
+  \(0<\ell\le L\).
+  The constants \(L\), \(\ell\), and the slack radii \(\tau_i\) are maintained
+  modelling restrictions, not quantities the observed distances identify or the
+  empirical design estimates.
+\end{definition}
+
+\begin{theorem}[Upper transport transfer under slack]
+  \label{eq:random-w2-upper-transfer}
+  \ppClaimBinding{eq:random-w2-upper-transfer}
+  \uses{ass:random-common-map, def:finite-exposure-cloud}
+  Under the upper Lipschitz bound and bounded per-endpoint slack, the optimized
+  squared exposure transport cost of two finitely supported clouds is at most
+  \(L^2\) times the optimized squared characteristic cost, plus a slack term
+  carrying the maintained support diameter.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{eq:random-w2-upper-transfer}
+  \uses{lem:transport-polarization}
+  Push the certificate coupling of the characteristic clouds through \(T\),
+  bound the resulting cost pointwise, and absorb the slack endpoints.
+\end{proof}
+
+\begin{theorem}[Lower transport transfer under slack]
+  \label{eq:random-w2-lower-transfer}
+  \ppClaimBinding{eq:random-w2-lower-transfer}
+  \uses{ass:random-common-map, def:finite-exposure-cloud}
+  Under a positive lower Lipschitz constant and bounded per-endpoint slack, the
+  optimized squared exposure transport cost is at least \(\ell^{-2}\) times the
+  optimized squared characteristic cost, less a slack term carrying the
+  maintained support diameter.
+\end{theorem}
+
+\begin{proof}
+  \ppClaimProofBinding{eq:random-w2-lower-transfer}
+  \uses{lem:transport-polarization}
+  Symmetric to the upper direction, using injectivity of \(T\) supplied by the
+  lower bound.
+\end{proof}
+
+\begin{corollary}[Metric-level bracket]
+  \label{cor:random-w2-metric}
+  \notready
+  \uses{eq:random-w2-upper-transfer, eq:random-w2-lower-transfer}
+  At the level of the metric rather than the squared optimized cost, the slack
+  enters additively and no support diameter appears:
+  \[
+    \ell^{-1}W_2(C_i,C_j)-(\tau_i+\tau_j)
+      \le W_{2,\Gamma}(P_i,P_j)
+      \le L\,W_2(C_i,C_j)+(\tau_i+\tau_j).
+  \]
+  This sharper form is what the empirical diagnostic uses.
+
+  The upper direction is machine-checked directly at this level: two
+  synchronous-coupling legs bound the slack, one contraction leg carries the
+  transmitted laws, and the \(\mathcal P_2(\mathcal H)\) triangle inequality
+  chains them.
+  The lower direction still needs the reverse Lipschitz half, which supplies
+  injectivity of \(T_\Gamma\) on its image, and remains a prose result.
+  The node keeps \texttt{notready} because it asserts both directions.
+\end{corollary}
+
+\begin{corollary}[Covariance bracket the diagnostic tests]
+  \label{eq:random-kappa-bracket}
+  \notready
+  \uses{thm:random-exposure-envelope, cor:random-w2-metric}
+  Substituting the metric bracket into the envelope brackets
+  \(\kappa^{\max}_{ij}\) in observable characteristic distances and the
+  maintained \((L,\ell,\tau)\).
+  Coverage of this bracket, and the share of unresolved dyads, is the primary
+  reported diagnostic.
+\end{corollary}
+
+\section{Coherent aggregation}
+
+\begin{theorem}[One joint law gives a coherent covariance]
+  \label{thm:joint-coherence}
+  \uses{def:finite-exposure-cloud}
+  A joint exposure law over all assets reproduces each pairwise systematic
+  covariance on its diagonal coupling, and the induced portfolio quadratic form
+  equals the second moment of the aggregated loading
+  \(B_w=\sum_i w_iB_i\).
+  Coherence is therefore automatic once the object is a single joint law, and
+  the quadratic form is positive semidefinite for that reason alone.
+  This is the honest route around \Cref{prop:pairwise-not-psd}.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:polarization}
+  Expand the quadratic form of the aggregate and identify terms with the
+  marginal and pairwise objects.
+\end{proof}
+
+\begin{theorem}[Factor-return semantics of the covariance]
+  \label{thm:factor-return-semantics}
+  \uses{thm:joint-coherence}
+  With a centred isotropic factor and residuals cross-orthogonal to the
+  exposures, the covariance of factor-driven returns equals the systematic
+  covariance of the exposure laws, and the residual cross term vanishes.
+  This is what licenses reading \(\kappa_{ij}\) as a return covariance rather
+  than only as a loading-space inner product; without the orthogonality
+  hypothesis the whole-return claim does not follow.
+\end{theorem}
+
+\begin{proof}
+  \uses{thm:joint-coherence}
+  Expand the return cross moment and kill the residual terms with the
+  orthogonality hypothesis.
+\end{proof}
+
+\section{Rehomed from the retired deterministic chapter}
+
+The retirement recorded on 2026-08-17 withdrew the manifest entries for the
+deterministic branch and kept exactly two, because the pivot keeps their claims.
+Those two moved here on 2026-08-21 when that chapter was deleted.
+Both are Paper~1 claims, so the trunk is where they belong; neither statement
+nor declaration changed in the move.
+
+\begin{corollary}[Approximate common map]
+  \label{cor:approximate-map-bound}
+  \uses{ass:random-common-map}
+  If each exposure deviates from a common map value by at most \(\tau_i\), the
+  covariance floor holds with \(LD\) inflated to \(LD+\tau_i+\tau_j\), and exact
+  transmission is the \(\tau=0\) case.
+
+  The statement fixes no characteristic distance: \(D\) is an arbitrary
+  nonnegative dissimilarity, and energy distance was only ever one instance.
+  Hosting it under the energy development misread that generality, which is why
+  the declaration now lives in \texttt{Transmission.Floor} and the node here.
+  Contrast \Cref{thm:random-exposure-envelope}, which is \emph{not}
+  distance-agnostic: the sharp envelope needs quadratic transport specifically,
+  because minimising the coupling cost is the same optimisation polarisation
+  turns into an inner product.
+\end{corollary}
+
+\begin{proof}
+  \uses{lem:polarization}
+  Triangle-inequality the deviations into the transmission bound, then polarize.
+\end{proof}
+
+\begin{theorem}[Portfolio variance floor]
+  \label{eq:portfolio-envelope}
+  \uses{cor:approximate-map-bound}
+  For a finite book with nonnegative weights, the pairwise floors aggregate
+  termwise into a floor on the squared systematic risk.
+  Nonnegativity is a hypothesis, not a convention: signed weights can reverse
+  individual pairwise inequalities and there is no signed-weight counterpart.
+  No weight normalization is assumed, so the screen applies a fortiori to
+  fully-invested long-only books.
+
+  \Cref{chap:distance-implied} carries its own label for this declaration under
+  the distance-implied reading; the two manuscripts consume one theorem.
+\end{theorem}
+
+\begin{proof}
+  \uses{cor:approximate-map-bound}
+  Sum the pairwise floor against the nonnegative weight products.
+\end{proof}

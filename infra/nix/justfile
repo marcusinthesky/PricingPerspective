@@ -1,0 +1,86 @@
+set shell := ["bash", "-uc"]
+
+# Update all flake inputs.
+update:
+    nix flake update
+
+# Every recipe below is directory-scoped, not `flake.nix`-scoped: the flake is
+# being split into one file per vendored derivation plus per-domain devShell
+# groups, and a file-scoped gate would silently stop covering everything but the
+# root file. statix and deadnix walk a directory natively; nixfmt 1.4 deprecated
+# directory arguments ("Passing directories or non-Nix files (such as \".\") is
+# deprecated and will be unsupported soon"), so it gets an explicit file list
+# from fd. fd honours .gitignore, so build symlinks like ./result never enter it.
+
+# Format nix files with nixfmt (RFC 166 style).
+fmt:
+    fd --extension nix --exec-batch nixfmt
+
+# Assert every nix file is already formatted; the gate half of `fmt`.
+fmt-check:
+    fd --extension nix --exec-batch nixfmt --check
+
+# Lint nix files: statix (anti-patterns) + deadnix (unused code).
+lint:
+    statix check .
+    deadnix --fail .
+
+# Print the dev-shell tool inventory as JSON, from the group descriptions and
+# package lists in shells/groups/*.nix. This is the only place the flake is
+# evaluated for the inventory; Insitu renders this exact JSON into README.md.
+inventory:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    system="$(nix eval --impure --raw --expr builtins.currentSystem)"
+    nix eval --json ".#toolInventory.${system}"
+
+# Print the dev-shell tool inventory as a Markdown table. This remains a public
+# diagnostic companion to the Insitu `tool_inventory` projector. Tool
+# names come from `meta.mainProgram` where set, which is why they read as the
+# command you would type (`tofu`, `rg`, `harper-ls`) rather than the attribute.
+tools:
+    #!/usr/bin/env bash
+    # `pipefail`: without it a failed `nix eval` leaves jq with empty input, jq
+    # succeeds on nothing, and the recipe exits 0 having printed no table — which
+    # a caller could otherwise mistake for a valid empty inventory.
+    set -euo pipefail
+    just inventory | jq -r '
+      ["| Group | Provides | Tools |", "|---|---|---|"]
+      + [ .[] | "| **\(.name)** | \(.description) | \(.tools | join(", ")) |" ]
+      | .[]'
+
+# Assert the flake's rumdl equals the rumdl pinned by every prek `rev:`.
+# Upstream tags rvben/rumdl-pre-commit `v<rumdl-version>` and that tag's
+# pyproject pins `rumdl==<same>` (verified at v0.2.20 and v0.2.31), so the tag
+# is directly comparable to `rumdl --version`. Skew is silent: an ad-hoc
+# `rumdl check` would measure a different ruleset than the gate enforces.
+rumdl-lockstep:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    shipped="$(rumdl --version | awk '{print $2}')"
+    rc=0
+    seen=0
+    for file in $(grep -rl --include='.pre-commit-config.yaml' 'rvben/rumdl-pre-commit' .); do
+        pinned="$(grep -A1 'rvben/rumdl-pre-commit' "$file" \
+            | sed -n 's/.*rev:[[:space:]]*v\([0-9.]*\).*/\1/p')"
+        seen=$((seen + 1))
+        if [ "$pinned" != "$shipped" ]; then
+            echo "rumdl-lockstep: $file pins '${pinned}', flake ships '${shipped}'" >&2
+            rc=1
+        fi
+    done
+    [ "$seen" -gt 0 ] || { echo "rumdl-lockstep: no rumdl hook found" >&2; exit 1; }
+    [ "$rc" -eq 0 ] && echo "rumdl-lockstep: OK — flake and $seen prek pins all at $shipped"
+    exit "$rc"
+
+# Fail when declared CLI tools resolve outside the pinned Nix store.
+toolchain-provenance *args:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
+    exec uv run --script infra/nix/toolchain-provenance/toolchain_provenance.py --root . "$@"
+
+# Run all nix prek hooks against the whole tree.
+check:
+    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && prek run --all-files --config infra/nix/.pre-commit-config.yaml

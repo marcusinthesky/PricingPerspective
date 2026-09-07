@@ -1,0 +1,143 @@
+name: TypeScript workspace
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/typescript/**"
+      - "infra/nix/**"
+      - "justfile"
+      - ".github/workflows/typescript.yml"
+  pull_request:
+    paths:
+      - "src/typescript/**"
+      - "infra/nix/**"
+      - "justfile"
+      - ".github/workflows/typescript.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: src/typescript
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          lfs: true
+
+      - name: Locate Chrome
+        shell: bash
+        run: |
+          chrome_path="$(command -v google-chrome || command -v chromium || true)"
+          if [ -z "$chrome_path" ]; then
+            echo "Chrome or Chromium is required by Lighthouse CI" >&2
+            exit 1
+          fi
+          echo "CHROME_PATH=$chrome_path" >> "$GITHUB_ENV"
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Install locked dependencies
+        run: bun ci
+
+      - name: Run TypeScript workspace checks
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://marcusinthesky.github.io/pricing-perspective' }}
+          NEXT_PUBLIC_BASE_PATH: ""
+        run: bun run ci
+
+      - name: Upload static site
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-site
+          path: src/typescript/apps/portfolio/out
+          if-no-files-found: error
+
+      - name: Upload Storybook
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook
+          path: src/typescript/apps/portfolio/storybook-static
+          if-no-files-found: error
+
+  pages-build:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          lfs: true
+
+      - name: Configure GitHub Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - name: Install locked dependencies
+        run: bun ci
+
+      - name: Build Pages export
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ steps.pages.outputs.base_url }}
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: bun run build
+
+      - name: Verify Pages export
+        env:
+          NEXT_PUBLIC_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        # `verify:export` and `audit:schema` are defined in apps/portfolio, not the
+        # workspace root, and both resolve `out/` relative to the working directory.
+        # Run them there directly: going through `turbo run` would re-enter `build`
+        # with NEXT_PUBLIC_SITE_URL unset, missing the cache and re-exporting the
+        # site that the next step uploads.
+        working-directory: src/typescript/apps/portfolio
+        run: |
+          touch out/.nojekyll
+          test -f out/.nojekyll
+          bun run verify:export
+          bun run audit:schema
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: src/typescript/apps/portfolio/out
+          include-hidden-files: true
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: pages-build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

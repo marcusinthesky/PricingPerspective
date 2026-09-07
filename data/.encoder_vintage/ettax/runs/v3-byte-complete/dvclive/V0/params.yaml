@@ -1,0 +1,45 @@
+data:
+  paths:
+  - data/.encoder_vintage/ettax/runs/v3-byte-complete/prepared/V0.u16
+  sequence_length: 256
+  batch_size: 32
+  shuffle_seed: 17
+model:
+  vocab_size: 32768
+  width: 320
+  layers: 12
+  heads: 5
+  ff_width: 576
+  local_window: 128
+  global_every: 3
+  rope_theta: 160000.0
+  pad_id: 0
+  doc_id: 1
+  eos_id: 2
+  delete_rate: 0.6
+  decoder_layers: 1
+  logit_chunk: 256
+  compute_dtype: bfloat16
+  global_attention_implementation: cudnn
+nominal_tokens: 900005888
+steps: 109864
+train:
+  token_budget: 900000000
+  learning_rate: 0.0003
+  min_learning_rate: 3e-05
+  warmup_fraction: 0.02
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  seed: 42
+  log_every: 20
+  checkpoint_every: 6000
+  checkpoint_dir:
+    data/.encoder_vintage/ettax/runs/v3-byte-complete/checkpoints/V0
+  live_dir: data/.encoder_vintage/ettax/runs/v3-byte-complete/dvclive/V0
+  metrics_path:
+    data/.encoder_vintage/ettax/runs/v3-byte-complete/metrics/V0.json
+warmup_steps: 2197
+tracking:
+  ema_decay: 0.98
+  training_probe_rows: 256
+  training_probe_seed: 20260809

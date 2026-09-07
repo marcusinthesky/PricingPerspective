@@ -1,0 +1,97 @@
+# Hooks run by prek (https://github.com/j178/prek), a Rust drop-in for
+# pre-commit. Install with `prek install`; run manually with `just check`.
+default_stages: [pre-commit]
+repos:
+  # A hook whose `files:` matches nothing is indistinguishable from a passing
+  # one in the run output — it just reads "(no files to check) Skipped". The
+  # root/.agents/.context configs already carry these; this project did not,
+  # which is why pydoclint's dead pattern below survived unnoticed.
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.0
+    hooks:
+      # `notebooks/` is not part of the projected source closure, so it is
+      # public-only content that the source repository's ruff settings never
+      # covered. Excluded rather than fixed: it is exploratory notebook code.
+      - id: ruff-check
+        name: ruff (lint)
+        args: [--fix]
+        exclude: ^notebooks/
+      - id: ruff-format
+        name: ruff (format Python and Markdown)
+        types_or: [python, pyi, jupyter, markdown]
+        exclude: ^notebooks/
+
+  - repo: local
+    hooks:
+      - id: pyrefly
+        name: pyrefly (type check)
+        language: system
+        # Run from src/python so pyrefly picks up [tool.pyrefly] and uv resolves
+        # the workspace venv. Explicit member src/tests globs avoid both config
+        # discovery under-coverage and member-root over-coverage of PEP 723 files,
+        # which typecheck-scripts checks in their own inline environments.
+        entry: "bash -euc 'cd \"$(git rev-parse --show-toplevel)/src/python\" && exec env -u VIRTUAL_ENV uv run pyrefly check apps/*/src apps/*/tests packages/*/src packages/*/tests'"
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+        types_or: [python, pyi, jupyter]
+
+      # Dependency hygiene gate — blocks a commit whose pyproject deps drift from
+      # its real import closure (unused / missing / transitive / misplaced), the
+      # same way a stale dvc.lock or a type error already does. The recipe cd's
+      # into each workspace member and runs deptry (deptry has no config
+      # inheritance). Deterministic and low-noise once first-party/type-only
+      # ignores are set, so it is safe to gate. Vulture's reviewed baseline and
+      # structural whitelist are also clean, so new dead-symbol findings block
+      # here; resolution remains human-reviewed (delete or justify a whitelist
+      # entry), never automatic.
+      - id: deptry
+        name: deptry (dependency hygiene)
+        language: system
+        # prek runs this nested-config hook with cwd = src/python, where the
+        # local recipe is `deptry` (the `python::` module alias only exists in the
+        # root justfile). cd explicitly so it works regardless of invocation dir.
+        entry: "bash -euc 'cd \"$(git rev-parse --show-toplevel)/src/python\" && exec just deptry'"
+        pass_filenames: false
+        require_serial: true
+        types_or: [python, toml]
+
+      # Docstring/signature agreement over jcor's test surface and the fixtures
+      # it ships (t49 C2). Narrow on purpose: `pytest --fixtures` is the only
+      # documentation surface pytest has, so an undocumented or stale fixture
+      # docstring is invisible rather than merely untidy. ruff's D rules already
+      # require a docstring everywhere; this checks it still matches the
+      # signature, which ruff cannot see.
+      - id: pydoclint
+        name: pydoclint (test docstrings match signatures)
+        language: system
+        entry: "bash -euc 'cd \"$(git rev-parse --show-toplevel)/src/python\" && exec just pydoclint'"
+        pass_filenames: false
+        require_serial: true
+        # PROJECT-RELATIVE, not repo-relative. prek runs a nested project with
+        # cwd set to the config's own directory and matches `files:` against
+        # paths relative to it, so a jcor test arrives here as
+        # `packages/jcor/tests/…`. The original `^src/python/packages/jcor/…`
+        # could never match: this gate reported "(no files to check) Skipped"
+        # on every run, including `--all-files`, while 95 files sat under the
+        # paths it names. `check-hooks-apply` below is what makes that loud.
+        files: ^packages/jcor/(tests|src/jcor/testing)/.*\.py$
+
+      - id: python-import-cycles
+        name: Ruff + tsort (Python import cycles)
+        language: system
+        entry: just analyze-cycles
+        pass_filenames: false
+        always_run: true
+        require_serial: true
+        types_or: [python, pyi, toml]
+
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.11.23
+    hooks:
+      - id: uv-lock

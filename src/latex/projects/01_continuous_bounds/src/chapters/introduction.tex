@@ -1,0 +1,111 @@
+\section{Introduction}\label{sec:introduction}
+
+Factor models represent systematic return variation through exposures to
+common shocks, and the resulting covariances determine how firm risks
+aggregate in a portfolio
+\citep{ross_arbitrage_1976,fama_multifactor_1996,daniel_evidence_1997}.
+Yet the characteristics used to describe those exposures are usually encoded
+as points or finite vectors, even when the evidence about a firm consists of
+heterogeneous observations measured with uncertainty.
+Such a point representation does not itself encode how the characteristic
+evidence is distributed within a firm.
+We therefore ask what restrictions become available when firm characteristics
+are treated instead as probability distributions.
+
+Under this representation, each firm is a cloud of characteristic
+observations rather than a single location.
+The distance between two clouds reflects how far their probability mass must
+be moved to align them.
+A coupling is a joint arrangement that specifies which draws from the two
+distributions occur together.
+Quadratic Wasserstein distance, denoted W$_2$, formalizes this comparison by
+selecting the coupling that minimizes expected squared displacement between
+the two distributions.
+The covariance result applies the same geometry after characteristics have
+been mapped into latent factor exposures.
+Given two latent exposure laws, quadratic Wasserstein distance in factor-risk
+coordinates yields sharp upper and lower covariance endpoints over admissible couplings.
+Polarization expresses covariance as average exposure magnitudes minus half
+the expected squared distance, so the least-cost coupling supplies the
+covariance ceiling and reflection supplies the floor.
+A maintained common transmission map then transfers a one-sided restriction
+on the covariance ceiling to characteristic-side distance.
+Any realized coupling then incurs a nonnegative transport-excess cost
+relative to the maximum-covariance arrangement.
+
+This result is conditional rather than a point prediction.
+It requires a common randomized bi-Lipschitz transmission map, bounds on
+firm-level slack expressed in risk coordinates, and a maintained bridge
+between factor exposures and return covariance.
+The article and return data do not identify the map, its constants, or the
+latent coupling.
+Accordingly, the contribution concerns theory and measurement of covariance,
+not expected returns or no-arbitrage pricing.
+
+\Cref{fig:continuous-bound-construction} summarizes the construction from
+article-embedding proxies for characteristic distributions to a conditional
+interval for the covariance ceiling.
+The observed articles proxy each firm's characteristic distribution, while
+the exposure laws and transmission restrictions remain latent.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{1}{continuous_bound_construction}
+  \caption{Construction of the one-sided systematic-covariance envelope.
+    Panel A maps each firm's characteristic law through the common
+    transmission map $T$ with kernel $K$ to its latent exposure law $P_i$.
+    Panel B states the bi-Lipschitz and risk-coordinate slack restrictions on
+    the shared randomized map.
+    Panel C combines the exposure-law covariance ceiling with transfer bounds
+    to form the conditional interval evaluated from observed articles.
+  The operator $\Gamma$ fixes the common risk-coordinate geometry.}
+  \label{fig:continuous-bound-construction}
+\end{figure}
+
+Empirically, we approximate each firm's latent characteristic distribution by
+the empirical distribution of language-model representations of financial
+news articles, disclosures, and analyst reports.
+These firm-level article clouds come from a Nasdaq sample spanning
+\ppvalue{sample-year-start}--\ppvalue{sample-year-end}.
+We then relate pairwise article-embedding W$_2$ distance to return
+co-movement in a dyadic regression with symmetric firm effects.
+The canonical association is positive: one standard deviation more W$_2$
+corresponds to roughly eight fewer correlation points.
+A timing-separated exercise holds the article-embedding geometry fixed and
+recomputes return outcomes in a later window, for which the estimated
+association retains the same sign.
+This comparison is corroborative rather than point-in-time predictive evidence.
+The regression coefficient is associational, not causal, and is not a
+numerical estimate of transport excess.
+
+A separate sensitivity grid evaluates how informative the conditional
+envelope remains as its maintained restrictions are relaxed.
+In that grid, $L$ governs multiplicative distortion in the
+characteristic-to-exposure map and $\tau$ governs additive slack in risk coordinates.
+A covered dyad has nonnegative transport excess throughout its
+scenario-implied interval, a violated dyad has negative excess throughout,
+and an unresolved dyad has an interval spanning zero.
+The zero-slack isometric cell $(L,\tau)=(1,0)$ classifies
+\ppnum[3]{confound-w2-l1-tau0-coverage} of observed dyads as covered and
+\ppnum[3]{confound-w2-l1-tau0-violation} as violations.
+Even $(L,\tau)=(1,0.05)$ and $(1,0.10)$ leave
+\ppnum[3]{confound-w2-l1-tau0p05-unresolved} and
+\ppnum[3]{confound-w2-l1-tau0p1-unresolved} unresolved, respectively.
+The envelope is therefore informative only when the
+characteristic-to-exposure map is tightly restricted.
+
+The paper makes three connected contributions.
+First, it derives sharp pairwise covariance endpoints for latent exposure
+laws and transfers a conditional restriction on the covariance ceiling to
+distribution-valued characteristics.
+Second, it provides a measurement design that keeps the distinction between
+latent characteristic laws, article-based proxies, and return covariance explicit.
+Third, it reports both the reduced-form distance association and the scenario
+evidence needed to assess when the theoretical envelope is informative.
+
+\Cref{sec:literature} positions the covariance contribution relative to
+characteristic-based loading models and textual proximity measures.
+\Cref{sec:methodology} constructs the one-sided covariance envelope and
+states its maintained conditions.
+\Cref{sec:empirical-design,sec:results} develops the proxy and estimation
+design before reporting the association, timing, and sensitivity evidence.

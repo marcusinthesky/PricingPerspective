@@ -1,0 +1,181 @@
+\section*{Introduction}
+\label{sec:introduction}
+
+Spatial asset-pricing models organize cross-sectional return dependence through
+an interaction matrix and estimate its strength by spatial quasi-likelihood.
+The researcher typically supplies $W$ from geography, industry, supply chains,
+or news-derived networks and estimates a spatial coefficient $\rho$ conditional
+on that choice
+\citep{fernandez_spatial_2011,kou_asset_2018,ge_news-implied_2023}.
+This approach is powerful once $W$ has been specified, but the spatial equation
+begins after the economically relevant relations among firms have already been
+chosen.
+It therefore leaves two questions outside the model: where the interaction
+field comes from, and what $\rho$ measures beyond return dependence conditional
+on that field.
+
+Existing constructions encode economic location in different ways.
+Point-based spatial models locate a firm in a geographic or characteristic
+space, whereas network models represent the firm as a node connected by
+observed links.
+Text-based finance extends the latter approach by extracting co-coverage and
+co-mention relations that balance-sheet classifications can miss
+\citep{scherbina_economic_2013,schwenkler_network_2020,ge_news-implied_2023}.
+Other work summarizes text as a predictive feature, a named factor, or a learned
+graph
+\citep{ben_rephael_information_consumption_2019,cong_textual_factors_2024,
+son2022graph}.
+These approaches establish the relevance of text, but an adjacency still leaves
+primitive what constitutes a link and why its cardinal weight should measure
+economic interaction.
+
+This paper moves one level upstream of the conventional spatial specification
+by changing the mathematical object used to represent a firm.
+A diversified firm does not occupy only one economic location: its products,
+technologies, supply chains, and information form a footprint across many
+positions.
+Two firms can share a centroid while having very different footprints, much as
+two restaurant chains with the same average store coordinates can cover
+different regions.
+We therefore represent each firm by a probability measure over
+economic-information positions rather than by one point or averaged text score.
+A point-valued firm is the special case in which the entire footprint is
+concentrated at one position; a genuine distribution also retains spread,
+multimodality, and internal composition.
+
+A language model maps each article to a numerical position, so a firm's corpus
+forms an empirical distribution in the embedding space.
+Once firms are measures, proximity must compare entire footprints rather than
+only their centroids.
+In the Kantorovich formulation, quadratic optimal transport considers all
+feasible couplings of two distributions and selects the one with the smallest
+average squared displacement.
+Here the ground cost is squared displacement in a language-model embedding
+space, so Wasserstein distance measures the least information-space displacement
+needed to align one observed footprint with another.
+This least-cost formulation gives the geometry an economic interpretation while
+making no claim of physical reallocation or literal spatial arbitrage.
+
+Pairwise transport nevertheless does not yet produce an interaction field.
+A distance says how far two distributions are separated; it does not say how
+several peers jointly represent a fixed target firm.
+For each target, optimal transport first aligns its articles separately with
+the articles of every candidate peer.
+Holding those target-specific alignments fixed, target-anchored Wasserstein
+barycentric reconstruction chooses nonnegative unit-sum weights that combine the
+aligned peer clouds to approximate the target cloud.
+These distributional spanning weights answer which combination of peers jointly
+represents the firm, rather than only which single firm lies nearest to it.
+Repeating the reconstruction across targets produces $W^\flat$, the directed,
+row-stochastic barycentric interaction field.
+Its simplex and leave-one-out restrictions give nonnegative unit row sums and a
+zero diagonal without a conventional kernel-bandwidth choice.
+
+The paper's primary conceptual contribution is to turn this target-anchored
+Wasserstein barycentric reconstruction into an admissible field for spatial
+exposure adjustment.
+Section~\ref{sec:interaction-operator} formalizes the fixed-target construction
+and its boundary with the unrestricted Wasserstein barycentre; the
+latter appears
+only in Section~\ref{sec:dispersion} as a representation of cross-sectional
+dispersion.
+
+Given this field, the paper next asks what the spatial coefficient means.
+Each firm has a stand-alone exposure $\xi_i$ implied by its own characteristics,
+and a quadratic adjustment problem balances departure from $\xi_i$ against
+misalignment with peer exposures.
+Solving that problem yields a spatial equilibrium in the peer-adjusted
+exposures $B_i$ with feedback coefficient
+
+\[
+  \rho=\frac{\lambda}{1+\lambda},
+\]
+
+where $\lambda$ is the penalty on peer misalignment relative to the penalty on
+departing from the stand-alone exposure.
+This spatial closure derives the lag in exposures rather than assuming it in
+returns and maps nonnegative adjustment intensity exactly to
+$0\leq\rho<1$.
+A subsequent return bridge connects the exposure equilibrium to observed
+returns.
+
+The same closure permits several admissible fields to enter one adjustment
+problem, each with its own coefficient and adjustment index.
+The barycentric interaction field and a persistent news co-mention field can
+therefore represent separate channels rather than rival estimates of one
+privileged network.
+A supporting attenuation result then asks how much characteristic-implied
+latent exposure dispersion survives peer adjustment under an explicit
+maintained transfer restriction.
+Related research uses distribution-valued firm characteristics to derive
+pairwise covariance restrictions and to study portfolio-risk bounds and
+allocation
+\citep{gawronsky_continuous_2026,gawronsky_distance_mpt_2026}.
+The present paper works at the intervening cross-sectional level: it constructs
+the field relating firms and traces how stand-alone exposures propagate through
+that field.
+
+Figure~\ref{fig:spatial-exposure-arc} separates what is observed or constructed
+from what is latent and model-implied, and from what is estimated.
+
+\begin{figure}[htbp]
+  \centering
+  \ppfigure{1}{spatial_exposure_arc}
+  \caption{From text geometry to model-implied adjustment. Text distributions
+    construct the frozen barycentric interaction field $W^\flat$. In the latent
+    model, firm-specific information generates stand-alone exposure $\xi_i$,
+    which adjustment transforms into peer-adjusted exposure $B_i$. The return
+    bridge connects exposure to returns; conditional on the frozen
+    field, QMLE yields a
+    working-model estimate of $\rho$ and hence the adjustment index
+    $\lambda=\rho/(1-\rho)$. Solid arrows denote construction or estimation;
+  dashed arrows denote model relations.}
+  \label{fig:spatial-exposure-arc}
+  \figalttext{Flow diagram with three layers. In the observed and constructed
+    layer, firm text distributions produce a frozen peer field; this field and
+    returns feed quasi-maximum likelihood estimation. In the latent layer, text
+    generates stand-alone exposure, and the peer field adjusts it before a model
+    bridge maps exposure to returns. The estimated coefficient is converted to
+    an adjustment index. Solid arrows are empirical construction or estimation;
+  dashed arrows are maintained model relations, not observed causal paths.}
+\end{figure}
+
+In the empirical application, we constructed $W^\flat$ from 2018--2022 text
+for \ppvalue{n-tickers-priced} firms and froze it before estimating the return
+equation on \ppvalue{post-pooled-2023-2026-w-flat-trading-days} aligned trading
+days from 2023 through the incomplete 2026 period.
+The pooled QMLE implies the working-model adjustment index
+$\hat\lambda=\ppnum[2]{post-pooled-2023-2026-w-flat-lambda}$.
+Within the quadratic representation, the fitted penalty on peer misalignment is
+therefore \ppnum[2]{post-pooled-2023-2026-w-flat-lambda} times the penalty on
+departing from stand-alone exposure.
+When the persistent news co-mention field enters jointly, the estimated indices
+are $\hat\lambda_B=\ppnum[2]{post-pooled-2023-2026-two-field-lambda-b}$ for the
+barycentric field and
+$\hat\lambda_N=\ppnum[2]{post-pooled-2023-2026-two-field-lambda-n}$ for the
+news-link field.
+Each field improves conditional fit once the other is included.
+
+These estimates have a deliberately conditional interpretation.
+Freezing the fields before the return window removes mechanical same-sample
+feedback, but it does not make the text geometry exogenous to omitted
+industries, technologies, attention, or reporting selection.
+QMLE estimates working-model return coefficients conditional on the specified
+fields and return quasi-likelihood; it does not separately identify the
+peer-adjusted exposures or adjustment costs.
+Only under the maintained return bridge and quadratic closure does
+$\hat\lambda$ inherit the model's adjustment interpretation.
+Accordingly, $\hat\lambda$ is a working-model adjustment index, not an observed
+managerial cost, a geometry-invariant structural parameter, or a causal peer
+effect.
+
+Section~\ref{sec:literature} positions the contribution relative to spatial
+finance, network adjustment, text-based measurement, and optimal transport.
+Sections~\ref{sec:model} and~\ref{sec:spatial-closure} define stand-alone
+exposures and derive the spatial closure, while
+Section~\ref{sec:interaction-operator} constructs the barycentric interaction
+field and Section~\ref{sec:dispersion} derives the attenuation result.
+Section~\ref{sec:identification-estimation} states the return bridge,
+identification boundary, data, and estimation design; Section~\ref{sec:results}
+reports the evidence, and Sections~\ref{sec:limitations}
+and~\ref{sec:conclusion} discuss scope and implications.

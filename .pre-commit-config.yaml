@@ -1,0 +1,311 @@
+# Hooks run by prek (https://github.com/j178/prek), a Rust drop-in for
+# pre-commit. Install with `prek install`; run manually with `just check`.
+#
+# In workspace mode, prek auto-discovers nested .pre-commit-config.yaml files.
+# The root .prekignore opts the canonical hidden governance roots into that
+# discovery; each nested project receives paths relative to its config directory.
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+  - pre-push
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      # Formatting
+      - id: trailing-whitespace
+        # dvc.lock is DVC-generated: ruamel.yaml wraps long `cmd:` plain scalars
+        # and leaves a redundant (YAML-folded-away) trailing space on each wrap,
+        # re-emitted on every `dvc repro`. Stripping it just churns a ~950-line
+        # whitespace diff each cycle, so leave the generated lock to DVC (already
+        # skipped by codespell + owned by the DVC pre-commit hook).
+        #
+        # .pgf figures are the same case, found 2026-08-02: they are DVC stage
+        # outputs written by matplotlib's PGF backend, which emits a trailing
+        # space inside its LaTeX preamble comments. A repo-wide run rewrote 40
+        # of them, desynchronising generated artifacts from the stages that
+        # produce them for a cosmetic change that the next `dvc repro` undoes.
+        # Generated outputs belong to their producer, not to this hook.
+        exclude: ^(dvc\.lock|src/latex/projects/[^/]+/src/images/.*\.pgf)$
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+      # Syntax validation
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+
+      # Security
+      - id: detect-private-key
+        stages: [pre-commit, pre-push]
+      - id: check-added-large-files
+        stages: [pre-commit, pre-push]
+
+      # Cross-platform compatibility
+      - id: check-case-conflict
+      - id: fix-byte-order-marker
+      - id: destroyed-symlinks
+
+      # Quality
+      - id: check-merge-conflict
+      - id: check-vcs-permalinks
+
+      # Safety
+      - id: no-commit-to-branch
+        args: [--branch, main]
+
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+
+  # DVC data/pipeline sync guards. pre-commit blocks committing code against a
+  # stale dvc.lock; pre-push ships tracked data to the remote alongside code.
+  # post-checkout (commented) would `dvc checkout` on branch switches — enable
+  # only if you branch-hop often (slow with the 1.8 GB raw root).
+  #
+  # language: system deliberately — these call the Nix dev-shell dvc on PATH
+  # instead of the upstream language:python hooks, which rebuild dvc from PyPI
+  # into a prek venv and hit a broken orjson native ext under Nix. Requires
+  # committing/pushing inside `nix develop` so dvc is on PATH (already the
+  # repo convention). Version tracks the dev shell — no rev to pin.
+  - repo: local
+    hooks:
+      - id: dvc-pre-commit
+        name: DVC pre-commit
+        entry: dvc git-hook pre-commit
+        language: system
+        stages: [pre-commit]
+        files: \.dvc$|dvc\.lock|dvc\.yaml
+        pass_filenames: false
+      # The JSON files are DVC's code-dependency boundary, so stale generated
+      # content would suppress a genuine rebuild. This read-only hook makes JSON
+      # freshness mandatory whenever source, config, YAML, or hashes change.
+      - id: semflow-check
+        name: "semflow: generated fingerprints current"
+        entry: just python::semflow::check
+        language: system
+        stages: [pre-commit]
+        files: ^dvc\.yaml$|^semflow\.toml$|^src/python/.*\.py$|^\.semflow/hashes/.*\.json$
+        pass_filenames: false
+      - id: dvc-pre-push
+        name: DVC pre-push
+        entry: dvc git-hook pre-push
+        language: system
+        stages: [pre-push]
+        always_run: true
+        pass_filenames: false
+      # prek's default_install_hook_types claims the pre-push slot exclusively,
+      # so `git lfs install`'s own pre-push (which uploads LFS objects before
+      # the push proceeds) never runs — pushes then ship pointer files for
+      # objects GitHub has never seen (GH008). Run the upload here instead.
+      - id: lfs-pre-push
+        name: Git LFS pre-push
+        entry: git lfs push origin --all
+        language: system
+        stages: [pre-push]
+        always_run: true
+        pass_filenames: false
+      # - id: dvc-post-checkout
+      #   name: DVC post-checkout
+      #   entry: dvc git-hook post-checkout
+      #   language: system
+      #   stages: [post-checkout]
+      #   always_run: true
+      #   pass_filenames: false
+
+  - repo: local
+    hooks:
+      # TOML formatter (whitespace/indent/array-wrap only). tombi ships on the
+      # dev-shell PATH from infra/nix/flake.nix; language:system calls the bare
+      # binary like the dvc/just hooks. --offline so no schema catalog is
+      # fetched — schema reordering is turned off in tombi.toml (validation is
+      # owned by the contracts pyproject/rumdl hooks). tombi discovers
+      # ./tombi.toml from the repo-root cwd prek runs it in.
+      - id: tombi-format
+        name: tombi (TOML format)
+        language: system
+        entry: tombi format --offline
+        types_or: [toml]
+        # Lock files are content-identified as TOML by prek but are generated —
+        # reformatting one churns thousands of lines and fights the next lock
+        # operation. The formatter owns hand-authored TOML only (pyproject,
+        # agent configuration, and .rumdl.toml).
+        exclude: (^|/)[^/]*\.lock$
+
+      # One `--justfile` invocation per file, mirroring just-lsp-analyze below.
+      # A bare `just --fmt` resolves ONE justfile — the root one — so with
+      # `pass_filenames: false` this hook fired on every one of the 27 module
+      # justfiles its `files:` pattern names and checked none of them. Measured:
+      # a clean root beside a wildly misformatted module exits 0 with no output;
+      # the same module via `--justfile` exits 1. Modules had zero format
+      # coverage while the gate reported green.
+      - id: just-fmt
+        name: just fmt (format justfiles)
+        language: system
+        entry: >-
+          bash -c 'rc=0; for f; do just --justfile "$f" --fmt --check --unstable || rc=1; done; exit $rc' --
+        files: ^justfile$|^.*\/justfile$
+        pass_filenames: true
+
+      - id: just-lsp-analyze
+        name: just-lsp analyze (lint module justfiles)
+        language: system
+        entry: bash -c 'for f in "$@"; do just-lsp analyze "$f"; done' --
+        files: ^.+/justfile$
+        pass_filenames: true
+
+      # PEP 723 script locks. The upstream astral-sh/uv-pre-commit `uv-lock`
+      # hook (used by the src/python workspace) is project-only —
+      # `files: ^(uv\.lock|pyproject\.toml|uv\.toml)$`, `pass_filenames: false` —
+      # so it never sees a `# /// script` header and gives the inline-metadata
+      # scripts zero coverage. Those span src/latex, src/lean, src/python, and
+      # .context/, so the check is root-owned. `uv lock --check --script` exits
+      # 2 on a missing `<script>.py.lock` and 1 on a stale one, but its stale
+      # message names `uv.lock` rather than the script — hence the echo. The
+      # grep guard skips ordinary .py files, which have no lock by design.
+      - id: uv-lock-script
+        name: "uv: PEP 723 script locks up-to-date"
+        language: system
+        # Block scalar: the entry embeds `: ` (in the DRIFT hint), which a plain
+        # YAML scalar would parse as a nested mapping.
+        entry: >-
+          bash -c 'rc=0; for f; do grep -q "^# /// script" "$f" || continue; uv lock -q --check --script "$f" || { echo "DRIFT: $f (run: uv lock --script $f)"; rc=1; }; done; exit $rc' --
+        pass_filenames: true
+        files: \.py$
+
+      # The repo declares required CLI tools in two places (the harness
+      # permission allowlist and prek `language: system` entries) but provisions
+      # them in a third (infra/nix/flake.nix). Drift is invisible interactively,
+      # because the dev shell inherits the ambient PATH and a machine-local
+      # profile answers the lookup — then it breaks in CI and fresh worktrees.
+      # `rumdl` and `gh` sat unprovisioned this way until 2026-08-01.
+      # pass_filenames: false — the contract is over the declaration set as a
+      # whole; triggered by any edit to a declaration site or to the flake.
+      # The flake trigger is `infra/nix/**.nix`, not `infra/nix/flake.nix`: the
+      # flake is being split into one file per vendored derivation plus
+      # per-domain devShell groups, so the file that adds or drops a tool is
+      # usually NOT flake.nix any more. A file-scoped trigger would let a package
+      # land in shells/groups/*.nix without this contract ever running.
+      - id: toolchain-provenance
+        name: "nix: declared tools come from the Nix store"
+        language: system
+        entry: just nix::toolchain-provenance
+        pass_filenames: false
+        files: ^(\.pre-commit-config\.yaml|.*/\.pre-commit-config\.yaml|\.agents/claude/settings\.json|infra/nix/(.*\.nix|flake\.lock))$
+
+      # Provenance is necessary but not sufficient: a store-provided rumdl at
+      # the wrong version still makes an ad-hoc `rumdl check` disagree with what
+      # the gate enforces, silently. Before 2026-08-01 the three prek configs
+      # pinned v0.2.20, the flake carried 0.2.31, and the ambient binary was
+      # 0.1.94. Same trigger set as the provenance hook — both fail when a
+      # declaration site or the flake moves, and both widened to `infra/nix/**.nix`
+      # for the same reason: after the flake split, rumdl is pinned in a devShell
+      # group file, so a file-scoped trigger would make the next bump silent.
+      - id: rumdl-lockstep
+        name: "contracts: rumdl flake version == prek pins"
+        language: system
+        entry: just nix::rumdl-lockstep
+        pass_filenames: false
+        files: ^(\.pre-commit-config\.yaml|.*/\.pre-commit-config\.yaml|infra/nix/(.*\.nix|flake\.lock))$
+
+      # Bibliography generation spans the context vault, LaTeX projects, and
+      # the owner-local projection recipe, so one root hook owns every trigger.
+      - id: bibliography-pipeline-check
+        name: "bibliography: CSL export-bib freshness and zero cited-unresolved"
+        language: system
+        entry: just references::bibliography-check
+        pass_filenames: false
+        files: ^\.context/reference/.+/README\.md$|^src/latex/projects/.+/refs\.bib$|^src/latex/projects/.+\.tex$|^src/python/scripts/references/justfile$
+
+
+      # Root-anchored: the PR-oriented Keep-a-Changelog vocabulary is the root
+      # CHANGELOG's contract only. Package changelogs (e.g.
+      # src/python/packages/jcor/CHANGELOG.md) are release/version-ordered and
+      # would fail this profile, so they stay out of scope.
+
+      # Rumdl MD051/MD057 own anchors and repository-relative targets. Lychee owns
+      # the orthogonal network claim: does each HTTP(S) destination in maintained
+      # prose still respond? Scan the full authored corpus on an in-scope Markdown
+      # change; the seven-day success cache in lychee.toml makes that repository-wide
+      # sweep practical.
+      - id: lychee
+        name: "docs: cached external link integrity"
+        language: system
+        entry: lychee --config lychee.toml .
+        pass_filenames: false
+        types: [markdown]
+        exclude: (^|/)CHANGELOG\.md$|^\.context/(chat|reference|plan/\.archive)/
+
+
+      # Domain CLIs own their file formats and semantic configuration contracts.
+      - id: schema-dvc-yaml
+        name: "dvc: dvc.yaml parses"
+        language: system
+        entry: dvc stage list --fail
+        pass_filenames: true
+        files: ^dvc\.yaml$
+
+      - id: schema-pre-commit-config
+        name: "prek: config parses"
+        language: system
+        entry: prek validate-config
+        pass_filenames: true
+        files: (^|/)\.pre-commit-config\.yaml$
+
+      - id: schema-pyproject
+        name: "tombi: pyproject schema"
+        language: system
+        entry: tombi lint --offline --error-on-warnings
+        pass_filenames: true
+        files: pyproject\.toml$
+        types_or: [toml]
+
+  - repo: https://github.com/rvben/rumdl-pre-commit
+    rev: v0.2.31
+    hooks:
+      - id: rumdl
+        exclude: \.(agents|context)/
+      - id: rumdl-fmt
+        exclude: \.(agents|context)/
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        exclude: \.context/|\.agents/|\.ipynb$
+
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args:
+          [
+            --strict,
+            --force-scope,
+            feat,
+            fix,
+            docs,
+            refactor,
+            perf,
+            test,
+            build,
+            ci,
+            chore,
+            revert,
+            style,
+          ]
+
+  # Commit-msg hooks — run after conventional-pre-commit validates format.
+  - repo: local
+    hooks:
+      - id: version-bump
+        name: version bump (semver from conventional commits)
+        language: system
+        entry: just python version-bump
+        stages: [commit-msg]
+        pass_filenames: true

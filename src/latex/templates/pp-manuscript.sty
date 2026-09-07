@@ -1,0 +1,170 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pp-manuscript}[2026/07/22 Pricing Perspective
+manuscript semantics]
+
+% Scalable-font closure: the minimal TeX Live set ships accented glyphs only via
+% the bitmap EC fonts, which microtype cannot font-expand ("auto
+% expansion is only
+% possible with scalable fonts"). T1 fontenc + Latin Modern provide the scalable
+% Type1 equivalents so accented bibliography names (e.g. Ismaïl)
+% compile under the
+% arXiv pdfLaTeX release path. The same request pulls T1/lmr TFM
+% metrics (e.g. ec-lmbx8) under Tectonic; `just setup` warms them
+% into the offline
+% --only-cached bundle so the fast cached-smoke matrix stays green (engine-aware
+% fontspec was rejected: it still needs fontspec.sty + LM OTF warmed,
+% for no gain).
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\RequirePackage{booktabs}
+\RequirePackage{mathtools}
+\RequirePackage{siunitx}
+\RequirePackage{bm}
+\RequirePackage{graphicx}
+% Figure transport (see ARCHITECTURE.md, "Figure transport"). Figures are
+% matplotlib PGF, so Tectonic typesets their text in the document's own font at
+% the document's own point size instead of scaling a pre-rendered PDF. All three
+% requirements are stated by matplotlib's own .pgf header: `pgf` to draw,
+% `import` so a figure's raster sidecars resolve next to the .pgf rather than
+% next to main.tex, and \mathdefault, which matplotlib emits around every math
+% label and leaves for the document to define.
+% These sit here beside graphicx rather than in targets/ because the figure
+% transport is a repository-wide semantic, not a per-venue layout choice.
+\RequirePackage{pgf}
+\RequirePackage{import}
+\providecommand{\mathdefault}[1]{#1}
+\RequirePackage{tabularx}
+\RequirePackage{etoolbox}
+\RequirePackage{longtable}
+% multi-page listings that must not be
+% floats (e.g. the
+% 53-row Paper 1 ticker universe, which overran the page as a table float and
+% printed the folio through its own body)
+% longtable sets its caption in a \parbox of \LTcapwidth, 4in by default and so
+% narrower than the text block in both target geometries. Widening it to the
+% line width keeps a longtable caption flush with the table it belongs to.
+\AtBeginDocument{\setlength{\LTcapwidth}{\linewidth}}
+\RequirePackage{float} % [H] pins appendix tables after their heading
+% (both engines)
+\RequirePackage{xfp} % \fpeval for display-time scaling, e.g.
+% \num{\fpeval{\ppvalue{k}*100}}
+
+% Match the Typst baseline's float display: round to the requested precision but
+% do NOT pad with trailing zeros (Typst's calc.round drops them, so 0.61 renders
+% as "0.61", not siunitx's default-padded "0.610").
+\sisetup{round-pad=false}
+
+% Independent per-type counters with flat numbering (Theorem 1,
+% Corollary 1, ...),
+% matching the canonical Typst templates/common.typ. Sharing one counter would
+% both renumber the theorem objects and make cleveref mislabel every corollary,
+% lemma, and assumption as "Theorem".
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{hypothesis}{Hypothesis}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\ppDeclareValue}[2]{%
+  \expandafter\gdef\csname pp@value@#1\endcsname{#2}%
+}
+
+\newcommand{\ppvalue}[1]{%
+  \ifcsname pp@value@#1\endcsname
+  \csname pp@value@#1\endcsname
+  \else
+  \PackageError{pp-manuscript}{Undefined generated value '#1'}%
+  {Regenerate the project's generated/value bindings.}%
+  \fi
+}
+
+% Marker for empirical cells that were genuinely not computed this
+% pass (upstream
+% float.nan). Mirrors the Typst ``fmt``/``sci`` helpers, which render
+% an em dash so
+% a missing value never appears as a bare number. Declared values
+% that resolve to
+% \ppmissing are recorded and auditable rather than silently zero-filled.
+\newcommand{\ppmissing}{--}
+
+% Display macro for pipeline-bound numeric values (t24.16.1/F1). Centralizes the
+% siunitx rounding POLICY -- round-mode=places, combined with the
+% \sisetup{round-pad=false} above -- into one definition so a call site carries
+% only the display precision, not the repeated option string. \ppnum expands
+% byte-identically to the \num[round-mode=places,round-precision=N]{\ppvalue{k}}
+% idiom it replaces, so migrating existing call sites is a mechanical, output-
+% preserving find-replace. Optional precision defaults to 3 (the dominant
+% call-site precision); \ppnume is the scientific-notation variant for small
+% p-values/eigenvalues.
+\newcommand{\ppnum}[2][3]{\num[round-mode=places,round-precision=#1]{\ppvalue{#2}}}
+\newcommand{\ppnume}[2][3]{%
+  \num[round-mode=places,round-precision=#1,scientific-notation=true]{\ppvalue{#2}}%
+}
+
+% Include a generated figure. #1 is the width the figure is *authored* at, as a
+% fraction of \linewidth; #2 is its name under images/.
+%
+% PGF is placed at natural size and cannot be rescaled — that is the
+% whole point,
+% since scaling a figure scales its type — so #1 sets nothing at
+% compile time. It
+% records the intended width so the manuscript stays an independent
+% source of it:
+% tests/figures/test_print_size.py parses these call sites and compares each
+% fraction against the width the renderer actually produced. Without it the
+% guard could only compare the renderer against itself. Target adapters may set
+% the internal suffix to select a separately authored natural-size variant.
+\newcommand{\ppfiguresuffix}{}
+\newcommand{\ppfigure}[2]{\import{images/}{#2\ppfiguresuffix.pgf}}
+% The `article` class does not define \figalttext. Keep the semantic call
+% portable in shared chapter sources; a target decides whether and how to render
+% it for reviewers.
+\providecommand{\figalttext}[2][]{\relax}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+% All-ones vector: Typst baseline uses bold(1); \mathbb{1} (blackboard digit) is
+% absent from amssymb's A-Z-only alphabet and renders as a stray msbm glyph.
+\newcommand{\1}{\mathbf{1}}
+
+% Paired delimiters for the analytical chapters (Typst
+% norm()/abs()/chevron/floor).
+% Chapters are content-only and may not define macros, so the shared math
+% vocabulary lives here. Starred forms auto-size: \norm*{x}, \inner*{a,b}.
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+\AtBeginDocument{%
+  \crefname{assumption}{assumption}{assumptions}%
+  \Crefname{assumption}{Assumption}{Assumptions}%
+  \crefname{appendix}{appendix}{appendices}%
+  \Crefname{appendix}{Appendix}{Appendices}%
+  \crefname{corollary}{corollary}{corollaries}%
+  \Crefname{corollary}{Corollary}{Corollaries}%
+  \crefname{definition}{definition}{definitions}%
+  \Crefname{definition}{Definition}{Definitions}%
+  \crefname{hypothesis}{hypothesis}{hypotheses}%
+  \Crefname{hypothesis}{Hypothesis}{Hypotheses}%
+  \crefname{lemma}{lemma}{lemmas}%
+  \Crefname{lemma}{Lemma}{Lemmas}%
+  \crefname{proposition}{proposition}{propositions}%
+  \Crefname{proposition}{Proposition}{Propositions}%
+  \crefname{remark}{remark}{remarks}%
+  \Crefname{remark}{Remark}{Remarks}%
+  \crefname{theorem}{theorem}{theorems}%
+  \Crefname{theorem}{Theorem}{Theorems}%
+}

@@ -1,0 +1,54 @@
+[pilot]
+id = "t69-context-loss-v1"
+sample_documents = 250000
+sequence_buckets = [256, 512, 1024, 2048]
+allocator_fraction = 0.90
+training_ceiling_seconds = 1200
+budget_seconds = 1080
+target_slots_per_update = 8192
+probe_validation_steps = 10
+probe_max_batch = 512
+sample_seed = "t69-ettax-context-loss-v1"
+training_seed = 42
+bootstrap_seed = 20260824
+bootstrap_resamples = 1000
+evaluation_sample_size = 2048
+final_content_tokens = 700000000
+work_root = "data/.encoder_vintage/ettax/pilots"
+experiment_config = "src/python/apps/ettax/configs/base.toml"
+vintages_config = "src/python/apps/ettax/configs/vintages.toml"
+tokenizer_path = "data/.encoder_vintage/ettax/runs/v3-byte-complete/tokenizer.json"
+plan_attachment_dir = ".context/plan/infra-tooling/tasks/t69-encoder-vintage-staircase/tasks/t69.2-pilot-capacity-harness/pilot"
+preparation_arms = ["V0", "V1"]
+pooling_policies = ["doc", "mean", "hybrid"]
+article_policies = ["first", "chunks"]
+
+[trials.context-256]
+maximum_context = 256
+training_buckets = [256]
+decoder_mask_rate = 0.0
+bow_weight = 0.0
+
+[trials.context-1024]
+maximum_context = 1024
+training_buckets = [256, 512, 1024]
+decoder_mask_rate = 0.0
+bow_weight = 0.0
+
+[trials.context-2048]
+maximum_context = 2048
+training_buckets = [256, 512, 1024, 2048]
+decoder_mask_rate = 0.0
+bow_weight = 0.0
+
+[trials.decoder-mask70]
+maximum_context = "winner"
+training_buckets = [256, 512, 1024, 2048]
+decoder_mask_rate = 0.70
+bow_weight = 0.0
+
+[trials.decoder-mask70-bow10]
+maximum_context = "winner"
+training_buckets = [256, 512, 1024, 2048]
+decoder_mask_rate = 0.70
+bow_weight = 0.10

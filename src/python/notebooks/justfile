@@ -1,0 +1,13 @@
+set shell := ["bash", "-uc"]
+
+# Edit a marimo notebook in sandboxed mode.
+edit slug:
+    cd ../../.. && export PYTHONPATH="" && uvx marimo edit --sandbox src/python/notebooks/{{ slug }}/notebook.py
+
+# Export a marimo notebook to static HTML.
+to-html slug:
+    cd ../../.. && export PYTHONPATH="" && uvx marimo export html --sandbox src/python/notebooks/{{ slug }}/notebook.py -o src/python/notebooks/{{ slug }}/output.html
+
+# Convenience: edit the citation-graph notebook.
+graph:
+    just edit citation-graph

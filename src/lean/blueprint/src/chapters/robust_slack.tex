@@ -1,0 +1,129 @@
+\chapter{Robust envelopes under measurement slack}
+\label{chap:robust-slack}
+
+The robust-energy manuscript (\texttt{04\_robust\_energy}) is a
+retirement candidate under the pivot, and this chapter is kept in a
+single file so that retiring it is a deletion rather than a dissection.
+Its subject is measurement slack in the embedding: the exposure bracket is
+inflated by per-asset embedding radii, and the resulting interval is maximized
+over a covariance box.
+The pivot absorbs its motivation directly.
+Slack is no longer an afterthought bolted onto an exact energy identity; it is
+the \(\tau_i\) of \Cref{ass:random-common-map} and enters the transfer theorems
+from the start.
+What genuinely does not duplicate is \Cref{thm:box-corner}, a weights-only
+maximization fact, and \Cref{thm:ball-inclusion}, which is the reconciliation
+between the two geometries and should be promoted into
+\Cref{chap:random-exposure} if the paper retires.
+
+\section{Radii propagate through the embedding}
+
+\begin{theorem}[Inner-product perturbation]
+  \label{thm:inner-perturbation}
+  \uses{ass:random-common-map}
+  For mean embeddings perturbed by at most \(\varepsilon_i\) and
+  \(\varepsilon_j\), the inner product moves by at most
+  \(\varepsilon_i\lVert\mu_j\rVert+\varepsilon_j\lVert\mu_i\rVert
+  +\varepsilon_i\varepsilon_j\).
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:polarization}
+  Expand the perturbed inner product and bound each cross term.
+\end{proof}
+
+\begin{theorem}[Radii add on the metric]
+  \label{thm:dist-bracket}
+  \uses{ass:random-common-map}
+  Under the same radii,
+  \(\lvert\operatorname{dist}(\mu_i',\mu_j')-\operatorname{dist}(\mu_i,\mu_j)\rvert
+  \le\varepsilon_i+\varepsilon_j\).
+  Additivity on the metric, rather than on the squared quantity, is the same
+  structural fact that makes the metric-level bracket of
+  \Cref{cor:random-w2-metric} sharper than its squared counterpart.
+\end{theorem}
+
+\begin{proof}
+  Two applications of the triangle inequality.
+\end{proof}
+
+\begin{theorem}[Asymmetric squared bracket]
+  \label{thm:energy-bracket}
+  \uses{thm:dist-bracket}
+  Squaring the metric bracket gives an asymmetric interval, with the lower end
+  truncated at zero.
+  The asymmetry is not cosmetic: it is why the squared-cost formalization cannot
+  simply inherit the metric statement.
+\end{theorem}
+
+\begin{proof}
+  \uses{thm:dist-bracket}
+  Square both ends of \Cref{thm:dist-bracket} and truncate.
+\end{proof}
+
+\begin{theorem}[Composed covariance bracket]
+  \label{thm:covariance-bracket}
+  \uses{ass:random-common-map, thm:energy-bracket}
+  Under bi-Lipschitz constants stated in the true, unobserved distance and
+  per-asset embedding radii, the covariance inner product is bracketed by
+  polarization expressions evaluated at the radius-inflated and radius-deflated
+  measured distance.
+  The hypothesis that the bi-Lipschitz relation holds in the unobserved distance
+  is the load-bearing one and is not testable from the measured distances.
+\end{theorem}
+
+\begin{proof}
+  \uses{thm:energy-bracket, thm:inner-perturbation, lem:polarization}
+  Compose \Cref{thm:energy-bracket} with the bi-Lipschitz relation and apply
+  polarization at both ends.
+\end{proof}
+
+\section{Maximizing over the box}
+
+\begin{theorem}[Long-only worst case is the upper corner]
+  \label{thm:box-corner}
+  \notready
+  For nonnegative weights and a candidate covariance dominated entrywise by
+  \(U\), the quadratic form is dominated by the form at \(U\); the supremum over
+  the box is therefore attained at the upper corner.
+  No positive-semidefiniteness of \(U\) is required, which is what makes the
+  result usable on a bracket that is not itself a covariance matrix.
+\end{theorem}
+
+\begin{proof}
+  Termwise domination against nonnegative weight products.
+\end{proof}
+
+\begin{theorem}[Robust portfolio envelope]
+  \label{thm:robust-envelope}
+  \uses{thm:covariance-bracket}
+  For long-only weights the squared systematic risk lies between the quadratic
+  forms of the entrywise lower and upper brackets built from the per-asset
+  radii.
+\end{theorem}
+
+\begin{proof}
+  \uses{thm:covariance-bracket, thm:box-corner}
+  Apply \Cref{thm:box-corner} at both corners of the bracket from
+  \Cref{thm:covariance-bracket}.
+\end{proof}
+
+\section{Reconciling the two geometries}
+
+\begin{theorem}[Wasserstein balls sit inside energy balls]
+  \label{thm:ball-inclusion}
+  \uses{def:exposure-law, def:energy-negative-type}
+  If \(W_2(\mu,\nu)\le\delta\) then \(\mathcal E^2(\mu,\nu)\le 2\delta\); the
+  Wasserstein ball of radius \(\delta\) is therefore contained in the
+  energy-distance ball of radius \(2\delta\).
+  The inclusion is one-directional, and that direction is the pivot's
+  justification: a \(W_2\) hypothesis is the stronger one, so results proved
+  under it apply to the energy ball, while the converse fails.
+  This node belongs with the trunk rather than with this chapter.
+\end{theorem}
+
+\begin{proof}
+  \uses{def:energy-negative-type}
+  Bound the energy distance by the transport cost through the negative-type
+  representation.
+\end{proof}
