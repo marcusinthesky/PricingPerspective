@@ -5,7 +5,7 @@
 [![License: Apache 2.0](https://img.shields.io/github/license/marcusinthesky/PricingPerspective)](LICENSE)
 [![Site](https://img.shields.io/badge/site-GitHub%20Pages-222?logo=github)](https://marcusinthesky.github.io/PricingPerspective/)
 [![Built with Nix](https://img.shields.io/badge/built%20with-nix-5277C3?logo=nixos&logoColor=white)](infra/nix/flake.nix)
-[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![DOI](https://zenodo.org/badge/1358295759.svg)](https://doi.org/10.5281/zenodo.22689254)
 [![DVC](https://img.shields.io/badge/data-DVC-13ADC7?logo=dvc&logoColor=white)](dvc.yaml)
 [![Lean 4](https://img.shields.io/badge/proofs-Lean%204-000?logo=lean&logoColor=white)](src/lean)
 
