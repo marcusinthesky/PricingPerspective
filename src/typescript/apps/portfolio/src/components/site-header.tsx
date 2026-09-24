@@ -14,6 +14,7 @@ const navigation = [
 export function SiteHeader() {
   return (
     <header className="site-header">
+      <meta name="google-site-verification" content="7MRz7VNdOBPHkBTAPZpRB6dIGyUPIlMn-Mj_LjRDcM0" />
       <div className="site-shell header-inner">
         <Link className="brand" href="/" aria-label="Pricing Perspective home">
           <Mark />
