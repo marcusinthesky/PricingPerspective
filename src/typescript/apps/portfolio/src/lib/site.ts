@@ -6,7 +6,7 @@ export const site = {
   name: "Pricing Perspective",
   shortName: "Pricing Perspective",
   description:
-    "Three papers on how distribution-valued firm information can restrict covariance, construct interaction fields, and certify portfolio diversification.",
+    "Research on how distribution-valued firm information reveals the geometry of financial dependence.",
   url: (process.env.NEXT_PUBLIC_SITE_URL ?? fallbackUrl).replace(/\/$/, ""),
   basePath,
   locale: "en_ZA",

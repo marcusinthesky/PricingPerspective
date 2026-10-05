@@ -90,7 +90,7 @@ export function paperJsonLd(paper: Paper): Record<string, unknown> {
           { "@type": "Thing", name: "Financial econometrics" },
           { "@type": "Thing", name: "Optimal transport" },
         ],
-        image: absoluteUrl("/og/constellation-card.webp"),
+        image: absoluteUrl("/og/atlas-card.webp"),
       },
       {
         "@type": "BreadcrumbList",
@@ -188,7 +188,7 @@ export function blogPostJsonLd(post: BlogPost): Record<string, unknown> {
           { "@type": "Thing", name: "Financial econometrics" },
           { "@type": "Thing", name: "Artificial intelligence" },
         ],
-        image: absoluteUrl("/og/constellation-card.webp"),
+        image: absoluteUrl("/og/atlas-card.webp"),
         audio: {
           "@type": "AudioObject",
           contentUrl: absoluteUrl(`/audio/${post.slug}.webm`),

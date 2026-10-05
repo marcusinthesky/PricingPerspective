@@ -1,0 +1,354 @@
+/* Server-rendered plate: all motion uses transform and opacity. */
+.economic-field {
+  --field-period: 36s;
+  --field-easing: cubic-bezier(0.42, 0, 0.58, 1);
+  position: relative;
+  width: 100%;
+  max-width: 40rem;
+  margin: 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line-dark);
+}
+
+.field-heading,
+.field-motion,
+.field-legend {
+  display: flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+}
+
+.field-heading {
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.field-motion {
+  width: fit-content;
+  min-height: 44px;
+  margin-top: 0.25rem;
+  gap: 0.5rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.field-motion input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--signal);
+}
+
+.field-motion input:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 4px;
+}
+
+.field-plate {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 640 / 620;
+  overflow: hidden;
+}
+
+.field-grid-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-opacity: 0.045;
+  stroke-width: 0.8;
+}
+
+.field-neatline {
+  fill: none;
+  stroke: var(--line-dark);
+  stroke-width: 1;
+}
+
+.field-wash-center {
+  stop-color: var(--signal);
+  stop-opacity: 0.24;
+}
+
+.field-wash-edge {
+  stop-color: var(--signal);
+  stop-opacity: 0;
+}
+
+.field-contours {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 0.85;
+  stroke-opacity: 0.3;
+}
+
+.field-isobath {
+  stroke-width: 1.15;
+  stroke-opacity: 0.65;
+}
+
+.field-footprint {
+  fill: var(--paper-bright);
+  fill-opacity: 0.92;
+  stroke: var(--ink);
+  stroke-width: 1.8;
+}
+
+.field-exposure {
+  fill: var(--signal);
+  fill-opacity: 0.3;
+}
+
+.field-sample {
+  fill: var(--ink);
+  fill-opacity: 0.45;
+}
+
+.field-registration {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.1;
+}
+
+.field-measure {
+  fill: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+
+.field-axis {
+  fill: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.field-axis path {
+  stroke: var(--line-dark);
+  stroke-width: 1;
+}
+
+.field-drift {
+  transform-origin: 320px 306px;
+  animation: field-tide var(--field-period) var(--field-easing) infinite;
+}
+
+.field-cycle {
+  opacity: 0.65;
+  animation: field-exposure var(--field-period) var(--field-easing) infinite;
+}
+
+.economic-field figcaption {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1.25rem;
+}
+
+.economic-field figcaption strong {
+  font-family: var(--serif);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-weight: 400;
+}
+
+.economic-field figcaption > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.field-legend {
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  color: var(--muted);
+}
+
+.economic-field .field-legend > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.field-legend-contour {
+  width: 1.5rem;
+  height: 0.4rem;
+  border-top: 1px solid var(--signal);
+  border-bottom: 1px solid var(--signal);
+  transform: skewY(-12deg);
+}
+
+.field-legend-footprint {
+  width: 1.5rem;
+  height: 0.65rem;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+}
+
+/* One phase: neutral → crest → neutral → trough → neutral.
+   The footprints and labels live inside this same moving group. */
+@keyframes field-tide {
+  0%,
+  50%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(8px, -12px) scale(1.015, 0.985);
+  }
+  75% {
+    transform: translate(-8px, 12px) scale(0.985, 1.015);
+  }
+}
+
+@keyframes field-exposure {
+  0%,
+  50%,
+  100% {
+    opacity: 0.6;
+  }
+  25% {
+    opacity: 0.85;
+  }
+  75% {
+    opacity: 0.35;
+  }
+}
+
+.field-label-leader {
+  fill: none;
+  stroke: var(--ink);
+  stroke-opacity: 0.5;
+  stroke-width: 0.8;
+}
+
+.field-radar {
+  fill: none;
+  stroke: var(--signal);
+  stroke-opacity: 0.22;
+  stroke-width: 0.8;
+}
+
+.field-radar-sector {
+  fill: var(--signal);
+  fill-opacity: 0.07;
+  stroke: none;
+}
+
+.field-radar-hand {
+  stroke-opacity: 0.6;
+}
+
+.field-radar-origin {
+  fill: var(--signal);
+  stroke: none;
+}
+
+.field-radar-sweep {
+  animation: field-scan 72s linear infinite;
+}
+
+.field-oscillation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.75rem;
+  padding-block: 0.5rem;
+  border-block: 1px solid var(--line);
+  color: var(--muted);
+  font: 0.6rem var(--mono);
+}
+
+.economic-field .field-oscillation > span {
+  flex-shrink: 0;
+}
+
+.field-waveform {
+  flex: 1;
+  width: 0;
+  min-width: 0;
+  height: 36px;
+}
+
+.field-trace-baseline {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.field-trace {
+  fill: none;
+  stroke: var(--signal);
+  stroke-width: 1.25;
+}
+
+.field-phase-progress {
+  animation: field-phase-travel var(--field-period) linear infinite;
+}
+
+.field-phase-value {
+  animation: field-phase-height var(--field-period) var(--field-easing) infinite;
+}
+
+.field-phase-guide {
+  stroke: var(--signal);
+  stroke-opacity: 0.25;
+  stroke-width: 1;
+}
+
+.field-phase-dot {
+  fill: var(--signal);
+  stroke: var(--paper);
+  stroke-width: 1.5;
+}
+
+@keyframes field-scan {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes field-phase-travel {
+  to {
+    transform: translateX(160px);
+  }
+}
+
+@keyframes field-phase-height {
+  0%,
+  50%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-16px);
+  }
+  75% {
+    transform: translateY(16px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .field-drift,
+  .field-cycle,
+  .field-radar-sweep,
+  .field-phase-progress,
+  .field-phase-value {
+    animation: none;
+  }
+  .field-motion {
+    display: none;
+  }
+}
+
+.economic-field:has(input:checked) .field-drift,
+.economic-field:has(input:checked) .field-cycle,
+.economic-field:has(input:checked) .field-radar-sweep,
+.economic-field:has(input:checked) .field-phase-progress,
+.economic-field:has(input:checked) .field-phase-value {
+  animation-play-state: paused;
+}

@@ -56,13 +56,13 @@ export async function generateMetadata({ params }: BlogPageProps): Promise<Metad
       publishedTime: post.datePublished,
       modifiedTime: post.dateModified,
       authors: ["Marcus Gawronsky"],
-      images: [{ url: absoluteUrl("/og/constellation-card.webp"), width: 1200, height: 630 }],
+      images: [{ url: absoluteUrl("/og/atlas-card.webp"), width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary",
       title: post.title,
       description: post.summary,
-      images: [absoluteUrl("/og/constellation-card.webp")],
+      images: [absoluteUrl("/og/atlas-card.webp")],
     },
   };
 }

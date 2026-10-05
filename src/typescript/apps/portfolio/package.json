@@ -2,7 +2,7 @@
   "name": "distributional-information-geometry-site",
   "version": "1.0.0",
   "private": true,
-  "description": "Research website for three papers on distributional information geometry in finance.",
+  "description": "Research website on distributional information geometry in finance.",
   "engines": {
     "bun": ">=1.4.0"
   },

@@ -7,6 +7,7 @@ import { PaperShell } from "@/components/paper-shell";
 import PortfolioRiskContent from "@/content/papers/portfolio-risk-bounds.mdx";
 import SystematicCovarianceContent from "@/content/papers/systematic-covariance-envelopes.mdx";
 import InteractionFieldsContent from "@/content/papers/wasserstein-barycentric-interaction-fields.mdx";
+import InformationGamesContent from "@/content/papers/information-games-strategic-crowding.mdx";
 import { getPaper, papers } from "@/content/data";
 import { paperJsonLd } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
@@ -15,6 +16,7 @@ const contentBySlug: Record<string, ComponentType> = {
   "systematic-covariance-envelopes": SystematicCovarianceContent,
   "wasserstein-barycentric-interaction-fields": InteractionFieldsContent,
   "portfolio-risk-bounds": PortfolioRiskContent,
+  "information-games-strategic-crowding": InformationGamesContent,
 };
 
 type PaperPageProps = {
@@ -45,13 +47,13 @@ export async function generateMetadata({ params }: PaperPageProps): Promise<Meta
       publishedTime: paper.datePublished,
       modifiedTime: paper.dateModified,
       authors: ["Marcus Gawronsky", "Chun-Sung Huang"],
-      images: [{ url: absoluteUrl("/og/constellation-card.webp"), width: 1200, height: 630 }],
+      images: [{ url: absoluteUrl("/og/atlas-card.webp"), width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
       title: paper.title,
       description: paper.summary,
-      images: [absoluteUrl("/og/constellation-card.webp")],
+      images: [absoluteUrl("/og/atlas-card.webp")],
     },
     other: {
       citation_title: paper.title,

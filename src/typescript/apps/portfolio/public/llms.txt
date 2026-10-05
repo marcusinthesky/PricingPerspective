@@ -1,12 +1,13 @@
 # Pricing Perspective
 
-> Three papers by Marcus Gawronsky and Chun-Sung Huang on probability-valued firm information, financial dependence, spatial interaction, and portfolio risk.
+> Research by Marcus Gawronsky and Chun-Sung Huang on probability-valued firm information, financial dependence, spatial interaction, strategic repositioning, and portfolio risk.
 
 ## Papers
 
 - [Systematic Covariance Envelopes](https://arxiv.org/abs/2410.23447): Quadratic Wasserstein geometry yields sharp conditional covariance endpoints over admissible exposure couplings.
 - [Wasserstein-Barycentric Interaction Fields](https://arxiv.org/abs/2608.29669): Target-anchored transport and simplex reconstruction produce a directed peer field for spatial factor models.
 - [Portfolio Risk Bounds](https://arxiv.org/abs/2608.29692): Multi-firm Wasserstein-2 dispersion produces one-sided portfolio-risk certificates without cross-asset return covariances.
+- [Information Games](https://arxiv.org/abs/2609.37820): A strategic model separates opportunity effects from crowding and studies the persistence of firm peer structure.
 
 ## Authors
 

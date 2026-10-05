@@ -41,10 +41,10 @@ export const metadata: Metadata = {
     locale: site.locale,
     images: [
       {
-        url: absoluteUrl("/og/constellation-card.webp"),
+        url: absoluteUrl("/og/atlas-card.webp"),
         width: 1200,
         height: 630,
-        alt: "Pricing Perspective: three papers, one geometric language.",
+        alt: "Pricing Perspective: firms as distributions, financial relationships as geometry.",
         type: "image/webp",
       },
     ],
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: site.name,
     description: site.description,
-    images: [absoluteUrl("/og/constellation-card.webp")],
+    images: [absoluteUrl("/og/atlas-card.webp")],
   },
   icons: {
     icon: [{ url: absoluteUrl("/icons/favicon.svg"), type: "image/svg+xml" }],
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     },
   },
   other: {
-    "theme-color": "#f7f7f2",
+    "theme-color": "#FAF9F4",
     "color-scheme": "light",
     citation_author: researchers.map((researcher) => researcher.name),
     "DC.type": "Collection",
@@ -86,7 +86,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#f7f7f2",
+  themeColor: "#FAF9F4",
   colorScheme: "light",
 };
 
