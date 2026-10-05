@@ -3,7 +3,7 @@ import { ArrowDown, Play } from "lucide-react";
 import AuthorsContent from "@/content/authors.mdx";
 import HomeContent from "@/content/home.mdx";
 import { AiResearchLinks } from "@/components/ai-research-links";
-import { Constellation } from "@/components/constellation";
+import { EconomicField } from "@/components/economic-field";
 import { AppearingIn } from "@/components/appearing-in";
 import { AudioFeature } from "@/components/audio-feature";
 import { JsonLd } from "@/components/json-ld";
@@ -27,10 +27,9 @@ export default function HomePage() {
       <section className="hero site-shell" aria-labelledby="hero-title">
         <div className="hero-copy">
           <p className="eyebrow">Information, geometry, and pricing</p>
-          <h1 id="hero-title">Three papers. One geometric language for financial dependence.</h1>
+          <h1 id="hero-title">Firms are not points. Their relationships have geometry.</h1>
           <p className="hero-deck">
-            Probability-valued firm information is used to study asset co-movement, construct
-            interaction fields, and certify portfolio diversification.
+            Probability-valued information links firm representations to financial dependence.
           </p>
           <div className="hero-actions">
             <ButtonLink href="#papers">
@@ -45,25 +44,21 @@ export default function HomePage() {
           />
           <dl className="hero-facts">
             <div>
-              <dt>Papers</dt>
-              <dd>03</dd>
-            </div>
-            <div>
-              <dt>Progression</dt>
-              <dd>Pair → field → portfolio</dd>
-            </div>
-            <div>
               <dt>Representation</dt>
               <dd>Firm as probability law</dd>
+            </div>
+            <div>
+              <dt>Method</dt>
+              <dd>Wasserstein geometry</dd>
+            </div>
+            <div>
+              <dt>Question</dt>
+              <dd>How information structures dependence</dd>
             </div>
           </dl>
         </div>
         <div className="hero-visual">
-          <Constellation />
-          <div className="orbit-label orbit-label-a">separation</div>
-          <div className="orbit-label orbit-label-b">reconstruction</div>
-          <div className="orbit-label orbit-label-c">dispersion</div>
-          <p>Observable information → geometric structure → financial restriction</p>
+          <EconomicField />
         </div>
       </section>
 
@@ -82,9 +77,9 @@ export default function HomePage() {
 
       <section className="section site-shell" id="papers" aria-labelledby="papers-title">
         <SectionHeading
-          eyebrow="The papers"
-          title="Separation, reconstruction, dispersion."
-          description="Each paper changes which object is held fixed and which object is allowed to vary."
+          eyebrow="Research"
+          title="Firm relationships as geometry."
+          description="Explore how observable firm information gives structure to financial dependence."
         />
         <div className="paper-grid">
           {papers.map((paper, index) => (
