@@ -12,8 +12,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Research papers and notes on information geometry, AI in finance, and reproducible model vintages.",
     start_url: sitePath("/"),
     display: "standalone",
-    background_color: "#f7f7f2",
-    theme_color: "#090909",
+    background_color: "#FAF9F4",
+    theme_color: "#00243A",
     icons: [
       { src: sitePath("/icons/icon-192.png"), sizes: "192x192", type: "image/png" },
       { src: sitePath("/icons/icon-512.png"), sizes: "512x512", type: "image/png" },

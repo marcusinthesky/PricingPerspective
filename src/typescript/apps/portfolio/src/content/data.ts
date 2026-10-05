@@ -200,6 +200,31 @@ export const papers: Paper[] = [
       },
     ],
   },
+  {
+    slug: "information-games-strategic-crowding",
+    number: "04",
+    title: "Information Games: Strategic Crowding and Firm Repositioning in Language-Model Space",
+    shortTitle: "Information Games",
+    summary:
+      "A rational-share game separates opportunity effects from strategic crowding, while corpus-scale evidence shows that peer structure can persist as firms' absolute positions move.",
+    abstract:
+      "Strategic competition changes how firms reposition when economic opportunities shift. The paper introduces ESCAPE, a rational-share game over distribution-valued positions with heterogeneous capability costs, establishes a unique equilibrium, and separates opportunity from crowding effects. In a benchmark many-firm economy, relative responses account for 90.5% of the weighted composition-response contrast between strategic and independent firms; that component is numerically zero with identical capabilities. In corporate-news distributions, optimized peer reconstructions retain 86.5% of their aggregate validation advantage a year later, despite increasing absolute distances.",
+    datePublished: "2026-09-29",
+    dateModified: "2026-09-29",
+    year: 2026,
+    arxivId: "2609.37820",
+    arxivClass: "q-fin.CP",
+    doi: "10.48550/arXiv.2609.37820",
+    citationKey: "gawronsky2026informationgames",
+    keywords: ["Strategic competition", "Firm repositioning", "Distribution-valued positions"],
+    links: [
+      {
+        platform: "arXiv",
+        href: "https://arxiv.org/abs/2609.37820",
+        kind: "paper",
+      },
+    ],
+  },
 ];
 
 export const researchers: Researcher[] = [

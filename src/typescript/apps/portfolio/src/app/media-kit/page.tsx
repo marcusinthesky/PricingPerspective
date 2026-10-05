@@ -115,8 +115,8 @@ export default function MediaKitPage() {
               <span className="media-kit-resource-index">01</span>
               <h3>Research overview</h3>
               <p>
-                Three papers move from pairwise covariance bounds, to spatial interaction fields, to
-                portfolio-level risk certificates.
+                Research connects probability-valued firm information with financial dependence,
+                peer structure, strategic positioning, and portfolio risk.
               </p>
               <a href={sitePath("/#papers")}>
                 Read the papers <ArrowUpRight aria-hidden="true" size={15} />

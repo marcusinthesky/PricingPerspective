@@ -1,6 +1,6 @@
 # Pricing Perspective - research website
 
-A MDX-first website for three papers and three research notes by Marcus Gawronsky and Chun-Sung Huang. The visual system is deliberately black and white, typographic, and organised around a constellation motif: separate mathematical objects connected by one geometric language.
+A MDX-first research website by Marcus Gawronsky and Chun-Sung Huang. Its visual language pairs warm chart paper, deep-ocean blue, precise rules, and coordinate-like metadata with hydrographic contour imagery.
 
 ## Stack
 
@@ -54,7 +54,7 @@ bun run storybook
 bun run build-storybook
 ```
 
-Stories cover the paper card, researcher card, video feature, button variants, and constellation motif. The official accessibility addon is enabled and configured to fail on detected violations.
+Stories cover the paper card, researcher card, video feature, and button variants. The official accessibility addon is enabled and configured to fail on detected violations.
 
 ## Edit the copy
 
@@ -107,11 +107,11 @@ document contains the four formal chapters described in `src/lean/blueprint/READ
 
 ## Links requiring author confirmation
 
-Canonical arXiv, Hugging Face, SSRN, and ResearchGate links are configured for all three papers. Researcher profiles use the supplied canonical ResearchGate, ORCID, LinkedIn, Twitter, GitHub, Hugging Face, and Google Scholar destinations. See `docs/LINKS_TO_VERIFY.md`.
+Canonical arXiv, Hugging Face, SSRN, and ResearchGate links are configured for the papers. Researcher profiles use the supplied canonical ResearchGate, ORCID, LinkedIn, Twitter, GitHub, Hugging Face, and Google Scholar destinations. See `docs/LINKS_TO_VERIFY.md`.
 
 ## Performance and SEO
 
-The site has no analytics, consent manager, external font request, third-party script, client-side search, or JavaScript constellation renderer. The constellation is inline SVG; layout dimensions are fixed; the video uses `preload="none"`; and the exported pages are static.
+The site has no analytics, consent manager, external font request, third-party script, client-side search, or JavaScript artwork renderer. The hydrographic atlas is server-rendered SVG with CSS-only motion, a native pause control and a reduced-motion still. Layout dimensions are fixed, the video uses `preload="none"`, and the exported pages are static.
 
 Structured data includes `WebSite`, `CollectionPage`, `ItemList`, `ScholarlyArticle`, `Person`, `VideoObject`, and `BreadcrumbList`. Scholarly citation meta tags, Open Graph/Twitter metadata, a sitemap, robots directives, BibTeX, CFF, `llms.txt`, descriptive captions, and a transcript are included.
 
@@ -134,3 +134,7 @@ bun run build-storybook
 bun run lighthouse:ci
 bun run verify:full
 ```
+
+## Visual identity
+
+See [DESIGN.md](DESIGN.md) for the shared-field metaphor, motion contract and asset generation. The hero, favicon and social card share one contour vocabulary.
