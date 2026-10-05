@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { blogPosts } from "../src/content/data";
+import { blogPosts, papers } from "../src/content/data";
 
 async function htmlFiles(directory: string): Promise<string[]> {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -73,13 +73,13 @@ const required = ["WebSite", "Organization", "CollectionPage", "VideoObject", "W
 for (const type of required) {
   if (!seen.has(type)) throw new Error(`Missing ${type} structured data.`);
 }
-if (articleCount !== 3)
-  throw new Error(`Expected 3 ScholarlyArticle nodes; found ${articleCount}.`);
+if (articleCount !== papers.length)
+  throw new Error(`Expected ${papers.length} ScholarlyArticle nodes; found ${articleCount}.`);
 if (blogPostCount !== blogPosts.length)
   throw new Error(`Expected ${blogPosts.length} BlogPosting nodes; found ${blogPostCount}.`);
 if (audioCount !== blogPosts.length)
   throw new Error(`Expected ${blogPosts.length} AudioObject nodes; found ${audioCount}.`);
-const expectedBreadcrumbs = 3 + blogPosts.length;
+const expectedBreadcrumbs = papers.length + blogPosts.length;
 if (breadcrumbCount !== expectedBreadcrumbs)
   throw new Error(
     `Expected ${expectedBreadcrumbs} BreadcrumbList nodes; found ${breadcrumbCount}.`,
