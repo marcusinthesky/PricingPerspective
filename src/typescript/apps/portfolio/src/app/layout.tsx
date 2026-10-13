@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { researchers } from "@/content/data";
 import { absoluteUrl, site } from "@/lib/site";
 
+import "katex/dist/katex.min.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

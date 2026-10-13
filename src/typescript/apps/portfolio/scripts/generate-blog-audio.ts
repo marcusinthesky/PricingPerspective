@@ -16,9 +16,15 @@ const modelId = "onnx-community/Kokoro-82M-v1.0-ONNX";
 const ffmpegBinary = process.env.FFMPEG_BIN ?? "ffmpeg";
 const ffprobeBinary = process.env.FFPROBE_BIN ?? "ffprobe";
 
-const posts = await Promise.all(
+const requestedSlug = Bun.argv
+  .find((argument) => argument.startsWith("--slug="))
+  ?.slice("--slug=".length);
+
+// With --slug, only that post is read, so unfinished drafts elsewhere do not block it.
+const postsToRender = await Promise.all(
   (await readdir(contentRoot, { withFileTypes: true }))
     .filter((entry) => entry.isFile() && entry.name.endsWith(".mdx"))
+    .filter((entry) => !requestedSlug || basename(entry.name, ".mdx") === requestedSlug)
     .map(async (entry) => {
       const source = await readFile(join(contentRoot, entry.name), "utf8");
       const title = (matter(source).data as Record<string, unknown>).title;
@@ -28,11 +34,6 @@ const posts = await Promise.all(
       return { slug: basename(entry.name, ".mdx"), title };
     }),
 );
-
-const requestedSlug = Bun.argv
-  .find((argument) => argument.startsWith("--slug="))
-  ?.slice("--slug=".length);
-const postsToRender = requestedSlug ? posts.filter((post) => post.slug === requestedSlug) : posts;
 if (requestedSlug && postsToRender.length === 0) {
   throw new Error(`Unknown blog slug: ${requestedSlug}.`);
 }
@@ -98,7 +99,7 @@ function narrationChunks(narration: string): string[] {
   return chunks;
 }
 
-async function writeTranscript(post: (typeof posts)[number], narration: string): Promise<void> {
+async function writeTranscript(post: (typeof postsToRender)[number], narration: string): Promise<void> {
   const audioPath = join(audioRoot, `${post.slug}.webm`);
   const duration = await audioDuration(audioPath);
   const vtt = [
@@ -114,7 +115,7 @@ async function writeTranscript(post: (typeof posts)[number], narration: string):
 
 async function renderPost(
   tts: InstanceType<typeof KokoroTTS>,
-  post: (typeof posts)[number],
+  post: (typeof postsToRender)[number],
   temporaryRoot: string,
 ): Promise<void> {
   const sourcePath = join(contentRoot, `${post.slug}.mdx`);

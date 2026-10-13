@@ -23,7 +23,7 @@ Edit `src/content/home.mdx` for the programme description and `src/content/autho
 
 ## Blog copy
 
-Edit the long-form notes in `src/content/blog/`. Their titles, dates, summaries, categories, and keywords live in `src/content/data.ts`; word counts and reading times are computed from the MDX source at build time. Route wiring lives in `src/app/blog/[slug]/page.tsx`. The Blog collection is intentionally static and currently contains three entries.
+Edit the long-form notes in `src/content/blog/`. Their titles, dates, summaries, categories, and keywords live in `src/content/data.ts`; word counts and reading times are computed from the MDX source at build time. Route wiring lives in `src/app/blog/[slug]/page.tsx`. The Blog collection is intentionally static and currently contains seven entries. Display equations are written in LaTeX (`$$…$$`, rendered by remark-math and rehype-katex) inside a captioned `<figure className="blog-equation">` so the audio narration can read the caption; add `blog-equation-boxed` to the figure for a box rather than `\boxed`, which renders tight against the content; inline maths uses `$…$`, so write currency as `\$24`. Use `{/* … */}` for comments, not `<!-- … -->`.
 
 ## Paper exhibits
 

@@ -4,7 +4,9 @@ import type { NextConfig } from "next";
 const withMDX = createMDX({
   extension: /\.mdx?$/,
   options: {
-    remarkPlugins: ["remark-frontmatter", "remark-gfm"],
+    // Plugins are named as strings so Turbopack can serialise the loader options.
+    remarkPlugins: ["remark-frontmatter", "remark-gfm", "remark-math"],
+    rehypePlugins: ["rehype-katex"],
   },
 });
 

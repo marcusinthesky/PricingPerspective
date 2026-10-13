@@ -16,6 +16,10 @@
 
 ## Blog
 
+- [No returns: Mega-IPOs and the promise of AI as economic measurement](/blog/mega-ipos-ai-economic-measurement/): Mega-IPOs, public-private market convergence, and economically structured AI for financial measurement.
+- [What are we actually studying when we study AI in finance?](/blog/what-are-we-studying-ai-in-finance/): AI as a tool for financial practice, a source of economic change, and a means of measurement.
+- [Do language models in finance need a Markowitz moment?](/blog/language-models-markowitz-moment/): From security-level text signals to what language-derived information means inside a portfolio.
+- [Reproducibility is a graph, not a lockfile](/blog/reproducibility-is-a-graph/): How Nix, DVC, Semflow, typed interfaces, and formal verification make the path from data to publication inspectable.
 - [The tidal wave of AI research in finance](/blog/tidal-wave-of-ai-research-in-finance/): Model age, retrieval efficiency, market efficiency, and a South African research agenda.
 - [Why finance needs vintage, reproducible encoders](/blog/vintage-reproducible-ettax-models/): The EttaX architecture and why dated model identities belong in financial econometrics.
 

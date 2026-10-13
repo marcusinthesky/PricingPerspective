@@ -37,7 +37,7 @@ export default function BlogPage() {
           description="Shorter essays on the methods, evidence, and research infrastructure around Pricing Perspective."
         />
         <div className="blog-grid">
-          {blogPosts.map((post) => (
+          {blogPosts.toReversed().map((post) => (
             <BlogCard key={post.slug} post={post} />
           ))}
         </div>

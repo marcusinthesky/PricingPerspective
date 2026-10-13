@@ -4,17 +4,25 @@ import type { ComponentType } from "react";
 
 import { BlogShell } from "@/components/blog-shell";
 import { JsonLd } from "@/components/json-ld";
+import ExplainabilityContent from "@/content/blog/explainability-as-learning.mdx";
+import MarkowitzMomentContent from "@/content/blog/language-models-markowitz-moment.mdx";
+import MegaIposContent from "@/content/blog/mega-ipos-ai-economic-measurement.mdx";
 import ReproducibilityContent from "@/content/blog/reproducibility-is-a-graph.mdx";
 import AiFinanceContent from "@/content/blog/tidal-wave-of-ai-research-in-finance.mdx";
 import EttaXVintagesContent from "@/content/blog/vintage-reproducible-ettax-models.mdx";
+import AiRolesContent from "@/content/blog/what-are-we-studying-ai-in-finance.mdx";
 import { blogPosts } from "@/content/data";
 import { blogPostJsonLd } from "@/lib/schema";
 import { absoluteUrl } from "@/lib/site";
 
 const contentBySlug: Record<string, ComponentType> = {
+  "explainability-as-learning": ExplainabilityContent,
+  "language-models-markowitz-moment": MarkowitzMomentContent,
+  "mega-ipos-ai-economic-measurement": MegaIposContent,
   "reproducibility-is-a-graph": ReproducibilityContent,
   "tidal-wave-of-ai-research-in-finance": AiFinanceContent,
   "vintage-reproducible-ettax-models": EttaXVintagesContent,
+  "what-are-we-studying-ai-in-finance": AiRolesContent,
 };
 
 const discoveredSlugs = new Set(blogPosts.map((post) => post.slug));

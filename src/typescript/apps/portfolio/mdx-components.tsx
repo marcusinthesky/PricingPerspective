@@ -1,10 +1,14 @@
 import type { MDXComponents } from "mdx/types";
+import Link from "next/link";
 
 import { Callout } from "@/components/callout";
 import { PaperFigure } from "@/components/paper-figure";
 
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
+    // Internal links go through next/link so the deployed basePath is applied.
+    a: ({ href, ...props }) =>
+      href?.startsWith("/") ? <Link href={href} {...props} /> : <a href={href} {...props} />,
     h2: ({ children }) => <h2 className="prose-heading">{children}</h2>,
     h3: ({ children }) => <h3 className="prose-subheading">{children}</h3>,
     p: ({ children }) => <p className="prose-copy">{children}</p>,
