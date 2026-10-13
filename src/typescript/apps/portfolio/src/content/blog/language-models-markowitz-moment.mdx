@@ -1,0 +1,100 @@
+---
+number: "04"
+category: Research notes
+title: Do language models in finance need a Markowitz moment?
+summary: Language models read individual companies remarkably well; the harder question, as Markowitz taught finance, is what that information means together inside a portfolio.
+datePublished: "2026-10-07"
+dateModified: "2026-10-07"
+keywords:
+  - Portfolio theory
+  - Language models
+  - Financial text analysis
+---
+
+Finance did not need Harry Markowitz to discover diversification. It needed him to turn a familiar investment instinct into a theory of how risks belong together. Language models may now be confronting a similar problem: in finance, language models have become remarkably good at reading, classifying and predicting at the level of individual securities, while the harder question is how those information outputs should combine inside a portfolio.
+
+As a graduate student at the University of Chicago, Harry Markowitz was reading John Burr Williams's The Theory of Investment Value when something began to trouble him. Williams had given investors a rigorous way to think about what an individual stock was worth: its value reflected the future stream of dividends an investor expected to receive. But if expected value were all that mattered, Markowitz reasoned, an investor should simply put everything into whichever security promised the highest expected return. Sensible investors did not behave that way. They diversified.
+
+The observation sounds obvious now because Markowitz helped make it obvious. Investment practice already contained sophisticated traditions of security analysis, valuation and diversification; what it lacked was a formal way of asking what happened when securities were considered together. A portfolio could not be understood simply as a collection of individually attractive investments because their risks might reinforce or offset one another. The relationship between them mattered.
+
+That shift in the unit of analysis became the foundation of modern portfolio theory. It also created a host of new problems. Estimating all those relationships was demanding, both statistically and computationally. William Sharpe's 1963 single-index model responded directly to that burden, offering a much cheaper approximation to full Markowitz analysis; his paper reported that 2,000 securities could be analysed for as little as 2% of the computational cost of standard quadratic-programming approaches.
+
+Researchers then began asking what lay behind the covariance structure itself. Benjamin King's 1966 study examined the market and industry components of stock-price behaviour, while Barr Rosenberg's subsequent work found significant covariance beyond the broad market and related those exposures to observable characteristics such as industry membership, financial statements and historical returns. The questions had moved beyond "which stock is attractive?" towards "what common forces make these stocks behave as they do?"
+
+The change did not sweep through investment practice immediately. Nearly 15 years after Markowitz's original paper, William Baumol could still write in the Financial Analysts Journal that the theory had profoundly influenced research while seeing relatively limited practical implementation. Data, estimation and computation had to catch up with the idea.
+
+That history offers an intriguing way to think about artificial intelligence in finance today.
+
+## When the analyst's language became data
+
+Financial researchers have been turning words into empirical evidence for almost two decades. Paul Tetlock's 2007 Journal of Finance study quantified pessimism in a Wall Street Journal column and showed systematic relationships with market prices and trading volume. A year later, Tetlock, Maytal Saar-Tsechansky and Sofus Macskassy moved from broad market sentiment to company-specific news, finding that negative language helped forecast earnings and that prices initially underreacted to some of the information contained in those stories.
+
+The attraction was clear. Investors had always read news, filings and analyst commentary; textual analysis made aspects of that information systematic enough to test across thousands of observations.
+
+But the first generation of methods also revealed an enduring difficulty: finance has its own language. In 2011, Tim Loughran and Bill McDonald showed that almost three-quarters of the words labelled "negative" by a widely used general-purpose dictionary were not normally negative in financial contexts. A "liability" is not necessarily bad news simply because everyday English makes it sound ominous. Their finance-specific dictionaries improved the measurement, but the broader lesson was more important: a method can process language consistently while still misunderstanding what that language means economically.
+
+Sentiment analysis also began to become more granular. Rather than assign an entire document a single positive or negative score, aspect-based sentiment analysis asked what the opinion was actually about. A company might receive favourable language about demand for its products while the same article expresses concern about margins, regulation or management. By separating the subject being discussed from the attitude attached to it, Aspect-based Sentiment Analysis (ABSA) moved text analysis away from a single document-level signal and towards a more structured representation of the economic ideas contained in language. It did not yet solve the broader problem of meaning, but it sharpened the question: what, exactly, is the text telling us about the firm?
+
+At roughly the same time, computational linguistics was changing what it meant to represent language at all. Earlier text methods often depended heavily on words appearing together or on direct vocabulary overlap. In 2013, Tomas Mikolov and colleagues demonstrated that useful semantic relationships could be learned from very large collections of text at far lower computational cost. Their Word2Vec models could learn high-quality word representations from 1.6 billion words in less than a day — an important practical breakthrough that helped make distributed representations widely usable.
+
+The significance for finance was not that computers had suddenly discovered meaning. It was that relationships between terms could increasingly be represented in a reusable mathematical space. Later contextual models made those representations depend on the surrounding sentence, so the same word need not carry the same representation in every setting. Financial-domain models such as FinBERT then brought that progress back to the problem Loughran and McDonald had exposed: general language competence and financial language competence are not quite the same thing.
+
+Some of the most revealing early financial-NLP work was consequently not about predicting stock prices. The FinSim shared task, launched in 2020, asked models to learn semantic relationships in the financial domain and map specialised terms to higher-level financial concepts. Its organisers explicitly described the tension between corpus-learned representations, which offered broad coverage but could be opaque, and manually created taxonomies and ontologies, which were interpretable but costly and incomplete.
+
+That was a subtle change in ambition. A model was no longer being asked merely whether a sentence sounded favourable or unfavourable. It was being asked whether it understood how financial concepts related to one another.
+
+## From words about companies to relationships between companies
+
+Finance research was undergoing a related change.
+
+Gerard Hoberg and Gordon Phillips used companies' own 10-K product descriptions to construct time-varying industries in which each firm could have its own set of competitors. Instead of inheriting a fixed industry classification, a company's peers could emerge from what the business said it actually did.
+
+Travis Box later showed that linguistic similarity in newswire coverage contains information about future cross-firm return correlation even after controlling for contemporaneous co-movement, systematic exposures, product similarity, common ownership, shared analyst coverage and several other familiar connections.
+
+A second strand treated news less as a description of similarity and more as evidence of economic connection. Anna Scherbina and Bernd Schlusche used co-mentions in news stories to infer links between firms and examined how information diffused across those linked stocks. Gustavo Schwenkler and Hannan Zheng developed a machine-learning approach in which text itself generated a network of firm connections associated with firm-level and aggregate risk.
+
+Shuyi Ge, Shaoran Li and Oliver Linton subsequently embedded news-implied links inside a spatial factor model, separating broad common-factor dependence from more local firm-to-firm dependence. Their results showed that news-derived connectivity could explain part of the correlation remaining after conventional factors had been removed.
+
+Seen together, these papers trace a progression that is easy to miss when the literature is organised by technique. Financial text began as another source from which to extract a signal. It gradually became a source from which researchers could infer industries, peers, economic links and dependence structures.
+
+The object being measured was changing.
+
+## Language models make the opportunity much larger
+
+Modern large language models extend that trajectory dramatically. A recent Journal of Financial Economics study by Alejandro Lopez-Lira and Yuehua Tang shows that LLM assessments of financial news can capture immediate market reactions and predict part of the subsequent drift; notably, the apparent advantage declines as LLM adoption rises, consistent with information being incorporated into prices more quickly.
+
+Prediction remains important, but it is no longer the only interesting question. Once language models can read financial information at scale, researchers can ask what else their representations contain.
+
+Practitioners are already encountering the same change through the data infrastructure around them. LSEG and RavenPack have long converted news into machine-readable entities, events, sentiment, relevance and related analytics. Newer platforms are making the interaction increasingly semantic, allowing investment teams to search and define concepts through natural language rather than rely exclusively on pre-specified fields. The direction of travel is from more documents, to more structured signals, to richer representations of the relationships contained in those documents.
+
+CFA Institute's own work reflects this broadening. Its 2020 review already documented AI applications in portfolio management, risk and trading; more recent research on unstructured data examines how LLMs can be incorporated into investment research, while its work on explainable AI emphasises that useful financial systems must remain understandable to portfolio managers, risk teams, compliance functions and other stakeholders.
+
+The question, then, is not whether AI belongs in portfolio management. It already does. The more interesting question is whether the way we conceptualise language-derived information has caught up with the sophistication of the models producing it.
+
+## From representation to portfolio structure
+
+In neuroscience, meaning is carried by patterns across populations of neurons rather than by one cell containing an entire idea. Language models work in a similarly distributed way: as a model reads an article, its internal state changes, and where it ends up after one document can be compared with where it ends up after another.
+
+That principle underlies modern semantic search. It can also be used differently.
+
+In our recent work, each article is represented separately and a company is treated not as one text score or one industry label, but as a distribution across the collection of states associated with its reporting. This matters for diversified firms in particular. A company whose activities span groceries, clothing, financial services and logistics may not be well represented by a single category or average description. The collection retains some of that variety. This question — whether firms should be represented across a spectrum rather than forced into one group — has been central to the research programme from its earliest formulation.
+
+To compare those distributions, we use mathematics that predates modern computing. Leonid Kantorovich's optimal-transport framework originally addressed how resources could be moved efficiently between different arrangements. Here the intuition is similar: how much would one collection of company information have to change to resemble another? Rather than compare two averages, the method looks for the closest overall matching between the articles surrounding the two firms.
+
+Our current studies then ask how that information geometry connects back to familiar financial questions. One examines how differences between two firms' article distributions relate to the range of systematic covariance consistent with specified economic assumptions, and finds that firms surrounded by more different information also tend to move less closely together in markets. Another asks which combination of other companies best represents a target firm's information and uses the resulting structure as an interaction field in a financial model. A third asks how information-derived relationships can enter portfolio risk and allocation without beginning with a full matrix of cross-asset return covariances.
+
+The common idea is not that language models should replace portfolio theory. It is almost the reverse: the richer the information AI can produce, the more important it becomes to connect that information to financial structure rather than stop at an isolated score or forecast.
+
+## A Markowitz moment would change the question
+
+Markowitz's importance was not that investors stopped analysing individual securities. Security analysis survived, valuation survived and forecasts survived. What changed was that an individually compelling investment was no longer the final unit of reasoning. Once it entered a portfolio, its relationship to everything already held became part of the decision.
+
+Language models may need an equivalent transition.
+
+For an investment committee, it is not enough to know that an AI system reads each company well or predicts each security somewhat better. If ten attractive signals ultimately describe exposure to the same underlying economic risk, treating them as ten independent insights may create a concentrated portfolio. If two companies that sit in different industries are surrounded by remarkably similar economic information, that relationship may deserve attention. If a newly listed or privately held company has little market history but years of information about its products, suppliers, contracts and competitors, a framework that can relate that information to the rest of the portfolio may be more useful than another point forecast.
+
+That is the sense in which language models may need a Markowitz moment in finance.
+
+The opportunity is not to invent a new portfolio theory because the old one has failed. It is to ask whether the extraordinary new representations now available to investors can be made to answer the kind of joint questions that portfolio theory taught finance to take seriously.
+
+Before Markowitz, investors already knew a great deal about individual securities. The breakthrough was learning to reason formally about what those securities meant together. Language Models may now know an extraordinary amount about individual companies. The next step is learning what all of that information means together.

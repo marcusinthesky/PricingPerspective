@@ -3,8 +3,35 @@ function attributeValue(attributes: string, name: string): string | undefined {
   return match?.[1];
 }
 
+const spokenTexCommands: Record<string, string> = {
+  mid: " given ",
+  leq: " at most ",
+  geq: " at least ",
+  in: " in ",
+  forall: " for all ",
+  propto: " proportional to ",
+  times: " times ",
+};
+
+// Inline LaTeX is read as plain symbol names: `\widehat R_n(h)` becomes "R hat n h".
+function spokenTex(tex: string): string {
+  return tex
+    .replace(/\\(?:widehat|hat)\s*\{?\s*([A-Za-z])\}?/g, "$1 hat ")
+    .replace(/\\([A-Za-z]+)/g, (_match, command: string) => {
+      if (command in spokenTexCommands) return spokenTexCommands[command];
+      return /^(?:alpha|beta|gamma|delta|epsilon|theta|lambda|mu|sigma|Sigma)$/.test(command)
+        ? ` ${command} `
+        : " ";
+    })
+    .replace(/-/g, " minus ")
+    .replace(/[{}^_()[\],|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function readableMarkup(source: string): string {
   return source
+    .replace(/\\\$|\$([^$\n]+)\$/g, (_match, tex?: string) => (tex ? spokenTex(tex) : "$"))
     .replace(/<[^>]*>/g, " ")
     .replace(/!\[([^\]]*)\]\([^)]*\)/g, "$1")
     .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
@@ -88,8 +115,15 @@ function replaceCaptionedVisuals(source: string, sourceName: string): string {
   return narration;
 }
 
+function withoutComments(source: string): string {
+  return source.replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+}
+
 export function narrationFromMdx(source: string, sourceName = "blog post"): string {
-  const withVisualCaptions = replaceCaptionedVisuals(withoutFrontmatter(source), sourceName);
+  const withVisualCaptions = replaceCaptionedVisuals(
+    withoutComments(withoutFrontmatter(source)),
+    sourceName,
+  );
   const lines = withVisualCaptions.split(/\r?\n/).map((line) => {
     const withoutHeadingMarker = line.replace(/^\s{0,3}#{1,6}\s+/, "");
     return withoutHeadingMarker.replace(/^\s*(?:[-+*]|\d+[.)])\s+/, "").trim();
