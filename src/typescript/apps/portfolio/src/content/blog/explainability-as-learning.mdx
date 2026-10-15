@@ -2,7 +2,7 @@
 number: "07"
 category: Research notes
 title: Learn, then Explain
-summary: Statistical learning, economic mechanisms and the limits of predictive modelling - why explainability in finance is part of scientific inference rather than an audit applied after estimation.
+summary: Statistical learning, economic mechanisms and the limits of predictive modelling - why explainability is part of scientific inference rather than an audit applied after estimation.
 datePublished: "2026-10-15"
 dateModified: "2026-10-15"
 keywords:
@@ -12,8 +12,6 @@ keywords:
 ---
 
 Artificial intelligence has made extraordinary progress in learning relationships from data, with increasingly capable models able to predict, classify and represent information that would previously have required substantial human expertise.
-
-{/* Draft for review: intro rewritten around the thesis note (financial econometrics as the science of learning agents). */}
 
 In finance, these models are applied to a distinctive scientific object. Financial econometrics studies a system whose participants learn, in which investors, firms and institutions observe outcomes, revise their expectations and adjust their behaviour, so that the regularities recorded in market data emerge from those interactions and evolve with them. Explaining a model of such a system means relating what it has learned to the behaviour that generated its data, because that relationship determines the conditions under which its estimates can be expected to hold.
 
@@ -32,7 +30,6 @@ The social sciences confront a related problem involving systems whose outcomes 
 The distinction between physical and social sciences is therefore not one between mechanistic explanation and statistical description. Both seek to develop explanations that connect evidence to underlying processes, while recognising that the relevant mechanisms may be deterministic, stochastic or emergent. Economics differs in the extent to which its participants can learn from observations, respond to the institutions governing their behaviour and alter the system being studied.
 
 This becomes especially important when scientific models are used to examine changes in the environment.
-{/* Draft for review: Phillips curve -> Lucas critique -> Goodhart's law. Add citation links before publishing. */}
 
 The Phillips curve is the textbook case taught in undergraduate macroeconomics. In 1958, A. W. Phillips documented a strikingly stable inverse relationship between wage inflation and unemployment across almost a century of UK data, and policymakers came to read it as a menu: tolerate a little more inflation, buy a little less unemployment. Edmund Phelps (1967) and Milton Friedman (1968) argued that the trade-off could not survive being exploited, because workers and firms would come to expect the higher inflation and build it into wages and prices, leading to the stagflation of the 1970s, which saw both high inflation and high unemployment together.
 
@@ -61,8 +58,6 @@ $$
 </figure>
 
 Here $R(h)$ is the expected population loss, $\widehat R_n(h)$ is the empirical loss, and $|\mathcal H|$ measures the number of candidate hypotheses. The expression illustrates how the statistical confidence associated with observed performance depends on both sample size and the complexity of the class from which the model is selected. More general learning theory replaces the cardinality of a finite hypothesis class with appropriate capacity measures, including VC dimension, covering numbers and Rademacher complexity.
-
-{/* Draft for review: capacity of familiar models. */}
 
 The finite-class bound counts hypotheses, but most models used in finance contain infinitely many. Their capacity is measured instead by the VC dimension, or its real-valued analogue the pseudo-dimension, which takes the place of $\log|\mathcal H|$ in the corresponding bound up to logarithmic factors. For familiar models, the differences are large:
 
@@ -136,36 +131,17 @@ Here $M$ represents a candidate economic mechanism, $D$ the observed evidence an
 The value of this formulation is that empirical fit and mechanistic plausibility contribute different forms of evidence. Two models may explain historical asset returns equally well, but one may rely on relationships inconsistent with known contractual obligations or established accounting constraints.
 Another may produce an attractive historical fit by exploiting a relationship that economic theory suggests will change as market participants adapt.
 
-{/* Draft for review: reverse causality. */}
-
 A third may fit well while getting the direction of causation backwards. Regress quantity on price without allowing for prices that also respond to quantities, and the estimated demand curve can slope the wrong way, a problem Elmer Working identified in 1927; in markets, fund flows both chase past returns and move prices. No amount of additional data resolves this. Identification needs an instrument or a mechanism.
 
 Economic interpretation therefore has a role before and during model estimation, not merely after it. Structural assumptions, admissible relationships and prior distributions influence the hypotheses that the model can entertain, while the observations provide evidence for distinguishing among them.
 
 This also clarifies the meaning of interpretability. An interpretable economic model is not necessarily one whose complete computation can be expressed through a small collection of linear coefficients. It is one in which the relationship between the quantities being modelled and the underlying economic phenomena can be established, examined and challenged through meaningful economic relationships.
 
-## From learned representations to economic measurement
-
-{/* Draft for review: pretraining note, now opening the section. */}
-
-Self-supervised pretraining reshapes this problem by moving most of the learning onto a separate and far larger body of data. A large language or vision model is fitted to an enormous corpus, so that its very large hypothesis class is matched by a very large $D$, and what it hands to a financial researcher is a representation $Z$: an embedding of each document, image or firm, together with the distances $d(Z, Z')$ between them. A model built on $Z$ can then remain small, with a modest $\mathcal H$ relative to the financial sample, and so generalises on far better terms than a network trained from scratch on thirty years of daily returns.
-
-The question becomes especially consequential when the intended economic quantity is not directly observable. Productive capacity, operating efficiency, financial vulnerability and competitive relationships may need to be inferred from several imperfect sources of evidence. A learned representation becomes a candidate economic measurement when its behaviour can be connected to those quantities through independent observations and economically meaningful relationships.
-
-There is already a substantial empirical tradition for this approach. [Hassan and co-authors (2019)](https://doi.org/10.1093/qje/qjz021) construct measures of firm-level political risk from earnings-call discussions and examine their relationships with corporate behaviour, demonstrating how unstructured information can support the measurement of an economically defined construct. Related research using corporate language to infer product-market relationships illustrates how financial similarity can be measured through information about business activities rather than relying exclusively on fixed industry classifications. Modern AI extends this tradition through more flexible representations of language, imagery and other forms of economic evidence, creating the opportunity to connect observations that reveal different aspects of the same underlying activity while retaining the uncertainty associated with incomplete information.
-
-The interpretation of these representations should follow the economic object being measured. Two companies may have similar textual representations because their disclosures use comparable language, while possessing materially different leverage, contractual structures or operating conditions. Conversely, firms in different industries may share substantial economic exposure to financing costs, energy prices or common suppliers despite appearing dissimilar under conventional classifications.
-
-A scientifically meaningful representation therefore requires an account of the economic distinctions it preserves. Its usefulness can be investigated through relationships with independently observed quantities, changes in economic conditions and the outcomes generated by the underlying mechanisms. Its interpretation lies in the relationship between the learned representation and the economic system it is intended to describe, rather than in individual pixels, tokens or latent coordinates.
-
-This creates a natural connection to the measurement of economic states. In dynamic economic models, a state describes the information relevant to the subsequent development of a system. In statistical learning, a representation may similarly summarise information contained within a collection of observations. The important research opportunity lies in connecting these concepts: establishing when learned representations preserve economically relevant information and when their behaviour supports an interpretation in terms of underlying economic states and mechanisms.
 
 ## Conclusion
 
-Self-supervised pre-training has expanded the capacity of financial researchers to learn from complex and heterogeneous information, but this progress also sharpens an enduring scientific problem. Finite observations can support many competing statistical explanations, particularly in economic systems whose behaviour changes through learning, competition and institutional development. Increasing model capacity makes the distinction between empirical fit and scientific understanding more important, rather than less.
+Finite observations can support many competing statistical explanations, particularly in economic systems whose behaviour changes through learning, competition and institutional development. Increasing model capacity makes the distinction between empirical fit and scientific understanding more important, rather than less.
 
 Statistical learning theory establishes why the complexity of the hypothesis space matters for generalisation, while economic theory provides mechanisms through which that space can be constrained and interpreted. Together, they offer a foundation for understanding explainability as a component of scientific inference rather than a separate requirement imposed on machine-learning systems after estimation.
-
-For AI as economic measurement, the next step is to establish how learned representations can be connected to economically meaningful states, which information their learning objectives preserve and how the resulting measurements can be interpreted across changing environments.
 
 The central ambition is therefore not simply to explain how financial AI produces its predictions, but to understand **what those models have learned about the economy, why that information is meaningful and which mechanisms make it useful beyond the observations on which they were trained**.

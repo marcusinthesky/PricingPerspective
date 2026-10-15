@@ -1,0 +1,146 @@
+---
+number: "09"
+category: Research notes
+title: "What Does AI Actually Measure About the Economy?"
+summary: "Self-Supervised Learning, Economic States and the Interpretation of Learned Representations."
+datePublished: "2026-10-20"
+dateModified: "2026-10-20"
+keywords:
+  - Private markets
+  - Economic measurement
+  - Representation learning
+  - Self-supervised learning
+---
+
+Many of the quantities that matter most in finance are only partially observed. Productive capacity, operating efficiency, financing stress and competitive position are inferred from evidence that differs in availability, timing and reliability. Market prices are one such source, but these quantities exist whether or not the underlying asset trades. For private companies, infrastructure and young businesses, substantial evidence about economic activity often exists long before a history of returns does. Comparing exposures across such assets is now a central portfolio problem.
+
+Language and vision models can turn disclosures, news and satellite imagery into representations that can be compared and fed into financial models. A representation that predicts well is evidence of useful information; it is not yet a measurement. The task is to establish which economic distinctions a representation preserves, which it discards, and how those distinctions relate to identifiable economic states.
+
+## From economic observations to economic states
+
+In recursive economic models, a state variable summarises the information needed to characterise how a system evolves under an assumed structure. [Hansen and Sargent's work on recursive economic models](https://press.princeton.edu/books/hardcover/9780691042775/recursive-models-of-dynamic-linear-economies) provides the standard foundation: a long history of observations can often be replaced by a much smaller set of variables without losing anything relevant to the system's evolution.
+
+Two related concepts are useful here. A *structural economic state* describes underlying quantities and mechanisms, such as capital, productivity, demand, leverage and financing conditions. A *predictive economic state* summarises the information needed to forecast specified outcomes, without necessarily identifying each structural quantity separately.
+
+The difference matters. Consider two industrial businesses with identical current output, one running a large facility at low utilisation and the other a small facility near capacity. A representation sufficient for predicting current production need not distinguish them. A representation intended to measure capacity for expansion must.
+
+The formal concept is statistical sufficiency. Let $H_t$ denote the observations available about an entity up to time $t$, and $Z_t=f_\theta(H_t)$ a learned compression of them. For a set of future outcomes $Y_c$, the representation is predictively sufficient when
+
+<figure className="blog-equation">
+
+$$
+P(Y_c\mid H_t)=P(Y_c\mid Z_t),
+\qquad c\in\mathcal C
+$$
+
+<figcaption>Equation 1. Predictive sufficiency: once the representation is known, the full observation history adds no information about the outcomes of interest.</figcaption>
+</figure>
+
+Sufficiency is defined relative to the outcomes $\mathcal C$, not by the dimension of $Z_t$ or its ability to reconstruct the inputs. It induces *equivalence classes*: writing $Q_c(\cdot\mid h)$ for the outcome distribution implied by history $h$, two histories are economically equivalent when $Q_c(\cdot\mid h)=Q_c(\cdot\mid h')$ for every $c\in\mathcal C$. A sufficient representation may merge equivalent histories but must separate all others. Its meaning lies in the distinctions it preserves; individual coordinates need not correspond to named financial variables, provided they relate to the intended measurements through an identifiable statistical relationship.
+
+## Learning representations without economic labels
+
+Self-supervised learning extracts structure without manually assigned economic states, because the training signal comes from the data themselves: predicting withheld tokens, reconstructing masked image regions, matching augmented views or predicting latent representations of unobserved content. Each objective rewards retaining different information. [SimCLR (Chen et al., 2020)](https://proceedings.mlr.press/v119/chen20j.html) learns from agreement between augmented views, [DINO (Caron et al., 2021)](https://openaccess.thecvf.com/content/ICCV2021/html/Caron_Emerging_Properties_in_Self-Supervised_Vision_Transformers_ICCV_2021_paper.html) shows that object-level semantic structure can emerge through self-distillation, and [I-JEPA (Assran et al., 2023)](https://arxiv.org/abs/2301.08243) predicts withheld latent content rather than every pixel.
+
+These methods allow representations to be learned from far more observations than economic labels would ever permit. But the pretraining objective, not the economic question, decides what is kept. A vision model that recognises industrial buildings may retain their physical configuration without measuring whether they operate profitably. A language model may understand how debt covenants are written without estimating the probability that a borrower breaches one. The same applies to classical compression: principal components summarise common variation efficiently, and nonlinear encoders preserve richer structure, but neither establishes that the resulting dimensions correspond to economic mechanisms. The link between a learned representation and a named economic state has to be established with additional evidence.
+
+## The geometry of economic information
+
+Learned representations allow observations to be compared by distance rather than assigned to predefined categories. [Hoberg and Phillips](https://hobergphillips.tuck.dartmouth.edu/) showed the value of this for finance, constructing time-varying product-market neighbourhoods from firms' own descriptions of their business. Modern language models make it possible to go further. A diversified firm can be represented as a *distribution* of embeddings over its activities rather than a single averaged point, and optimal transport offers a natural way to compare such distributions.
+
+Proximity in embedding space does not, however, mean proximity in economic exposure. Firms may sit close together because they use similar language or attract similar coverage, while differing in leverage, contractual seniority or business model. A stronger definition measures similarity through the outcomes being studied:
+
+<figure className="blog-equation">
+
+$$
+d_{\mathcal C}(h,h')
+=
+\sum_{c\in\mathcal C}
+\omega_c\,
+d\left(
+Q_c(\cdot\mid h),
+Q_c(\cdot\mid h')
+\right)
+$$
+
+<figcaption>Equation 2. Task-weighted economic dissimilarity: a weighted sum of the distances between the outcome distributions implied by two observation histories.</figcaption>
+</figure>
+
+where $d$ is a divergence between distributions and $\omega_c$ weights each task. Equation 2 is the graded version of the equivalence relation above: $d_{\mathcal C}(h,h')=0$ exactly when $h$ and $h'$ are economically equivalent.
+
+This also specifies what a good representation should discard. It should be *invariant* to transformations that leave the economic state unchanged, such as document formatting, reporting units or satellite illumination, and *sensitive* to changes in leverage, capacity or financing costs, even when those changes are small relative to the overall variation in the raw data. The test of an embedding is not whether it clusters intuitively or scores well on semantic benchmarks, but whether its geometry tracks economically defined differences.
+
+## Economic measurement across multiple observation systems
+
+The strongest opportunities arise when the same activity is observed through several imperfect channels. A firm's productive condition shows up in its financial statements, operational records, transactions, electricity consumption and physical infrastructure, and each channel adds noise specific to its measurement process. The problem is familiar from factor models and state-space econometrics:
+
+<figure className="blog-equation">
+
+$$
+X_t^{(1)}=AS_t+\epsilon_t^{(1)},
+\qquad
+X_t^{(2)}=BS_t+\epsilon_t^{(2)}
+$$
+
+<figcaption>Equation 3. Two measurement systems observing the same latent economic state, each with its own loading and measurement error.</figcaption>
+</figure>
+
+When the measurement errors are independent across channels, $\operatorname{Cov}(X_t^{(1)},X_t^{(2)})=A\,\operatorname{Var}(S_t)\,B^\top$ carries information only about the shared state. Multiview representation learning extends this logic to nonlinear, heterogeneous observations. [Yao and co-authors (2024)](https://proceedings.iclr.cc/paper_files/paper/2024/hash/956e5427549a82a7472e02adc88360e9-Abstract-Conference.html) give identification results for shared latent information learned from partially observed views, and [González Laiz, Schmidt and Schneider (2025)](https://proceedings.iclr.cc/paper_files/paper/2025/hash/9ba53f77e348bce55aedffa16d344824-Abstract-Conference.html) connect contrastive self-supervision to nonlinear system identification, including recovery of latent dynamics.
+
+Consider a private data-centre operator approaching a listing. Satellite imagery measures construction and installed capacity; electricity consumption measures realised utilisation; customer contracts measure committed demand; financial statements measure operating performance; financing agreements fix the obligations that determine how cash flows are divided among claimants. Each channel sees a different aspect of one enterprise, arriving at a different frequency. Installed capacity, utilisation and revenue are distinct quantities, linked by operating mechanisms.
+
+This suggests a more economically targeted use of self-supervision: train models to predict one channel from another, or later observations from earlier ones. A model that sees electricity consumption, installed capacity and contracts, and is trained to predict subsequently reported utilisation or operating cash flow, is pushed to retain information about the shared state rather than about arbitrary features of documents or images. Its interpretation is then supported by its ability to reconcile independent measurements, which is the econometric problem of inferring unobserved states from their measurable consequences.
+
+## Dynamics and the production of information
+
+Economic states evolve. Capacity responds to investment and depreciation, obligations to borrowing and repayment, activity to demand and costs. A state-space formulation makes the transition explicit:
+
+<figure className="blog-equation">
+
+$$
+S_{t+1}=F_M(S_t,U_{t+1},\eta_{t+1})
+$$
+
+<figcaption>Equation 4. State transition: the next economic state follows from the current state, economic conditions and disturbances under a mechanism M.</figcaption>
+</figure>
+
+where $M$ is the economic mechanism, $U_{t+1}$ the relevant conditions and $\eta_{t+1}$ a disturbance. Equation 4 separates two kinds of stability that are easily confused. Utilisation can fall sharply when demand deteriorates while the relationship between capacity, utilisation and output remains intact; payments on floating-rate debt move with rates while the contract linking them does not. A representation that measures the state should move with $S_t$ and remain consistent with $F_M$.
+
+Financial text adds a complication: the observations are themselves produced by economic decisions. A news article is evidence about an event and also the output of an information-production process in which journalists, editors and publishers select stories for significance, novelty and audience demand. The occurrence, repetition and changing language of coverage therefore carry information about attention and perceived materiality as well as about fundamentals. Representations of text are most informative when that production process is modelled as part of the observation equation rather than treated as a neutral record.
+
+## Uncertainty and identification
+
+Different economic states can produce similar observations. Revenue growth alone does not distinguish higher utilisation from higher prices or expansion into new markets, and each implies different operating and financing conditions. Rather than treating an embedding as an exact measurement, an economically structured model estimates a distribution over states and mechanisms:
+
+<figure className="blog-equation">
+
+$$
+p(S_t,M\mid X_{\leq t},\mathcal E)
+$$
+
+<figcaption>Equation 5. The posterior distribution over economic states and mechanisms, given the accumulated observations and economic knowledge.</figcaption>
+</figure>
+
+where $X_{\leq t}$ is the accumulated evidence and $\mathcal E$ the economic knowledge informing the model. This places AI-based measurement within Bayesian filtering and structural econometrics: new observations update the state, and uncertainty about measurement error, state variables and competing mechanisms is carried in one framework.
+
+Here the distinction between predictive sufficiency and structural identification becomes sharp. A representation may satisfy Equation 1 for next-quarter sales while leaving capacity and utilisation unidentified, as in the two-factory example. Additional channels restore identification when they measure *different consequences* of the state: imagery for capacity, operational records for utilisation, contracts for demand.
+
+Expected outcomes are also not enough. Two businesses with identical expected cash flows can carry very different probabilities of distress, and two assets with similar marginal risk can behave differently in a portfolio because they depend on common conditions. A useful state representation must preserve the tail and dependence information its applications need: joint outcome distributions for portfolio construction, downside cash flows and refinancing conditions for credit. Uncertainty is part of the measurement, not an adjustment applied afterwards.
+
+## An empirical programme
+
+This framework suggests a concrete research design. Begin with defined economic quantities, such as productive capacity, utilisation, financing stress or changes in demand, that can be checked against independent observations. Use factor and state-space models as econometric baselines, measure how much of each quantity is already recoverable from off-the-shelf language, vision and tabular encoders, and then test whether multiview or temporal objectives built around economically related predictions improve recovery. Representations should be compared on the same information sets using five criteria:
+
+- **Recovery:** the accuracy with which independently observed quantities are recovered.
+- **Sensitivity:** the response to economically material changes.
+- **Invariance:** stability under transformations that leave the state unchanged.
+- **Calibration:** the reliability of the uncertainty in Equation 5.
+- **Stability:** behaviour across economic regimes.
+
+The design also separates what the representation contributes from what the economic model contributes. A vision encoder may measure visible infrastructure well while a structural model converts that into productive capacity; contractual information then determines what a change in capacity means for each claim. Extending the state to claim-specific cash flows, for equity and credit on the same enterprise, provides a route to consistent measurement of exposure across public and private markets, including for assets with no return history at all.
+
+## Conclusion
+
+A model's ability to reconstruct observations, organise semantic information or improve forecasts is evidence about its statistical capabilities. Economic interpretation requires more: a demonstrated link between what the representation preserves and the states and mechanisms that generate the data. Sufficiency defines what must be preserved, multiview measurement and structural restrictions connect it to identifiable quantities, and dynamics and probabilistic inference carry it through time and into financial outcomes.
+
+The research frontier is **economically interpretable representation learning**, in which training objectives, observation processes and economic mechanisms jointly determine what is preserved and what can be identified. The next important development in financial AI may be less about learning to predict the economy, and more about learning how to measure it.

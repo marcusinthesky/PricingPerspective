@@ -1,0 +1,179 @@
+---
+number: "08"
+category: Research notes
+title: Why use Pretraining?
+summary: "How pretraining reduces what small datasets must teach a model, and how Bayesian updating explains the promise and limits of transfer."
+datePublished: "2026-10-17"
+dateModified: "2026-10-17"
+keywords:
+  - Pretraining
+  - Transfer learning
+  - Bayesian inference
+  - Fine-tuning
+---
+
+An expressive model can fit many relationships that a small dataset cannot reliably distinguish. Training it from scratch asks the same limited observations to support both the discovery of useful features and their connection to a particular outcome. Some of that learning, however, concerns patterns shared across tasks for which observations are much more abundant.
+
+Pretraining uses this broader evidence before adapting the model to a particular application. A language model can learn recurring linguistic patterns from unlabelled documents before a smaller sample teaches it to classify them. The potential advantage is that the task data have less to establish. Whether that advantage materialises depends on which relationships the larger corpus teaches and whether they remain useful in the new setting.
+
+## Two datasets, two learning problems
+
+The two stages draw on a broad dataset $D_{\text{pre}}$ and a smaller, task-specific dataset $D_{\text{post}}$. Pretraining often obtains its supervision from the observations themselves, through next-token prediction or reconstruction of masked image regions. This makes it possible to learn from far more examples than would be practical to label for each application.
+
+The resulting network can be frozen and used as a feature extractor, mapping an observation $X$ into a representation $Z=g_{\theta_{\text{pre}}}(X)$. A downstream model $y=f_\psi(Z)$ then learns how those features relate to the desired outcome. Alternatively, fine-tuning updates the pretrained network itself using the task data.
+
+If the frozen representation contains the relevant information, a comparatively simple downstream model may suffice. The task sample then estimates how existing features relate to the outcome, with feature learning already supported by the larger corpus. Full fine-tuning retains the network's capacity: pretraining changes its starting point without itself reducing the hypothesis class. Its benefit depends on adapting useful earlier learning with limited task evidence.
+
+This benefit can be measured in terms of the target data needed to reach a given performance. In [Scaling Laws for Transfer (Hernandez et al., 2021)](https://arxiv.org/abs/2102.01293), language-modelling experiments compare pretrained models with equally sized models trained from scratch. The additional target data the latter need to match the former's loss provide an empirical measure of transfer, specific to the distributions and training conditions studied.
+
+## A Bayesian reading of pretraining
+
+Scaling experiments measure how much target data pretraining saves, but not why any is saved. Bayesian inference offers a way to describe the mechanism, treating learning as the reallocation of belief across candidate explanations as evidence arrives. The question then becomes how much of that reallocation a broad corpus can complete before the task data are seen.
+
+For a probabilistic model $M$ and a dataset $D$, Bayes' rule combines prior beliefs with the evidence:
+
+<figure className="blog-equation blog-equation-boxed">
+
+$$
+p(M\mid D)
+=
+\frac{p(D\mid M)\,p(M)}{p(D)}
+$$
+
+<figcaption>Equation 1. Bayes' rule: the posterior reweights the prior by how well each model explains the data.</figcaption>
+</figure>
+
+The prior $p(M)$ describes beliefs about the model before the data are observed. The likelihood $p(D\mid M)$ measures how well a particular model accounts for the data. The denominator $p(D)$ is the prior predictive probability: it averages that likelihood across models, weighted by the prior. It both normalises the update and describes how expected the data were. Models explaining them better than this average gain posterior weight; those explaining them worse lose weight.
+
+While Statistical Learning Theory, offers clear foundations on sample size, hypothesis sets and learning, here too we can understand the effects of sample size on our accumulated posterior. For a sample $D=\{d_1,\ldots,d_n\}$ of independent observations from a common distribution, the likelihood factors into a product. Comparing two candidate models turns that product into a sum:
+
+<figure className="blog-equation blog-equation-boxed">
+
+$$
+\begin{aligned}
+p(M\mid D)
+&\propto p(M)\prod_{i=1}^{n}p(d_i\mid M)
+\\[4pt]
+\log\frac{p(M_1\mid D)}{p(M_2\mid D)}
+&=\log\frac{p(M_1)}{p(M_2)}
++\sum_{i=1}^{n}\log\frac{p(d_i\mid M_1)}{p(d_i\mid M_2)}
+\end{aligned}
+$$
+
+<figcaption>Equation 2. Likelihoods multiply across independent observations; their log-ratios add to the prior log-odds.</figcaption>
+</figure>
+
+When each observation supplies the same positive expected log-evidence for one model over another, the expected sum grows linearly with $n$, while the prior log-odds stay fixed. Small differences can accumulate into strong evidence, helping distinguish among the many explanations an expressive model can fit. With few observations, the reverse holds: many explanations remain nearly indistinguishable, and the prior largely determines which is preferred. This is the difficulty a small task sample faces on its own without additional evidence.
+
+Given this framework, we can think of pretraining as a better-informed prior. Given a pre-training dataset, $D_{\text{pre}}$, and post-training dataset, $D_{\text{post}}$, we can use the pretraining data produce a posterior $p(M\mid D_{\text{pre}})$, which becomes the prior for the next stage:
+
+<figure className="blog-equation blog-equation-boxed">
+
+$$
+p(M\mid D_{\text{pre}},D_{\text{post}})
+=
+\frac{p(D_{\text{post}}\mid M,D_{\text{pre}})\,p(M\mid D_{\text{pre}})}{p(D_{\text{post}}\mid D_{\text{pre}})}
+$$
+
+<figcaption>Equation 3. Sequential Bayesian updating: the posterior from the first dataset becomes the prior for the second.</figcaption>
+</figure>
+
+Each term plays the same role as in Equation 1, now conditioned on the pretraining data. The prior predictive $p(D_{\text{post}}\mid D_{\text{pre}})$ averages the task likelihood using the weights pretraining has produced, describing how expected the new data were before adaptation. If the datasets are conditionally independent given $M$, the likelihood simplifies to $p(D_{\text{post}}\mid M)$. The denominator still depends on pretraining because the weights used to average over models have already been shaped by it.
+
+## When source and target differ
+
+Sequential updating says how the two datasets combine, but not how much each contributes or what changes when they come from different distributions. Equation 2 answers the first question once extended to a task sample $D_{\text{post}}=\{d'_1,\ldots,d'_m\}$, typically with $m$ much smaller than $n$. Under conditional independence, the evidence from both datasets adds to the same prior log-odds:
+
+<figure className="blog-equation blog-equation-boxed">
+
+$$
+\log\frac{p(M_1\mid D_{\text{pre}},D_{\text{post}})}{p(M_2\mid D_{\text{pre}},D_{\text{post}})}
+=\log\frac{p(M_1)}{p(M_2)}
++\underbrace{\sum_{i=1}^{n}\log\frac{p(d_i\mid M_1)}{p(d_i\mid M_2)}}_{\text{pretraining evidence}}
++\underbrace{\sum_{j=1}^{m}\log\frac{p(d'_j\mid M_1)}{p(d'_j\mid M_2)}}_{\text{task evidence}}
+$$
+
+<figcaption>Equation 4. Evidence from the pretraining and task samples accumulates on the same log-odds scale.</figcaption>
+</figure>
+
+With $n$ much larger than $m$, the pretraining sum dominates any comparison the source data can inform. The task evidence then decides mainly between models the corpus cannot separate: those explaining the source data equally well while differing on the target. This is the precise sense in which pretraining reduces what the task sample must establish, but the same arithmetic carries a risk: where the corpus favours a relationship the target does not share, a few task observations cannot outweigh it.
+
+The prior predictive $p(D_{\text{post}}\mid D_{\text{pre}})$ indicates when this decomposition works in the target's favour. In the simplest case, both datasets are drawn from the same distribution. Pretraining is then an earlier portion of the same sample: every source term carries evidence about the target, the prior predictive becomes the posterior predictive for further draws, and the final posterior equals the one obtained by pooling all $n+m$ observations. The target data saved equal the pretraining sample size, a natural benchmark for the effective data measured by Hernandez et al. Task data in this case should look unsurprising under the prior predictive. Data that are unusually surprising, judged against comparable data, suggest that the two samples do not share a distribution.
+
+In practice they rarely do: the corpus is broad and often unlabelled, while the task is narrow and labelled. Equation 4 describes how evidence is weighted under such a mismatch, but not how well the model it favours will perform on the task, which is the question learning theory asks directly. Consider a classification task whose labels apply in two domains: a source distribution $P_S$, playing the role of the pretraining data, and a target $P_T$, playing the role of the task. For a hypothesis $h$ from a class $\mathcal H$, write $R_S(h)$ and $R_T(h)$ for its error rate in each. This assumes the same labelled task in both domains, whereas language-model pretraining optimises next-token prediction before any labels appear, so the result identifies which quantities matter rather than guaranteeing transfer. With that caveat, [Ben-David et al. (2010)](https://doi.org/10.1007/s10994-009-5152-4) derive the following bound on target error:
+
+<figure className="blog-equation blog-equation-boxed">
+
+$$
+R_T(h)
+\leq R_S(h)
++\tfrac{1}{2}\,d_{\mathcal H\Delta\mathcal H}(P_S,P_T)
++\lambda^*
+$$
+
+<figcaption>Equation 5. Target error is bounded by source error, distributional divergence and the best combined error across both domains.</figcaption>
+</figure>
+
+The bound splits target error into three parts, of which the source error $R_S(h)$ is the only one that more source data can reduce. The divergence $d_{\mathcal H\Delta\mathcal H}$ measures how differently the two input distributions look to the hypothesis class: it is large when some pair of hypotheses disagrees at very different rates in the two domains, so that agreement observed on the source says little about agreement on the target. Because it depends only on inputs, it can be estimated without target labels, by testing how well a classifier of comparable capacity can tell source observations from target ones.
+
+The final term $\lambda^*$ is the smallest combined error any single hypothesis achieves across both domains. It is large when the domains call for conflicting answers to similar inputs. This is the risk Equation 4 describes: no relationship serves both, so abundant pretraining evidence can favour the wrong one.
+
+The terms also pull against each other through the representation, since the frozen feature extractor of the first section determines which inputs hypotheses see. A representation that discards what distinguishes source from target lowers the divergence, but if the discarded information mattered for the labels, it raises $\lambda^*$. [Zhao et al. (2019)](https://arxiv.org/abs/1901.09453) show that matching representations across domains can increase target error in this way.
+
+
+## From variational inference to policy optimisation
+
+While this Bayesian lens treats adaptation as exact conditioning, in which the task data reweight a posterior that pretraining has already formed, in practice neural-network training performs no such conditioning. Models typically retain a fitted parameter vector, rather than a posterior distribution, and are updated along gradient steps using a stochastic optimizer. The Bayesian account is therefore an idealisation, whose practical relevance depends on how much earlier learning survives adaptation and on how much should.
+
+For example, in supervised fine-tuning, parameters begin at $\theta_0=\theta_{\text{pre}}$ and are updated using a downstream loss through steps of the form $\theta_{t+1}=\theta_t-\eta\nabla_\theta\mathcal L_{\text{post}}(\theta_t)$, with learning rate $\eta$. Small steps and early stopping can preserve useful features, but initialisation alone carries no distribution describing uncertainty about the pretrained parameters.
+
+Variational inference makes that distributional update explicit by approximating the downstream posterior with a distribution $q(\theta)$. Assuming conditional independence as above, $q(\theta)$ is chosen to minimise the following objective:
+
+<figure className="blog-equation blog-equation-boxed">
+
+$$
+\mathcal L(q)
+=
+\mathbb E_{\theta\sim q}\!\left[-\log p(D_{\text{post}}\mid\theta)\right]
++
+D_{\mathrm{KL}}\!\left(q(\theta)\,\middle\|\,p(\theta\mid D_{\text{pre}})\right)
+$$
+
+<figcaption>Equation 6. Variational adaptation balances fit to the new data against divergence from the earlier posterior.</figcaption>
+</figure>
+
+The first term favours distributions that explain the new observations; the second measures departure from what was learned before. Minimising their sum is equivalent to minimising KL divergence from the new posterior within the chosen approximation family. In [Variational Continual Learning (Nguyen et al., 2018)](https://arxiv.org/abs/1710.10628), the earlier posterior is itself approximated, allowing the procedure to continue across successive datasets.
+
+A related structure appears when a language model is trained using preferences. The model defines a policy $\pi(y\mid x)$ over responses $y$ to a prompt $x$. A reward $r(x,y)$ scores those responses, while a KL penalty discourages departure from a reference policy $\pi_{\text{ref}}$, often the supervised model. For a fixed prompt, reward and reference policy, with $\beta>0$ and a finite normalising constant $Z(x)$, the objective, its optimal policy and an equivalent form of the objective are as follows:
+
+<figure className="blog-equation blog-equation-boxed">
+
+$$
+\begin{aligned}
+J(\pi)
+&=\mathbb E_{y\sim\pi(\cdot\mid x)}[r(x,y)]
+-\beta D_{\mathrm{KL}}\!\left(\pi(\cdot\mid x)\,\middle\|\,\pi_{\text{ref}}(\cdot\mid x)\right)
+\\[4pt]
+\pi^*(y\mid x)
+&=\frac{\pi_{\text{ref}}(y\mid x)\exp(r(x,y)/\beta)}{Z(x)}
+\\[4pt]
+J(\pi)
+&=\beta\log Z(x)
+-\beta D_{\mathrm{KL}}\!\left(\pi(\cdot\mid x)\,\middle\|\,\pi^*(\cdot\mid x)\right)
+\end{aligned}
+$$
+
+<figcaption>Equation 7. Maximising KL-regularised reward is equivalent to minimising divergence from a reward-reweighted reference distribution.</figcaption>
+</figure>
+
+The final line connects this objective to variational inference: maximising it moves the policy towards a target distribution that reweights the reference policy by exponentiated reward, much as a posterior reweights a prior by the likelihood. A larger $\beta$ tempers the reward, as if down-weighting the likelihood, so the reference retains more influence after the objective changes. Because exponentiated reward is a likelihood-like weighting rather than a statistical likelihood, the correspondence belongs to [generalised Bayesian updating (Bissiri, Holmes and Walker, 2016)](https://doi.org/10.1111/rssb.12158), where a loss can replace the likelihood; [Korbak, Perez and Buckley (2022)](https://arxiv.org/abs/2205.11275) develop this interpretation of KL-regularised reinforcement learning.
+
+## What this means for econometric applications
+
+Economic data are often large in rows but small in experiences. A loan book may hold millions of observations while spanning only a few credit cycles, so evidence distinguishing one account of default from another accumulates far more slowly than its size suggests.
+
+Pretraining helps when part of what a model must learn can be taught by a broader body of data. A credit model, for example, does not need to learn the language of covenants, collateral and repayment from a handful of defaults. That language appears throughout a far larger corpus, which can teach it before the task data are seen.
+
+Reading a contract correctly, however, does not reveal how the borrower will behave when economic conditions change. The same terms can lead to different outcomes as interest rates, employment or asset prices move. This is the conflict that a large $\lambda^*$ describes, where no single relationship holds across both regimes and no amount of text can settle which one applies. Estimating those outcomes still requires relevant observations, together with assumptions about cash flows, financing and behaviour. Repeated descriptions of a financial crisis do not help either, because they add text about the event without adding new, independent experiences of it.
+
+Pretraining can therefore reduce what scarce economic observations must teach a model, but it cannot supply the experiences those observations lack. Economic reasoning helps establish which transferred relationships are applicable and which require further evidence.
