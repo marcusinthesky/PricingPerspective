@@ -54,14 +54,18 @@ for (const [file, html] of documents) {
       if (type === "BlogPosting") {
         blogPostCount += 1;
         const audio = node.audio;
+        const post = blogPosts.find((post) => file.includes(`/blog/${post.slug}/`));
         if (
-          blogPosts.find((post) => file.includes(`/blog/${post.slug}/`))?.audio !== false &&
+          post?.audio &&
           (!audio ||
-          typeof audio !== "object" ||
-          Array.isArray(audio) ||
-          (audio as Record<string, unknown>)["@type"] !== "AudioObject")
+            typeof audio !== "object" ||
+            Array.isArray(audio) ||
+            (audio as Record<string, unknown>)["@type"] !== "AudioObject")
         ) {
           throw new Error(`${file}: BlogPosting is missing its AudioObject.`);
+        }
+        if (!post?.audio && audio) {
+          throw new Error(`${file}: BlogPosting declares unexpected audio.`);
         }
         if (audio) audioCount += 1;
       }
