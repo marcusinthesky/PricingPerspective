@@ -189,18 +189,19 @@ export function blogPostJsonLd(post: BlogPost): Record<string, unknown> {
           { "@type": "Thing", name: "Artificial intelligence" },
         ],
         image: absoluteUrl("/og/atlas-card.webp"),
-        ...(post.audio ? {
-          audio: {
-            "@type": "AudioObject",
-            contentUrl: absoluteUrl(`/audio/${post.slug}.webm`),
-            encodingFormat: "audio/webm",
-            name: `${post.title} - computer-generated reading`,
-            description: `A computer-generated audio reading of ${post.title}.`,
-            inLanguage: site.language,
-            isAccessibleForFree: true,
-          },
-  
-        } : {}),
+        ...(post.audio
+          ? {
+              audio: {
+                "@type": "AudioObject",
+                contentUrl: absoluteUrl(`/audio/${post.slug}.webm`),
+                encodingFormat: "audio/webm",
+                name: `${post.title} - computer-generated reading`,
+                description: `A computer-generated audio reading of ${post.title}.`,
+                inLanguage: site.language,
+                isAccessibleForFree: true,
+              },
+            }
+          : {}),
       },
       {
         "@type": "BreadcrumbList",
