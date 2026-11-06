@@ -17,6 +17,7 @@ name: Pre-commit (diff) on PR
 # branch protection matches on.
 on:
   pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
     branches: [ main ]
   push:
     branches: [ main ]
@@ -39,6 +40,7 @@ permissions:
 
 jobs:
   pre-commit:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
