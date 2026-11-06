@@ -55,14 +55,15 @@ for (const [file, html] of documents) {
         blogPostCount += 1;
         const audio = node.audio;
         if (
-          !audio ||
+          blogPosts.find((post) => file.includes(`/blog/${post.slug}/`))?.audio !== false &&
+          (!audio ||
           typeof audio !== "object" ||
           Array.isArray(audio) ||
-          (audio as Record<string, unknown>)["@type"] !== "AudioObject"
+          (audio as Record<string, unknown>)["@type"] !== "AudioObject")
         ) {
           throw new Error(`${file}: BlogPosting is missing its AudioObject.`);
         }
-        audioCount += 1;
+        if (audio) audioCount += 1;
       }
       if (type === "BreadcrumbList") breadcrumbCount += 1;
     }
@@ -77,8 +78,9 @@ if (articleCount !== papers.length)
   throw new Error(`Expected ${papers.length} ScholarlyArticle nodes; found ${articleCount}.`);
 if (blogPostCount !== blogPosts.length)
   throw new Error(`Expected ${blogPosts.length} BlogPosting nodes; found ${blogPostCount}.`);
-if (audioCount !== blogPosts.length)
-  throw new Error(`Expected ${blogPosts.length} AudioObject nodes; found ${audioCount}.`);
+const expectedAudioCount = blogPosts.filter((post) => post.audio).length;
+if (audioCount !== expectedAudioCount)
+  throw new Error(`Expected ${expectedAudioCount} AudioObject nodes; found ${audioCount}.`);
 const expectedBreadcrumbs = papers.length + blogPosts.length;
 if (breadcrumbCount !== expectedBreadcrumbs)
   throw new Error(
