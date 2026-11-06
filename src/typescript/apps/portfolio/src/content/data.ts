@@ -67,6 +67,7 @@ function parseBlogPost(filename: string): BlogPost {
     datePublished: requiredDate(frontmatter, "datePublished", filename),
     dateModified: requiredDate(frontmatter, "dateModified", filename),
     ...readingStats(parsed.content),
+    audio: frontmatter.audio !== false,
     keywords: requiredKeywords(frontmatter, filename),
   };
 }

@@ -2,6 +2,7 @@ name: Lean (lake build)
 
 on:
   pull_request:
+    types: [opened, reopened, synchronize, ready_for_review, converted_to_draft]
     branches: [main]
     paths:
       - 'src/lean/**'
@@ -24,6 +25,7 @@ concurrency:
 
 jobs:
   build:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
     runs-on: ubuntu-latest
     steps:
       # Stock ubuntu-latest ships ~14 GB free on /, which the Nix dev-env closure

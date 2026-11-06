@@ -1,6 +1,8 @@
 import { access, readdir, readFile, stat } from "node:fs/promises";
 import { join, normalize, relative, resolve } from "node:path";
 
+import { blogPosts } from "../src/content/data";
+
 const root = resolve("out");
 const basePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/^\/+|\/+$/g, "");
 const blogSlugs = (await readdir(resolve("src/content/blog"), { withFileTypes: true }))
@@ -26,7 +28,7 @@ const required = [
   "og/atlas-card.webp",
   ".nojekyll",
   ...blogSlugs.map((slug) => `blog/${slug}/index.html`),
-  ...blogSlugs.flatMap((slug) => [`audio/${slug}.webm`, `audio/${slug}.vtt`]),
+  ...blogPosts.filter((post) => post.audio).flatMap((post) => [`audio/${post.slug}.webm`, `audio/${post.slug}.vtt`]),
 ];
 
 await Promise.all(required.map((item) => access(join(root, item))));
