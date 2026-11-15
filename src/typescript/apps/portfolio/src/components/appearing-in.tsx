@@ -11,6 +11,13 @@ const appearances = [
     ),
   },
   {
+    name: "CFA Institute",
+    href: "https://rpc.cfainstitute.org/blogs/enterprising-investor/2026/do-large-language-models-need-markowitz-moment",
+    className: "appearance-cfa-institute",
+    // Official artwork requires a trademark licence; render a typographic link.
+    content: "CFA Institute",
+  },
+  {
     name: "arXiv",
     href: "https://arxiv.org/",
     className: "appearance-arxiv",

@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/json-ld";
 import ExplainabilityContent from "@/content/blog/explainability-as-learning.mdx";
 import MarkowitzMomentContent from "@/content/blog/language-models-markowitz-moment.mdx";
 import MegaIposContent from "@/content/blog/mega-ipos-ai-economic-measurement.mdx";
+import PretrainingContent from "@/content/blog/pretraining-for-economists.mdx";
 import ReproducibilityContent from "@/content/blog/reproducibility-is-a-graph.mdx";
 import AiFinanceContent from "@/content/blog/tidal-wave-of-ai-research-in-finance.mdx";
 import EttaXVintagesContent from "@/content/blog/vintage-reproducible-ettax-models.mdx";
@@ -19,6 +20,7 @@ const contentBySlug: Record<string, ComponentType> = {
   "explainability-as-learning": ExplainabilityContent,
   "language-models-markowitz-moment": MarkowitzMomentContent,
   "mega-ipos-ai-economic-measurement": MegaIposContent,
+  "pretraining-for-economists": PretrainingContent,
   "reproducibility-is-a-graph": ReproducibilityContent,
   "tidal-wave-of-ai-research-in-finance": AiFinanceContent,
   "vintage-reproducible-ettax-models": EttaXVintagesContent,

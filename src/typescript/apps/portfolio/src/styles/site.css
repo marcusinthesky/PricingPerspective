@@ -500,6 +500,14 @@ a:hover {
   letter-spacing: -0.07em;
 }
 
+.appearance-cfa-institute {
+  font-family: var(--sans);
+  font-size: clamp(0.9rem, 1.4vw, 1.25rem);
+  font-weight: 720;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+
 .appearance-ssrn {
   letter-spacing: 0.08em;
 }
