@@ -19,8 +19,7 @@ its marginal incentive, and the value effect of rivals' movement.
   leaving **direct news plus the rival response**.
 * At an anchored stage equilibrium the field equals `-kappa (q - a)` on the active set, so the
   own term is `kappa ⟪q - a, u⟫` and does *not* vanish. When the stage objective includes an
-  adjustment cost that cash flow excludes, the envelope split fails. This is correction 4 of the
-  t39 session corrections.
+  adjustment cost that cash flow excludes, the envelope split fails.
 
 **Discounted value.** For a linear state recursion `x_{h+1} = M x_h` with `‖β M‖ < 1`, the
 discounted value `Σ β^h H M^h x` equals `H (1 - β M)⁻¹ x`: the valuation resolvent. For the

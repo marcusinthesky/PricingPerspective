@@ -69,12 +69,10 @@ claim_id = "thm:resolvent-from-perron"
 assumptions = ["IsPerronLimit W pi", "W row-stochastic", "ι nonempty"]
 disclosure = "Machine-checked in the pinned Lean 4 / mathlib v4.35.0 workspace under standard axioms only. The derivation is elementary linear algebra via an absorbing-idempotent resolvent split; it introduces no Perron--Frobenius content of its own, no Abel/Tauberian summation, and no spectral theory."
 
-# REMOVED 2026-08-23: thm:capm-recovered (capm_recovered_in_limit). The beta-collapse
-# statement was cut from the manuscript during the t13 restructure, so it no longer has a
-# label for render.py to emit as a \Cref target. The declaration remains in the Lean
-# workspace; re-add an entry here if a manuscript ever states it again.
+# The beta-collapse declaration capm_recovered_in_limit has no manuscript claim label
+# and is not part of the publication registry.
 
-# NEW 2026-08-23 (t13). The four bridges that give the paper its spatial spine:
+# The four bridges connecting the paper's spatial model:
 # adjustment-cost closure, two-marginal nesting, aggregate carrier transfer, and
 # dispersion attenuation under the normalized spatial multiplier.
 [[claims]]
@@ -95,7 +93,7 @@ assumptions = [
 ]
 disclosure = "Machine-checked in the pinned Lean 4 / mathlib v4.35.0 workspace. The spatial equation is derived from the stated adjustment problem; it is not imposed as a reduced form, and the interaction weights themselves are a maintained input."
 
-# NEW 2026-08-23 (t33). The two-field extension: a convex mixture of admissible
+# The two-field extension: a convex mixture of admissible
 # interaction matrices is admissible, so the one-field closure transfers to a firm
 # pricing misalignment against two fields, and each channel coefficient inverts to
 # its own adjustment intensity.
@@ -145,8 +143,8 @@ claim_id = "cor:zero-feedback-nesting"
 assumptions = []
 disclosure = "Machine-checked unconditionally in the pinned Lean 4 / mathlib v4.35.0 workspace: at zero feedback, peer-adjusted exposure equals stand-alone exposure exactly. This verifies the exposure identity only; it does not import the related paper's transmission or covariance assumptions."
 
-# Re-pointed 2026-08-26 (paper3/t37). The dispersion definition, its barycentre
-# representation, and the characteristic-to-exposure transfer moved to Paper 3, whose
+# The dispersion definition, its barycentre representation and the
+# characteristic-to-exposure transfer belong to Paper 3, whose
 # pairwise certificate is their relaxation. Paper 5 retains pairwise nesting and the
 # spatial attenuation bracket, which consume the interaction operator.
 [[claims]]
@@ -217,10 +215,9 @@ assumptions = [
 ]
 disclosure = "Machine-checked by continuity and compactness in the pinned Lean 4 / mathlib v4.35.0 workspace. The result establishes existence and the inherited risk guarantee, not uniqueness, unconditional convexity for an arbitrary distance matrix, or superior realized variance relative to competing portfolios."
 
-# Added 2026-08-26 (paper3/t37). The sharp multi-marginal form of the certificate, the
+# The sharp multi-marginal form of the certificate, the
 # exactness of its envelope, its curvature under a stated distance-matrix condition, and
-# the two-asset bridge to Paper 1. All four declarations existed and were machine-checked
-# before this cycle; only the last row's declaration is new.
+# the two-asset bridge to Paper 1.
 [[claims]]
 paper = "03_distance_implied_mpt"
 claim_id = "thm:p3-sharp-certificate"

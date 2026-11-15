@@ -14,8 +14,10 @@ from dataclasses import dataclass, field
 from itertools import combinations
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pandas as pd
 
+from pipeline._kernels.typed_barycentre._common import ACTIVE_WEIGHT_EPS_FACTOR
 from pipeline.stages.papers.paper5.field_operators import (
     FieldOperatorIdentity,
     co_mention_operator,
@@ -26,7 +28,6 @@ from pipeline.stages.papers.paper5.field_operators import (
 if TYPE_CHECKING:
     from pathlib import Path
 
-    import numpy as np
     from numpy.typing import NDArray
 
     from pipeline.stages.papers.paper5.field_operators import (
@@ -92,7 +93,7 @@ def peer_definition_rows(
     operators: dict[str, NDArray[np.float64]],
     config: PeerDefinitionConfig,
 ) -> pd.DataFrame:
-    """Rank each target's positive coefficients; ties break by ticker."""
+    """Rank peer coefficients, using solver support for the barycentric field."""
     missing = sorted(set(config.targets) - set(inputs.tickers))
     if missing:
         message = f"peer-definition targets are outside the universe: {missing}"
@@ -102,10 +103,15 @@ def peer_definition_rows(
         target_index = inputs.tickers.index(target)
         for definition, matrix in operators.items():
             row = matrix[target_index]
+            support_cutoff = (
+                ACTIVE_WEIGHT_EPS_FACTOR * np.finfo(row.dtype).eps
+                if definition == "barycentric_w2"
+                else 0.0
+            )
             support = [
                 index
                 for index in range(len(inputs.tickers))
-                if index != target_index and row[index] > 0.0
+                if index != target_index and row[index] > support_cutoff
             ]
             top = sorted(support, key=lambda i: (-row[i], inputs.tickers[i]))
             top = top[: config.top_k]

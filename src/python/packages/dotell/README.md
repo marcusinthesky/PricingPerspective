@@ -241,29 +241,21 @@ JAX.
 
 ## Diagnosing a slow stage
 
-1. Find regressed stages with the telemetry regression query in the `src/python/apps/harnessme`
-   harness (compares `wall_s`/`peak_rss_gb` across `git_sha`s in `runs.jsonl`).
-2. Rerun just that stage directly (bypassing `dvc repro`) with profiling on, e.g.
-   for the `permutation_tests` stage (see `dvc.yaml`):
+1. Compare the stage's `wall_s` and `peak_rss_gb` records in
+   `data/telemetry/runs.jsonl`.
+2. Rerun the declared stage with profiling enabled. For example, after restoring
+   the reproduction inputs, profile the Paper 5 peer definitions:
 
    ```bash
-   PP_TELEMETRY_PROFILE=1 uv run --project src/python pipeline compute-permutation-tests
+   PP_TELEMETRY_PROFILE=1 dvc repro --single-item --force p5_peer_definitions
    ```
 
-3. Render the resulting `.pstats` file:
+3. Inspect the resulting `.pstats` file with Python's standard profiler tools:
 
    ```bash
-   uvx gprof2dot -f pstats data/telemetry/profiles/pipeline__compute-permutation-tests__<ts>.pstats | dot -Tsvg -o profile.svg
-   # or, text summary:
-   uv run --project src/python python -m pstats data/telemetry/profiles/pipeline__compute-permutation-tests__<ts>.pstats
+   uv run --locked --project src/python python -m pstats data/telemetry/profiles/<profile>.pstats
    ```
 
 `cProfile` only captures the main process — the sampler thread's own overhead
 is negligible but unprofiled, and any joblib/process-pool child processes are
-**not** captured (profiling is inherently per-process). For whole-process-tree
-sampling of a live run, use `py-spy` instead:
-
-```bash
-py-spy dump --pid <pid>                          # one-shot stack dump
-py-spy record -s -o flame.svg --pid <pid>        # flamegraph over time
-```
+**not** captured (profiling is inherently per-process).

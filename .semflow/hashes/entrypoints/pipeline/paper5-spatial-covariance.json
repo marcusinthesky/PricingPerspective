@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "pipeline.cli.commands.p5.spatial_covariance:cli_paper5_spatial_covariance",
-  "digest": "sha256:f5281745bc1d48542bd04889247e16a003c6e437e2a7dc80bf2878fa63c76497",
+  "digest": "sha256:2fafb5694d02c5c83eba4b06157fa4776d1d7672790d562de0bccd752aecfe16",
   "entrypoint": "pipeline paper5-spatial-covariance",
   "fallbacks": [
   ],
@@ -99,7 +99,7 @@
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/papers/paper5/estimate.py","symbol":"pipeline.stages.papers.paper5.estimate:<binding:annotations=__future__:annotations>"},
     {"digest":"sha256:c00ebfe6693c7f9d874e9e04d46e0c6737397ee3678902e540684eabcdbc76ed","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/papers/paper5/estimate.py","symbol":"pipeline.stages.papers.paper5.estimate:<binding:cast=typing:cast>"},
     {"digest":"sha256:321ed2ed3afceb74be547c9905ed4c676e453b1a68fe7cb2d3e214caeac2624d","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/papers/paper5/estimate.py","symbol":"pipeline.stages.papers.paper5.estimate:<binding:dataclass=dataclasses:dataclass>"},
-    {"digest":"sha256:6e51be6f364baad06a99690ae4d5873eff408d1c6eb793265b04fe80de8d6f8d","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/papers/paper5/estimate.py","symbol":"pipeline.stages.papers.paper5.estimate:<binding:minimize_scalar=scipy.optimize:minimize_scalar>"},
+    {"digest":"sha256:d2a98b0402b15429c7b032d0d462ed2bad339976463dcd3c6fe0c1958835631e","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/papers/paper5/estimate.py","symbol":"pipeline.stages.papers.paper5.estimate:<binding:minimize_scalar=scipy.optimize:minimize_scalar>"},
     {"digest":"sha256:271fc31378e1108a9784c29c3c4768de571ce080301b4ad9721ba767fcf5842b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/papers/paper5/estimate.py","symbol":"pipeline.stages.papers.paper5.estimate:<binding:np=numpy>"},
     {"digest":"sha256:15719857062ab9a4af737b2c06ea2d9010306596fe5e016f6f893f65ec7c8f27","kind":"global","path":"src/python/apps/pipeline/src/pipeline/stages/papers/paper5/estimate.py","symbol":"pipeline.stages.papers.paper5.estimate:Complex"},
     {"digest":"sha256:e402206e5ade060e4d1194eeb3201dad80128a390919809bf9a4e8afff42c9df","kind":"class","path":"src/python/apps/pipeline/src/pipeline/stages/papers/paper5/estimate.py","symbol":"pipeline.stages.papers.paper5.estimate:FactorSarFit"},

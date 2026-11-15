@@ -90,7 +90,9 @@ _prepare project:
 
 # The one builder — interactive loop, quality gates, and the DVC `render`
 # stage all come through here, so a PDF can only ever be produced one way.
-# Tectonic's V2 layout is the published layout: outputs land in
+# Publication targets share bundle-audit's deterministic main.tex compile;
+# previews stage in a temporary directory and preserve certified archives.
+# Outputs retain the V2 layout:
 # projects/<project>/build/<target>/ as <target>.{pdf,log,blg,aux,bbl}, with
 # the submission archive written alongside them by `just bundle`.
 #
@@ -110,6 +112,24 @@ build project="01_continuous_bounds" target="draft" offline="0":
       uv run --script tools/management-science build "projects/{{ project }}"
       exit 0
     fi
+    case "{{ target }}" in
+      arxiv|quantitative-finance|gfj|ejf)
+        work="$(mktemp -d)"
+        trap 'rm -rf "$work"' EXIT
+        just _stage "{{ project }}" "{{ target }}" "$work/source"
+        bundle_ref="$(rg -o '^bundle = "([^"]+)"' -r '$1' "projects/{{ project }}/Tectonic.toml")"
+        if [[ "$bundle_ref" != *://* ]]; then
+          bundle_ref="$(realpath "projects/{{ project }}/$bundle_ref")"
+        fi
+        extension=tar.gz
+        [[ "{{ target }}" != quantitative-finance ]] || extension=zip
+        uv run --script tools/bundle-audit "$work/source" "{{ target }}" \
+          "$root/projects/{{ project }}/build/{{ target }}/{{ target }}.$extension" \
+          "$bundle_ref" --preview \
+          --pdf "$root/projects/{{ project }}/build/{{ target }}/{{ target }}.pdf"
+        exit 0
+        ;;
+    esac
     cached=()
     if [[ "{{ offline }}" == "1" ]]; then cached=(--only-cached); fi
     project_dir="projects/{{ project }}"
@@ -120,8 +140,34 @@ build project="01_continuous_bounds" target="draft" offline="0":
 
 # Rebuild a named target whenever an input changes.
 watch project="01_continuous_bounds" target="draft":
-    just _prepare {{ project }}
-    cd projects/{{ project }} && tectonic -X watch --exec "build --untrusted --keep-logs --target {{ target }}"
+    #!/usr/bin/env bash
+    set -euo pipefail
+    python3 - "{{ project }}" "{{ target }}" <<'PYWATCH'
+    import subprocess, sys, time
+    from pathlib import Path
+    project, target = sys.argv[1:]
+    roots = [Path("projects") / project / "src", Path("templates")]
+    previous = None
+    try:
+        while True:
+            current = tuple(
+                (str(path), path.stat().st_mtime_ns, path.stat().st_size)
+                for root in roots for path in sorted(root.rglob("*"))
+                if path.is_file()
+            )
+            if current != previous:
+                subprocess.run(["just", "build", project, target], check=False)
+                # Preparation may materialize support files; include those
+                # before watching for the next authored input change.
+                previous = tuple(
+                    (str(path), path.stat().st_mtime_ns, path.stat().st_size)
+                    for root in roots for path in sorted(root.rglob("*"))
+                    if path.is_file()
+                )
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        pass
+    PYWATCH
 
 # A change-tracked PDF: what a referee or co-author reads to see what moved.
 # `diff-pdf` (groups/documents.nix) answers the complementary question — did the
@@ -196,7 +242,7 @@ diff project="01_continuous_bounds" target="draft" rev="HEAD" offline="0":
     echo "wrote $destination/{{ target }}-diff.pdf (${hunks:-0} marked hunks vs {{ rev }})"
 
 # Stage exactly the source files uploaded to arXiv, QF, GFJ, or EJF (no compile/audit).
-_stage project target:
+_stage project target destination="":
     #!/usr/bin/env bash
     set -euo pipefail
     case "{{ project }}" in
@@ -210,7 +256,8 @@ _stage project target:
     project="projects/{{ project }}"
     # Staged beside the compiled target rather than in a sibling bundles/ tree,
     # so everything a submission needs for one venue lives in one directory.
-    stage="$project/build/{{ target }}/bundle"
+    stage="{{ destination }}"
+    [[ -n "$stage" ]] || stage="$project/build/{{ target }}/bundle"
     rm -rf "$stage"
     mkdir -p "$stage"
     install -m 0644 "$project/src/targets/{{ target }}.tex" "$stage/main.tex"

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from numpy.testing import assert_allclose
+from pipeline._kernels.typed_barycentre._common import ACTIVE_WEIGHT_EPS_FACTOR
 from pipeline.stages.papers.paper5.baskets import equal_support_weights
 from pipeline.stages.papers.paper5.field_operators import (
     FieldOperatorIdentity,
@@ -93,6 +94,58 @@ def test_peer_rows_are_ranked_row_coefficients_with_residual_mass() -> None:
         assert_allclose(basket["weight"].sum() + basket["remaining_mass"].iloc[0], 1.0)
     facts = caption_facts(rows)
     assert set(facts["targets"]) == {"AMD", "CCC"}  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("cutoff_multiple", [0.0, 0.5, 1.0, 2.0])
+def test_peer_support_uses_solver_zero_cutoff_without_changing_coefficients(
+    cutoff_multiple: float,
+) -> None:
+    """Roundoff does not create peers; genuinely active small weights still count."""
+    inputs = _fixture()
+    weights = inputs.matrices["w2"].copy()
+    cutoff = ACTIVE_WEIGHT_EPS_FACTOR * np.finfo(weights.dtype).eps
+    noise = cutoff_multiple * cutoff
+    weights[0] = [0.0, 0.5 - noise, 0.3, 0.2, noise, 0.0]
+    unchanged = weights.copy()
+    operators = peer_definition_operators(inputs)
+    operators["barycentric_w2"] = weights
+    rows = peer_definition_rows(
+        inputs, operators, PeerDefinitionConfig(targets=("AMD",), top_k=2)
+    )
+    basket = rows.loc[rows["definition"] == "barycentric_w2"].sort_values("rank")
+    active = 4 if cutoff_multiple > 1.0 else 3
+    assert basket["support_size"].tolist() == [active, active]
+    assert basket["remaining_count"].tolist() == [active - 2, active - 2]
+    assert basket["candidate"].tolist() == ["AAA", "BBB"]
+    assert basket["weight"].tolist() == [float(weights[0, 1]), float(weights[0, 2])]
+    assert (
+        basket["remaining_mass"].tolist()
+        == [float(weights[0].sum() - weights[0, [1, 2]].sum())] * 2
+    )
+    assert np.array_equal(weights, unchanged)
+    facts = caption_facts(rows)
+    targets = facts["targets"]
+    assert isinstance(targets, dict)
+    assert (
+        targets["AMD"]["definitions"]["barycentric_w2"]["remaining_count"] == active - 2
+    )
+
+
+@pytest.mark.parametrize("definition", ["rbf_w2_median", "co_mention"])
+def test_tiny_positive_non_solver_peers_keep_their_support(definition: str) -> None:
+    """The solver's numerical-zero rule does not truncate other peer definitions."""
+    inputs = _fixture()
+    weights = inputs.matrices["w2"].copy()
+    weights[0] = [0.0, 0.5, 0.3, 0.2, np.finfo(weights.dtype).eps / 2, 0.0]
+    operators = peer_definition_operators(inputs)
+    operators[definition] = weights
+    rows = peer_definition_rows(
+        inputs, operators, PeerDefinitionConfig(targets=("AMD",), top_k=2)
+    )
+    basket = rows.loc[rows["definition"] == definition]
+    assert basket["support_size"].tolist() == [4, 4]
+    assert basket["remaining_count"].tolist() == [2, 2]
+    assert basket["candidate"].tolist() == ["AAA", "BBB"]
 
 
 @pytest.mark.skipif(

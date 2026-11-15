@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 from numpy.typing import NDArray
-from scipy.optimize import minimize_scalar
+from scipy.optimize import brentq, minimize_scalar
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -261,6 +261,72 @@ def _sar_profile_se(
     return float(np.sqrt(1.0 / curvature))
 
 
+def _sar_profile_score(profile: _SarProfile, rho: float) -> float:
+    """Differentiate the retained likelihood without subtracting large values.
+
+    Profiling the common intercept centers both residuals and their spatial
+    lag derivative. The scale-floor branch has the same score expression,
+    since its fixed scale replaces the unconstrained profiled scale.
+    """
+    residual = profile.returns - rho * profile.spatial_lag
+    residual -= np.mean(residual)
+    centered_lag = profile.spatial_lag - np.mean(profile.spatial_lag)
+    rss = float(np.sum(residual * residual))
+    sigma2 = max(rss / residual.size, NUMERICAL_FLOOR)
+    residual_score = float(np.sum(residual * centered_lag)) / sigma2
+    jacobian_score = -profile.returns.shape[0] * float(
+        np.real(np.sum(profile.spectrum / (1.0 - rho * profile.spectrum)))
+    )
+    return residual_score + jacobian_score
+
+
+def _polish_sar_profile(profile: _SarProfile, result: _ScalarSearch) -> _ScalarSearch:
+    """Resolve a selected local maximum using its analytic likelihood score.
+
+    The original global scan selects the basin. A score sign change within
+    one scan spacing refines that same basin without the loss of argument
+    precision caused by rounding an otherwise large likelihood value.
+    Boundary or unbracketed optima retain the original search result.
+    """
+    lower, upper = profile.bounds
+    spacing = (upper - lower) / (_SCALAR_SCAN_POINTS - 1)
+    left = max(lower, result.x - spacing)
+    right = min(upper, result.x + spacing)
+    left_score = _sar_profile_score(profile, left)
+    right_score = _sar_profile_score(profile, right)
+    if not (
+        np.isfinite(left_score)
+        and np.isfinite(right_score)
+        and left_score > 0.0 > right_score
+    ):
+        return result
+    try:
+        # SciPy's stub includes RootResults, but the default full_output=False
+        # returns a scalar float.
+        rho = float(
+            brentq(  # pyrefly: ignore[bad-argument-type]
+                lambda point: _sar_profile_score(profile, point),
+                left,
+                right,
+                xtol=np.finfo(np.float64).eps,
+                rtol=4.0 * np.finfo(np.float64).eps,
+            )
+        )
+    except (RuntimeError, ValueError):
+        return result
+    value = profile.objective(rho)
+    # Permit only the few-ULP uncertainty of evaluating the same likelihood.
+    rounding_bound = 8.0 * np.finfo(np.float64).eps * max(1.0, abs(result.value))
+    if not np.isfinite(value) or value > result.value + rounding_bound:
+        return result
+    return _ScalarSearch(
+        x=rho,
+        value=value,
+        converged=result.converged,
+        refinement_gain=max(0.0, result.refinement_gain + result.value - value),
+    )
+
+
 def sar_qmle(
     returns: Float,
     w: Float,
@@ -287,6 +353,7 @@ def sar_qmle(
     profile = _sar_profile(returns, w)
     lo, hi = profile.bounds
     result = _global_scalar_minimize(profile.objective, profile.bounds)
+    result = _polish_sar_profile(profile, result)
     rho_hat = float(result.x)
     alpha_hat, sigma2_hat, _ = profile.nuisance(rho_hat)
 

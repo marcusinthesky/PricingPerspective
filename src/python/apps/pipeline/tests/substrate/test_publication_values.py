@@ -9,6 +9,7 @@ missing/NaN policy.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import importlib.util
 import json
@@ -33,6 +34,7 @@ from pipeline.io.values import (
 
 if TYPE_CHECKING:
     from types import ModuleType
+    from typing import Any
 
     from pipeline.io.values import Record
 
@@ -466,12 +468,228 @@ def test_reproduction_checks_scientific_curve_not_only_axis_labels() -> None:
     )
 
 
+def _scientific_marker(
+    frame: tuple[float, float, float, float],
+    offset: tuple[float, float] = (0.0, 0.0),
+) -> str:
+    x, y, width, height = frame
+    px = x + width / 4 + offset[0]
+    py = y + 3 * height / 4 + offset[1]
+    return "\n".join(
+        [
+            r"\begin{pgfpicture}",
+            r"\pgfpathrectangle{\pgfqpoint{0.000000in}{0.000000in}}{\pgfqpoint{8.000000in}{8.000000in}}",
+            r"\pgfusepath{use as bounding box, clip}",
+            r"\begin{pgfscope}",
+            rf"\pgfpathrectangle{{\pgfqpoint{{{x:.6f}in}}{{{y:.6f}in}}}}{{\pgfqpoint{{{width:.6f}in}}{{{height:.6f}in}}}}",
+            r"\pgfusepath{clip}",
+            rf"\pgfsys@transformshift{{{px:.6f}in}}{{{py:.6f}in}}",
+            r"\pgfsys@useobject{currentmarker}{}",
+            r"\end{pgfscope}",
+            r"\end{pgfpicture}",
+        ]
+    )
+
+
+@pytest.mark.parametrize(
+    ("old_frame", "new_frame"),
+    [
+        ((0.5, 0.5, 3.0, 2.0), (0.5, 0.5, 3.0, 2.0)),
+        ((0.5, 0.5, 3.0, 2.0), (1.0, 1.5, 4.0, 3.0)),
+        ((0.1, 0.2, 0.1, 4.0), (2.0, 1.0, 0.2, 3.0)),
+        ((1.0, 0.2, 4.0, 0.1), (0.2, 2.0, 3.0, 0.2)),
+    ],
+)
+@pytest.mark.parametrize("axis", [0, 1])
+def test_reproduction_geometry_floor_preserves_panel_scaling_and_translation(
+    old_frame: tuple[float, float, float, float],
+    new_frame: tuple[float, float, float, float],
+    axis: int,
+) -> None:
+    """Five microinches pass; a 100-microinch shift fails on either panel axis."""
+    check = _reproduction_checker()
+    before = check.pgf_signature(_scientific_marker(old_frame))
+    after = check.pgf_signature(_scientific_marker(new_frame))
+    assert check.plot_differences(before, after) == []
+    for displacement, passes in ((5e-6, True), (1e-4, False)):
+        offset = (displacement, 0.0) if axis == 0 else (0.0, displacement)
+        changed = check.pgf_signature(_scientific_marker(new_frame, offset))
+        failures = check.plot_differences(before, changed)
+        assert (not failures) is passes
+        if not passes:
+            assert any("curve/point coordinates changed" in item for item in failures)
+
+
+@pytest.mark.parametrize("change", ["labels", "colors", "count", "kind"])
+def test_reproduction_geometry_floor_keeps_discrete_plot_content_exact(
+    change: str,
+) -> None:
+    """Subpixel tolerance cannot hide changed labels, colors, counts or kinds."""
+    check = _reproduction_checker()
+    frame = (0.5, 0.5, 3.0, 2.0)
+    before = check.pgf_signature(_scientific_marker(frame))
+    after = check.pgf_signature(_scientific_marker(frame, (5e-6, 0.0)))
+    assert check.plot_differences(before, after) == []
+    if change == "labels":
+        after["numeric_labels"] = [["2"]]
+    elif change == "colors":
+        after["primitives"][0]["fill"][0] = 0.1
+    elif change == "count":
+        after["primitives"].append(after["primitives"][0])
+    else:
+        after["primitives"][0]["kind"] = "path"
+    assert check.plot_differences(before, after)
+
+
 def test_reproduction_rejects_unknown_scientific_path_command() -> None:
     """Unsupported geometry must fail instead of silently escaping comparison."""
     check = _reproduction_checker()
     text = _scientific_curve("2.500000").replace(r"\pgfpathcurveto", r"\pgfpatharcto")
     with pytest.raises(ValueError, match="unsupported PGF path command"):
         check.pgf_signature(text)
+
+
+def test_reproduction_rejects_unsupported_scientific_transform() -> None:
+    """Unknown transforms must not bypass the panel geometry comparison."""
+    check = _reproduction_checker()
+    text = _scientific_marker((0.5, 0.5, 3.0, 2.0)).replace(
+        r"\pgfsys@transformshift", r"\pgfsys@transformcm"
+    )
+    with pytest.raises(ValueError, match="unsupported PGF transform"):
+        check.pgf_signature(text)
+
+
+def _evolution_heatmap(order: list[str]) -> tuple[dict[str, Any], dict[str, Any]]:
+    identities = {
+        "A": {"ticker": "A", "sector": "One", "active": True},
+        "B": {"ticker": "B", "sector": "One", "active": False},
+        "C": {"ticker": "C", "sector": "One", "active": False},
+        "D": {"ticker": "D", "sector": "Two", "active": False},
+    }
+    primitives = []
+    for row, ticker in enumerate(order):
+        for column in range(2):
+            left, right = column / 2, (column + 1) / 2
+            top, bottom = 1 - row / 4, 1 - (row + 1) / 4
+            primitives.append(
+                {
+                    "kind": "path",
+                    "panel": 0,
+                    "commands": [
+                        ["moveto", left, top],
+                        ["lineto", right, top],
+                        ["lineto", right, bottom],
+                        ["lineto", left, bottom],
+                        ["lineto", left, top],
+                    ],
+                    "fill": [(ord(ticker) - ord("A") + 1) / 10, (column + 1) / 10, 0.2],
+                }
+            )
+    primitives.append(
+        {
+            "kind": "path",
+            "panel": 0,
+            "commands": [["moveto", 0.0, 0.25], ["lineto", 1.0, 0.25]],
+            "stroke": [0.1, 0.2, 0.3],
+        }
+    )
+    signature = {
+        "schematic": False,
+        "panels": [[4.0, 3.0]],
+        "primitives": primitives,
+        "numeric_labels": [["2018"], ["2019"], ["12.5"]],
+    }
+    metadata = {
+        "schema": 1,
+        "rows": [identities[ticker] for ticker in order],
+        "years": [2018, 2019],
+    }
+    return signature, metadata
+
+
+def test_evolution_compares_every_color_by_firm_with_inactive_sector_ties() -> None:
+    """Only an inactive within-sector permutation can move otherwise exact cells."""
+    check = _reproduction_checker()
+    before, reference = _evolution_heatmap(["A", "C", "B", "D"])
+    after, current = _evolution_heatmap(["A", "B", "C", "D"])
+    assert check.plot_differences(before, after)
+    assert (
+        check.portfolio_evolution_differences(before, after, reference, current) == []
+    )
+    # A correct color assigned to the wrong firm still fails, even though the
+    # overall color inventory and every geometric coordinate remain unchanged.
+    after["primitives"][2]["fill"], after["primitives"][4]["fill"] = (
+        after["primitives"][4]["fill"],
+        after["primitives"][2]["fill"],
+    )
+    failures = check.portfolio_evolution_differences(before, after, reference, current)
+    assert any("B/2018 exact RGB changed" in item for item in failures)
+    assert any("C/2018 exact RGB changed" in item for item in failures)
+
+
+@pytest.mark.parametrize("order", [["B", "A", "C", "D"], ["A", "D", "B", "C"]])
+def test_evolution_rejects_active_or_cross_sector_row_moves(order: list[str]) -> None:
+    """Identity alignment cannot hide an active-row shift or a sector crossing."""
+    check = _reproduction_checker()
+    before, reference = _evolution_heatmap(["A", "C", "B", "D"])
+    after, current = _evolution_heatmap(order)
+    assert check.portfolio_evolution_differences(before, after, reference, current)
+
+
+@pytest.mark.parametrize(
+    "change", ["color", "geometry", "scale", "other_color", "count"]
+)
+def test_evolution_keeps_all_scientific_content_strict(change: str) -> None:
+    """Grid alignment preserves exact colors, every path, scales and other marks."""
+    check = _reproduction_checker()
+    before, reference = _evolution_heatmap(["A", "C", "B", "D"])
+    after, current = _evolution_heatmap(["A", "B", "C", "D"])
+    if change == "color":
+        after["primitives"][0]["fill"][0] += 0.000001
+    elif change == "geometry":
+        after["primitives"][-1]["commands"][0][1] += 0.001
+    elif change == "scale":
+        after["numeric_labels"][-1] = ["12.6"]
+    elif change == "other_color":
+        after["primitives"][-1]["stroke"][0] += 0.000001
+    else:
+        after["primitives"].append(copy.deepcopy(after["primitives"][-1]))
+    assert check.portfolio_evolution_differences(before, after, reference, current)
+
+
+@pytest.mark.parametrize(
+    "change", ["missing", "duplicate", "unknown", "activity", "year"]
+)
+def test_evolution_rejects_changed_or_ambiguous_identity_metadata(change: str) -> None:
+    """A closed, unique and exact cohort is required before comparing any cells."""
+    check = _reproduction_checker()
+    before, reference = _evolution_heatmap(["A", "C", "B", "D"])
+    after, current = _evolution_heatmap(["A", "B", "C", "D"])
+    if change == "missing":
+        current["rows"].pop()
+    elif change == "duplicate":
+        current["rows"][2] = current["rows"][1]
+    elif change == "unknown":
+        current["extra"] = True
+    elif change == "activity":
+        current["rows"][1]["active"] = True
+    else:
+        current["years"][-1] = 2020
+    if change in {"duplicate", "unknown"}:
+        with pytest.raises(ValueError, match="portfolio-evolution"):
+            check.portfolio_evolution_differences(before, after, reference, current)
+    else:
+        assert check.portfolio_evolution_differences(before, after, reference, current)
+
+
+@pytest.mark.parametrize(
+    "text", ["", "%% pp-portfolio-evolution {}", "%% pp-portfolio-evolution-unknown {}"]
+)
+def test_evolution_requires_one_supported_pgf_metadata_record(text: str) -> None:
+    """Missing or unrecognized comment metadata fails closed."""
+    check = _reproduction_checker()
+    with pytest.raises(ValueError, match="portfolio-evolution"):
+        check.evolution_row_metadata(text)
 
 
 def test_reproduction_raster_comparison_ignores_metadata_but_checks_pixels() -> None:
@@ -535,3 +753,79 @@ def test_reproduction_operator_accepts_only_unprinted_precision_changes(
     current_path.write_text(original.replace("0.12345678901234567", "0.1245"))
     failures, _, _ = check.check_results(tmp_path, baseline)
     assert any("display #1" in failure and "0.125" in failure for failure in failures)
+
+
+@pytest.mark.parametrize("identity", ["g", "h"])
+@pytest.mark.parametrize(
+    ("reference", "current", "valid"),
+    [
+        ("3.552714e-15", "8.881784e-16", True),
+        ("3.552714e-15", "0.0", True),
+        ("3.552714e-15", "1e-12", False),
+        ("3.552714e-15", "-1e-16", False),
+        ("3.552714e-15", "NaN", False),
+        ("1e-12", "8.881784e-16", False),
+    ],
+)
+def test_reproduction_checks_both_identity_errors_against_certificate_bound(
+    tmp_path: Path, identity: str, reference: str, current: str, *, valid: bool
+) -> None:
+    """Roundoff may vary, but neither run may exceed the existing identity bound."""
+    check = _reproduction_checker()
+    fragment = "src/latex/projects/05_spatial_pricing/src/generated/numbers.tex"
+    consumer = "src/latex/projects/05_spatial_pricing/src/chapters/asymptotics.tex"
+    key = f"network-factor-w2-{identity}-common-mode-error"
+    original = rf"\ppDeclareValue{{{key}}}{{{reference}}}"
+    fixed = json.dumps({fragment: original}).encode()
+    fixed_path = tmp_path / "data/reference/published_values.json"
+    fixed_path.parent.mkdir(parents=True)
+    fixed_path.write_bytes(fixed)
+    current_path = tmp_path / fragment
+    current_path.parent.mkdir(parents=True)
+    current_path.write_text(rf"\ppDeclareValue{{{key}}}{{{current}}}")
+    consumer_path = tmp_path / consumer
+    consumer_path.parent.mkdir(parents=True)
+    consumer_path.write_text(rf"\ppnume[2]{{{key}}}")
+    site = check.display_sites(consumer_path.read_text(), consumer)[0][0]
+    baseline = {
+        "values_sha256": hashlib.sha256(fixed).hexdigest(),
+        "fragments": {
+            fragment: {
+                "literal_numbers": list[str](),
+                "integer_bindings": dict[str, str](),
+                "date_bindings": dict[str, str](),
+            }
+        },
+        "displays": {
+            consumer: [
+                dict(
+                    site.record(), expected=check.rendered_value(site, {key: reference})
+                )
+            ]
+        },
+        "figures": dict[str, object](),
+    }
+    failures, diagnostics, counts = check.check_results(tmp_path, baseline)
+    assert (not failures) is valid
+    assert counts["displays"] == 0
+    assert counts["identity_bounds"] == 1
+    assert bool(diagnostics) is valid
+    if not valid:
+        assert any("identity bound" in failure for failure in failures)
+    else:
+        other = consumer.replace("asymptotics.tex", "other.tex")
+        other_path = tmp_path / other
+        other_path.write_text(consumer_path.read_text())
+        other_site = check.display_sites(other_path.read_text(), other)[0][0]
+        baseline["displays"] = {
+            other: [
+                dict(
+                    other_site.record(),
+                    expected=check.rendered_value(other_site, {key: reference}),
+                )
+            ]
+        }
+        failures, _, counts = check.check_results(tmp_path, baseline)
+        assert any("display #1" in failure for failure in failures)
+        assert counts["displays"] == 1
+        assert counts["identity_bounds"] == 0

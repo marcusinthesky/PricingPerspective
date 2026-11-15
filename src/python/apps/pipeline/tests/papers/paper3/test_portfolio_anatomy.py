@@ -11,6 +11,7 @@ from pipeline._kernels.paper3.validation import solve_certificate
 from pipeline.figures.paper3.numbers import Paper3NumberInputs, _write_paper3_numbers
 from pipeline.figures.paper3.portfolio_anatomy import (
     _render_holdings_table,
+    _sector_order,
     _ticker_label_positions,
 )
 from pipeline.stages.papers.paper3.portfolio_anatomy import (
@@ -22,6 +23,30 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 _FINAL_YEAR = 2022
+
+
+def test_inactive_order_uses_existing_support_without_changing_weights() -> None:
+    """Roundoff in inactive weights cannot move firms or historical heatmap rows."""
+    firms = pd.DataFrame(
+        {
+            "ticker": ["B2", "AA", "C2", "B1", "AB", "C1"],
+            "sector": ["One", "One", "Two", "One", "One", "Two"],
+            "active": [False, True, False, False, True, False],
+            "weight": [2e-17, 0.2, 3e-17, 1e-17, 0.1, 0.0],
+        }
+    )
+    sectors = pd.DataFrame({"sector": ["One", "Two"]})
+    changed = firms.copy()
+    changed.loc[~changed["active"], "weight"] = [0.0, 1e-17, 3e-17, 2e-17]
+    for frame in (firms, changed):
+        original = frame.copy(deep=True)
+        ordered = _sector_order(frame, sectors)
+        assert ordered["ticker"].tolist() == ["AA", "AB", "B1", "B2", "C1", "C2"]
+        pd.testing.assert_frame_equal(frame, original)
+        pd.testing.assert_frame_equal(
+            ordered.set_index("ticker").sort_index(),
+            original.set_index("ticker").sort_index(),
+        )
 
 
 def test_ticker_labels_use_alternating_positions_without_dropping_data() -> None:

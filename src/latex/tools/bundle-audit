@@ -43,9 +43,9 @@ which is what every project here uses and what `just bundle` resolves for you
 Omitting it falls back to Tectonic's default bundle, which is NOT the one the
 manuscripts are pinned to.
 The optional --pdf mode publishes the staged PDF only after both compiles and
-every audit succeed. The archive stays source-only.
-PDF byte equality across recompiles is not required; the published bytes are
-chosen from the first, dependency-audited staged compile.
+every audit succeed. The archive stays source-only. --preview uses the same
+deterministic main.tex compile and source audits, publishing only the PDF and
+target-named log; it preserves existing release archives and manifests.
 
 STAGE_DIR must already contain main.tex plus every other source file that
 belongs in the bundle (chapters/, generated/, images/, refs.bib, and the
@@ -234,7 +234,13 @@ def tectonic_compile(
     rules: Path | None = None,
 ) -> None:
     """Compile main.tex with Tectonic from `stage`, offline against the bundle cache."""
-    cmd = ["tectonic", "-X", "compile", "--untrusted", "--only-cached", "--keep-logs"]
+    # The sanitized environment omits wall-clock SOURCE_DATE_EPOCH overrides.
+    # Both previews and releases compile main.tex, fixing the jobname used in
+    # PDF trailer IDs as well as dates and temporary-directory metadata.
+    cmd = [
+        "tectonic", "-X", "compile", "-Z", "deterministic-mode",
+        "--untrusted", "--only-cached", "--keep-logs", "--keep-intermediates",
+    ]
     if bundle:
         cmd += ["--bundle", bundle]
     if rules is not None:
@@ -828,6 +834,10 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--pdf", type=Path, help="publish the staged PDF beside the archive"
     )
+    parser.add_argument(
+        "--preview", action="store_true",
+        help="publish only a checked PDF and log, preserving release archives",
+    )
     args = parser.parse_args(argv[1:])
     stage = args.stage.resolve()
     target = args.target
@@ -855,6 +865,8 @@ def main(argv: list[str]) -> int:
             raise AuditError(
                 "release PDF must be a .pdf beside the archive, outside the stage"
             )
+        if args.preview and out_pdf is None:
+            raise AuditError("preview requires --pdf")
         # Clean any stale build state before the recorded compile so the rules
         # file reflects exactly this run's closure.
         for stale_suffix in EXCLUDED_SUFFIXES | {".ilg", ".idx", ".toc"}:
@@ -880,6 +892,21 @@ def main(argv: list[str]) -> int:
         audit_portable_names(stage, files)
         audit_includegraphics(stage, files)
 
+        if args.preview:
+            assert out_pdf is not None
+            out_pdf.parent.mkdir(parents=True, exist_ok=True)
+            with tempfile.TemporaryDirectory(
+                prefix=".bundle-preview-", dir=out_pdf.parent
+            ) as temporary:
+                for suffix in (".pdf", ".log", ".aux", ".bbl", ".blg", ".out"):
+                    source = stage / ("main" + suffix)
+                    if source.is_file():
+                        candidate = Path(temporary) / (out_pdf.stem + suffix)
+                        candidate.write_bytes(source.read_bytes())
+                        candidate.replace(out_pdf.with_suffix(suffix))
+            print(f"bundle-audit: preview PASS: {out_pdf}")
+            return 0
+
         if target == "quantitative-finance":
             engine = f"xetex (Tectonic, {class_name})"
         elif target == "gfj":
@@ -892,8 +919,8 @@ def main(argv: list[str]) -> int:
         manifest_path = write_manifest(stage, manifest)
 
         # Build and recompile a candidate before replacing any advertised artifact.
-        # Keep the original staged PDF: independent XeTeX runs need not have equal
-        # bytes (timestamps/IDs), and the unpacked compile is a source-closure gate.
+        # Publish the exact dependency-audited compile. The unpacked compile
+        # independently proves that the source archive is self-contained.
         out_archive.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(
             prefix=".bundle-release-", dir=out_archive.parent

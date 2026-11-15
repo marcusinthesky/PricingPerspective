@@ -52,8 +52,6 @@ here re-derives finiteness of a second moment; a caller over a concrete space di
 once. This is the same discipline as `WassersteinGeometry.Contraction` and
 `Transmission.Frechet`.
 
-## References
-
 -/
 
 namespace PricingPerspective.Transmission

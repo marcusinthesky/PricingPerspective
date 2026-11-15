@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -53,12 +54,13 @@ def _sector_order(firms: pd.DataFrame, sectors: pd.DataFrame) -> pd.DataFrame:
     order = {sector: index for index, sector in enumerate(sectors["sector"])}
     ordered = firms.assign(
         _sector_order=firms["sector"].map(order),
+        _sort_weight=firms["weight"].where(firms["active"], 0.0),
     ).sort_values(
-        ["_sector_order", "weight", "ticker"],
+        ["_sector_order", "_sort_weight", "ticker"],
         ascending=[True, False, True],
         ignore_index=True,
     )
-    return ordered.drop(columns="_sector_order")
+    return ordered.drop(columns=["_sector_order", "_sort_weight"])
 
 
 def _sector_colours(sectors: pd.DataFrame) -> dict[str, str]:
@@ -392,6 +394,22 @@ def _fig_portfolio_evolution(
             )
         _weight_scale(ax_heatmap, cmap)
         _metric_table(ax_metrics, vintage_summary)
+    metadata = {
+        "schema": 1,
+        "rows": [
+            {"ticker": str(ticker), "sector": str(sector), "active": bool(active)}
+            for ticker, sector, active in ordered[
+                ["ticker", "sector", "active"]
+            ].itertuples(index=False, name=None)
+        ],
+        "years": years,
+    }
+    with path.open("a", encoding="utf-8") as output:
+        output.write(
+            "%% pp-portfolio-evolution "
+            + json.dumps(metadata, separators=(",", ":"))
+            + "\n"
+        )
 
 
 def _escape_tex(value: object) -> str:

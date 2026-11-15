@@ -25,6 +25,24 @@ _MAX_EXPONENT = 20
 _RGB_COMPONENTS = 3
 _POINT_COMPONENTS = 2
 _MAX_FIGURE_FAILURES = 8
+_GEOMETRY_FLOOR_INCHES = 0.01 / 600
+_PORTFOLIO_EVOLUTION_FIGURE = (
+    "src/latex/projects/03_distance_implied_mpt/src/images/portfolio_evolution.pgf"
+)
+_EVOLUTION_METADATA_PREFIX = "%% pp-portfolio-evolution "
+# These two algebraically zero witnesses use the existing certificate contract
+# in params.yaml: paper5.network_certificate.tolerance (also tested at 1e-12).
+# Their roundoff digits are diagnostics, not statistical estimates.
+_IDENTITY_RESIDUAL_SOURCE = (
+    "src/latex/projects/05_spatial_pricing/src/chapters/asymptotics.tex"
+)
+_IDENTITY_RESIDUAL_EXPRESSIONS = frozenset(
+    {
+        r"\ppvalue{network-factor-w2-g-common-mode-error}",
+        r"\ppvalue{network-factor-w2-h-common-mode-error}",
+    }
+)
+_IDENTITY_RESIDUAL_BOUND = Decimal("1e-12")
 
 type Point = tuple[float, float]
 type Frame = tuple[float, float, float, float]
@@ -490,7 +508,7 @@ def pgf_signature(text: str, *, schematic: bool = False) -> dict:  # noqa: C901,
 
 
 def plot_differences(before: dict, after: dict) -> list[str]:  # noqa: C901, PLR0912 - compare every serialized primitive
-    """Compare scientific geometry at the PGF renderer's one-microinch resolution."""
+    """Compare geometry with serializer bounds and a 0.01-pixel floor at 600 dpi."""
     failures = []
     if before["numeric_labels"] != after["numeric_labels"]:
         failures.append("numeric plot labels/scales changed")
@@ -531,12 +549,14 @@ def plot_differences(before: dict, after: dict) -> list[str]:  # noqa: C901, PLR
                 zip(first[1:], second[1:], strict=True)
             ):
                 # Each serialized point and clip bound is rounded to 1e-6 inch.
-                # Both normalizations contribute to the error envelope.
-                tolerance = (
-                    (2.0 + max(abs(left), abs(right)))
-                    * 1e-6
-                    / min(widths[coordinate % 2], new_widths[coordinate % 2])
-                )
+                # Both normalizations contribute to the error envelope. A
+                # 0.01-pixel floor at 600 dpi also tolerates subpixel movement
+                # from numerical solver differences below printed precision.
+                # Convert inches with this coordinate's old/new panel extent.
+                tolerance = max(
+                    (2.0 + max(abs(left), abs(right))) * 1e-6,
+                    _GEOMETRY_FLOOR_INCHES,
+                ) / min(widths[coordinate % 2], new_widths[coordinate % 2])
                 if abs(left - right) > tolerance:
                     changed = True
                     break
@@ -549,6 +569,152 @@ def plot_differences(before: dict, after: dict) -> list[str]:  # noqa: C901, PLR
         if len(failures) >= _MAX_FIGURE_FAILURES:
             break
     return failures
+
+
+def _validate_evolution_rows(metadata: dict) -> None:
+    """Reject ambiguous identities or extensions to this single figure's schema."""
+    if (
+        not isinstance(metadata, dict)
+        or set(metadata) != {"schema", "rows", "years"}
+        or type(metadata["schema"]) is not int
+        or metadata["schema"] != 1
+    ):
+        message = "invalid portfolio-evolution row metadata schema"
+        raise ValueError(message)
+    rows, years = metadata["rows"], metadata["years"]
+    if (
+        not isinstance(rows, list)
+        or not rows
+        or not isinstance(years, list)
+        or not years
+        or any(type(year) is not int for year in years)
+        or years != sorted(set(years))
+    ):
+        message = "invalid portfolio-evolution rows or years"
+        raise ValueError(message)
+    tickers = []
+    for row in rows:
+        if (
+            not isinstance(row, dict)
+            or set(row) != {"ticker", "sector", "active"}
+            or type(row["active"]) is not bool
+            or any(
+                not isinstance(row[key], str)
+                or not row[key].strip()
+                or row[key] != row[key].strip()
+                for key in ("ticker", "sector")
+            )
+        ):
+            message = "invalid portfolio-evolution row identity"
+            raise ValueError(message)
+        tickers.append(row["ticker"])
+    if len(set(tickers)) != len(tickers):
+        message = "duplicate portfolio-evolution ticker identity"
+        raise ValueError(message)
+
+
+def evolution_row_metadata(text: str) -> dict:
+    """Read the one complete identity record emitted from the plotted row order."""
+    lines = [
+        line
+        for line in text.splitlines()
+        if line.startswith("%% pp-portfolio-evolution")
+    ]
+    if len(lines) != 1 or not lines[0].startswith(_EVOLUTION_METADATA_PREFIX):
+        message = "missing or duplicate portfolio-evolution row metadata"
+        raise ValueError(message)
+    metadata = json.loads(lines[0][len(_EVOLUTION_METADATA_PREFIX) :])
+    _validate_evolution_rows(metadata)
+    return metadata
+
+
+def _heatmap_cells(signature: dict, rows: int, columns: int) -> dict:
+    """Identify every colored grid rectangle from its normalized geometry."""
+    cells = {}
+    widths = signature["panels"][0]
+    for index, item in enumerate(signature["primitives"]):
+        commands = item["commands"]
+        if (
+            item["kind"] != "path"
+            or item["panel"] != 0
+            or "fill" not in item
+            or "stroke" in item
+            or [command[0] for command in commands]
+            != ["moveto", "lineto", "lineto", "lineto", "lineto"]
+            or any(len(command) != _POINT_COMPONENTS + 1 for command in commands)
+        ):
+            continue
+        column = round(commands[0][1] * columns)
+        row = round((1 - commands[0][2]) * rows)
+        if not (0 <= row < rows and 0 <= column < columns):
+            continue
+        left, right = column / columns, (column + 1) / columns
+        top, bottom = 1 - row / rows, 1 - (row + 1) / rows
+        expected = [
+            (left, top),
+            (right, top),
+            (right, bottom),
+            (left, bottom),
+            (left, top),
+        ]
+        if any(
+            abs(actual - wanted)
+            > max((2.0 + max(abs(actual), abs(wanted))) * 1e-6, _GEOMETRY_FLOOR_INCHES)
+            / widths[axis]
+            for command, point in zip(commands, expected, strict=True)
+            for axis, (actual, wanted) in enumerate(
+                zip(command[1:], point, strict=True)
+            )
+        ):
+            continue
+        if (row, column) in cells:
+            message = "duplicate portfolio-evolution grid cell"
+            raise ValueError(message)
+        cells[row, column] = index
+    if len(cells) != rows * columns:
+        message = "incomplete or invalid portfolio-evolution heatmap grid"
+        raise ValueError(message)
+    return cells
+
+
+def portfolio_evolution_differences(
+    before: dict, after: dict, reference_rows: dict, current_rows: dict
+) -> list[str]:
+    """Compare exact per-firm colors, allowing only inactive within-sector row ties."""
+    _validate_evolution_rows(reference_rows)
+    _validate_evolution_rows(current_rows)
+    expected, actual = reference_rows["rows"], current_rows["rows"]
+    expected_ids = {row["ticker"]: row for row in expected}
+    actual_ids = {row["ticker"]: row for row in actual}
+    if expected_ids != actual_ids or reference_rows["years"] != current_rows["years"]:
+        return ["portfolio-evolution cohort, sector, activity or years changed"]
+    for first, second in zip(expected, actual, strict=True):
+        if first["sector"] != second["sector"] or (
+            (first["active"] or second["active"])
+            and first["ticker"] != second["ticker"]
+        ):
+            return [
+                "portfolio-evolution active row position or sector ordering changed"
+            ]
+    years = reference_rows["years"]
+    old_cells = _heatmap_cells(before, len(expected), len(years))
+    new_cells = _heatmap_cells(after, len(actual), len(years))
+    if old_cells != new_cells:
+        return ["portfolio-evolution heatmap cell path ordering changed"]
+    reference_colors = {
+        (expected[row]["ticker"], years[column]): before["primitives"][index]["fill"]
+        for (row, column), index in old_cells.items()
+    }
+    normalized = {**after, "primitives": [dict(item) for item in after["primitives"]]}
+    failures = []
+    for (row, column), index in new_cells.items():
+        key = (actual[row]["ticker"], years[column])
+        if after["primitives"][index]["fill"] != reference_colors[key]:
+            failures.append(f"portfolio-evolution {key[0]}/{key[1]} exact RGB changed")
+        # Only these verified grid-cell colors are aligned by identity. All
+        # geometry, numeric labels, path counts and other colors stay strict.
+        normalized["primitives"][index]["fill"] = before["primitives"][index]["fill"]
+    return failures + plot_differences(before, normalized)
 
 
 def _paper(relative: str) -> str:
@@ -570,6 +736,45 @@ def _catalogs(fragments: dict[str, str]) -> dict[str, dict[str, str]]:
 
 def _display_record(record: dict[str, object]) -> Display:
     return Display(**{key: value for key, value in record.items() if key != "expected"})
+
+
+def _identity_residual_failure(
+    display: Display, reference: dict[str, str], current: dict[str, str]
+) -> str | None:
+    """Require both algebraic-identity errors to satisfy the certificate bound."""
+    for label, catalog in (("reference", reference), ("current", current)):
+        value = evaluate_expression(display.expression, catalog)
+        if not SCALAR.fullmatch(value):
+            return f"{label} identity residual is not a finite nonnegative number"
+        number = Decimal(value)
+        if not number.is_finite() or not 0 <= number < _IDENTITY_RESIDUAL_BOUND:
+            return (
+                f"{label} identity residual {value} must satisfy "
+                f"0 <= error < {_IDENTITY_RESIDUAL_BOUND}"
+            )
+    return None
+
+
+def _check_identity_residual(
+    display: Display,
+    reference: dict[str, dict[str, str]],
+    current: dict[str, dict[str, str]],
+) -> tuple[list[str], list[str]]:
+    """Report a bounded identity witness separately from displayed estimates."""
+    try:
+        paper = _paper(display.source)
+        failure = _identity_residual_failure(display, reference[paper], current[paper])
+    except (KeyError, ValueError, ArithmeticError) as error:
+        failure = str(error)
+    if failure:
+        return [f"{display.source}: identity bound: {failure}"], []
+    return [], [
+        (
+            f"{display.source}: {display.expression}: reference and current identity "
+            f"errors satisfy 0 <= error < {_IDENTITY_RESIDUAL_BOUND}; "
+            "roundoff digits are reported independently of displayed estimates"
+        )
+    ]
 
 
 def fragment_differences(
@@ -614,7 +819,7 @@ def fragment_differences(
     return failures
 
 
-def check_results(  # noqa: C901, PLR0912 - report all independent failures
+def check_results(  # noqa: C901 - report all independent failures
     root: Path, baseline: dict[str, object], *, raw_diagnostic: bool = False
 ) -> tuple[list[str], list[str], dict[str, int]]:
     """Compare complete displayed values and scientific figure geometry/pixels."""
@@ -641,7 +846,8 @@ def check_results(  # noqa: C901, PLR0912 - report all independent failures
                 f"{relative}: raw numeric tokens differ (diagnostic only)"
             )
     catalogs = _catalogs(current)
-    display_count = 0
+    reference_catalogs = _catalogs(fixed)
+    display_count = identity_count = 0
     for relative, expected in baseline["displays"].items():
         path = root / relative
         if not path.is_file():
@@ -660,6 +866,17 @@ def check_results(  # noqa: C901, PLR0912 - report all independent failures
             )
             continue
         for site, record in zip(actual, expected, strict=True):
+            if (
+                site.source == _IDENTITY_RESIDUAL_SOURCE
+                and site.expression in _IDENTITY_RESIDUAL_EXPRESSIONS
+            ):
+                identity_count += 1
+                errors, notices = _check_identity_residual(
+                    site, reference_catalogs, catalogs
+                )
+                failures.extend(errors)
+                diagnostics.extend(notices)
+                continue
             display_count += 1
             try:
                 value = rendered_value(site, catalogs[_paper(relative)])
@@ -673,32 +890,54 @@ def check_results(  # noqa: C901, PLR0912 - report all independent failures
                     f"({site.mode}, precision={site.precision}, "
                     f"scientific={site.scientific})"
                 )
-    for relative, expected in baseline["figures"].items():
-        path = root / relative
-        if not path.is_file():
-            failures.append(f"{relative}: missing scientific figure")
-            continue
-        try:
-            differences = _figure_differences(path, expected)
-            failures.extend(f"{relative}: {difference}" for difference in differences)
-        except (ValueError, OSError) as error:
-            failures.append(f"{relative}: figure validation failed: {error}")
+    failures.extend(_check_figures(root, baseline["figures"]))
     return (
         failures,
         diagnostics,
         {
             "fragments": len(current),
             "displays": display_count,
+            "identity_bounds": identity_count,
             "figures": len(baseline["figures"]),
         },
     )
 
 
-def _figure_differences(path: Path, expected: dict) -> list[str]:
+def _check_figures(root: Path, figures: dict[str, dict]) -> list[str]:
+    """Collect every missing, invalid or changed scientific figure."""
+    failures = []
+    for relative, expected in figures.items():
+        path = root / relative
+        if not path.is_file():
+            failures.append(f"{relative}: missing scientific figure")
+            continue
+        try:
+            differences = _figure_differences(path, expected, relative=relative)
+            failures.extend(f"{relative}: {difference}" for difference in differences)
+        except (ValueError, OSError) as error:
+            failures.append(f"{relative}: figure validation failed: {error}")
+    return failures
+
+
+def _figure_differences(
+    path: Path, expected: dict, *, relative: str | None = None
+) -> list[str]:
     if path.suffix == ".pgf":
-        actual = pgf_signature(
-            path.read_text(encoding="utf-8"), schematic=expected["schematic"]
-        )
+        text = path.read_text(encoding="utf-8")
+        actual = pgf_signature(text, schematic=expected["schematic"])
+        if relative == _PORTFOLIO_EVOLUTION_FIGURE:
+            if "row_metadata" not in expected:
+                message = "missing reference portfolio-evolution row metadata"
+                raise ValueError(message)
+            return portfolio_evolution_differences(
+                expected["signature"],
+                actual,
+                expected["row_metadata"],
+                evolution_row_metadata(text),
+            )
+        if "row_metadata" in expected:
+            message = "row metadata is only supported for portfolio evolution"
+            raise ValueError(message)
         return plot_differences(expected["signature"], actual)
     actual = raster_signature(path.read_bytes())
     if actual == expected["signature"]:
@@ -748,7 +987,8 @@ def main() -> None:
         parser.exit(1, "\n".join(failures) + "\n")
     print(  # noqa: T201 - CLI result
         f"Published-precision comparison passed: {counts['displays']} numeric "
-        f"displays, {counts['fragments']} fragments, {counts['figures']} figures"
+        f"displays, {counts['identity_bounds']} numerical identity bounds, "
+        f"{counts['fragments']} fragments, {counts['figures']} figures"
     )
 
 

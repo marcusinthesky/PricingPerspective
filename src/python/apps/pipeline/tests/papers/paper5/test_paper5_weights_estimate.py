@@ -7,6 +7,7 @@ invariants required by the task acceptance criteria.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
@@ -15,8 +16,14 @@ import pandas as pd
 import pytest
 from pipeline.stages.papers.paper5.co_mentions import load_co_mentions_w
 from pipeline.stages.papers.paper5.estimate import (
+    NUMERICAL_FLOOR,
     SarEstimationError,
+    _global_scalar_minimize,
     _log_det_jacobian,
+    _polish_sar_profile,
+    _sar_profile,
+    _sar_profile_score,
+    _SarProfile,
     sar_gmm,
     sar_qmle,
 )
@@ -231,3 +238,111 @@ def test_sar_qmle_and_gmm_respect_stationarity_bound() -> None:
 
     assert abs(qmle["rho_hat"]) < 1.0
     assert np.isfinite(qmle["loglik"])
+
+
+def _nilpotent_sar_panel(rho: float) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """Give the concentrated likelihood a known interior or boundary optimum."""
+    rng = np.random.default_rng(246)
+    driver = rng.normal(size=300)
+    noise = rng.normal(size=300)
+    # Orthogonal centered noise leaves the OLS/profile optimum exactly at rho.
+    driver -= np.mean(driver)
+    noise -= np.mean(noise)
+    noise -= driver * (noise @ driver) / (driver @ driver)
+    returns = np.column_stack((rho * driver + noise, driver))
+    return returns, np.array([[0.0, 1.0], [0.0, 0.0]])
+
+
+@pytest.mark.parametrize("rho", [-0.65, 0.0, 0.57])
+def test_sar_score_matches_likelihood_derivative(rho: float) -> None:
+    """The full complex Jacobian and intercept profile have the right score."""
+    rng = np.random.default_rng(751)
+    returns = rng.normal(size=(70, 3))
+    weights = np.array([[0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]])
+    profile = _sar_profile(returns, weights)
+    step = 1e-5
+    derivative = (profile.objective(rho + step) - profile.objective(rho - step)) / (
+        2.0 * step
+    )
+    np.testing.assert_allclose(
+        _sar_profile_score(profile, rho), -derivative, rtol=1e-8, atol=1e-8
+    )
+
+
+def test_sar_score_matches_scale_floor_derivative() -> None:
+    """The innovation-variance floor remains part of the same likelihood."""
+    returns, weights = _nilpotent_sar_panel(0.37)
+    returns *= np.sqrt(NUMERICAL_FLOOR) / 100
+    profile = _sar_profile(returns, weights)
+    step = 1e-3
+    rho = 0.1
+    assert profile.nuisance(rho)[1] == NUMERICAL_FLOOR
+    derivative = (profile.objective(rho + step) - profile.objective(rho - step)) / (
+        2.0 * step
+    )
+    np.testing.assert_allclose(
+        _sar_profile_score(profile, rho), -derivative, rtol=1e-6, atol=1e-8
+    )
+
+
+@pytest.mark.parametrize("offset", [0.0, 1e12])
+def test_sar_polish_resolves_large_constant_objective_plateau(
+    monkeypatch: pytest.MonkeyPatch, offset: float
+) -> None:
+    """A likelihood constant must not change the resolved coefficient."""
+    returns, weights = _nilpotent_sar_panel(0.37123456789)
+    objective = _SarProfile.objective
+    monkeypatch.setattr(
+        _SarProfile, "objective", lambda profile, rho: objective(profile, rho) + offset
+    )
+    fit = sar_qmle(returns, weights, compute_se=False)
+    np.testing.assert_allclose(fit["rho_hat"], 0.37123456789, rtol=0.0, atol=2e-14)
+    profile = _sar_profile(returns, weights)
+    assert fit["loglik"] == -profile.objective(fit["rho_hat"])
+    assert fit["converged"]
+
+
+def test_sar_polish_retains_admissible_boundary() -> None:
+    """An increasing likelihood without a score root keeps its boundary optimum."""
+    returns, weights = _nilpotent_sar_panel(1.2)
+    profile = _sar_profile(returns, weights)
+    original = _global_scalar_minimize(profile.objective, profile.bounds)
+    assert original.x == profile.bounds[1]
+    assert _polish_sar_profile(profile, original) is original
+    assert sar_qmle(returns, weights, compute_se=False)["rho_hat"] == profile.bounds[1]
+
+
+def test_sar_polish_retains_flat_unbracketed_profile() -> None:
+    """An unidentified zero interaction must not acquire an arbitrary root."""
+    returns, _weights = _nilpotent_sar_panel(0.37)
+    profile = _sar_profile(returns, np.zeros((2, 2)))
+    original = _global_scalar_minimize(profile.objective, profile.bounds)
+    np.testing.assert_equal(_sar_profile_score(profile, original.x), 0.0)
+    assert _polish_sar_profile(profile, original) is original
+
+
+def test_sar_polish_preserves_search_failure_status() -> None:
+    """Resolving a local score must not conceal an earlier failed refinement."""
+    returns, weights = _nilpotent_sar_panel(0.37123456789)
+    profile = _sar_profile(returns, weights)
+    original = replace(
+        _global_scalar_minimize(profile.objective, profile.bounds), converged=False
+    )
+    polished = _polish_sar_profile(profile, original)
+    assert not polished.converged
+    np.testing.assert_allclose(polished.x, 0.37123456789, rtol=0.0, atol=2e-14)
+
+
+def test_sar_polish_rejects_materially_worse_likelihood(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A score root cannot replace the global winner with a worse basin."""
+    returns, weights = _nilpotent_sar_panel(0.37)
+    profile = _sar_profile(returns, weights)
+    original = _global_scalar_minimize(profile.objective, profile.bounds)
+    displaced_root = original.x + 0.01
+    monkeypatch.setattr(
+        "pipeline.stages.papers.paper5.estimate._sar_profile_score",
+        lambda _profile, rho: displaced_root - rho,
+    )
+    assert _polish_sar_profile(profile, original) is original

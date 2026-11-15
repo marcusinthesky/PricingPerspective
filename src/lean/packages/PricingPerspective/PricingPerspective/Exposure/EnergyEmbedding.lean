@@ -231,13 +231,12 @@ end
 
 end HalfNormalizedMeanEmbedding
 
-/-! ### s4 — carrying the energy-kernel embedding to measures (Paper 3)
+/-! ### Carrying the energy-kernel embedding to measures (Paper 3)
 
 `Exposure/Energy/Core.lean` builds `hilbertEnergyKernelEmbedding`, whose `energy_sq`
-slot is `‖· − ·‖²` on a real inner-product space, and t24 exercised the identity layer
-at *exposures*. The declarations below carry that instance to *probability measures*
-through `EnergyStatistics.energyEmbed`, which is the wiring `MeanEmbedding.lean`
-records as stage s4.
+slot is `‖· − ·‖²` on a real inner-product space. The declarations below carry that
+instance from *exposures* to *probability measures* through
+`EnergyStatistics.energyEmbed`, constructed in `MeanEmbedding.lean`.
 
 **Constant.** Sejdinovic et al. (2013) Thm 22 reads `D_{E,ρ} = 2γ_k²` for a kernel `k`
 that generates `ρ` via `ρ(z,w) = k(z,z) + k(w,w) − 2k(z,w)` — the *half-normalized*
@@ -301,7 +300,7 @@ theorem energy_sq_energyEmbed_eq_energyDistanceSq
   EnergyStatistics.norm_sub_energyEmbed_sq μ ν hμ hν
 
 /--
-**s4 keystone — the identity layer at the measure level.**
+**The identity layer at the measure level.**
 
 Applying `energy_to_covariance_exact_identity` at `hilbertEnergyKernelEmbedding` and the
 slot alignment above gives the exact decomposition of the *population squared energy
@@ -309,9 +308,8 @@ distance* into embedding variances and covariance:
 
   `𝓔²(μ, ν) = ‖Φ μ‖² + ‖Φ ν‖² − 2⟪Φ μ, Φ ν⟫`.
 
-t24 exercised the identity layer only at exposures, where `energy_sq` was `‖β_i − β_j‖²`
-by construction; this exercises it where the left-hand side is a genuine energy distance
-between measures, which is the content s4 was reserving.
+At exposures, `energy_sq` is `‖β_i − β_j‖²` by construction. Here the left-hand side
+is a genuine energy distance between probability measures.
 
 **Scope.** `⟪Φ μ, Φ ν⟫` is an `L²` inner product of mean embeddings. Reading it as
 systematic return covariance is the paper's modelling claim, is not formalized anywhere in

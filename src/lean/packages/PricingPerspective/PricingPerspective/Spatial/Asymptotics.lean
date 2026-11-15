@@ -6,10 +6,8 @@ import Mathlib.Topology.Instances.Matrix
 /-!
 # Spatial asymptotics: segment/stationary structure and the strong-interaction limit
 
-Paper 5 rung `C2` (plan `paper5/t06-spatial-asymptotics-rungs`): the "memorable theorems" of the
-spatial-lag program, built on the finite-`ρ` spine of `Spatial/Model.lean`
-(`leontief`, `spatialCov`, `spatialCov_factor_model`). One-writer-per-file: this module CONSUMES
-`Spatial/Model.lean` and never edits it.
+Paper 5's spatial-lag asymptotics, built on the finite-`ρ` results of
+`Spatial/Model.lean` (`leontief`, `spatialCov`, `spatialCov_factor_model`).
 
 Two results.
 
