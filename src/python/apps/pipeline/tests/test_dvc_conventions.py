@@ -25,6 +25,22 @@ STAGES: dict[str, dict[str, Any]] = {
 }
 RAW_STAGES: dict[str, dict[str, Any]] = CONFIG["stages"]
 
+PUBLISHED_INPUT_STAGE = "fixed_inputs"
+
+BYTE_SOURCE_STAGES = frozenset({"co_mentions", "public_inputs_check"})
+BYTE_SOURCE_DEPS = frozenset(
+    [
+        "src/python/apps/pipeline/src",
+        "src/python/apps/hotelling/src",
+        "src/python/packages/dotell/src",
+        "src/python/pyproject.toml",
+        "src/python/apps/pipeline/pyproject.toml",
+        "src/python/apps/hotelling/pyproject.toml",
+        "src/python/packages/dotell/pyproject.toml",
+        "src/python/uv.lock",
+    ]
+)
+
 PUBLICATION_ROOTS = {
     "render",
     "render_wfbs",
@@ -70,14 +86,19 @@ def _is_publication_path(path: str) -> bool:
     return path.startswith(("${p1_tex}/", "${p3_tex}/", "${p5_tex}/", "${p6_tex}/"))
 
 
-def test_public_stages_recompute_from_the_published_inputs() -> None:
+def test_public_stages_recompute_from_the_fixed_inputs() -> None:
     """Every retained computation can execute from its declared numeric inputs."""
     frozen = {
         name
         for name, stage in RAW_STAGES.items()
         if stage.get("frozen") or stage.get("do", {}).get("frozen")
     }
-    assert not frozen
+    assert frozen == {PUBLISHED_INPUT_STAGE}
+    fixed = RAW_STAGES[PUBLISHED_INPUT_STAGE]
+    assert fixed["cmd"] == "false"
+    assert not fixed.get("deps")
+    assert not fixed.get("params")
+    assert all(options.get("cache", True) for _, options in _outs(fixed))
 
 
 @pytest.mark.parametrize(
@@ -115,7 +136,10 @@ def test_stage_name_matches_its_role(name: str) -> None:
     """Match a producer's role and output owner, including directory outputs."""
     stage = STAGES[name]
     outs = [path for path, _ in _outs(stage)]
-    if name in PUBLICATION_ROOTS | CERTIFICATION | {"semflow_refresh"}:
+    if name in PUBLICATION_ROOTS | CERTIFICATION | {
+        "semflow_refresh",
+        PUBLISHED_INPUT_STAGE,
+    }:
         return
     match = PAPER_STAGE.match(name)
     if match is None:
@@ -184,6 +208,10 @@ def test_code_deps_are_semflow_fingerprints(name: str) -> None:
     """Use the reachable source closure without whole-file dependency churn."""
     stage = STAGES[name]
     if "${py_" not in stage["cmd"] or name == "semflow_refresh":
+        return
+    if name in BYTE_SOURCE_STAGES:
+        assert BYTE_SOURCE_DEPS.issubset(_deps(stage))
+        assert not any(dep.startswith(".semflow/hashes/") for dep in _deps(stage))
         return
     for dep in _deps(stage):
         assert not dep.endswith(("uv.lock", ".py")), (

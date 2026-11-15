@@ -122,6 +122,9 @@ def compile_document(
             "tectonic",
             "-X",
             "compile",
+            # Random clean-room paths and wall-clock dates must not alter tracked PDFs.
+            "-Z",
+            "deterministic-mode",
             "--untrusted",
             "--only-cached",
             "--keep-logs",
@@ -409,7 +412,10 @@ def build(project: Path, bundle: str, release: bool) -> None:
         payloads[companion_output / f"{COMPANION}.pdf"] = payloads[
             destination / f"{COMPANION}.pdf"
         ]
-        payloads[destination / candidate_archive.name] = candidate_archive.read_bytes()
+        if release:
+            payloads[destination / candidate_archive.name] = (
+                candidate_archive.read_bytes()
+            )
         # Keep logs/catalog for human validation without contaminating source archives.
         for name in ("main.log", "companion.log", "catalog.log", "label-catalog.json"):
             payloads[destination / name] = (unpacked / name).read_bytes()

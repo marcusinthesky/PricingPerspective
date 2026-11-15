@@ -1,5 +1,0 @@
-outs:
-- md5: 0d4f2599703d25af6ddbb81002556362
-  size: 1963
-  hash: md5
-  path: inference_audit_design.json

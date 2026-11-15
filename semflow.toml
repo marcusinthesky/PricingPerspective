@@ -14,5 +14,6 @@ ignore-type-checking-blocks = true
 
 [tracking]
 auto-typer = true
-# The fingerprint generator retains its tool-environment byte dependencies.
-control-stages = ["semflow_refresh"]
+# These control stages retain complete local source and locked-environment
+# byte dependencies.
+control-stages = ["semflow_refresh", "co_mentions", "public_inputs_check"]

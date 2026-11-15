@@ -1032,8 +1032,8 @@ stages:
     deps:
     - path: semflow.toml
       hash: md5
-      md5: 4a8be4398ec2ccf63cd591e86745a9fc
-      size: 484
+      md5: 1c7b26d492fd371b5074d95edeb3aff0
+      size: 542
     - path: src/python/apps/hotelling/src
       hash: md5
       md5: c900519ed3a8c922bb861273f884aec0.dir
@@ -1041,9 +1041,9 @@ stages:
       nfiles: 16
     - path: src/python/apps/pipeline/src
       hash: md5
-      md5: 6d9e423c687d20fe73d7ce17e3d33306.dir
-      size: 2076321
-      nfiles: 231
+      md5: 1b8b5ee493bfe83af6cd2e16f80f0a2a.dir
+      size: 2075972
+      nfiles: 229
     - path: src/python/pyproject.toml
       hash: md5
       md5: 315ccb1be11aea96ca6843c5093b7ddc
@@ -1055,9 +1055,9 @@ stages:
     outs:
     - path: .semflow/hashes
       hash: md5
-      md5: 8bfa2b730acabb4a0be646133eb9ef64.dir
-      size: 2172468
-      nfiles: 76
+      md5: c59d5d9d86d14c465266fdfd22eae8c8.dir
+      size: 2165211
+      nfiles: 74
   p1_neighbour_outcome_split:
     cmd: uv run --project src/python pipeline paper1-neighbour-outcome-split 
       --distance-artifact-dir 
@@ -1500,10 +1500,6 @@ stages:
       data/universe.csv --output-dir data/shared/co_mentions --start-date 
       2018-01-01 --end-date 2022-12-31 --min-persistence-years 2
     deps:
-    - path: .semflow/hashes/entrypoints/pipeline/compute-co-mentions.json
-      hash: md5
-      md5: fb5b4f1ef21267c854af972e1fdf1175
-      size: 3072
     - path: data/shared/co_mention_inputs/events.parquet
       hash: md5
       md5: 679ab1b2107207797aae7715c2b6a5df
@@ -1512,6 +1508,41 @@ stages:
       hash: md5
       md5: fafbf7567127e11985d66621666715c3
       size: 7590
+    - path: src/python/apps/hotelling/pyproject.toml
+      hash: md5
+      md5: d0a822f9ba7c87e1a94decee0f029852
+      size: 1414
+    - path: src/python/apps/hotelling/src
+      hash: md5
+      md5: c900519ed3a8c922bb861273f884aec0.dir
+      size: 106761
+      nfiles: 16
+    - path: src/python/apps/pipeline/pyproject.toml
+      hash: md5
+      md5: fc83e4c12e2ecf282a879e73abfc0b3a
+      size: 3203
+    - path: src/python/apps/pipeline/src
+      hash: md5
+      md5: 1b8b5ee493bfe83af6cd2e16f80f0a2a.dir
+      size: 2075972
+      nfiles: 229
+    - path: src/python/packages/dotell/pyproject.toml
+      hash: md5
+      md5: eaa540912e09db0fb03ba0357d5cd16c
+      size: 1438
+    - path: src/python/packages/dotell/src
+      hash: md5
+      md5: 16c56769b0ad71b35bee469bcbc59ddb.dir
+      size: 50964
+      nfiles: 7
+    - path: src/python/pyproject.toml
+      hash: md5
+      md5: 315ccb1be11aea96ca6843c5093b7ddc
+      size: 4177
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 4fd3b93afb32898a19e9b05a433198a6
+      size: 250457
     params:
       params.yaml:
         co_mentions.min_persistence_years: 2
@@ -10502,9 +10533,9 @@ stages:
       size: 104473
       nfiles: 4
   barycentres@qwen3_embedding_4b__unit__wasserstein_w2_loo:
-    cmd: uv run --project src/python pipeline typed-barycentre --provider-id 
-      qwen3-embedding-4b --representation-id qwen3-embedding-4b-unit --arm-id 
-      wasserstein_w2_loo --output-dir 
+    cmd: uv run --locked --project src/python pipeline typed-barycentre 
+      --provider-id qwen3-embedding-4b --representation-id 
+      qwen3-embedding-4b-unit --arm-id wasserstein_w2_loo --output-dir 
       data/shared/barycentres/qwen3-embedding-4b/qwen3-embedding-4b-unit/wasserstein_w2_loo
       --params-file params.yaml --embeddings-dir 
       data/shared/embeddings/qwen3-embedding-4b
@@ -10515,8 +10546,8 @@ stages:
       size: 86694
     - path: data/shared/embeddings/qwen3-embedding-4b
       hash: md5
-      md5: 9a3484b57c658758a1ca78b82ed9bc45.dir
-      size: 618243889
+      md5: 969a2f44a747746c4b2c7a066e65825a.dir
+      size: 513513466
       nfiles: 100
     params:
       params.yaml:
@@ -10672,13 +10703,13 @@ stages:
     - path: 
         data/shared/barycentres/qwen3-embedding-4b/qwen3-embedding-4b-unit/wasserstein_w2_loo
       hash: md5
-      md5: d1036a27835f4bf3f887e396f5001109.dir
-      size: 109071
+      md5: a06a4f01bdb178e6fc94a688a59d6214.dir
+      size: 109013
       nfiles: 4
   barycentres@qwen3_embedding_4b__1024_unit__wasserstein_w2_loo:
-    cmd: uv run --project src/python pipeline typed-barycentre --provider-id 
-      qwen3-embedding-4b --representation-id qwen3-embedding-4b-1024-unit 
-      --arm-id wasserstein_w2_loo --output-dir 
+    cmd: uv run --locked --project src/python pipeline typed-barycentre 
+      --provider-id qwen3-embedding-4b --representation-id 
+      qwen3-embedding-4b-1024-unit --arm-id wasserstein_w2_loo --output-dir 
       data/shared/barycentres/qwen3-embedding-4b/qwen3-embedding-4b-1024-unit/wasserstein_w2_loo
       --params-file params.yaml --embeddings-dir 
       data/shared/embeddings/qwen3-embedding-4b
@@ -10689,8 +10720,8 @@ stages:
       size: 86694
     - path: data/shared/embeddings/qwen3-embedding-4b
       hash: md5
-      md5: 9a3484b57c658758a1ca78b82ed9bc45.dir
-      size: 618243889
+      md5: 969a2f44a747746c4b2c7a066e65825a.dir
+      size: 513513466
       nfiles: 100
     params:
       params.yaml:
@@ -10846,8 +10877,8 @@ stages:
     - path: 
         data/shared/barycentres/qwen3-embedding-4b/qwen3-embedding-4b-1024-unit/wasserstein_w2_loo
       hash: md5
-      md5: a87a3cbd52fd2dc32c434325dfb03d35.dir
-      size: 108208
+      md5: 1dfeebf875843561ef96f3ea4e3b142c.dir
+      size: 107964
       nfiles: 4
   barycentres@bge_large_en_v1_5__unit__wasserstein_w2_loo:
     cmd: uv run --project src/python pipeline typed-barycentre --provider-id 
@@ -17501,10 +17532,6 @@ stages:
       data/publication/certification && touch 
       data/publication/certification/public_inputs.stamp
     deps:
-    - path: .semflow/hashes/entrypoints/pipeline/validate-public-inputs.json
-      hash: md5
-      md5: da2b140651048cf51b22001df27308f7
-      size: 4185
     - path: data/papers/paper1/pretraining_embeddings
       hash: md5
       md5: 2fe222ecdcbd69a1193e4ff73c1ff809.dir
@@ -17519,8 +17546,152 @@ stages:
       hash: md5
       md5: 88e2bdb1cdc5f3ff35215edbe061360e
       size: 1111404
+    - path: src/python/apps/hotelling/pyproject.toml
+      hash: md5
+      md5: d0a822f9ba7c87e1a94decee0f029852
+      size: 1414
+    - path: src/python/apps/hotelling/src
+      hash: md5
+      md5: c900519ed3a8c922bb861273f884aec0.dir
+      size: 106761
+      nfiles: 16
+    - path: src/python/apps/pipeline/pyproject.toml
+      hash: md5
+      md5: fc83e4c12e2ecf282a879e73abfc0b3a
+      size: 3203
+    - path: src/python/apps/pipeline/src
+      hash: md5
+      md5: 1b8b5ee493bfe83af6cd2e16f80f0a2a.dir
+      size: 2075972
+      nfiles: 229
+    - path: src/python/packages/dotell/pyproject.toml
+      hash: md5
+      md5: eaa540912e09db0fb03ba0357d5cd16c
+      size: 1438
+    - path: src/python/packages/dotell/src
+      hash: md5
+      md5: 16c56769b0ad71b35bee469bcbc59ddb.dir
+      size: 50964
+      nfiles: 7
+    - path: src/python/pyproject.toml
+      hash: md5
+      md5: 315ccb1be11aea96ca6843c5093b7ddc
+      size: 4177
+    - path: src/python/uv.lock
+      hash: md5
+      md5: 4fd3b93afb32898a19e9b05a433198a6
+      size: 250457
     outs:
     - path: data/publication/certification/public_inputs.stamp
       hash: md5
       md5: d41d8cd98f00b204e9800998ecf8427e
       size: 0
+  fixed_inputs:
+    cmd: 'false'
+    outs:
+    - path: data/papers/paper1/pretraining_embeddings
+      hash: md5
+      md5: 2fe222ecdcbd69a1193e4ff73c1ff809.dir
+      size: 483248340
+      nfiles: 404
+    - path: data/papers/paper1/tfidf_inputs
+      hash: md5
+      md5: 873aa53af2fbf654120ab05141699896.dir
+      size: 27520046
+      nfiles: 3
+    - path: data/papers/paper5/inputs
+      hash: md5
+      md5: 3a65df6cec3749f42c45480972db0253.dir
+      size: 1052523
+      nfiles: 57
+    - path: data/papers/paper6/article_redraw_design.json
+      hash: md5
+      md5: 4860481171ea8b67f5d4c2d437064ac8
+      size: 4174
+    - path: data/papers/paper6/corporate_inputs
+      hash: md5
+      md5: c8da39eb7d05d905313dc825a8374fd8.dir
+      size: 153244686
+      nfiles: 5
+    - path: data/papers/paper6/directional_design.json
+      hash: md5
+      md5: 8057e69c58b0bd0948d524dbe53cbb06
+      size: 6330
+    - path: data/papers/paper6/historical-evidence/t79
+      hash: md5
+      md5: 76af93759aae7a8db001e492b4eda3e6.dir
+      size: 1132015
+      nfiles: 1
+    - path: data/papers/paper6/inference_audit_design.json
+      hash: md5
+      md5: 0d4f2599703d25af6ddbb81002556362
+      size: 1963
+    - path: data/papers/paper6/information_recovery
+      hash: md5
+      md5: 245b84631b0a8cde83bf7a61123f7fec.dir
+      size: 1667524
+      nfiles: 85
+    - path: data/papers/paper6/review-artifacts
+      hash: md5
+      md5: 7fdea72618faa073140fb821197feb1f.dir
+      size: 406105454
+      nfiles: 6
+    - path: data/raw/fama_french
+      hash: md5
+      md5: 3830e3582dbc8be760bdf1508ef70910.dir
+      size: 412885
+      nfiles: 3
+    - path: data/raw/hoberg_phillips
+      hash: md5
+      md5: 6bd22489d6181bb7639f3be0b5cdd5b7.dir
+      size: 98997
+      nfiles: 2
+    - path: data/reference/published_results.json
+      hash: md5
+      md5: 97fb976068b31c35f94923e1a11bc14a
+      size: 17707501
+    - path: data/reference/published_values.json
+      hash: md5
+      md5: 76a240cc1c191ee83a9c5e698f75b5b0
+      size: 233814
+    - path: data/shared/article_metadata
+      hash: md5
+      md5: 79dc5178c4690d65993bbc6ecb2b5b82.dir
+      size: 2003948
+      nfiles: 100
+    - path: data/shared/co_mention_inputs
+      hash: md5
+      md5: 6e89b6c2c7f622405d929bbe2f67fbe5.dir
+      size: 195199
+      nfiles: 1
+    - path: data/shared/corpus/summary.yaml
+      hash: md5
+      md5: ba505876f840ebcae2db9a5d5ea7fc58
+      size: 1698
+    - path: data/shared/embeddings
+      hash: md5
+      md5: 41272409149f02b485159a7b1987f0d0.dir
+      size: 1599335767
+      nfiles: 1203
+    - path: data/shared/input_manifest.json
+      hash: md5
+      md5: 88e2bdb1cdc5f3ff35215edbe061360e
+      size: 1111404
+    - path: data/shared/liquidity_proxy.json
+      hash: md5
+      md5: a360beac4792211458fbdbf943d7f70d
+      size: 2938
+    - path: data/shared/oos/returns
+      hash: md5
+      md5: 202d17169595a46a581e1ae34a382a88.dir
+      size: 1758568
+      nfiles: 100
+    - path: data/shared/returns
+      hash: md5
+      md5: c98218643386556cb638ec9d7b8a5cbd.dir
+      size: 2671177
+      nfiles: 100
+    - path: data/universe.csv
+      hash: md5
+      md5: fafbf7567127e11985d66621666715c3
+      size: 7590

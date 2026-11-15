@@ -1,6 +1,0 @@
-outs:
-- md5: 873aa53af2fbf654120ab05141699896.dir
-  size: 27520046
-  nfiles: 3
-  hash: md5
-  path: tfidf_inputs

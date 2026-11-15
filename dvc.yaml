@@ -17,6 +17,35 @@ vars:
 - p5_tex: src/latex/projects/05_spatial_pricing/src
 - p6_tex: src/latex/projects/06_information_motion/src
 stages:
+  fixed_inputs:
+    desc: Fixed, checksummed text-free numerical inputs. Restore with dvc pull; the frozen command fails
+      closed if unfrozen.
+    cmd: 'false'
+    frozen: true
+    outs:
+    - data/papers/paper1/pretraining_embeddings
+    - data/papers/paper1/tfidf_inputs
+    - data/papers/paper5/inputs
+    - data/papers/paper6/article_redraw_design.json
+    - data/papers/paper6/corporate_inputs
+    - data/papers/paper6/directional_design.json
+    - data/papers/paper6/historical-evidence/t79
+    - data/papers/paper6/inference_audit_design.json
+    - data/papers/paper6/information_recovery
+    - data/papers/paper6/review-artifacts
+    - data/raw/fama_french
+    - data/raw/hoberg_phillips
+    - data/reference/published_values.json
+    - data/shared/article_metadata
+    - data/shared/co_mention_inputs
+    - data/shared/corpus/summary.yaml
+    - data/shared/embeddings
+    - data/shared/input_manifest.json
+    - data/shared/liquidity_proxy.json
+    - data/shared/oos/returns
+    - data/shared/returns
+    - data/universe.csv
+    - data/reference/published_results.json
   semflow_refresh:
     desc: Refresh semantic entrypoint fingerprints after source changes. This control-plane stage owns
       JSON only; semflow instrumentation of dvc.yaml remains an explicit human-reviewed patch.
@@ -36,7 +65,14 @@ stages:
       data/universe.csv --output-dir ${shared}/co_mentions --start-date ${start_date} --end-date ${end_date}
       --min-persistence-years ${co_mentions.min_persistence_years}
     deps:
-    - .semflow/hashes/entrypoints/pipeline/compute-co-mentions.json
+    - src/python/apps/pipeline/src
+    - src/python/apps/hotelling/src
+    - src/python/packages/dotell/src
+    - src/python/pyproject.toml
+    - src/python/apps/pipeline/pyproject.toml
+    - src/python/apps/hotelling/pyproject.toml
+    - src/python/packages/dotell/pyproject.toml
+    - src/python/uv.lock
     - ${shared}/co_mention_inputs/events.parquet
     - data/universe.csv
     params:
@@ -1938,7 +1974,14 @@ stages:
     cmd: ${py_pipeline} validate-public-inputs --manifest-file ${shared}/input_manifest.json && mkdir
       -p data/publication/certification && touch data/publication/certification/public_inputs.stamp
     deps:
-    - .semflow/hashes/entrypoints/pipeline/validate-public-inputs.json
+    - src/python/apps/pipeline/src
+    - src/python/apps/hotelling/src
+    - src/python/packages/dotell/src
+    - src/python/pyproject.toml
+    - src/python/apps/pipeline/pyproject.toml
+    - src/python/apps/hotelling/pyproject.toml
+    - src/python/packages/dotell/pyproject.toml
+    - src/python/uv.lock
     - ${shared}/input_manifest.json
     - ${shared}/embeddings
     - ${p1}/pretraining_embeddings
