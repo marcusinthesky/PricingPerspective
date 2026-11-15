@@ -1,58 +1,160 @@
 """Saved-result publication keeps primary, simulation and audit evidence separate."""
 
+from __future__ import annotations
+
 import json
 import re
-import shutil
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import Mock
 
 import pytest
 from pipeline.figures.paper6 import corporate_analysis, information_audit
 from pipeline.figures.paper6.information_recovery import render as simulation
 
-_ROOT = Path(__file__).resolve().parents[7]
-_EVIDENCE = _ROOT / "data/papers/paper6/review-artifacts"
-_CAMPAIGN = _ROOT / "data/papers/paper6/information_recovery/campaign/summary.json"
+if TYPE_CHECKING:
+    from pathlib import Path
+
+_CELLS = ("d2560_expanded", "d2560_matched", "d64_expanded", "d64_matched")
 
 
 def corporate_fixture() -> dict[str, Any]:
-    """Emulate the new saved contract using unchanged historical evidence."""
-    result = json.loads((_EVIDENCE / "t81/results.json").read_bytes())
-    result["schema_version"] = 1
-    result["inventory"] = json.loads((_EVIDENCE / "t81/inventory.json").read_bytes())
-    frontier = json.loads((_EVIDENCE / "t82/frontier-results.json").read_bytes())
-    for key, cell in result["cells"].items():
-        low, high = cell["article_measurement_percentile95"]
-        cell.update(
-            article_sensitivity_q025=low,
-            article_sensitivity_q05=cell["article_measurement_lower95"],
-            article_sensitivity_q975=high,
-            normalized_alignment=frontier["cells"][key]["normalized_alignment"],
-            within_projection_fit=frontier["cells"][key]["normalized_alignment"] ** 2,
-            annual_beta=[
-                {
-                    "label": numerator["label"],
-                    "beta": numerator["contribution"] / denominator["contribution"],
-                }
-                for numerator, denominator in zip(
-                    cell["annual_theta_contributions"],
-                    cell["annual_second_moment_contributions"],
-                    strict=True,
-                )
+    """Small saved records exercise publication without an analysis data download."""
+    betas = (
+        0.004768643278367574,
+        0.005552226228293822,
+        0.011319143868042641,
+        0.011975116963378142,
+    )
+    cells = {}
+    for key, beta in zip(_CELLS, betas, strict=True):
+        low = 0.0017519782567947508 if key == _CELLS[0] else beta / 2
+        cells[key] = {
+            "beta": beta,
+            "annual_theta_contributions": [{"label": "2019", "contribution": beta}],
+            "annual_second_moment_contributions": [
+                {"label": "2019", "contribution": 1.0}
             ],
-            year_denominator={
-                "shares": [
-                    {"share": row["contribution"] / cell["second_moment"]}
-                    for row in cell["annual_second_moment_contributions"]
-                ]
-            },
-            inference={
+            "target_denominator": {"shares": [{"share": 0.6}, {"share": 0.4}]},
+            "reference_denominator": {"shares": [{"share": 0.7}, {"share": 0.3}]},
+            "leave_one_firm_out": [{"beta": beta / 2}, {"beta": 2 * beta}],
+            "leave_one_year_out": [{"beta": beta / 2}, {"beta": 2 * beta}],
+            "article_measurement_percentile95": [low, 2 * beta],
+            "article_sensitivity_q025": low,
+            "article_sensitivity_q05": (low + beta) / 2,
+            "article_sensitivity_q975": 2 * beta,
+            "normalized_alignment": 0.25,
+            "within_projection_fit": 0.0625,
+            "annual_beta": [{"label": "2019", "beta": beta}],
+            "year_denominator": {"shares": [{"share": 0.4}, {"share": 0.6}]},
+            "inference": {
                 "status": "unavailable",
                 "reason": "No calibrated corporate sampling model.",
             },
-        )
-    return result
+        }
+    return {
+        "schema_version": 1,
+        "firms": 100,
+        "directional_coordinates_per_cell": 400,
+        "draws": 199,
+        "inventory": {"width": 2560, "expanded_articles": 20, "matched_articles": 12},
+        "cells": cells,
+    }
+
+
+def audit_fixture(evidence: Path) -> Path:
+    """Write only the three saved-record contracts consumed by the audit renderer."""
+    records = {
+        "t82/gmm-results.json": {
+            "cells": {
+                key: {
+                    "original_pooled_beta": 0.01,
+                    "original_pooled_effective_year_weights": [0.25] * 4,
+                    "fixed_identity_common_slope": {
+                        "beta": 0.02,
+                        "effective_year_weights": [0.25] * 4,
+                    },
+                }
+                for key in _CELLS
+            }
+        },
+        "t82/frontier-results.json": {
+            "cells": {
+                key: {
+                    "normalized_alignment": 0.25,
+                    "equal_relative_budget_sufficient_threshold": 0.1,
+                }
+                for key in _CELLS
+            }
+        },
+        "t83/results.json": {
+            "cells": {
+                key: {
+                    "primary_centered_profile": {
+                        "heldout_skill": skill,
+                        "per_year": [
+                            {"year": 2020, "heldout_skill": -0.004839040645791659}
+                        ],
+                    },
+                    "locality": {
+                        "at_or_beyond_nearest_distinct_origin_reference_count": 663,
+                        "cumulative_defined_count": 784,
+                    },
+                }
+                for key, skill in zip(
+                    _CELLS, (-0.01, 0.02, 0.03, -0.02079), strict=True
+                )
+            }
+        },
+    }
+    for relative, record in records.items():
+        path = evidence / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(record), encoding="utf-8")
+    return evidence
+
+
+def campaign_fixture(path: Path) -> Path:
+    """Save a compact complete summary with the declared publication design."""
+    cell = {
+        "bias": 0.01,
+        "bias_mcse": 0.001,
+        "normalized_rmse": 0.2,
+        "rmse_mcse": 0.02,
+        "undefined": 0,
+        "recovered": True,
+    }
+    record: dict[str, Any] = {
+        "schema_version": 1,
+        "status": "complete",
+        "histories": 16,
+        "redraws": 128,
+        "budgets": [1, 4, 16],
+        "reporting_amplitudes": [0.0, 0.001, 0.0025, 0.005, 0.01],
+        "regimes": ["common", "changing"],
+        "recovery": [[cell] * 3 for _ in range(2)],
+        "finite_affine_departure": 0.001,
+        "reporting_floor": [0.0, 0.01, 0.02, 0.03, 0.04],
+        "reporting_only_floor": [0.0, 0.01, 0.02, 0.03, 0.04],
+        "smallest_recovered_budget": [1, 1],
+        "failures": [],
+        "diagnostics": {
+            "maximum_solver_bound": 1e-11,
+            "minimum_capacity": 0.01,
+            "minimum_baseline_price": 10.0,
+            "active_domain_violations": 0,
+        },
+        "appendix": [
+            {
+                "dimension": dimension,
+                "budgets": [1, 16],
+                "recovery": [cell] * 2,
+                "failures": [],
+            }
+            for dimension in (2, 4, 8, 16)
+        ],
+    }
+    path.write_text(json.dumps(record), encoding="utf-8")
+    return path
 
 
 def directional_fixture(extension: dict[str, Any]) -> dict[str, object]:
@@ -146,7 +248,9 @@ def test_dimension_table_compresses_only_common_success_accounting(
         lambda _path: {"status": "complete", "integrity": True},
     )
     monkeypatch.setattr(simulation, "render", Mock())
-    campaign = simulation.Campaign.model_validate_json(_CAMPAIGN.read_bytes())
+    campaign = simulation.Campaign.model_validate_json(
+        campaign_fixture(summary).read_bytes()
+    )
     for dimension in campaign.appendix:
         dimension.failures.clear()
         for cell in dimension.recovery:
@@ -236,15 +340,7 @@ def test_secondary_audit_retains_historical_negative_and_locality_results(
     tmp_path: Path,
 ) -> None:
     """T81 and campaign inputs are absent; T82/T83 alone reproduce the audit."""
-    evidence = tmp_path / "evidence"
-    for relative in (
-        "t82/gmm-results.json",
-        "t82/frontier-results.json",
-        "t83/results.json",
-    ):
-        target = evidence / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(_EVIDENCE / relative, target)
+    evidence = audit_fixture(tmp_path / "evidence")
     information_audit.publish(evidence, tmp_path / "project")
     values = (
         tmp_path / "project/src/generated/information_audit_numbers.tex"
@@ -255,7 +351,11 @@ def test_secondary_audit_retains_historical_negative_and_locality_results(
     assert (
         rf"\ppDeclareValue{{ir-observation-heldout-2020}}{{{expected:.17g}}}" in values
     )
-    assert "ir-observation-d64-matched-heldout-pct}{-2.079" in values
+    expected_pct = 100 * -0.02079
+    assert (
+        rf"\ppDeclareValue{{ir-observation-d64-matched-heldout-pct}}{{{expected_pct:.17g}}}"
+        in values
+    )
     table = (
         tmp_path / "project/src/generated/information_recovery_observation_table.tex"
     ).read_text()
@@ -295,7 +395,7 @@ def test_simulation_publication_reads_saved_metrics_without_corporate_inputs(
     figure = Mock()
     monkeypatch.setattr(simulation, "render", figure)
     project = tmp_path / "project"
-    simulation.publish(_CAMPAIGN, project, metrics)
+    simulation.publish(campaign_fixture(tmp_path / "summary.json"), project, metrics)
     generated = project / "src/generated"
     values = (generated / "information_recovery_numbers.tex").read_text()
     assert "ir-common-1-positive-count}{1079}" in values
@@ -317,7 +417,7 @@ def test_publication_producers_have_exclusive_scalar_ownership(
     source = tmp_path / "results.json"
     source.write_text(json.dumps(corporate_fixture()))
     corporate_analysis.publish(source, project)
-    information_audit.publish(_EVIDENCE, project)
+    information_audit.publish(audit_fixture(tmp_path / "evidence"), project)
     source.write_text(json.dumps(directional_fixture(validation_extension)))
     monkeypatch.setattr(
         simulation,
@@ -325,7 +425,7 @@ def test_publication_producers_have_exclusive_scalar_ownership(
         lambda _path: {"status": "complete", "integrity": True},
     )
     monkeypatch.setattr(simulation, "render", Mock())
-    simulation.publish(_CAMPAIGN, project, source)
+    simulation.publish(campaign_fixture(tmp_path / "summary.json"), project, source)
     catalogs = list((project / "src/generated").glob("*numbers.tex"))
     keys = [
         key

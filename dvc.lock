@@ -730,8 +730,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/01_continuous_bounds/Tectonic.toml
       hash: md5
       md5: 7acdeb0b91bb5bd4a2b1cb7c02eb2bfa
@@ -747,8 +747,8 @@ stages:
       size: 10882
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 05b54e63cb7567f01da2e2265085dd1e
-      size: 37207
+      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
+      size: 38586
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
@@ -763,8 +763,8 @@ stages:
     outs:
     - path: src/latex/projects/01_continuous_bounds/build/arxiv/arxiv.pdf
       hash: md5
-      md5: d975076c0e6c637ec839fdc992c07c22
-      size: 1136788
+      md5: 5a0fcc4774da0770929827939ee972ae
+      size: 1136748
     - path: src/latex/projects/01_continuous_bounds/build/arxiv/arxiv.tar.gz
       hash: md5
       md5: 426316279713e5783242cc7793146401
@@ -795,8 +795,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/01_continuous_bounds/Tectonic.toml
       hash: md5
       md5: 7acdeb0b91bb5bd4a2b1cb7c02eb2bfa
@@ -812,8 +812,8 @@ stages:
       size: 10882
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 05b54e63cb7567f01da2e2265085dd1e
-      size: 37207
+      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
+      size: 38586
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
@@ -829,8 +829,8 @@ stages:
     - path: 
         src/latex/projects/01_continuous_bounds/build/quantitative-finance/quantitative-finance.pdf
       hash: md5
-      md5: a3b0f1e70d2b0985c292a913dc4edf98
-      size: 1156920
+      md5: 2d9e6d2a11d9ad8e4c674998c2d9a75b
+      size: 1156893
     - path: 
         src/latex/projects/01_continuous_bounds/build/quantitative-finance/quantitative-finance.zip
       hash: md5
@@ -890,8 +890,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/03_distance_implied_mpt/Tectonic.toml
       hash: md5
       md5: 6bc826ce34e961195d75ee201acf585b
@@ -907,8 +907,8 @@ stages:
       size: 10882
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 05b54e63cb7567f01da2e2265085dd1e
-      size: 37207
+      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
+      size: 38586
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
@@ -923,8 +923,8 @@ stages:
     outs:
     - path: src/latex/projects/03_distance_implied_mpt/build/arxiv/arxiv.pdf
       hash: md5
-      md5: 85b307f65985b543486f6e21d2588248
-      size: 255050
+      md5: b14ec33dcc0cdb1a7ed822ab1f060658
+      size: 255009
     - path: src/latex/projects/03_distance_implied_mpt/build/arxiv/arxiv.tar.gz
       hash: md5
       md5: 6ef1c3714aebc2638132281c22cda35a
@@ -955,8 +955,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/05_spatial_pricing/Tectonic.toml
       hash: md5
       md5: 31c72cca62e40d2f519736b5d1343261
@@ -972,8 +972,8 @@ stages:
       size: 10882
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 05b54e63cb7567f01da2e2265085dd1e
-      size: 37207
+      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
+      size: 38586
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
@@ -988,8 +988,8 @@ stages:
     outs:
     - path: src/latex/projects/05_spatial_pricing/build/arxiv/arxiv.pdf
       hash: md5
-      md5: 92ae6794f5ce1d45f259651727dcacc8
-      size: 426006
+      md5: 117ad3e72f6e3afd512f756fe8767462
+      size: 425974
     - path: src/latex/projects/05_spatial_pricing/build/arxiv/arxiv.tar.gz
       hash: md5
       md5: 195d9fd82a4b7f1187e573e55f4a903c
@@ -5788,8 +5788,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/05_spatial_pricing/Tectonic.toml
       hash: md5
       md5: 31c72cca62e40d2f519736b5d1343261
@@ -5805,8 +5805,8 @@ stages:
       size: 10882
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 05b54e63cb7567f01da2e2265085dd1e
-      size: 37207
+      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
+      size: 38586
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
@@ -5821,8 +5821,8 @@ stages:
     outs:
     - path: src/latex/projects/05_spatial_pricing/build/gfj/gfj.pdf
       hash: md5
-      md5: 95beca73d23b35e6fd3304e6b4969e97
-      size: 440933
+      md5: d18d3ce8b0953afcaf5e13ab5e7aab41
+      size: 440899
     - path: src/latex/projects/05_spatial_pricing/build/gfj/gfj.tar.gz
       hash: md5
       md5: abfa931ee33eaf14b8e04317f1a95dbe
@@ -5904,8 +5904,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/03_distance_implied_mpt/Tectonic.toml
       hash: md5
       md5: 6bc826ce34e961195d75ee201acf585b
@@ -5921,8 +5921,8 @@ stages:
       size: 10882
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 05b54e63cb7567f01da2e2265085dd1e
-      size: 37207
+      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
+      size: 38586
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
@@ -5937,8 +5937,8 @@ stages:
     outs:
     - path: src/latex/projects/03_distance_implied_mpt/build/ejf/ejf.pdf
       hash: md5
-      md5: ac0f9d0f5d862e899ec3a972cae625d7
-      size: 273310
+      md5: 180ad0ad9cd3a52bd33c42fbdbb3dca1
+      size: 273277
     - path: src/latex/projects/03_distance_implied_mpt/build/ejf/ejf.tar.gz
       hash: md5
       md5: 640db1bfb6d72de344f7b4472aff997f
@@ -5998,8 +5998,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/06_information_motion/Tectonic.toml
       hash: md5
       md5: 92edd4a63f0c2fe3e3dbc88f46a6b0d6
@@ -6015,8 +6015,8 @@ stages:
       size: 10882
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 05b54e63cb7567f01da2e2265085dd1e
-      size: 37207
+      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
+      size: 38586
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
@@ -6031,8 +6031,8 @@ stages:
     outs:
     - path: src/latex/projects/06_information_motion/build/arxiv/arxiv.pdf
       hash: md5
-      md5: eb7ee3205e9a40e1fab0deccb26dca07
-      size: 296270
+      md5: cb229ac63ca3507fbeabf11ccfd4c0fc
+      size: 296247
     - path: src/latex/projects/06_information_motion/build/arxiv/arxiv.tar.gz
       hash: md5
       md5: b80e6af105fd899c13bbd02e7ae77cb4
@@ -6055,8 +6055,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/06_information_motion/Tectonic.toml
       hash: md5
       md5: 92edd4a63f0c2fe3e3dbc88f46a6b0d6
@@ -6102,8 +6102,8 @@ stages:
       size: 9771277
     - path: src/latex/justfile
       hash: md5
-      md5: 7527bd80a3044decfc9dfdbc1f2b317f
-      size: 20686
+      md5: 7946b936a4ab537195c495b1d16bcbc1
+      size: 22710
     - path: src/latex/projects/06_information_motion/Tectonic.toml
       hash: md5
       md5: 92edd4a63f0c2fe3e3dbc88f46a6b0d6
@@ -6119,8 +6119,8 @@ stages:
       size: 10882
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 05b54e63cb7567f01da2e2265085dd1e
-      size: 37207
+      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
+      size: 38586
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5

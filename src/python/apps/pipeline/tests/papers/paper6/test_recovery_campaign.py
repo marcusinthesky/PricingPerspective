@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import shutil
 from concurrent.futures import Future, ProcessPoolExecutor
 from dataclasses import replace
 from pathlib import Path
@@ -38,7 +37,6 @@ from pipeline.stages.papers.paper6.recovery.campaign import (
 if TYPE_CHECKING:
     from typing import Any
 
-EXPANDED_ARTICLES = 43720
 RESUME_HISTORIES = 3
 
 
@@ -50,27 +48,61 @@ def _measurement() -> HistoryMeasurement:
     )
 
 
-def test_frozen_monthly_counts_reconcile_without_private_context(
+def test_frozen_monthly_counts_reconcile_with_saved_input_hashes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """Exported data retain coverage and its immutable historical hash contract."""
-    root = Path(__file__).resolve().parents[7]
-    for relative in (SUPPORT, INVENTORY):
-        destination = tmp_path / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(root / relative, destination)
+    """Load dated support only after checking its hash and all annual firm counts."""
+    firms = [f"F{index:03}" for index in range(100)]
+    expected = np.zeros((5, 12, 100), dtype=np.int64)
+    expected[:, 0, :] = 1
+    expected[:, 6, 1::2] = 1
+    expected[0, 11, 0] = 2
+    dates = []
+    indexes = []
+    for year in range(5):
+        for month in range(12):
+            for firm in range(100):
+                count = int(expected[year, month, firm])
+                dates.extend([f"{2018 + year}-{month + 1:02}-15"] * count)
+                indexes.extend([firm] * count)
+    support = tmp_path / SUPPORT
+    support.parent.mkdir(parents=True)
+    np.savez(
+        support,
+        firm_ids=np.asarray(firms),
+        dates=np.asarray(dates, dtype="datetime64[D]"),
+        firm_index=np.asarray(indexes, dtype=np.int64),
+    )
+    inventory = tmp_path / INVENTORY
+    inventory.parent.mkdir(parents=True)
+    inventory.write_text(
+        json.dumps(
+            {
+                "input_sha256": {FROZEN_SUPPORT_KEY: file_hash(support)},
+                "firm_ids": firms,
+                "annual_counts": [
+                    {
+                        "year": 2018 + year,
+                        "firm": firm,
+                        "expanded": int(expected[year, :, index].sum()),
+                    }
+                    for year in range(5)
+                    for index, firm in enumerate(firms)
+                ],
+            }
+        )
+    )
     monkeypatch.setattr(
         "pipeline.stages.papers.paper6.recovery.artifacts.repository_root",
         lambda: tmp_path,
     )
     counts, provenance = load_month_counts()
-    assert counts.shape == (5, 12, 100)
-    assert counts.sum() == EXPANDED_ARTICLES
+    np.testing.assert_array_equal(counts, expected)
     assert np.any(counts == 0)
     assert np.all(counts.sum(axis=1) > 0)
-    assert provenance["articles"] == EXPANDED_ARTICLES
+    assert provenance["articles"] == int(expected.sum())
     assert provenance["hashes"] == {
-        relative: file_hash(root / relative) for relative in (SUPPORT, INVENTORY)
+        relative: file_hash(tmp_path / relative) for relative in (SUPPORT, INVENTORY)
     }
     assert not (tmp_path / ".context").exists()
 

@@ -61,9 +61,15 @@ fi
 # --- bundle-audit hostile fixtures (must be REJECTED) -----------------------
 expect_reject() {  # stage target label
   local extension out; out=$(mktemp -d)
+  mkdir "$out/source"
+  if ! cp -R "$1/." "$out/source/"; then
+    bad "could not copy $3 fixture"
+    rm -rf "$out"
+    return
+  fi
   extension=tar.gz
   [[ "$2" == quantitative-finance ]] && extension=zip
-  if uv run --script bundle-audit "$1" "$2" "$out/b.$extension" "$bundle_url" >/dev/null 2>&1; then
+  if uv run --script bundle-audit "$out/source" "$2" "$out/b.$extension" "$bundle_url" >/dev/null 2>&1; then
     bad "bundle-audit should reject $3"
   else
     pass "bundle-audit rejects $3"

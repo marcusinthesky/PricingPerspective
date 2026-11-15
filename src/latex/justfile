@@ -146,24 +146,30 @@ watch project="01_continuous_bounds" target="draft":
     import subprocess, sys, time
     from pathlib import Path
     project, target = sys.argv[1:]
-    roots = [Path("projects") / project / "src", Path("templates")]
+    inputs = [
+        f"projects/{project}/src", f"projects/{project}/Tectonic.toml",
+        "templates", "bundle", "tools", "justfile",
+    ]
+    def snapshot():
+        paths = subprocess.check_output([
+            "git", "ls-files", "-z", "--cached", "--others", "--exclude-standard",
+            "--", *inputs,
+        ]).decode().split("\0")
+        result = []
+        for name in sorted(set(paths) - {""}):
+            try:
+                stat = Path(name).stat()
+            except FileNotFoundError:
+                continue
+            result.append((name, stat.st_mtime_ns, stat.st_size))
+        return tuple(result)
     previous = None
     try:
         while True:
-            current = tuple(
-                (str(path), path.stat().st_mtime_ns, path.stat().st_size)
-                for root in roots for path in sorted(root.rglob("*"))
-                if path.is_file()
-            )
+            current = snapshot()
             if current != previous:
+                previous = current
                 subprocess.run(["just", "build", project, target], check=False)
-                # Preparation may materialize support files; include those
-                # before watching for the next authored input change.
-                previous = tuple(
-                    (str(path), path.stat().st_mtime_ns, path.stat().st_size)
-                    for root in roots for path in sorted(root.rglob("*"))
-                    if path.is_file()
-                )
             time.sleep(0.5)
     except KeyboardInterrupt:
         pass

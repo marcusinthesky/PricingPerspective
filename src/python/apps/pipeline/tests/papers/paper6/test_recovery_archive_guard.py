@@ -2,16 +2,31 @@
 
 from pathlib import Path
 
+import pytest
+from click import unstyle
 from pipeline.cli.commands.p6.recovery import commands
 from pipeline.io.paths import PAPERS
 from typer.testing import CliRunner
 
+_USAGE_ERROR = 2
 
-def test_legacy_runner_requires_explicit_destination() -> None:
+
+@pytest.mark.parametrize("force_color", [None, "1"])
+def test_legacy_runner_requires_explicit_destination(force_color: str | None) -> None:
     """An omitted destination cannot select historical data implicitly."""
-    result = CliRunner().invoke(commands, ["paper6-information-recovery"])
-    assert result.exit_code != 0
-    assert "--output" in result.output
+    result = CliRunner().invoke(
+        commands,
+        ["paper6-information-recovery"],
+        env={
+            "FORCE_COLOR": force_color,
+            "NO_COLOR": None,
+            "TERM": "xterm-256color",
+        },
+    )
+    assert result.exit_code == _USAGE_ERROR
+    message = unstyle(result.output)
+    assert "Missing option" in message
+    assert "--output" in message
 
 
 def test_legacy_runner_rejects_archive_and_descendants() -> None:

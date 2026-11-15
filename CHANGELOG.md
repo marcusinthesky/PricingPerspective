@@ -25,7 +25,7 @@ description: Per-PR record of changes to the four papers, numerical reproduction
 - Reduced Lean dependencies to the required proof closure. Statadic resolves
   from its pinned public GitHub revision; EnergyStatistics and
   WassersteinGeometry retain the bridges needed by the papers.
-- Verified 1,667 Python tests and the Lean publication checks for 63 claims with
+- Verified 1,668 Python tests and the Lean publication checks for 63 claims with
   no admissions. Full DVC reproduction and publication comparisons passed:
   922 numeric displays, two numerical identity bounds, 42 fragments and
   21 figures.
@@ -49,8 +49,10 @@ description: Per-PR record of changes to the four papers, numerical reproduction
 - Counted barycentric peers using the solver's existing numerical-support
   threshold. Corrected the remaining-peer labels for AMD (94 to 30) and HON
   (75 to 53); weights, estimates, top-five peers and residual mass are unchanged.
-- Made Management Science manuscript and companion PDFs deterministic across
+- Made manuscript PDFs deterministic across preview and certified submission
   builds, and preserved certified submission archives during preview builds.
+- Made Paper 6 tests independent of downloaded artifacts and terminal color
+  formatting, so the standard CI run works from a clean checkout.
 
 ## [PR #1](https://github.com/marcusinthesky/PricingPerspective/pull/1): AnyIO dependency update
 

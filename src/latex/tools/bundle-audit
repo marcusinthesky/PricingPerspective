@@ -238,8 +238,15 @@ def tectonic_compile(
     # Both previews and releases compile main.tex, fixing the jobname used in
     # PDF trailer IDs as well as dates and temporary-directory metadata.
     cmd = [
-        "tectonic", "-X", "compile", "-Z", "deterministic-mode",
-        "--untrusted", "--only-cached", "--keep-logs", "--keep-intermediates",
+        "tectonic",
+        "-X",
+        "compile",
+        "-Z",
+        "deterministic-mode",
+        "--untrusted",
+        "--only-cached",
+        "--keep-logs",
+        "--keep-intermediates",
     ]
     if bundle:
         cmd += ["--bundle", bundle]
@@ -835,7 +842,8 @@ def main(argv: list[str]) -> int:
         "--pdf", type=Path, help="publish the staged PDF beside the archive"
     )
     parser.add_argument(
-        "--preview", action="store_true",
+        "--preview",
+        action="store_true",
         help="publish only a checked PDF and log, preserving release archives",
     )
     args = parser.parse_args(argv[1:])
