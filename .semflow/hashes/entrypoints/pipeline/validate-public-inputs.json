@@ -1,0 +1,27 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.substrate.embeddings:cli_validate_public_inputs",
+  "digest": "sha256:c48173b5561d738536d6316bad181cf8d9fd43b976b6c555c10b3e6a057f4d64",
+  "entrypoint": "pipeline validate-public-inputs",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:701b162d541e1c9506cca310ef2b8a90b9ce4ab016c5aeb67a529eb0e89c9e8f","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:<binding:typer=typer>"},
+    {"digest":"sha256:773b51e7260be5b944d6af0c099cc89306aab0e4f2fb7b0468efcf041aff419e","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:cli_validate_public_inputs"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:commands"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:092cb77ae0770f1627b29bf41b2732722fbcc3a0e1d77a79674801800a2721d1","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:<binding:hashlib=hashlib>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:<binding:json=json>"},
+    {"digest":"sha256:8ce944318e4ea1d88a9de02d36ccd10090ae7df3da1a580492359050ca7401e5","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:<binding:pq=pyarrow.parquet>"},
+    {"digest":"sha256:832c2da4064b14958fdf8be35cd1cdfa5d811c368d875049a432f2af590236b6","kind":"global","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:EMBEDDING_COLUMNS"},
+    {"digest":"sha256:8f5fa947976f6282510de3166c38c59ba5f05e75d21f9ae21d0b519d6325c374","kind":"global","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:REQUIRED_COLUMNS"},
+    {"digest":"sha256:38dd120a5934b175ff68ff6e8fcaa1128dd7a1dc204f4441bba55f5737bb20a6","kind":"function","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:validate_embedding"},
+    {"digest":"sha256:1b697cea683599ffc42b6fccce7f797938a40f7cc787f929d5592acc2970235b","kind":"function","path":"src/python/apps/pipeline/src/pipeline/io/public_inputs.py","symbol":"pipeline.io.public_inputs:validate_public_inputs"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

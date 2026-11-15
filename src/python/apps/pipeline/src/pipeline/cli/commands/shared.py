@@ -3,69 +3,77 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Annotated, Literal
 
 import typer
-from pydantic import Field
-
-from pipeline.cli.options import CliOptions, model_command, options_from_context
 
 commands = typer.Typer()
 
 
-class SampleUniverseTableCliOptions(CliOptions):
-    """Inputs for the shared canonical-roster appendix table."""
-
-    universe_csv: Path = Field(
-        default=Path("data/universe.csv"),
-        description="Universe metadata CSV with symbol, name, and sector.",
-    )
-    returns_dir: Path = Field(
-        default=Path("data/shared/returns"),
-        description="Directory containing one adjusted-return parquet per ticker.",
-    )
-    distance_artifact_dir: Path = Field(
-        description="Governed typed W2 distance artifact directory.",
-    )
-    provider_id: str = Field(description="Expected typed-distance provider identity.")
-    representation_id: str = Field(
-        description="Expected typed-distance representation identity.",
-    )
-    distance_id: str = Field(
-        default="wasserstein_w2",
-        description="Expected typed-distance identity.",
-    )
-    output_file: Path = Field(
-        description="Generated LaTeX longtable fragment.",
-    )
-
-
-sample_universe_table_command = model_command(SampleUniverseTableCliOptions)
-
-
-@commands.command("render-sample-universe-table", cls=sample_universe_table_command)
-def cli_render_sample_universe_table(ctx: typer.Context) -> None:
-    """Render a canonical priced W2 roster as a LaTeX appendix longtable."""
+@commands.command("render-sample-universe-table")
+def cli_render_sample_universe_table(
+    universe_csv: Annotated[
+        Path,
+        typer.Option(help="Universe metadata CSV with symbol, name, and sector."),
+    ],
+    returns_dir: Annotated[
+        Path,
+        typer.Option(
+            help="Directory containing one adjusted-return parquet per ticker."
+        ),
+    ],
+    distance_artifact_dir: Annotated[
+        Path, typer.Option(help="Governed typed W2 distance artifact directory.")
+    ],
+    provider_id: Annotated[
+        str, typer.Option(help="Expected typed-distance provider identity.")
+    ],
+    representation_id: Annotated[
+        str, typer.Option(help="Expected typed-distance representation identity.")
+    ],
+    distance_id: Annotated[str, typer.Option(help="Expected typed-distance identity.")],
+    output_file: Annotated[Path, typer.Option(help="Generated LaTeX table fragment.")],
+    layout: Annotated[
+        Literal["longtable", "sector-list"],
+        typer.Option(help="Per-firm longtable or compact per-sector ticker list."),
+    ] = "longtable",
+) -> None:
+    """Render a canonical priced W2 roster as a LaTeX appendix table."""
     from pipeline.figures.shared_tables import render_sample_universe_table
 
-    options = options_from_context(ctx, SampleUniverseTableCliOptions)
     render_sample_universe_table(
-        universe_csv=options.universe_csv,
-        distance_artifact_dir=options.distance_artifact_dir,
-        returns_dir=options.returns_dir,
-        output_file=options.output_file,
-        provider_id=options.provider_id,
-        representation_id=options.representation_id,
-        distance_id=options.distance_id,
+        universe_csv=universe_csv,
+        distance_artifact_dir=distance_artifact_dir,
+        returns_dir=returns_dir,
+        output_file=output_file,
+        provider_id=provider_id,
+        representation_id=representation_id,
+        distance_id=distance_id,
+        layout=layout,
     )
 
 
 @commands.command("typed-geometry-component")
 def cli_typed_geometry_component(
-    provider_id: str = typer.Option(...),
-    representation_id: str = typer.Option(...),
-    geometry_id: str = typer.Option(...),
-    output_dir: Path = typer.Option(...),
-    params_file: Path = typer.Option(Path("params.yaml")),
+    provider_id: Annotated[str, typer.Option(help="Registered provider identity.")],
+    representation_id: Annotated[
+        str, typer.Option(help="Registered representation identity.")
+    ],
+    geometry_id: Annotated[
+        str, typer.Option(help="Registered energy or MMD geometry identity.")
+    ],
+    embeddings_dir: Annotated[
+        Path,
+        typer.Option(
+            file_okay=False,
+            readable=True,
+            help="Provider Parquet directory supplied by the stage graph.",
+        ),
+    ],
+    output_dir: Annotated[Path, typer.Option(help="Component artifact directory.")],
+    params_file: Annotated[
+        Path, typer.Option(help="params.yaml carrying the typed registry.")
+    ],
 ) -> None:
     """Materialize one reusable raw energy or MMD geometry component."""
     from pipeline.precision import own_float64
@@ -79,6 +87,7 @@ def cli_typed_geometry_component(
         provider_id=provider_id,
         representation_id=representation_id,
         geometry_id=geometry_id,
+        embeddings_dir=embeddings_dir,
         output_dir=output_dir,
         params_file=params_file,
     )
@@ -86,71 +95,83 @@ def cli_typed_geometry_component(
 
 @commands.command("typed-distance")
 def cli_typed_distance(
-    provider_id: str = typer.Option(...),
-    roster_key: str | None = typer.Option(None),
-    representation_id: str | None = typer.Option(None),
-    distance_id: str | None = typer.Option(None),
-    output_dir: Path | None = typer.Option(None),
-    params_file: Path = typer.Option(Path("params.yaml")),
+    provider_id: Annotated[str, typer.Option(help="Registered provider identity.")],
+    representation_id: Annotated[
+        str, typer.Option(help="Registered representation identity.")
+    ],
+    distance_id: Annotated[
+        str, typer.Option(help="Registered statistical-distance identity.")
+    ],
+    output_dir: Annotated[Path, typer.Option(help="Distance artifact directory.")],
+    params_file: Annotated[
+        Path, typer.Option(help="params.yaml carrying the typed registry.")
+    ],
+    embeddings_dir: Annotated[
+        Path | None,
+        typer.Option(
+            file_okay=False,
+            readable=True,
+            help=(
+                "Provider Parquet directory; required unless deriving energy/MMD "
+                "from --geometry-component-dir."
+            ),
+        ),
+    ] = None,
+    geometry_component_dir: Annotated[
+        Path | None,
+        typer.Option(
+            help="Cached raw geometry component; energy/MMD distances derive from it."
+        ),
+    ] = None,
 ) -> None:
-    """Materialize one typed matrix or a provider's distance roster."""
+    """Materialize one typed statistical-distance matrix."""
     from pipeline.precision import own_float64
 
     own_float64()
     from pipeline.stages.shared.typed_artifacts import (
+        TypedStageError,
         run_typed_distance,
-        run_typed_distance_roster,
     )
 
-    if roster_key is not None:
-        if representation_id is not None or distance_id is not None:
-            message = "use either one representation/distance or a roster, not both"
-            raise typer.BadParameter(message)
-        run_typed_distance_roster(
+    try:
+        run_typed_distance(
             provider_id=provider_id,
-            roster_key=roster_key,
-            output_dir=(
-                output_dir
-                if output_dir is not None
-                else Path("data/shared/typed_distances") / provider_id
-            ),
+            representation_id=representation_id,
+            distance_id=distance_id,
+            embeddings_dir=embeddings_dir,
+            output_dir=output_dir,
+            component_dir=geometry_component_dir,
             params_file=params_file,
         )
-        return
-
-    if representation_id is None or distance_id is None:
-        message = "single-distance mode requires representation-id and distance-id"
-        raise typer.BadParameter(message)
-
-    run_typed_distance(
-        provider_id=provider_id,
-        representation_id=representation_id,
-        distance_id=distance_id,
-        output_dir=(
-            output_dir
-            if output_dir is not None
-            else Path("data/shared/typed_distances")
-            / provider_id
-            / representation_id
-            / distance_id
-        ),
-        params_file=params_file,
-    )
+    except TypedStageError as error:
+        raise typer.BadParameter(str(error)) from error
 
 
 @commands.command("typed-barycentre")
 def cli_typed_barycentre(
-    provider_id: str = typer.Option(...),
-    representation_id: str = typer.Option(...),
-    arm_id: str = typer.Option(...),
-    geometry_component_dir: Path | None = typer.Option(
-        None,
-        help="Explicit raw geometry component directory for energy/MMD arms.",
-    ),
-    output_dir: Path | None = typer.Option(None),
-    params_file: Path = typer.Option(Path("params.yaml")),
+    provider_id: Annotated[str, typer.Option(help="Registered provider identity.")],
+    representation_id: Annotated[
+        str, typer.Option(help="Registered representation identity.")
+    ],
+    arm_id: Annotated[str, typer.Option(help="Registered barycentre arm identity.")],
+    embeddings_dir: Annotated[
+        Path,
+        typer.Option(
+            file_okay=False,
+            readable=True,
+            help="Provider Parquet directory supplied by the stage graph.",
+        ),
+    ],
+    output_dir: Annotated[Path, typer.Option(help="Barycentre artifact directory.")],
+    params_file: Annotated[
+        Path, typer.Option(help="params.yaml carrying the typed registry.")
+    ],
+    geometry_component_dir: Annotated[
+        Path | None,
+        typer.Option(help="Raw geometry component directory for energy/MMD arms."),
+    ] = None,
 ) -> None:
-    """Materialize one typed energy target-projection artifact."""
+    """Materialize one typed barycentre artifact."""
     from pipeline.precision import own_float64
 
     own_float64()
@@ -160,14 +181,8 @@ def cli_typed_barycentre(
         provider_id=provider_id,
         representation_id=representation_id,
         arm_id=arm_id,
+        embeddings_dir=embeddings_dir,
         geometry_component_dir=geometry_component_dir,
-        output_dir=(
-            output_dir
-            if output_dir is not None
-            else Path("data/shared/barycentres")
-            / provider_id
-            / representation_id
-            / arm_id
-        ),
+        output_dir=output_dir,
         params_file=params_file,
     )

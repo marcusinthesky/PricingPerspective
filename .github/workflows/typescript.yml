@@ -58,7 +58,7 @@ jobs:
 
       - name: Run TypeScript workspace checks
         env:
-          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://marcusinthesky.github.io/pricing-perspective' }}
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL || 'https://marcusinthesky.github.io/PricingPerspective' }}
           NEXT_PUBLIC_BASE_PATH: ""
         run: bun run ci
 

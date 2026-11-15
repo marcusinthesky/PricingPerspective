@@ -1,0 +1,5 @@
+outs:
+- md5: 8057e69c58b0bd0948d524dbe53cbb06
+  size: 6330
+  hash: md5
+  path: directional_design.json

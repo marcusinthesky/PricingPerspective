@@ -15,5 +15,3 @@ issue: '5'
 publisher: Institute of Mathematical Statistics
 page: 3284-3305
 ---
-
-# Distance Covariance in Metric Spaces

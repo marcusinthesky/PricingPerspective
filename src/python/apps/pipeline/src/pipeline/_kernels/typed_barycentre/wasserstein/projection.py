@@ -1,15 +1,15 @@
 """Target-anchored empirical W1/W2 barycentre projections.
 
-Why this one stays in the pipeline while its measure-barycentre sibling moved to
-``jcor``: the solve is ``scipy.optimize.minimize(method="SLSQP")`` over the
-candidate simplex, on top of ``scipy.optimize.linear_sum_assignment`` couplings.
-``jcor`` retired its last runtime SciPy call at t65 -- SciPy is a test-only
-dependency of that package now -- so promoting this needs a JAX reimplementation
-of constrained SLSQP, not a move.  Until then the anchored solver lives here.
+The application owns the restricted target-anchored construction and its SciPy
+assignments, including deterministic tie choices and second-best gaps. Both W1
+and W2 retain the existing SLSQP solve: downstream comparisons use the fitted
+support at a prespecified threshold, so close objectives alone do not establish
+equivalence to an interior-point iterate with small positive inactive weights.
 """
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -35,6 +35,25 @@ if TYPE_CHECKING:
         PointDistanceSpec,
         StatisticalDistanceSpec,
     )
+
+
+_SLSQP_PRIMARY_FTOL = 1.0e-12
+_FLOAT64_FTOL_FLOOR = 64.0 * np.finfo(np.float64).eps
+
+
+@dataclass(frozen=True, slots=True)
+class WassersteinProjectionSupports:
+    """Legacy target-projection result plus its reconstructed supports.
+
+    ``supports`` follows ``result.target_ids``. Each ``(m, d)`` support is the
+    weighted average of the already target-aligned candidate atoms used by the
+    simplex objective. Retaining it here avoids recomputing all pairwise
+    assignments in a downstream paper stage.
+    """
+
+    result: BarycentreResult
+    supports: tuple[np.ndarray, ...]
+    permutations: tuple[tuple[np.ndarray, ...], ...] = ()
 
 
 def _transport_permutation(
@@ -134,6 +153,33 @@ def _anchored_objective_and_gradient(
     return objective, gradient
 
 
+def _simplex_optimality_certificate(
+    weights: np.ndarray, gradient: np.ndarray
+) -> tuple[float, float]:
+    """Return the Frank--Wolfe gap and unit-step gradient-mapping norm.
+
+    For the unit simplex, minimizing the linearization selects the coordinate
+    with the smallest gradient. Hence the Frank--Wolfe dual gap is
+    ``dot(weights, gradient) - min(gradient)``. The projected-gradient measure
+    is the norm of the unit-step gradient mapping, not the centered gradient.
+    """
+    gap = float(np.dot(weights, gradient) - np.min(gradient))
+    projected = project_simplex(weights - gradient)
+    return max(gap, 0.0), float(np.linalg.norm(weights - projected))
+
+
+def _constraint_violation(weights: np.ndarray) -> float:
+    """Return the maximum equality or bound violation of the unit simplex."""
+    return max(abs(float(np.sum(weights)) - 1.0), 0.0, -float(np.min(weights)))
+
+
+def _slsqp_backend_tolerances() -> tuple[float, ...]:
+    """Return strict float64 backend tolerances, ordered for one refinement."""
+    if _SLSQP_PRIMARY_FTOL <= _FLOAT64_FTOL_FLOOR:
+        return (_FLOAT64_FTOL_FLOOR,)
+    return (_SLSQP_PRIMARY_FTOL, _FLOAT64_FTOL_FLOOR)
+
+
 def _anchored_diagnostics(
     *,
     target_id: str,
@@ -144,7 +190,8 @@ def _anchored_diagnostics(
     converged: bool,
     solver: str,
     feasible_set: str,
-    gradient: np.ndarray,
+    optimality_gap: float,
+    projected_gradient_norm: float,
     order_two: bool,
     curvature: tuple[float, float, float],
     assignment_gap_min: float,
@@ -159,10 +206,8 @@ def _anchored_diagnostics(
         target_id=target_id,
         objective=objective,
         initial_objective=initial_objective,
-        optimality_gap=max(initial_objective - objective, 0.0),
-        constraint_violation=max(
-            abs(float(np.sum(weights)) - 1.0), 0.0, -float(np.min(weights))
-        ),
+        optimality_gap=optimality_gap,
+        constraint_violation=_constraint_violation(weights),
         active_support_size=int(
             np.count_nonzero(
                 weights > ACTIVE_WEIGHT_EPS_FACTOR * np.finfo(weights.dtype).eps
@@ -172,7 +217,7 @@ def _anchored_diagnostics(
         iterations=iterations,
         solver=solver,
         feasible_set=feasible_set,
-        projected_gradient_norm=float(np.linalg.norm(gradient - np.mean(gradient))),
+        projected_gradient_norm=projected_gradient_norm,
         cnd_tangent_max_eigenvalue=cnd_max,
         tangent_curvature_min=tangent_min,
         simplex_sum_error=abs(float(np.sum(weights)) - 1.0),
@@ -212,17 +257,59 @@ def _solve_anchored_wasserstein_row(
             order_two=order_two,
         )
 
-    result = minimize(
-        lambda weights: objective(weights)[0],
-        initial_weights,
-        jac=lambda weights: objective(weights)[1],
-        method="SLSQP",
-        bounds=[(0.0, 1.0)] * candidate_count,
-        constraints={"type": "eq", "fun": lambda weights: np.sum(weights) - 1.0},
-        options={"ftol": tol, "maxiter": maxiter, "disp": False},
-    )
-    weights = project_simplex(np.asarray(result.x, dtype=np.float64))
+    weights = initial_weights
     value, gradient = objective(weights)
+    optimality_gap, projected_gradient_norm = _simplex_optimality_certificate(
+        weights, gradient
+    )
+    total_iterations = 0
+    solver_succeeded = False
+    for backend_tol in _slsqp_backend_tolerances():
+        remaining_iterations = maxiter - total_iterations
+        if remaining_iterations <= 0:
+            break
+        result = minimize(
+            lambda candidate: objective(candidate)[0],
+            weights,
+            jac=lambda candidate: objective(candidate)[1],
+            method="SLSQP",
+            bounds=[(0.0, 1.0)] * candidate_count,
+            constraints={
+                "type": "eq",
+                "fun": lambda candidate: np.sum(candidate) - 1.0,
+            },
+            options={
+                "ftol": backend_tol,
+                "maxiter": remaining_iterations,
+                "disp": False,
+            },
+        )
+        total_iterations += int(getattr(result, "nit", 0) or 0)
+        weights = project_simplex(np.asarray(result.x, dtype=np.float64))
+        value, gradient = objective(weights)
+        optimality_gap, projected_gradient_norm = _simplex_optimality_certificate(
+            weights, gradient
+        )
+        solver_succeeded = bool(result.success)
+        finite = bool(
+            np.isfinite(value)
+            and np.isfinite(optimality_gap)
+            and np.isfinite(projected_gradient_norm)
+            and np.all(np.isfinite(weights))
+        )
+        feasible = _constraint_violation(weights) <= max(tol, _FLOAT64_FTOL_FLOOR)
+        certified = optimality_gap <= tol * (1.0 + abs(value))
+        if solver_succeeded and finite and feasible and certified:
+            break
+
+    finite = bool(
+        np.isfinite(value)
+        and np.isfinite(optimality_gap)
+        and np.isfinite(projected_gradient_norm)
+        and np.all(np.isfinite(weights))
+    )
+    feasible = _constraint_violation(weights) <= max(tol, _FLOAT64_FTOL_FLOOR)
+    certified = optimality_gap <= tol * (1.0 + abs(value))
     curvature = (0.0, 0.0, 0.0)
     if order_two:
         residual_candidates = matched_candidates - np.asarray(target.values)[None, :, :]
@@ -247,13 +334,12 @@ def _solve_anchored_wasserstein_row(
         weights=weights,
         objective=value,
         initial_objective=initial_objective,
-        iterations=int(getattr(result, "nit", 0) or 0),
-        converged=bool(
-            result.success and np.isfinite(value) and np.all(np.isfinite(weights))
-        ),
+        iterations=total_iterations,
+        converged=bool(solver_succeeded and finite and feasible and certified),
         solver=solver,
         feasible_set=feasible_set,
-        gradient=gradient,
+        optimality_gap=optimality_gap,
+        projected_gradient_norm=projected_gradient_norm,
         order_two=order_two,
         curvature=curvature,
         assignment_gap_min=assignment_gap_min,
@@ -262,12 +348,12 @@ def _solve_anchored_wasserstein_row(
     return weights, diagnostics
 
 
-def solve_wasserstein_target_projections(
+def _solve_wasserstein_target_projections(
     clouds: list[EmbeddingCloud] | tuple[EmbeddingCloud, ...],
     geometry: StatisticalDistanceSpec,
     arm: BarycentreArm,
     ground: PointDistanceSpec,
-) -> BarycentreResult:
+) -> WassersteinProjectionSupports:
     """Solve leave-one-out anchored empirical W1/W2 barycentre projections.
 
     Each target row first computes an optimal balanced transport map from the
@@ -309,6 +395,7 @@ def solve_wasserstein_target_projections(
     candidate_ids: list[tuple[str, ...]] = []
     weight_rows: list[np.ndarray] = []
     diagnostics: list[BarycentreDiagnostics] = []
+    supports: list[np.ndarray] = []
     for target_index, target in enumerate(items):
         candidate_indices = tuple(
             index for index in range(len(items)) if index != target_index
@@ -338,14 +425,43 @@ def solve_wasserstein_target_projections(
         candidate_ids.append(tuple(items[index].item_id for index in candidate_indices))
         weight_rows.append(weights)
         diagnostics.append(diagnostic)
-    return BarycentreResult(
-        target_ids=tuple(target_ids),
-        candidate_ids=tuple(candidate_ids),
-        weights=tuple(weight_rows),
-        diagnostics=tuple(diagnostics),
-        arm_id=arm.arm_id,
-        geometry_id=geometry.distance_id,
+        supports.append(np.einsum("k,kmd->md", weights, matched))
+    return WassersteinProjectionSupports(
+        result=BarycentreResult(
+            target_ids=tuple(target_ids),
+            candidate_ids=tuple(candidate_ids),
+            weights=tuple(weight_rows),
+            diagnostics=tuple(diagnostics),
+            arm_id=arm.arm_id,
+            geometry_id=geometry.distance_id,
+        ),
+        supports=tuple(supports),
+        permutations=permutations,
     )
 
 
-__all__ = ["solve_wasserstein_target_projections"]
+def solve_wasserstein_target_projections(
+    clouds: list[EmbeddingCloud] | tuple[EmbeddingCloud, ...],
+    geometry: StatisticalDistanceSpec,
+    arm: BarycentreArm,
+    ground: PointDistanceSpec,
+) -> BarycentreResult:
+    """Solve target projections without retaining reconstructed supports."""
+    return _solve_wasserstein_target_projections(clouds, geometry, arm, ground).result
+
+
+def solve_wasserstein_target_projections_with_supports(
+    clouds: list[EmbeddingCloud] | tuple[EmbeddingCloud, ...],
+    geometry: StatisticalDistanceSpec,
+    arm: BarycentreArm,
+    ground: PointDistanceSpec,
+) -> WassersteinProjectionSupports:
+    """Solve target projections and retain supports from the same assignments."""
+    return _solve_wasserstein_target_projections(clouds, geometry, arm, ground)
+
+
+__all__ = [
+    "WassersteinProjectionSupports",
+    "solve_wasserstein_target_projections",
+    "solve_wasserstein_target_projections_with_supports",
+]

@@ -7,7 +7,7 @@ own and no side-effect primitives beyond what ``pipeline.io`` exposes.
 reverse.
 
 Tiered into shared ``substrate/`` (corpus/embeddings/market/energy/ablation/
-mantel/dimensionality — reused across papers) and per-paper ``papers/paperN/``
+dimensionality — reused across papers) and per-paper ``papers/paperN/``
 subpackages (paper1/dyadic_confound, paper3/empirical,
 paper5/).
 """

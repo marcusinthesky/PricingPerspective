@@ -14,5 +14,3 @@ volume: '2024'
 publisher: ICLR
 page: 35549-35562
 ---
-
-# FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning

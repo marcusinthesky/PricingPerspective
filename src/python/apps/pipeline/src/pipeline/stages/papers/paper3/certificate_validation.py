@@ -7,16 +7,17 @@ import json
 import platform
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Never, cast
+from typing import TYPE_CHECKING, Never, cast
 
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import yaml
-from scipy.optimize import linear_sum_assignment, minimize
+from scipy.optimize import linear_sum_assignment
 from sklearn.covariance import LedoitWolf
+from statadic.numerics.optimize.simplex import simplex_qp_result
 
-from pipeline._kernels.paper3_validation import (
+from pipeline._kernels.paper3.validation import (
     capital_to_budget_weights,
     coverage_lower,
     select_stationary_block_length,
@@ -24,20 +25,24 @@ from pipeline._kernels.paper3_validation import (
     stationary_block_indices,
 )
 from pipeline.io.contracts import write_manifest
+from pipeline.io.semantic_identity import entrypoint_code_identity
 from pipeline.io.typed_analysis import StatisticalDistanceSpec, load_typed_analysis
 from pipeline.io.typed_providers import load_dated_provider_observations
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 PROVIDER_ID = "qwen3-embedding-8b"
 REPRESENTATION_ID = "qwen3-embedding-8b-unit"
 OUTPUT_NAMES = (
     "formation_results.parquet",
     "portfolio_weights.parquet",
-    "random_portfolios.parquet",
     "placebos.parquet",
-    "summary.yaml",
+    "results.json",
 )
 EXPECTED_ROSTER_SIZE = 100
 WEIGHT_SUM_TOLERANCE = 1e-8
+GMV_KKT_TOLERANCE = 1e-7
 
 
 class CertificateValidationStageError(ValueError):
@@ -57,6 +62,7 @@ class Paper3CertificateValidationPaths:
     holdout_returns_dir: Path
     pit_w2_path: Path
     sample_descriptives_path: Path
+    embeddings_dir: Path
     output_dir: Path
 
 
@@ -79,7 +85,6 @@ class ValidationConfig:
     return_reps: int
     seed: int
     cap: float
-    random_portfolios: int
     label_permutations: int
     residual_budgets: tuple[float, ...]
 
@@ -119,7 +124,6 @@ def _load_config(path: Path) -> ValidationConfig:
         return_reps=int(raw["return_block_replications"]),
         seed=int(raw["seed"]),
         cap=float(raw["maximum_weight"]),
-        random_portfolios=int(raw["random_portfolios"]),
         label_permutations=int(raw["label_permutations"]),
         residual_budgets=tuple(float(value) for value in raw["residual_budgets"]),
     )
@@ -220,19 +224,24 @@ def _capital_from_budget(q: np.ndarray, volatility: np.ndarray) -> np.ndarray:
 
 
 def _gmv(covariance: np.ndarray) -> np.ndarray:
+    """Minimize variance with a stopping criterion independent of currency units."""
     n = len(covariance)
-    result = minimize(
-        lambda weights: float(weights @ covariance @ weights),
-        np.full(n, 1.0 / n),
-        jac=lambda weights: 2.0 * covariance @ weights,
-        method="SLSQP",
-        bounds=[(0.0, 1.0)] * n,
-        constraints={"type": "eq", "fun": lambda weights: weights.sum() - 1.0},
-        options={"ftol": 1e-12, "maxiter": 2000},
+    quadratic = 2.0 * jnp.asarray(covariance)
+    objective_scale = jnp.linalg.norm(quadratic, ord=jnp.inf)
+    quadratic = quadratic / jnp.where(objective_scale > 0.0, objective_scale, 1.0)
+    result = simplex_qp_result(
+        quadratic,
+        jnp.zeros(n, dtype=quadratic.dtype),
+        tolerance=GMV_KKT_TOLERANCE,
+        max_steps=2000,
     )
-    if not result.success or abs(result.x.sum() - 1.0) > WEIGHT_SUM_TOLERANCE:
-        _invalid(f"GMV solver failed: {result.message}")
-    return np.asarray(result.x)
+    weights = np.asarray(result.solver.value)
+    if (
+        not bool(result.solver.converged)
+        or abs(weights.sum() - 1.0) > WEIGHT_SUM_TOLERANCE
+    ):
+        _invalid(f"GMV solver failed: status {int(result.solver.status)}")
+    return weights
 
 
 def _portfolio_weights(
@@ -272,6 +281,7 @@ def _portfolio_weights(
 
 def _article_block_draws(
     params_file: Path,
+    embeddings_dir: Path,
     tickers: tuple[str, ...],
     vintages: tuple[str, ...],
     replications: int,
@@ -291,6 +301,7 @@ def _article_block_draws(
         observations = load_dated_provider_observations(
             provider,
             representation,
+            embeddings_dir=embeddings_dir,
             item_ids=tickers,
             sample_size=distance.sample_size,
             window=window,
@@ -471,7 +482,7 @@ def _select_cell(
 
 
 def _sector_labels(path: Path, tickers: tuple[str, ...]) -> np.ndarray:
-    raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    raw = json.loads(path.read_text(encoding="utf-8"))
     mapping = {row["symbol"]: row["sector"] for row in raw["universe"]}
     if any(ticker not in mapping for ticker in tickers):
         _invalid("sample descriptives do not cover the validation roster")
@@ -480,15 +491,6 @@ def _sector_labels(path: Path, tickers: tuple[str, ...]) -> np.ndarray:
 
 def _permuted_matrix(matrix: np.ndarray, permutation: np.ndarray) -> np.ndarray:
     return matrix[np.ix_(permutation, permutation)]
-
-
-def _random_capped_weights(n: int, count: int, cap: float, seed: int) -> np.ndarray:
-    rng = np.random.default_rng(seed)
-    accepted: list[np.ndarray] = []
-    while len(accepted) < count:
-        candidates = rng.dirichlet(np.ones(n), size=max(128, count - len(accepted)))
-        accepted.extend(candidate for candidate in candidates if candidate.max() <= cap)
-    return np.asarray(accepted[:count])
 
 
 def _weight_stability(
@@ -532,7 +534,156 @@ def _weight_stability(
     }
 
 
-def _evaluate(  # noqa: C901, PLR0912, PLR0915
+def _evaluate_placebos(
+    evaluation_cache: list[tuple[pd.Timestamp, np.ndarray, np.ndarray, np.ndarray]],
+    point_matrix: np.ndarray,
+    stale_matrix: np.ndarray,
+    ticker_permutation: np.ndarray,
+    sector_permutation: np.ndarray,
+    selected: tuple[float, float],
+    config: ValidationConfig,
+    rng: np.random.Generator,
+    *,
+    fallback: bool,
+) -> pd.DataFrame:
+    """Evaluate fixed and random label placebos using the caller's RNG stream."""
+    placebo_rows: list[dict[str, object]] = []
+    placebo_matrices = {
+        "ticker": _permuted_matrix(point_matrix, ticker_permutation),
+        "within_sector": _permuted_matrix(point_matrix, sector_permutation),
+        "stale_2018": stale_matrix,
+    }
+    for name, matrix in placebo_matrices.items():
+        floor = np.zeros_like(matrix) if fallback else _floor_squared(matrix, *selected)
+        for (
+            formation,
+            trailing_volatility,
+            _future_volatility,
+            future_values,
+        ) in evaluation_cache:
+            capital = np.reciprocal(trailing_volatility)
+            capital /= capital.sum()
+            q = capital_to_budget_weights(capital, trailing_volatility)
+            placebo_rows.append(
+                {
+                    "placebo": name,
+                    "replication": 0,
+                    "formation_date": formation,
+                    "certificate_credit": _credit(floor, q),
+                    "realized_variance": float(np.var(future_values @ capital, ddof=1)),
+                }
+            )
+    for replication in range(config.label_permutations):
+        permutation = rng.permutation(len(point_matrix))
+        floor = (
+            np.zeros_like(point_matrix)
+            if fallback
+            else _floor_squared(_permuted_matrix(point_matrix, permutation), *selected)
+        )
+        permutation_credits = []
+        for (
+            _formation,
+            trailing_volatility,
+            _future_volatility,
+            _future_values,
+        ) in evaluation_cache:
+            capital = np.reciprocal(trailing_volatility)
+            capital /= capital.sum()
+            permutation_credits.append(
+                _credit(floor, capital_to_budget_weights(capital, trailing_volatility))
+            )
+        placebo_rows.append(
+            {
+                "placebo": "label_permutation",
+                "replication": replication,
+                "formation_date": pd.NaT,
+                "certificate_credit": float(np.mean(permutation_credits)),
+                "realized_variance": float("nan"),
+            }
+        )
+    return pd.DataFrame(placebo_rows)
+
+
+def _evaluation_summary(
+    formation_frame: pd.DataFrame,
+    squared_floor: np.ndarray | None,
+    article_matrices: np.ndarray,
+    selected: tuple[float, float],
+    config: ValidationConfig,
+) -> dict[str, object]:
+    """Summarize coverage, decision value and diagnostics for evaluated portfolios."""
+    primary = formation_frame[
+        formation_frame["portfolio"].isin(["certificate", "inverse_volatility"])
+    ]
+    validity: dict[str, object] = {}
+    for mode, column in (
+        ("operational", "operational_covered"),
+        ("geometry_only", "geometry_only_covered"),
+    ):
+        subset = formation_frame[formation_frame["portfolio"] == "inverse_volatility"]
+        successes = int(subset[column].sum())
+        validity[mode] = {
+            "coverage": successes / len(subset),
+            "coverage_lower": coverage_lower(successes, len(subset), config.confidence),
+            "formations": len(subset),
+        }
+    means = primary.groupby("portfolio", sort=True)["realized_variance"].mean()
+    summary: dict[str, object] = {
+        "validity": validity,
+        "informativeness": {
+            "mean_lower_credit_inverse_volatility": float(
+                formation_frame.loc[
+                    formation_frame["portfolio"] == "inverse_volatility",
+                    "lower_credit_operational",
+                ].mean()
+            ),
+            "floor_activation_rate": float(np.mean(squared_floor > 0.0))
+            if squared_floor is not None
+            else 0.0,
+            "positive_floor_quantiles": (
+                {
+                    str(q): float(np.quantile(squared_floor[squared_floor > 0.0], q))
+                    for q in (0.1, 0.5, 0.9)
+                }
+                if squared_floor is not None and np.any(squared_floor > 0.0)
+                else {"0.1": 0.0, "0.5": 0.0, "0.9": 0.0}
+            ),
+        },
+        "decision_value": {
+            "mean_future_variance": {key: float(value) for key, value in means.items()},
+            "certificate_minus_inverse_volatility": float(
+                means.get("certificate", np.nan)
+                - means.get("inverse_volatility", np.nan)
+            ),
+            "mean_required_delta": float(
+                formation_frame.loc[
+                    formation_frame["portfolio"] == "inverse_volatility",
+                    "required_delta",
+                ].mean()
+            ),
+        },
+        "diagnostics": {
+            "weight_stability": _weight_stability(
+                squared_floor, article_matrices, selected, config.cap
+            ),
+            "mean_turnover": {
+                str(key): float(value)
+                for key, value in formation_frame.groupby("portfolio")["turnover"]
+                .mean()
+                .items()
+            },
+            "mean_concentration": {
+                str(key): float(value)
+                for key, value in formation_frame.groupby("portfolio")["concentration"]
+                .mean()
+                .items()
+            },
+        },
+    }
+    return summary
+
+
+def _evaluate(
     formations: tuple[pd.Timestamp, ...],
     panel: pd.DataFrame,
     tickers: tuple[str, ...],
@@ -542,7 +693,7 @@ def _evaluate(  # noqa: C901, PLR0912, PLR0915
     sectors: np.ndarray,
     selected: tuple[float, float],
     config: ValidationConfig,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, object]]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, object]]:
     fallback = not np.isfinite(selected[0])
     squared_floor = None if fallback else _floor_squared(point_matrix, *selected)
     rng = np.random.default_rng(config.seed)
@@ -551,13 +702,9 @@ def _evaluate(  # noqa: C901, PLR0912, PLR0915
     for sector in sorted(set(sectors)):
         members = np.flatnonzero(sectors == sector)
         sector_permutation[members] = rng.permutation(members)
-    random_capital = _random_capped_weights(
-        len(tickers), config.random_portfolios, config.cap, _seed(config.seed, "random")
-    )
     roster_identity = hashlib.sha256("|".join(tickers).encode()).hexdigest()
     formation_rows: list[dict[str, object]] = []
     weight_rows: list[dict[str, object]] = []
-    random_rows: list[dict[str, object]] = []
     previous: dict[str, np.ndarray] = {}
     evaluation_cache: list[tuple[pd.Timestamp, np.ndarray, np.ndarray, np.ndarray]] = []
     for formation in formations:
@@ -685,159 +832,29 @@ def _evaluate(  # noqa: C901, PLR0912, PLR0915
                         "budget_weight": budget_weight,
                     }
                 )
-        for portfolio_id, capital in enumerate(random_capital):
-            q = capital_to_budget_weights(capital, trailing_volatility)
-            if fallback:
-                credit = 0.0
-            else:
-                if squared_floor is None:
-                    _invalid("certificate floor missing outside fallback")
-                credit = _credit(squared_floor, q)
-            amplitude = float(capital @ trailing_volatility)
-            random_rows.append(
-                {
-                    "formation_date": formation,
-                    "portfolio_id": portfolio_id,
-                    "certificate_credit": credit,
-                    "operational_bound": amplitude**2 * (1.0 - credit),
-                    "realized_variance": float(np.var(future_values @ capital, ddof=1)),
-                    "maximum_weight": float(capital.max()),
-                }
-            )
     formation_frame = pd.DataFrame(formation_rows)
     weight_frame = pd.DataFrame(weight_rows)
-    random_frame = pd.DataFrame(random_rows)
 
-    placebo_rows: list[dict[str, object]] = []
-    placebo_matrices = {
-        "ticker": _permuted_matrix(point_matrix, ticker_permutation),
-        "within_sector": _permuted_matrix(point_matrix, sector_permutation),
-        "stale_2018": stale_matrix,
-    }
-    for name, matrix in placebo_matrices.items():
-        floor = np.zeros_like(matrix) if fallback else _floor_squared(matrix, *selected)
-        for (
-            formation,
-            trailing_volatility,
-            _future_volatility,
-            future_values,
-        ) in evaluation_cache:
-            capital = np.reciprocal(trailing_volatility)
-            capital /= capital.sum()
-            q = capital_to_budget_weights(capital, trailing_volatility)
-            placebo_rows.append(
-                {
-                    "placebo": name,
-                    "replication": 0,
-                    "formation_date": formation,
-                    "certificate_credit": _credit(floor, q),
-                    "realized_variance": float(np.var(future_values @ capital, ddof=1)),
-                }
-            )
-    for replication in range(config.label_permutations):
-        permutation = rng.permutation(len(tickers))
-        floor = (
-            np.zeros_like(point_matrix)
-            if fallback
-            else _floor_squared(_permuted_matrix(point_matrix, permutation), *selected)
-        )
-        permutation_credits = []
-        for (
-            _formation,
-            trailing_volatility,
-            _future_volatility,
-            _future_values,
-        ) in evaluation_cache:
-            capital = np.reciprocal(trailing_volatility)
-            capital /= capital.sum()
-            permutation_credits.append(
-                _credit(floor, capital_to_budget_weights(capital, trailing_volatility))
-            )
-        placebo_rows.append(
-            {
-                "placebo": "label_permutation",
-                "replication": replication,
-                "formation_date": pd.NaT,
-                "certificate_credit": float(np.mean(permutation_credits)),
-                "realized_variance": float("nan"),
-            }
-        )
-    placebo_frame = pd.DataFrame(placebo_rows)
-
-    primary = formation_frame[
-        formation_frame["portfolio"].isin(["certificate", "inverse_volatility"])
-    ]
-    validity: dict[str, object] = {}
-    for mode, column in (
-        ("operational", "operational_covered"),
-        ("geometry_only", "geometry_only_covered"),
-    ):
-        subset = formation_frame[formation_frame["portfolio"] == "inverse_volatility"]
-        successes = int(subset[column].sum())
-        validity[mode] = {
-            "coverage": successes / len(subset),
-            "coverage_lower": coverage_lower(successes, len(subset), config.confidence),
-            "formations": len(subset),
-        }
-    means = primary.groupby("portfolio", sort=True)["realized_variance"].mean()
-    summary: dict[str, object] = {
-        "validity": validity,
-        "informativeness": {
-            "mean_lower_credit_inverse_volatility": float(
-                formation_frame.loc[
-                    formation_frame["portfolio"] == "inverse_volatility",
-                    "lower_credit_operational",
-                ].mean()
-            ),
-            "floor_activation_rate": float(np.mean(squared_floor > 0.0))
-            if squared_floor is not None
-            else 0.0,
-            "positive_floor_quantiles": (
-                {
-                    str(q): float(np.quantile(squared_floor[squared_floor > 0.0], q))
-                    for q in (0.1, 0.5, 0.9)
-                }
-                if squared_floor is not None and np.any(squared_floor > 0.0)
-                else {"0.1": 0.0, "0.5": 0.0, "0.9": 0.0}
-            ),
-        },
-        "decision_value": {
-            "mean_future_variance": {key: float(value) for key, value in means.items()},
-            "certificate_minus_inverse_volatility": float(
-                means.get("certificate", np.nan)
-                - means.get("inverse_volatility", np.nan)
-            ),
-            "mean_required_delta": float(
-                formation_frame.loc[
-                    formation_frame["portfolio"] == "inverse_volatility",
-                    "required_delta",
-                ].mean()
-            ),
-        },
-        "diagnostics": {
-            "weight_stability": _weight_stability(
-                squared_floor, article_matrices, selected, config.cap
-            ),
-            "mean_turnover": {
-                str(key): float(value)
-                for key, value in formation_frame.groupby("portfolio")["turnover"]
-                .mean()
-                .items()
-            },
-            "mean_concentration": {
-                str(key): float(value)
-                for key, value in formation_frame.groupby("portfolio")["concentration"]
-                .mean()
-                .items()
-            },
-        },
-    }
-    return formation_frame, weight_frame, random_frame, placebo_frame, summary
+    placebo_frame = _evaluate_placebos(
+        evaluation_cache,
+        point_matrix,
+        stale_matrix,
+        ticker_permutation,
+        sector_permutation,
+        selected,
+        config,
+        rng,
+        fallback=fallback,
+    )
+    summary = _evaluation_summary(
+        formation_frame, squared_floor, article_matrices, selected, config
+    )
+    return formation_frame, weight_frame, placebo_frame, summary
 
 
 def _write_outputs(
     paths: Paper3CertificateValidationPaths,
-    frames: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame],
+    frames: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame],
     summary: dict[str, object],
     config: ValidationConfig,
     tickers: tuple[str, ...],
@@ -846,7 +863,7 @@ def _write_outputs(
     block_lengths: dict[str, dict[str, object]],
 ) -> None:
     paths.output_dir.mkdir(parents=True, exist_ok=True)
-    names = OUTPUT_NAMES[:4]
+    names = OUTPUT_NAMES[:3]
     for name, frame in zip(names, frames, strict=True):
         ordered = (
             frame.sort_values(
@@ -879,7 +896,6 @@ def _write_outputs(
             "return_replications": config.return_reps,
             "seed": config.seed,
             "maximum_weight": config.cap,
-            "random_portfolios": config.random_portfolios,
             "label_permutations": config.label_permutations,
             "residual_budgets": list(config.residual_budgets),
         },
@@ -888,16 +904,12 @@ def _write_outputs(
         "article_block_lengths": block_lengths,
         **summary,
     }
-    summary_path = paths.output_dir / "summary.yaml"
-    summary_path.write_text(yaml.safe_dump(document, sort_keys=True), encoding="utf-8")
-    outputs = [paths.output_dir / name for name in OUTPUT_NAMES]
-    source_paths = (
-        Path(__file__),
-        Path(__file__).parents[3] / "_kernels" / "paper3_validation.py",
+    summary_path = paths.output_dir / "results.json"
+    summary_path.write_text(
+        json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
-    code_identity = hashlib.sha256(
-        "".join(_sha256(path) for path in source_paths).encode()
-    ).hexdigest()
+    outputs = [paths.output_dir / name for name in OUTPUT_NAMES]
+    code_identity = entrypoint_code_identity("paper3-certificate-validation")
     write_manifest(
         paths.output_dir / "provenance.manifest.json",
         {
@@ -925,7 +937,7 @@ def _write_outputs(
                 for path in (
                     paths.returns_dir,
                     paths.holdout_returns_dir,
-                    Path("data/shared/embeddings/qwen3-embedding-8b"),
+                    paths.embeddings_dir,
                 )
             ],
             "environment": {
@@ -945,8 +957,7 @@ def _write_outputs(
             "metadata": {
                 "formation_result_rows": len(frames[0]),
                 "weight_rows": len(frames[1]),
-                "random_rows": len(frames[2]),
-                "placebo_rows": len(frames[3]),
+                "placebo_rows": len(frames[2]),
                 "holdout_isolation": "selected_cell computed before evaluation rows",
                 "ticker_roster_sha256": hashlib.sha256(
                     "|".join(tickers).encode()
@@ -987,6 +998,7 @@ def run_paper3_certificate_validation(paths: Paper3CertificateValidationPaths) -
         _invalid("frozen 2022 W2 vintage is missing")
     article_draws, block_lengths = _article_block_draws(
         paths.params_file,
+        paths.embeddings_dir,
         tickers,
         tuple(sorted(vintage_matrices)),
         config.article_reps,
@@ -997,7 +1009,7 @@ def run_paper3_certificate_validation(paths: Paper3CertificateValidationPaths) -
     )
     selected = (selected_l, selected_tau)
     sectors = _sector_labels(paths.sample_descriptives_path, tickers)
-    formation, weights, random, placebos, summary = _evaluate(
+    formation, weights, placebos, summary = _evaluate(
         evaluation,
         panel,
         tickers,
@@ -1010,7 +1022,7 @@ def run_paper3_certificate_validation(paths: Paper3CertificateValidationPaths) -
     )
     _write_outputs(
         paths,
-        (formation, weights, random, placebos),
+        (formation, weights, placebos),
         summary,
         config,
         tickers,

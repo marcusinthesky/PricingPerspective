@@ -1,3 +1,4 @@
+import Architect
 import PricingPerspective.Transmission.Dispersion.PortfolioVariance
 import Mathlib.Analysis.Convex.StdSimplex
 
@@ -40,6 +41,13 @@ def IsConditionallyNegativeDefinite (d : A → A → ℝ) : Prop :=
 /-- Under conditional negative definiteness, one minus the pairwise
 certificate is convex along mixtures of probability weights.  No unconditional
 convexity claim is made for an arbitrary distance matrix. -/
+@[blueprint "thm:p3-certificate-convexity"
+  (statement := /--
+    If the squared pairwise distance matrix is conditionally negative definite, then one minus
+    the pairwise certificate is convex along mixtures of normalized risk weights. Assumptions:
+    finite asset universe; the squared distance matrix is conditionally negative definite; two
+    sets of normalized risk weights and a mixing parameter in the unit interval.
+  -/)]
 theorem standardizedCertifiedObjective_convex_of_cnd
     (d : A → A → ℝ) (hCND : IsConditionallyNegativeDefinite d)
     (q r : WassersteinGeometry.Multimarginal.ProbabilityWeight A)

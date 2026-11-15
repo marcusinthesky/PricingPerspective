@@ -19,5 +19,3 @@ issue: '86'
 publisher: JMLR
 page: 1-47
 ---
-
-# Minimax Estimation of Kernel Mean Embeddings

@@ -11,15 +11,15 @@ import pandas as pd
 
 from pipeline.stages.papers.paper5 import estimate as est
 from pipeline.stages.papers.paper5 import weights as wgt
-from pipeline.stages.papers.paper5._gate.bootstrap import stationary_bootstrap_indices
-from pipeline.stages.papers.paper5._gate.contracts import (
-    GATE_FOLDS,
+from pipeline.stages.papers.paper5.baskets import equal_support_weights
+from pipeline.stages.papers.paper5.bootstrap import stationary_bootstrap_indices
+from pipeline.stages.papers.paper5.co_mentions import load_co_mentions_w
+from pipeline.stages.papers.paper5.operators import load_operator
+from pipeline.stages.papers.paper5.periods import (
+    ANNUAL_FOLDS,
     POST_CORPUS_END_DATE,
     POST_CORPUS_START_DATE,
 )
-from pipeline.stages.papers.paper5._gate.driver import _load_gate_operator
-from pipeline.stages.papers.paper5._gate.metrics import equal_support_weights
-from pipeline.stages.papers.paper5._run.robustness import _load_co_mentions_w
 from pipeline.stages.substrate.panel import (
     load_aligned_return_panel,
     load_priced_distance_universe,
@@ -39,7 +39,7 @@ class Paper5PostCorpusPaths:
     oos_returns_dir: Path
     shared_barycentre_dir: Path
     distance_artifact_dir: Path
-    co_mentions_adjacency: Path
+    co_mentions_adjacency: Path | None
     output_dir: Path
 
 
@@ -69,6 +69,9 @@ def _bootstrap_rho(
     draws = np.empty(len(indices), dtype=np.float64)
     for draw, date_indices in enumerate(indices):
         fit = est.sar_qmle(returns[date_indices], weights, compute_se=False)
+        if not bool(fit["converged"]):
+            message = f"post-corpus bootstrap draw {draw} did not converge"
+            raise est.SarEstimationError(message)
         draws[draw] = fit["rho_hat"]
     return draws
 
@@ -92,7 +95,7 @@ def run_paper5_post_corpus_qmle(
     if config.n_bootstrap < 1 or config.block_length < 1:
         message = "bootstrap draws and block length must be positive"
         raise ValueError(message)
-    tickers, w_flat, _summary = _load_gate_operator(
+    tickers, w_flat, _summary = load_operator(
         paths.shared_barycentre_dir,
         config,
     )
@@ -110,13 +113,16 @@ def run_paper5_post_corpus_qmle(
         "w_h": w_h,
     }
     if not config.focal_matrices_only:
+        if paths.co_mentions_adjacency is None:
+            message = "the co-mention comparator needs a co-mentions adjacency"
+            raise ValueError(message)
         matrices.update(
             {
                 "equal_support": equal_support_weights(
                     w_flat,
                     active_tolerance=config.active_weight_tolerance,
                 ),
-                "w_co_mentions": _load_co_mentions_w(
+                "w_co_mentions": load_co_mentions_w(
                     paths.co_mentions_adjacency,
                     tickers,
                 )[0],
@@ -126,7 +132,7 @@ def run_paper5_post_corpus_qmle(
         "pooled_2023_2026": (POST_CORPUS_START_DATE, POST_CORPUS_END_DATE),
     }
     if not config.pooled_only:
-        periods.update(GATE_FOLDS)
+        periods.update(ANNUAL_FOLDS)
     rows: list[dict[str, object]] = []
     bootstrap_rows: list[dict[str, object]] = []
     results: dict[str, object] = {}
@@ -147,6 +153,9 @@ def run_paper5_post_corpus_qmle(
         period_results: dict[str, object] = {}
         for name, weights in matrices.items():
             fit = est.sar_qmle(returns, weights)
+            if not bool(fit["converged"]):
+                message = f"post-corpus fit for {period}/{name} did not converge"
+                raise est.SarEstimationError(message)
             bootstrap = _bootstrap_rho(returns, weights, indices)
             bootstrap_rows.extend(
                 {
@@ -172,6 +181,7 @@ def run_paper5_post_corpus_qmle(
                 "sigma2_hat": fit["sigma2_hat"],
                 "loglik": fit["loglik"],
                 "converged": bool(fit["converged"]),
+                "refinement_gain": fit["refinement_gain"],
                 "bootstrap_boundary_share": float(
                     np.mean(np.abs(bootstrap) >= _RHO_BOUNDARY_DIAGNOSTIC)
                 ),
@@ -183,7 +193,7 @@ def run_paper5_post_corpus_qmle(
     payload: dict[str, object] = {
         "schema_version": 3,
         "primary_period": "pooled_2023_2026",
-        "annual_periods": [] if config.pooled_only else list(GATE_FOLDS),
+        "annual_periods": [] if config.pooled_only else list(ANNUAL_FOLDS),
         "operator_construction_window": "2018-01-01/2022-12-31",
         "identity": {
             "provider_id": config.provider_id,

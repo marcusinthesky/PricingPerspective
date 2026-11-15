@@ -1,5 +1,4 @@
-\section{Randomized bi-Lipschitz pushforward and W$_2$ covariance
-envelope}\label{sec:methodology}
+\section{Economic transmission and the covariance envelope}\label{sec:methodology}
 
 \subsection{Theoretical framework}
 
@@ -12,8 +11,6 @@ For firm $i$, the law $C_i$ records a distribution over risk-relevant
 locations rather than collapsing heterogeneous information to one vector.
 A common map sends draws from these laws to factor exposures, while a
 Lipschitz restriction controls how much the map can distort characteristic distance.
-The map, its distortion and slack bounds, and exposure magnitudes are
-maintained rather than estimated.
 
 Because the restriction concerns systematic covariance, the return
 representation is written to accommodate either a finite or an infinite
@@ -32,13 +29,16 @@ firm-specific return component.
 The random element $B_i$ adds a distinct source of variation by allowing a
 firm's loading on common shocks to follow an exposure law.
 To connect that loading law to distribution-valued characteristics, let
-$B_i=T(X_i,U_i)$, where $X_i\sim C_i$ is a characteristic draw and $U_i$
+$B_i=T_i(X_i,U_i)$, where $X_i\sim C_i$ is a characteristic draw and $U_i$
 allows the same characteristic to map to different exposures.
 Thus $X_i$ represents heterogeneity within the firm's characteristic law,
 while $U_i$ represents transmission variation conditional on a
 characteristic; both differ from the return innovations $F_t$ and $e_t^i$.
-Equivalently, a stochastic kernel $K(x,\cdot)=\mathcal L(T(x,U))$ maps
-characteristics to exposure laws and $P_i=C_i\,K=\mathcal L(B_i)$.
+Equivalently, a firm-specific stochastic kernel
+$K_i(x,\cdot)=\mathcal L(T_i(x,U_i)\mid X_i=x)$ maps
+characteristics to exposure laws and $P_i=C_i\,K_i=\mathcal L(B_i)$.
+The common restriction below concerns the benchmark component of these maps;
+the complete transmission maps may differ across firms.
 The deterministic map and additive-slack cases are special cases of this construction.
 
 Transport comparisons require the firm laws to share a characteristic domain
@@ -67,24 +67,46 @@ specifies how draws from two already-defined exposure laws occur jointly.
 
 The envelope itself concerns systematic covariance, whereas its
 interpretation using total returns requires a separate return bridge.
-Under that bridge, the residual is square-integrable and centered, is
-orthogonal to $F_t$, and has zero cross-firm residual covariance under the
-same coupling $\pi$.
-The full exposure laws $P_i$ are the objects entering the transport envelope.
-The article cloud is only a finite-support proxy for $C_i$, and the data do
-not identify the latent draws, the kernel, or the joint coupling of the exposure laws.
+Under that bridge, the joint exposure draw is independent of the centered
+factor innovation, whose covariance is $\Gamma$.
+Residuals are square-integrable and centered, are orthogonal to both firms'
+systematic returns, and have zero cross-firm covariance under the same joint law.
+These conditions equate total-return covariance with $\kappa_\pi$.
+Total-return variance additionally includes residual variance, which enters
+the empirical return-distance calculation below.
 
-\subsection{Randomized bi-Lipschitz pushforward and the W$_2$ covariance
-envelope}\label{sec:random-exposure}
+\subsection{From economic characteristics to covariance}\label{sec:random-exposure}
+
+The economic link starts with how firms earn revenue, incur costs, and
+allocate risk through contracts.
+Consider two airlines facing an unexpected increase in fuel prices.
+Fuel intensity determines the immediate cost pressure, while competition and
+ticket contracts constrain how much can be passed into fares.
+Fuel hedges can offset part of the cash-flow loss; debt commitments affect
+how the remaining loss falls on equity.
+Managers choose routes, fleets, fares, and hedging arrangements subject to
+contracts and adjustment costs.
+Investors value the resulting expected cash flows and discount-rate risks.
+A factor loading summarizes the sensitivity of returns to a specified
+common shock, rather than the frequency with which that shock is mentioned.
+
+Within a stable operating regime, comparable economic roles and contractual
+arrangements motivate comparable responses to common shocks.
+Differences in hedging, leverage, and operating arrangements motivate
+firm-specific departures.
+This reasoning motivates a shared benchmark relationship, called the common
+carrier below, between economic characteristics and risk sensitivities.
+The relevant characteristics must describe economic roles: an oil producer
+and an airline can discuss the same commodity while responding in opposite
+directions to its price.
+Characteristic-based loading models likewise relate firm descriptors to
+factor sensitivities through shared functions \citep{kelly_characteristics_2019}.
 
 Characteristic distance can restrict covariance only if differences in
-characteristics survive their transmission into systematic exposures.
-The formulation therefore treats the characteristic-to-exposure link as a
-randomized pushforward: a common carrier captures the shared part of the
-link, while the kernel draw allows exposure heterogeneity around it.
-This structure also isolates the object later linked to returns: the excess
-of exposure distance under a realized coupling over the least possible
-transport cost of the latent exposure laws.
+characteristics survive as differences in systematic exposures.
+We therefore allow a shared response, stochastic variation, and bounded
+firm-specific departures, and state explicitly how much similarity the
+relationship must preserve.
 
 Quadratic transport and covariance both require second moments, so this
 subsection strengthens the characteristic domain accordingly.
@@ -102,7 +124,7 @@ The lower transfer bound will need to pull a coupling on the carrier image
 back to characteristic space, which motivates the inverse condition stated next.
 The common carrier $t:\Omega\to\mathcal H$ is Borel measurable, and
 $t_\Gamma:=\Gamma^{1/2}\circ t$ is a Borel embedding with a Borel inverse on its image.
-The stochastic map $T:\Omega\times\mathcal U\to\mathcal H$ is Borel
+Each stochastic map $T_i:\Omega\times\mathcal U\to\mathcal H$ is Borel
 measurable, and the maintained integrability conditions put the induced
 exposure laws in $\mathcal P_2(\mathcal H)$.
 
@@ -113,9 +135,9 @@ permits multiplicative compression or expansion.
 The bound $\tau_i$ permits an additive firm-level departure from the common
 carrier in the same risk units.
 This slack is a transmission tolerance rather than article-measurement error,
-and the kernel draw $U_i$ that generates it remains distinct from the
+and the transmission draw $U_i$ that generates it remains distinct from the
 cross-firm coupling $\pi$ used to join the firm-level exposure laws.
-\begin{assumption}[Common bi-Lipschitz random map]
+\begin{assumption}[Common carrier with bounded random departures]
   \label{ass:random-common-map}
   Let $C_i,C_j\in\mathcal P_2(\Omega)$ and let $t:\Omega\to\mathcal H$ be
   the common carrier. Assume that, for some $L\ge1$,
@@ -123,31 +145,119 @@ cross-firm coupling $\pi$ used to join the firm-level exposure laws.
     L^{-1}d_\Omega(x,y)\le\norm{t_\Gamma(x)-t_\Gamma(y)}_{\mathcal H}
     \le Ld_\Omega(x,y).
   \end{equation}
-  If $X_i\sim C_i$ and $U_i$ is drawn from the common transmission kernel,
+  If $X_i\sim C_i$ and $U_i$ is a conditional transmission draw,
   define the exposure random element
   \begin{equation}\label{eq:random-exposure-pushforward}
-    B_i=T(X_i,U_i)
+    B_i=T_i(X_i,U_i)
     =t(X_i)+\varepsilon_i(X_i,U_i),
     \qquad \norm{\Gamma^{1/2}\varepsilon_i(x,u)}_{\mathcal H}\le\tau_i,
     \qquad P_i:=\mathcal L(B_i).
   \end{equation}
   The slack maps $\varepsilon_i$ are Borel measurable, and the preceding
   integrability condition ensures that $P_i$ has a finite
-  $\Gamma$-weighted second moment. The map, the common Lipschitz scale $L$,
+  $\Gamma$-weighted second moment. The maps, the common Lipschitz scale $L$,
   and the deviation bounds $\tau_i$ are maintained over the analyzed regime.
   Both scales are stated in risk coordinates:
   equation~\ref{eq:random-bilipschitz}
   constrains $\Gamma^{1/2}t$ rather than $t$ alone, and $\tau_i$ bounds the
-  deviation after the same factor weighting. Every transport quantity
-  displayed below therefore lives in the one geometry that the covariance
-  envelope is defined in, and no step silently exchanges
-  $\norm{\cdot}_{\mathcal H}$ for $\norm{\Gamma^{1/2}\cdot}_{\mathcal H}$.
+  deviation after the same factor weighting. All transport quantities below
+  use this factor-risk geometry.
 \end{assumption}
 
-The common-map restriction does the economic work of connecting
-characteristic and exposure geometry; once the exposure laws are fixed, the
-covariance envelope follows from an elementary inner-product identity.
-We state that identity first because every bound below is an instance of it.
+The two sides of the restriction have different economic content.
+The upper bound imposes bounded sensitivity: within the maintained regime,
+small characteristic changes cannot produce arbitrarily large changes in
+risk-weighted exposure.
+For example, with contracts and financing held within a stable regime,
+a modest change in fuel intensity or cost pass-through can change the
+fuel-price sensitivity gradually.
+Smooth cash-flow and valuation responses with bounded sensitivities motivate
+this local approximation; distress, contractual thresholds, and regime
+changes can undermine it.
+The lower bound separately requires that distinctions represented by the
+characteristic metric survive as exposure differences.
+It can fail when characteristics distinguish economically irrelevant features,
+when hedging offsets differences in operating exposure, or when different
+activities have offsetting systematic exposures.
+Thus two airlines with different fuel requirements could nevertheless have
+similar net fuel-price exposure after hedging.
+The lower restriction therefore selects characteristics whose differences
+remain economically relevant after firms' risk-management decisions.
+
+A finite-dimensional example makes the sufficient conditions explicit.
+Take $\Omega$ to be a compact subset of $\mathbb R^k$ with Euclidean distance,
+and let the carrier be $t(x)=b_0+Ax$, where $b_0\in\mathcal H$ and
+$A:\mathbb R^k\to\mathcal H$ is linear.
+This affine benchmark represents a first-order approximation to the response
+of factor loadings to economic characteristics within a fixed operating regime;
+firm-specific departures and approximation error enter $\varepsilon_i$.
+If, on the span of admissible characteristic differences, constants
+$0<m\le M<\infty$ satisfy
+\[
+  m\norm{h}\le\norm{\Gamma^{1/2}Ah}_{\mathcal H}\le M\norm{h},
+\]
+then equation~\ref{eq:random-bilipschitz} holds with
+$L=\max\{1,M,m^{-1}\}$.
+The upper constant limits amplification; the positive lower constant excludes
+characteristic directions that have no systematic-risk effect.
+Bounding the risk-weighted approximation and firm-specific departures by
+$\tau_i$ supplies the remaining transmission condition.
+
+The economic magnitude of $L$ depends on the fixed characteristic units and
+the factor-risk geometry.
+Common amplification or compression enters $L$, while differences from that
+carrier enter $\tau_i$.
+For example, $L=1.25$ permits carrier distances between $80\%$ and $125\%$
+of characteristic distances before additive slack is allowed.
+The empirical grid varies $L$ and $\tau_i$ as scenario inputs to show how
+much transmission uncertainty the restriction tolerates.
+The relative scale of characteristic and exposure units is part of each scenario.
+Estimating that conversion would require economic exposure information in
+addition to normalized articles and returns.
+The constant $L$ bounds distortion over all admissible characteristic pairs;
+the regression below summarizes an average association.
+
+Once the transmission relationship fixes the exposure laws, comparing their
+possible joint arrangements is a Kantorovich transport problem.
+A coupling specifies which exposure draws occur together while preserving
+each firm's marginal law.
+The transport cost measures how far those draws are apart, and minimizing it
+finds their closest feasible alignment.
+This gives the cost specification an economic role before it enters the
+covariance calculation.
+
+With cost proportional to displacement, W$_1$ measures the least average
+distance required for alignment.
+Its dual asks for the largest difference in average valuation across the
+two distributions, subject to a unit bound on valuation changes per unit
+distance \citep{panaretos_invitation_2020}.
+In a goods market with symmetric transport costs, that bound rules out
+profitable spatial arbitrage: buying at one location, transporting, and
+reselling at another cannot yield a positive margin.
+Here the dual valuations give an economic reading of distributional
+separation in the chosen characteristic units.
+The characteristic-to-exposure relationship remains the separate
+transmission assumption above.
+
+Quadratic cost gives larger adjustments increasing marginal weight.
+This is familiar from the Tobin--Hayashi investment mechanism: firms balance
+the marginal value of installed capital against its purchase and marginal
+installation costs, so rising adjustment costs encourage gradual investment
+\citep{hayashi_marginal_q_1982}.
+A smooth adjustment penalty with positive curvature at its no-adjustment
+minimum has a local quadratic form; curvature sets the relative cost of
+adjustment in different directions.
+For a mass-preserving reconfiguration over a unit horizon, W$_2^2$ is the
+least integrated squared adjustment velocity
+\citep{benamou_brenier_2000,santambrogio_optimal_transport_2015}.
+W$_2$ is its square root, expressed in displacement units.
+\Cref{sec:transport-economic-interpretation} records the dual and dynamic
+formulations and their normalization.
+
+The quadratic specification has an additional role specific to the financial
+question here: the same squared distance enters the inner-product identity
+that determines common-shock covariance.
+We state this identity before deriving the covariance envelope.
 
 \begin{lemma}[Polarization Identity]\label{lem:polarization}
   For any $x,y$ in a real inner-product space,
@@ -163,14 +273,6 @@ equation~\ref{eq:polarization} converts into an inner product.
 Minimizing squared transport cost over couplings therefore maximizes
 covariance over couplings, which gives W$_2$ a theoretical role not shared by
 the alternative distances used later as empirical comparisons.
-
-To determine what the marginal exposure laws alone can say about covariance,
-we must compare their possible joint arrangements.
-A coupling is a joint probability law with the prescribed firm-level
-marginals; economically, it records which exposure draws occur together while
-leaving each firm's marginal exposure law unchanged.
-W$_2$ searches across these dependence arrangements for the smallest expected
-squared exposure distance.
 
 Three quantities summarize the pair in factor-risk coordinates: the marginal
 second moment $v_i$, the coupling-specific covariance $\kappa_\pi$, and the
@@ -232,15 +334,11 @@ particular coupling.
   \citep[Ch.~1]{panaretos_invitation_2020}.
 \end{proof}
 
-Conditional on the maintained exposure laws, the theorem restricts feasible
-systematic covariance rather than selecting the realized coupling or
-determining expected returns.
 Holding $v_i$ and $v_j$ fixed, a larger latent exposure distance lowers the
 greatest systematic covariance that the two laws can attain.
 The transport excess $\Delta_\pi$ measures how much the realized joint
 arrangement exceeds the minimum transport cost and, equivalently, how far its
 covariance falls below the ceiling.
-This is a covariance-envelope result, not a no-arbitrage pricing model.
 
 To characterize the entire feasible covariance set rather than only its
 ceiling, the same argument is applied to the reflected law $\check P_j:=(-I)_\#P_j$.
@@ -256,132 +354,29 @@ ceiling, the same argument is applied to the reflected law $\check P_j:=(-I)_\#P
 \end{theorem}
 
 \begin{proof}
-  Define the reflection map
-  \[
-    R(z_i,z_j):=(z_i,-z_j).
-  \]
-  For every coupling $\pi$ of $(P_i,P_j)$, the pushforward
-  $R_\#\pi$ is a coupling of $(P_i,\check P_j)$, where
-  $\check P_j:=(-I)_\#P_j$. Since $R$ is involutive, this operation bijects
-  the couplings of $(P_i,P_j)$ with those of $(P_i,\check P_j)$. Reflection
-  leaves the two second moments unchanged and negates the covariance:
-  \[
-    \E_{R_\#\pi}\inner{Z_i,Z_j}_{\mathcal H}
-    =-\E_\pi\inner{Z_i,Z_j}_{\mathcal H}.
-  \]
-  Apply \Cref{thm:random-exposure-envelope} to the reflected pair. Its
-  greatest covariance is
-  $\frac12(v_i+v_j-W_{2,\Gamma}^{2}(P_i,\check P_j))$; negating this value
-  gives the least covariance for the original pair, which is
-  equation~\ref{eq:random-exposure-floor}.
+  Reflection $(z_i,z_j)\mapsto(z_i,-z_j)$ bijects couplings of
+  $(P_i,P_j)$ with couplings of $(P_i,\check P_j)$, preserves second moments,
+  and negates covariance.
+  Applying \Cref{thm:random-exposure-envelope} to the reflected pair and
+  negating its upper endpoint gives equation~\ref{eq:random-exposure-floor}.
 \end{proof}
 
-Economically, the reflected endpoint describes the weakest systematic
-covariance compatible with the two marginal exposure laws under their most
-oppositely aligned feasible coupling.
-It completes the envelope; it does not predict that realized co-movement will
-be negative.
-
-Together with \Cref{thm:random-exposure-envelope}, this brackets systematic
-covariance in $[\underline\kappa_{ij},\bar\kappa_{ij}]$.
-If $\pi^-$ and $\pi^+$ attain the lower and upper endpoints, respectively,
-then for every $\lambda\in[0,1]$ the mixture
-\[
-  \pi_\lambda:=(1-\lambda)\pi^-+\lambda\pi^+
-\]
-preserves both marginals and, by linearity of covariance, attains
-$(1-\lambda)\underline\kappa_{ij}+\lambda\bar\kappa_{ij}$.
-Thus every interior covariance is attainable.
-The marginal laws therefore bound covariance but do not generally determine
-its sign; the restriction that survives empirically is the nonnegative
-transport excess in equation~\ref{eq:random-exposure-excess-nonneg}.
+The reflected endpoint describes the most oppositely aligned feasible
+arrangement of the two exposure laws.
+Mixtures of the endpoint-attaining couplings preserve the marginals and
+attain every covariance between $\underline\kappa_{ij}$ and $\bar\kappa_{ij}$.
+The main application uses the upper endpoint: greater separation limits the
+scope for aligned systematic exposure.
 
 The covariance envelope still depends on the latent distance
 $W_{2,\Gamma}(P_i,P_j)$, which is not observed in the application.
 The next step is therefore to use \Cref{ass:random-common-map} to transfer
 bounds from characteristic-side distance, later proxied by article
 embeddings, to exposure-side distance.
-The finite-support result first shows how this bridge operates for
-characteristic clouds of the form used empirically.
-It pairs each characteristic atom with an indexed transmission draw so that
-the characteristic and exposure clouds retain the same atom masses.
-Because additive slack changes squared distances through a cross-term, the
-comparison also needs a maintained support-diameter bound.
-
-\begin{proposition}[Finite-support transfer]\label{prop:random-w2-transfer}
-  Write each finite characteristic cloud as
-  \[
-    \widehat C_i=\sum_a p_{ia}\delta_{x_{ia}},
-    \qquad
-    \widehat C_j=\sum_b p_{jb}\delta_{x_{jb}}.
-  \]
-  Fix one transmission draw $u_{ia}$ for each characteristic atom and define
-  the indexed exposure clouds by
-  \[
-    \widehat P_i:=\sum_a p_{ia}\delta_{T(x_{ia},u_{ia})},
-    \qquad
-    \widehat P_j:=\sum_b p_{jb}\delta_{T(x_{jb},u_{jb})}.
-  \]
-  $G_{ij}:=W_{2,d_\Omega}(\widehat C_i,\widehat C_j)$ and
-  $\tau_{ij}:=\tau_i+\tau_j$. Let $D_{ij}$ be any maintained bound on the
-  risk-coordinate support diameter, that is on
-  $\norm{t_\Gamma(x)-t_\Gamma(y)}$ and on $\norm{Z_i-Z_j}$ across all pairs of
-  indexed support points. Then, under \Cref{ass:random-common-map},
-  \begin{align}
-    L^{-2}G_{ij}^{2}-2\tau_{ij}D_{ij}-\tau_{ij}^{2}
-    &\le W_{2,\Gamma}^{2}(\widehat P_i,\widehat P_j)
-    \label{eq:random-w2-lower-transfer}\\
-    W_{2,\Gamma}^{2}(\widehat P_i,\widehat P_j)
-    &\le L^{2}G_{ij}^{2}+2\tau_{ij}D_{ij}+\tau_{ij}^{2}.
-    \label{eq:random-w2-upper-transfer}
-  \end{align}
-\end{proposition}
-
-\begin{proof}
-  Let $M=(m_{ab})$ be a transport matrix. Because the indexed characteristic
-  and exposure clouds use the same atom masses, every nonnegative matrix with
-  row sums $p_{ia}$ and column sums $p_{jb}$ is feasible for both the
-  characteristic and exposure problems. Thus both Wasserstein costs minimize
-  over the same coupling-matrix polytope.
-  Write $Y_{ia}:=t_\Gamma(x_{ia})$ and
-  $Z_{ia}:=\Gamma^{1/2}T(x_{ia},u_{ia})$, and define $Y_{jb},Z_{jb}$
-  analogously. The indexed slack bounds imply
-  $\norm{Z_{ia}-Y_{ia}}\le\tau_i$ and
-  $\norm{Z_{jb}-Y_{jb}}\le\tau_j$.
-  For each entry $(a,b)$, the bi-Lipschitz inequality gives
-  \[
-    L^{-2}d_\Omega(x_{ia},x_{jb})^2
-    \le \norm{t_\Gamma(x_{ia})-t_\Gamma(x_{jb})}^2
-    \le L^2d_\Omega(x_{ia},x_{jb})^2.
-  \]
-  The indexed slack vectors have norms at most $\tau_i$ and $\tau_j$, so the
-  triangle inequality gives, entry by entry,
-  \[
-    \left|
-    \norm{Z_{ia}-Z_{jb}}^2
-    -\norm{t_\Gamma(x_{ia})-t_\Gamma(x_{jb})}^2
-    \right|
-    \le 2\tau_{ij}D_{ij}+\tau_{ij}^2.
-  \]
-  Combining the two entrywise displays, average against an arbitrary feasible
-  $M$. Because every admissible $M$ is available in both problems, minimizing
-  the lower and upper comparisons over the shared polytope gives
-  equations~\ref{eq:random-w2-lower-transfer}--\ref{eq:random-w2-upper-transfer}.
-\end{proof}
-
-The finite-support proposition shows why matching atom masses matter: the
-same transport weights can be evaluated before and after transmission, so
-bounded distortion and slack carry characteristic-cloud distance into an
-exposure-distance interval.
-Economically, the interval is conditional on the declared values of $L$,
-$\tau_{ij}$, and $D_{ij}$; permitting more transmission distortion or a
-larger support bound weakens what a finite characteristic cloud can imply
-about its indexed exposure cloud.
-
-For the full characteristic and exposure laws, the empirical bridge needs a
-metric-level bracket that does not depend on a finite support diameter.
-The following corollary supplies that population statement by comparing each
-exposure law with the pushforward of its characteristic law through the common carrier.
+The following metric bracket compares each exposure law with the
+pushforward of its characteristic law through the common carrier.
+A complementary squared-cost bound for finite clouds is given in
+\Cref{app:finite-support-transfer}.
 
 \begin{corollary}[Metric transfer bracket]\label{cor:random-w2-metric}
   Under \Cref{ass:random-common-map}, with
@@ -434,8 +429,6 @@ The bracket makes the role of the transmission assumptions transparent.
 When $L=1$ and $\tau_i=\tau_j=0$, characteristic distance is preserved in
 factor-risk coordinates; as multiplicative distortion or additive slack
 increases, the lower endpoint falls and the upper endpoint rises.
-The result therefore transfers distance conditionally rather than identifying
-the latent exposure map.
 
 To pass this exposure-distance bracket into the covariance ceiling, write
 \begin{equation}\label{eq:random-w2-bracket}
@@ -457,6 +450,5 @@ Its lower endpoint has the direct economic implication used below: a larger
 $w^-_{ij}$ tightens the covariance ceiling because characteristics that
 cannot be brought close under any admissible transmission leave less room for
 shared systematic exposure.
-The next section evaluates this restriction using article distance as a proxy
-for characteristic distance and treats $(L,\tau)$ as declared sensitivity
-inputs rather than estimated transmission parameters.
+The empirical analysis uses article distance to represent characteristic
+separation and evaluates this restriction across $(L,\tau)$ scenarios.

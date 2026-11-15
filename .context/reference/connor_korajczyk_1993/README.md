@@ -19,5 +19,3 @@ cites:
 - chamberlain_rothschild_1983
 - ross_arbitrage_1976
 ---
-
-# Connor & Korajczyk (1993)

@@ -1,0 +1,886 @@
+\section{Theory and numerical support}\label{app:theory-support}
+
+The equilibrium proof combines the curvature of proportional shares with
+strictly curved capacity costs; the response proof then restricts that field
+to the locally unchanged active coordinates.
+The composition and cash-flow arguments identify which parts of the resulting
+capacity response survive normalization and comparisons across firms.
+Numerical certificates bound operating-solver error before article sampling.
+
+\subsection{Contest inheritance and the capacity
+adaptation}\label{app:contest-inheritance}
+
+The economic technology in \eqref{eq:firm-problem} adapts the multi-contest
+framework of \citet{xu_zenou_zhou_conflict_2022}.
+Their Equations~1--2 allocate effort directly to contests, while Remark~5,
+Equation~54 and its footnote allow a positive, contest-specific denominator
+term.
+Setting contest production to the identity and $K=I$ recovers the corresponding
+regularized share rule.
+Here $Kq_i$ instead maps operating capacities to appeal across demands, and
+outside appeal remains positive rather than being taken to zero in an
+existence approximation.
+
+Their Proposition~1 characterizes Nash equilibrium by a variational
+inequality; Propositions~2--3 and Theorem~2 use monotonicity for uniqueness.
+Theorem~3 derives local active-coordinate responses in their pure-cost setting
+under their cost assumptions and nondegeneracy,
+which corresponds to the strict complementarity condition used here.
+
+The capacity adaptation requires its own hypotheses.
+Xu and colleagues maintain increasing convex costs and impose strong increase
+where needed; Assumption~\ref{ass:primitives} instead uses uniformly positive
+quadratic curvature, including a general symmetric cost matrix.
+Positive definiteness alone does not imply coordinatewise increasing cost.
+Although one may represent feasible appeals as
+$\mathcal A_i=\{Kq_i:q_i\geq0\}$ and minimize capacity cost over each appeal's
+preimage, the resulting effective cost need not inherit their smoothness and
+monotonicity assumptions.
+Their restricted-contest Proposition~5 therefore does not make the present
+orthant result an automatic corollary.
+The following proofs establish the required concavity, monotonicity,
+existence and sensitivity for this specification.
+
+\subsection{Anchored operating stages}\label{app:anchored-stage}
+
+For a fixed preceding allocation $a$, the stage field is
+$F(q;r)+\kappa(q-a)$.
+Its difference between any two feasible profiles has inner product at least
+$(\nu+\kappa)\|q-q'\|^2$ with $q-q'$, because the anchor cancels and the
+static field is $\nu$-strongly monotone.
+The same coercivity argument as in Appendix~\ref{app:equilibrium} gives
+existence on the capacity orthant; strong monotonicity gives uniqueness.
+The shifted linear cost $c_i-\kappa a_i$ need not be nonnegative, so this
+argument uses the anchored-stage result rather than imposing the static
+nonnegative-cost restriction on the shifted problem.
+Every stage retains contemporaneous rival choices and a fixed inherited
+anchor, without a continuation-value first-order condition.
+
+\subsection{Discrete-choice interpretation of proportional
+appeal}\label{app:logit}
+
+The interpretation in Remark~\ref{rem:logit} follows the conditional-logit
+random-utility construction of
+\citet{mcfadden_conditional_logit_1974} and
+\citet{train_discrete_choice_2009}.
+Fix a demand node $\ell$ and nonnegative integer counts $q_{ia}$.
+Consumer choice is among all individual varieties and one outside option.
+For variety $v$ belonging to firm $i$ at activity $a$, write deterministic
+utility $V_v=-\tau_A\|x_a-z_\ell\|^2/d$; write $V_0=\log b_\ell$ for
+outside utility.
+The shocks $\epsilon_v$ are independent across alternatives with
+$\Pr(\epsilon_v\leq e)=\exp\{-\exp(-e)\}$.
+Independence and this distribution give
+\begin{equation}\label{eq:logit-choice}
+  \Pr(v\text{ chosen}\mid z_\ell)
+  =\frac{\exp V_v}{\sum_w\exp V_w}.
+\end{equation}
+Summing this probability over firm $i$'s varieties yields
+\begin{equation}\label{eq:logit-firm-share}
+  \Pr(i\mid z_\ell)
+  =\frac{\sum_a q_{ia}\exp\{-\tau_A\|x_a-z_\ell\|^2/d\}}
+  {b_\ell+\sum_j\sum_a q_{ja}\exp\{-\tau_A\|x_a-z_\ell\|^2/d\}}
+  =\frac{A_{i\ell}}{A_{i\ell}+B_{i\ell}}.
+\end{equation}
+For real nonnegative $q$, the same ratio defines a weighted-choice
+extension: an active firm-activity alternative has deterministic utility
+$\log q_{ia}+\log K_{\ell a}$, and zero-weight alternatives are absent.
+This extension retains the share formula without interpreting a fractional
+mass as a fractional number of independent shocks.
+Multiproduct aggregation is also central to
+\citet{nocke_schutz_aggregative_2018}, whose endogenous-price model
+has different strategic choices from this fixed-margin capacity game.
+
+\begin{remark}[Logit interpretation]\label{rem:logit}
+  The share rule is multinomial logit \citep{mcfadden_conditional_logit_1974}
+  when $q_{ia}$ measures varieties, outlets, or participation and $c_{ia}$
+  is linear cost per unit.
+  The parameter $\tau_A$ measures mismatch cost relative to taste heterogeneity,
+  and $r_\ell=M_\ell m_\ell$ combines market size with fixed per-sale margin.
+  Conditional on other primitives, size and margin changes are
+  observationally equivalent in firm cash flows.
+\end{remark}
+
+\subsection{Mathematical preliminaries and notation}\label{app:proofs}
+
+All spaces in the economic model are finite dimensional.
+Let $I=\{1,\ldots,N\}$, $\mathcal A=\{1,\ldots,m\}$, and
+$\mathcal L=\{1,\ldots,L\}$ index firms, activities, and demand
+nodes, with $N,m,L\geq1$.
+Firm $i$ chooses $q_i\in\mathcal Q_i=\mathbb R_+^m$ and the joint
+profile belongs to
+$\mathcal Q=\prod_i\mathcal Q_i$.
+We use the ordinary Euclidean product structure:
+\begin{equation}\label{eq:app-inner}
+  \langle q,v\rangle=\sum_i\sum_a q_{ia}v_{ia},\qquad
+  \|q\|^2=\sum_i\|q_i\|^2.
+\end{equation}
+The cone $\mathcal Q$ is convex, so segments and one-sided deviations remain
+feasible even at a boundary allocation.
+
+The appeal matrix $K\in\mathbb R_+^{L\times m}$ is common to firms.
+Its row $k_\ell^\top$ maps a capacity block into the scalar appeal
+$A_{i\ell}=k_\ell^\top q_i$.
+Put $B_{i\ell}=b_\ell+\sum_{j\ne i}A_{j\ell}$ and
+$D_\ell=b_\ell+\sum_i A_{i\ell}=A_{i\ell}+B_{i\ell}$.
+Outside appeal $b_\ell>0$ guarantees $D_\ell\geq b_\ell$ at every
+feasible profile.
+Opportunity weights $r_\ell\geq0$ are in cash-flow units, and
+$R_\Sigma=\sum_\ell r_\ell$ is the total available opportunity.
+No rank condition on $K$ is required: different capacity changes can
+have the same appeal image.
+
+Costs are $C_i(q_i)=c_i^\top q_i+q_i^\top H_i q_i/2$, with $c_i\geq0$,
+$H_i=H_i^\top$, and $H_i\succeq\nu I$ for a common $\nu>0$.
+The Gaussian benchmark economy uses the same $H$ across firms and
+heterogeneous $c_i$.
+The proofs permit different $H_i$ when the same lower bound holds.
+The negative marginal-profit field is $F_i=-\nabla_i\pi_i$; its
+components have units of
+cash flow per unit capacity.
+Cost curvature has units of cash flow per squared unit capacity.
+Consequently the error and regret bounds in
+Appendix~\ref{app:certificates} have capacity
+and payoff units, respectively.
+
+\subsection{Proportional-share payoff algebra}\label{app:payoff}
+
+The margin component of the operating payoff and the individual capacity
+choice are, in full notation,
+\begin{equation}\label{eq:revenue}
+  \mathcal M_i(q_i;r_t,B_i)=\sum_\ell r_{\ell t}
+  \frac{A_{i\ell}(q_i)}{A_{i\ell}(q_i)+B_{i\ell}}.
+\end{equation}
+\begin{equation}\label{eq:firm-choice}
+  q_i^*(t)=\arg\max_{q_i\geq0}\pi_i(q_i,q_{-i};r_t).
+\end{equation}
+
+For a unilateral deviation, fix rivals and one demand node, writing current
+own appeal as $a\geq0$, rival-plus-outside appeal as $B>0$ and $D=a+B$.
+A feasible appeal change $s$ can have either sign, but $a+s\geq0$ keeps both
+denominators strictly positive.
+Subtracting the share margins gives the exact identity
+\begin{align}
+  \frac{r(a+s)}{D+s}-\frac{ra}{D}
+  &=\frac{r[(a+s)D-a(D+s)]}{D(D+s)}
+  =\frac{rBs}{D(D+s)}\label{eq:app-share}\\
+  &=\frac{rBs}{D^2}-\frac{rBs^2}{D^2(D+s)}.\label{eq:share-expansion}
+\end{align}
+The nonnegative remainder measures the deduction from valuing the deviation
+at the initial marginal contribution, for expansion and contraction alike.
+
+For a feasible replacement $z_i$, let $d_i=z_i-q_i$ and
+$s_{i\ell}=k_\ell^\top d_i$.
+Linearity of appeal gives $A_{i\ell}(z_i)=A_{i\ell}(q_i)+s_{i\ell}$.
+Applying \eqref{eq:share-expansion} at every node yields
+\begin{align}
+  \mathcal M_i(z_i;r,B_i)-\mathcal M_i(q_i;r,B_i)
+  &=\sum_\ell\frac{r_\ell B_{i\ell}}{D_\ell^2}k_\ell^\top d_i
+  -\mathcal R_i^{\mathrm{sat}}(q,d_i),\label{eq:app-revenue-expansion}\\
+  \mathcal R_i^{\mathrm{sat}}(q,d_i)
+  &=\sum_\ell\frac{r_\ell B_{i\ell}(k_\ell^\top d_i)^2}
+  {D_\ell^2(D_\ell+k_\ell^\top d_i)}\geq0.\label{eq:app-remainder}
+\end{align}
+Symmetry of $H_i$ gives the exact cost difference
+\begin{equation}\label{eq:app-cost-expansion}
+  C_i(q_i+d_i)-C_i(q_i)
+  =(c_i+H_i q_i)^\top d_i+\tfrac12d_i^\top H_i d_i.
+\end{equation}
+Subtracting costs from margin gives, with the field in \eqref{eq:field},
+\begin{equation}\label{eq:payoff-expansion}
+  \pi_i(z_i,q_{-i})-\pi_i(q)
+  =-F_i(q)^\top d_i-\tfrac12d_i^\top H_i d_i-\mathcal R_i^{\mathrm{sat}}(q,d_i).
+\end{equation}
+Thus a nonpositive first-order gain rules out a profitable deviation of any size.
+
+For later use, consider a fraction $t\in[0,1]$ of a feasible deviation.
+The new denominator is at least $b_\ell$, so
+\begin{equation}\label{eq:app-remainder-order}
+  0\leq\mathcal R_i^{\mathrm{sat}}(q,td_i)
+  \leq t^2\sum_\ell\frac{r_\ell B_{i\ell}(k_\ell^\top d_i)^2}{D_\ell^2 b_\ell}.
+\end{equation}
+The right-hand coefficient is finite and independent of $t$.
+This explicit bound justifies taking a directional limit at boundary capacities,
+including profiles where some activities remain inactive.
+
+\subsection{Equilibrium, uniqueness, and symmetry}\label{app:equilibrium}
+
+The marginal incentive to expand is summarized by a vector field $F:\mathcal
+Q\to\mathbb R^{Nm}$ whose $i$th block is the negative own-cash-flow gradient,
+so that its coordinates are marginal expansion cost less marginal contribution:
+\begin{equation}\label{eq:field}
+  F_{ia}(q)=c_{ia}+(H_i q_i)_a-
+  \sum_\ell r_\ell\frac{B_{i\ell}(q_{-i})}
+  {[A_{i\ell}(q_i)+B_{i\ell}(q_{-i})]^2}K_{\ell a}.
+\end{equation}
+A negative coordinate is an incentive to add the corresponding capacity, and
+at zero capacity a positive coordinate makes entry unprofitable.
+At an equilibrium every activity with positive capacity has a zero
+coordinate: its marginal contribution equals its marginal capacity cost.
+
+Proposition~\ref{prop:equilibrium} follows by identifying Nash equilibria with
+solutions of the variational inequality
+\begin{equation}\label{eq:vi}
+  \langle F(q^*),q-q^*\rangle\geq0\qquad\text{for every }q\in\mathcal Q,
+\end{equation}
+then establishing existence and strong monotonicity on the entire orthant.
+
+\subsubsection{Own concavity and the Nash--VI equivalence}
+
+Holding rivals fixed, the own margin Hessian is
+\begin{equation}\label{eq:app-hessian}
+  \nabla_i^2\mathcal M_i(q_i;r,B_i)
+  =-2\sum_\ell\frac{r_\ell B_{i\ell}}{(A_{i\ell}+B_{i\ell})^3}
+  k_\ell k_\ell^\top.
+\end{equation}
+Its quadratic form is nonpositive, and subtracting $H_i$ makes the
+payoff Hessian
+bounded above by $-\nu I$.
+The formula is valid on an open neighborhood of each feasible profile
+because all denominators
+are strictly positive there.
+Thus each own payoff is strictly concave on its convex feasible set,
+with a unique
+best response whenever a maximum exists.
+
+Suppose $q^*$ solves the joint VI \eqref{eq:vi}.
+Choose a feasible joint alternative that changes only firm $i$.
+The VI then says $F_i(q^*)^\top(z_i-q_i^*)\geq0$.
+The exact payoff expansion, positive cost curvature, and nonnegative
+remainder imply
+$\pi_i(z_i,q_{-i}^*)\leq\pi_i(q^*)$ for every feasible $z_i$.
+This holds for every firm, so $q^*$ is Nash.
+For the converse, suppose $q$ is Nash and fix $z_i\geq0$ with $d_i=z_i-q_i$.
+The intermediate choice $q_i+td_i$ is feasible for $0<t\leq1$, and
+Nash optimality gives
+\begin{equation}\label{eq:app-nash-direction}
+  0\geq-tF_i(q)^\top d_i-\tfrac12t^2d_i^\top H_i d_i-\mathcal
+  R_i^{\mathrm{sat}}(q,td_i).
+\end{equation}
+Divide by $t$ and use \eqref{eq:app-remainder-order} as $t\downarrow0$.
+It follows that $F_i(q)^\top d_i\geq0$.
+Sum these inequalities across the blocks of an arbitrary feasible
+joint alternative
+to obtain \eqref{eq:vi}.
+This proves necessity and sufficiency, including at the boundary of the orthant.
+
+\subsubsection{Demand-side monotonicity}
+
+Own concavity alone does not establish joint monotonicity: rival
+responses also enter the joint field.
+We therefore calculate its demand part explicitly.
+At one node let $a=(a_1,\ldots,a_N)$ denote the nonnegative appeal vector and
+$D=b+\sum_i a_i$.
+The negative marginal-contribution field in appeal coordinates is
+$f_i(a)=-r(D-a_i)/D^2$.
+For a direction $u\in\mathbb R^N$ and $U=\sum_i u_i$, direct
+differentiation gives
+\begin{equation}\label{eq:app-node-derivative}
+  (Df(a)u)_i=\frac r{D^3}\bigl[D u_i+(D-2a_i)U\bigr].
+\end{equation}
+The raw Jacobian need not be symmetric.
+Its quadratic form, which equals that of its symmetric part, is
+\begin{align}
+  u^\top Df(a)u
+  &=\frac r{D^3}\left[D\left(\sum_i u_i^2+U^2\right)-2U\sum_i a_i
+  u_i\right]\label{eq:node-monotonicity}\\
+  &=\frac r{D^3}\left[
+    b\left(\sum_i u_i^2+U^2\right)
+  +\sum_i a_i\left\{\sum_{j\ne i}u_j^2+(U-u_i)^2\right\}\right]\geq0.
+  \label{eq:app-demand-squares}
+\end{align}
+The second equality expands $D=b+\sum_i a_i$ and completes a square
+separately for each $a_i$.
+All coefficients are nonnegative.
+This is the property of the proportional-share technology that preserves
+monotonicity in the interacting game.
+
+For capacity profiles $q,v$, put $h=q-v$ and $q(t)=v+th$.
+At node $\ell$, the corresponding appeal direction is
+$u_{i\ell}=k_\ell^\top h_i$.
+The margin part $F^R$ of the capacity field is the pullback of the
+node fields through $K$.
+The fundamental theorem of calculus therefore yields
+\begin{equation}\label{eq:app-integrated-demand}
+  \langle F^R(q)-F^R(v),h\rangle
+  =\int_0^1\sum_\ell u_\ell^\top Df_\ell(A_\ell(q(t)))u_\ell\,\mathrm dt
+  =\mathcal M(q,v)\geq0.
+\end{equation}
+The finite sums and continuous derivatives justify the integral.
+A nonzero $h_i$ may lie in the null space of $K$, so this argument
+need not supply
+strict curvature in all capacity directions.
+That strictness comes from the resource-cost matrices.
+The node inequality is the unit-exponent case of the marginal-share Jacobian
+curvature in \citet[Lemma~A.4]{ewerhart_quartieri_contests_2020}, with the
+outside coordinate fixed and its directional change set to zero.
+Equation~\eqref{eq:app-integrated-demand} transfers that curvature to capacity;
+the cost bound controls directions in the null space of $K$, supplying the
+strong monotonicity required by the general variational-inequality result
+\citep{parise_ozdaglar_network_games_2019}.
+
+\subsubsection{Gaussian cost curvature}
+
+The Gaussian congestion kernel $K^c$ is positive semidefinite on any finite
+set.
+When $\tau_c=0$, it is the all-ones matrix and
+$v^\top K^c v=(\sum_a v_a)^2\geq0$.
+When $\tau_c>0$, factor its entries and expand the exponential:
+\begin{equation}\label{eq:app-gaussian-series}
+  K^c_{ab}=e^{-\tau_c\|x_a\|^2/d}e^{-\tau_c\|x_b\|^2/d}
+  \sum_{n=0}^{\infty}\frac{(2\tau_c/d)^n}{n!}\langle x_a,x_b\rangle^n.
+\end{equation}
+For every nonnegative integer $n$, the matrix with entries
+$\langle x_a,x_b\rangle^n$ is a Gram matrix of the tensor vectors
+$x_a^{\otimes n}$;
+for $n=0$ use the scalar vector one.
+Consequently
+\begin{equation}\label{eq:app-gaussian-psd}
+  v^\top K^c v=\sum_{n=0}^{\infty}\frac{(2\tau_c/d)^n}{n!}
+  \left\|\sum_a v_a e^{-\tau_c\|x_a\|^2/d}x_a^{\otimes n}\right\|^2\geq0.
+\end{equation}
+Finite activity sums and absolute convergence of the exponential
+series justify the equality.
+Thus $H=\eta K^c+\nu I$ has quadratic form at least $\nu\|v\|^2$ for $\eta\geq0$.
+The same conclusion holds for any symmetric $H_i$ satisfying the stated bound.
+
+\subsubsection{Existence on the unbounded cone}
+
+The cost part of $F$ has difference $H_i(q_i-v_i)$ in block $i$.
+Combining its curvature with \eqref{eq:app-integrated-demand} gives
+\begin{equation}\label{eq:strong-monotonicity}
+  \langle F(q)-F(v),q-v\rangle
+  =\mathcal M(q,v)+\sum_i(q_i-v_i)^\top H_i(q_i-v_i)
+  \geq\nu\|q-v\|^2.
+\end{equation}
+To establish existence, first obtain a strategy bound that holds
+uniformly over rivals.
+Each share lies between zero and one, hence
+\begin{equation}\label{eq:app-capacity-bound}
+  \pi_i(q_i,q_{-i})\leq R_\Sigma-c_i^\top q_i-\tfrac12q_i^\top H_i q_i
+  \leq R_\Sigma-\tfrac\nu2\|q_i\|^2.
+\end{equation}
+Zero capacity earns zero for every rival profile.
+Choose $R>\sqrt{2R_\Sigma/\nu}$ and let
+$X_i=\{q_i\geq0:\|q_i\|\leq R\}$.
+Every strategy with norm at least $R$ has negative payoff and is
+dominated by zero.
+The sets $X_i$ are nonempty, compact, and convex.
+Continuity and strict own concavity give a unique maximizer over each
+$X_i$ for every rival profile.
+
+On the compact product $X=\prod_i X_i$, continuity of payoffs and uniqueness
+of each maximizer make the best-response map continuous by the maximum theorem.
+Brouwer's fixed-point theorem therefore supplies a fixed point in $X$.
+No choice outside $X_i$ can improve on it, since those choices earn
+negative payoff and zero is available inside.
+The fixed point is therefore Nash on the entire orthant.
+
+\subsubsection{Uniqueness and the symmetry boundary}\label{app:symmetry-proof}
+
+Let $q^*$ and $v^*$ be two equilibria.
+Their equivalent VI conditions, tested against one another, give
+\begin{equation}\label{eq:app-uniqueness}
+  \langle F(q^*),v^*-q^*\rangle\geq0,\qquad
+  \langle F(v^*),q^*-v^*\rangle\geq0.
+\end{equation}
+Adding and reversing signs bounds the monotonicity pairing above by zero.
+Its lower bound is $\nu\|q^*-v^*\|^2$, so the two equilibria coincide.
+If primitives are invariant under relabeling firms, a permutation of
+an equilibrium remains an equilibrium:
+each permuted firm faces the same own cost and the correspondingly
+permuted sum of rivals' appeals.
+Uniqueness requires the profile to be invariant under every
+transposition of firms.
+Hence all firm blocks are equal.
+Capability heterogeneity removes this permutation invariance and can
+generate different equilibrium allocations.
+
+\subsection{The no-interaction counterfactual}\label{app:independent-proof}
+
+In the independent-firm economy, each firm faces only outside appeal while
+retaining its own opportunity and cost primitives.
+Its payoff is
+\begin{equation}\label{eq:app-independent-payoff}
+  \pi_i^{\mathrm M}(q_i)=\sum_\ell r_\ell\frac{k_\ell^\top
+  q_i}{k_\ell^\top q_i+b_\ell}
+  -c_i^\top q_i-\tfrac12q_i^\top H_i q_i.
+\end{equation}
+The associated field, derived by differentiation of this objective, is
+\begin{equation}\label{eq:app-independent-field}
+  F_i^{\mathrm M}(q_i)=c_i+H_i q_i-
+  \sum_\ell\frac{r_\ell b_\ell}{(k_\ell^\top q_i+b_\ell)^2}k_\ell.
+\end{equation}
+With no rival blocks in its derivative, this operator is a Cartesian
+product of one-firm proportional-share problems.
+Each firm retains access to the full $R_\Sigma$, so aggregate market margin
+can differ between the independent and strategic economies.
+
+Each block Jacobian is
+\begin{equation}\label{eq:app-independent-curvature}
+  DF_i^{\mathrm M}(q_i)=H_i+
+  2\sum_\ell\frac{r_\ell b_\ell}{(k_\ell^\top q_i+b_\ell)^3}k_\ell k_\ell^\top
+  \succeq\nu I.
+\end{equation}
+Integration along each block segment and summation over firms gives
+$\langle F^{\mathrm M}(q)-F^{\mathrm M}(v),q-v\rangle\geq\nu\|q-v\|^2$.
+The payoff bound \eqref{eq:app-capacity-bound} still applies.
+A maximum therefore exists for each block and strict concavity makes it unique;
+the vector of these maxima is the unique independent equilibrium.
+The exact payoff expansion remains valid with $B_{i\ell}=b_\ell$.
+The VI equivalence and the distance and regret arguments below follow
+directly for this product operator.
+Under identical capabilities every independent optimum is identical,
+even though its level need not equal
+the symmetric strategic equilibrium.
+
+\subsection{Response to opportunity and cost shifts}\label{app:response}
+
+Throughout, $q$ is feasible, so $D_\ell\geq B_{i\ell}\geq b_\ell>0$ for every
+firm and node.
+Write $F(q;r)$ for the field \eqref{eq:field} at opportunity values $r$.
+
+\subsubsection{Opportunity continuity}
+
+Under Assumption~\ref{ass:primitives}, equilibria at nonnegative opportunity
+vectors $r,r'$ satisfy
+\begin{equation}\label{eq:response-continuity}
+  \|q^*(r')-q^*(r)\|\leq\frac{L_r}{\nu}\|r'-r\|,
+  \qquad L_r^2=N\sum_\ell\frac{\|k_\ell\|^2}{b_\ell^2}.
+\end{equation}
+This bound requires neither a fixed active set nor differentiability of the
+equilibrium map.
+
+Only the opportunity weights change, so the cost terms cancel and
+\begin{equation}\label{eq:app-field-shift}
+  F_{ia}(q;r')-F_{ia}(q;r)=-\sum_\ell(r'_\ell-r_\ell)\mathcal G_{ia,\ell},
+  \qquad
+  0\leq\mathcal G_{ia,\ell}=\frac{B_{i\ell}}{D_\ell^2}K_{\ell
+  a}\leq\frac{K_{\ell a}}{b_\ell}.
+\end{equation}
+The upper bound uses $B_{i\ell}\leq D_\ell$ and $b_\ell\leq D_\ell$.
+By Cauchy--Schwarz, each coordinate of the shift has square at most
+$\|r'-r\|^2\sum_\ell K_{\ell a}^2/b_\ell^2$.
+Summing over firms and activities gives
+$\|F(q;r')-F(q;r)\|\leq L_r\|r'-r\|$ at every feasible $q$.
+Let $q=q^*(r)$ and $q'=q^*(r')$.
+Adding the two variational inequalities \eqref{eq:vi}, each evaluated
+at the other
+equilibrium, and using \eqref{eq:strong-monotonicity} at opportunity
+values $r$ gives
+\begin{equation}\label{eq:app-continuity}
+  \nu\|q'-q\|^2\leq\langle F(q';r)-F(q';r'),q'-q\rangle
+  \leq L_r\|r'-r\|\,\|q'-q\|,
+\end{equation}
+which is \eqref{eq:response-continuity}.
+This is the strongly monotone sensitivity bound of
+\citet{parise_ozdaglar_network_games_2019} with the model's loading bound.
+
+\subsubsection{The Jacobian and its curvature}\label{app:response-jacobian}
+
+Formally, write $k_\ell^\top$ for row $\ell$ of $K$ and $D_\ell=A_{i\ell}+B_{i\ell}$.
+Raising $r_\ell$ lowers coordinate $(i,a)$ of the field \eqref{eq:field}
+by exactly $\mathcal G_{ia,\ell}=B_{i\ell}K_{\ell a}/D_\ell^2$, so an
+opportunity change $\delta r$ moves the field by $-\mathcal G\delta r$ at
+fixed capacities.
+The field's Jacobian $J$ has own and rival blocks
+\begin{equation}\label{eq:jacobian}
+  J_{ii}=H_i+\sum_\ell\frac{2r_\ell B_{i\ell}}{D_\ell^3}k_\ell k_\ell^\top,
+  \qquad
+  J_{ij}=\sum_\ell\frac{r_\ell(B_{i\ell}-A_{i\ell})}{D_\ell^3}k_\ell k_\ell^\top
+  \quad(j\ne i).
+\end{equation}
+Let $\mathcal U$ be a fixed set of active firm-activity coordinates and $P$
+the orthogonal projection onto them.
+The projected linear response to an opportunity direction $\delta r$ is defined by
+\begin{equation}\label{eq:linear-response}
+  PJ\,\delta q=P\mathcal G\,\delta r,\qquad P\delta q=\delta q.
+\end{equation}
+Its $i$th block is~\eqref{eq:firm-response} on the active coordinates.
+The direct response $\delta q^{\mathrm d}$ solves this system with $J$
+replaced by $J_{\mathrm d}=\operatorname{blockdiag}(J_{ii})$.
+It retains the strategic origin's rival fields $B_i$, rather than replacing
+them by outside appeal alone.
+The difference between the responses in Proposition~\ref{prop:response}
+is the direct adjustment transmitted through the rival blocks
+$J_{\mathrm o}=J-J_{\mathrm d}$.
+
+Along a line $q+tu$ through a feasible profile, node $\ell$ contributes
+$r_\ell(D_\ell-A_{i\ell})D_\ell^{-2}k_\ell$ to firm $i$'s block, with
+numerator and
+denominator affine in $t$.
+Write $U_\ell=\sum_{j}k_\ell^\top u_j$ for the total appeal change and
+$u_{i\ell}=k_\ell^\top u_i$ for firm $i$'s own change.
+The quotient rule gives the derivative
+\begin{equation}\label{eq:app-node-quotient}
+  r_\ell\Bigl[\frac{U_\ell-u_{i\ell}}{D_\ell^2}
+  -\frac{2(D_\ell-A_{i\ell})U_\ell}{D_\ell^3}\Bigr]k_\ell
+  =-\frac{r_\ell}{D_\ell^3}\bigl[2B_{i\ell}u_{i\ell}
+  +(B_{i\ell}-A_{i\ell})(U_\ell-u_{i\ell})\bigr]k_\ell,
+\end{equation}
+so the negative marginal-profit field has directional derivative $Ju$ with the
+blocks in \eqref{eq:jacobian}.
+The pairing $\langle Ju,u\rangle$ is therefore the derivative of
+$t\mapsto\langle F(q+tu),u\rangle$ at zero.
+That derivative is $\sum_{i}u_i^\top H_i u_i$ plus the node form
+\eqref{eq:node-monotonicity}, which is nonnegative, so
+$\langle Ju,u\rangle\geq\nu\|u\|^2$.
+The own-block part contributes
+$\sum_{i}u_i^\top H_i u_i+\sum_{i,\ell}2r_\ell B_{i\ell}D_\ell^{-3}u_{i\ell}^2$,
+so $J_{\mathrm d}$ has the same modulus.
+Neither bound uses an equilibrium or an active set.
+
+\subsubsection{Existence, uniqueness, and size of the response}
+
+Let $T$ be either $J$ or $J_{\mathrm d}$, and suppose $u$ solves
+$PTu=Pg$ with $Pu=u$.
+Because $P$ is an orthogonal projection,
+\begin{equation}\label{eq:app-restricted-bound}
+  \nu\|u\|^2\leq\langle Tu,u\rangle=\langle Tu,Pu\rangle
+  =\langle PTu,u\rangle=\langle Pg,u\rangle\leq\|Pg\|\,\|u\|.
+\end{equation}
+Hence $\|u\|\leq\|Pg\|/\nu$.
+Differences of solutions solve the system with zero forcing, so the
+solution is unique.
+The linear map $u\mapsto PTPu+(u-Pu)$ has trivial kernel by the same bound.
+It is therefore onto in finite dimension, and a preimage of $Pg$ solves the
+restricted system.
+Thus at every feasible profile and for any fixed active set, both the full
+and direct projected systems have unique solutions bounded by
+$\|P\mathcal G\delta r\|/\nu$.
+At an equilibrium with strict complementarity the derivative identification
+below gives the economic interpretation in Proposition~\ref{prop:response}.
+
+\subsubsection{Direct response and rival feedback}
+
+Subtracting the direct system from the full system gives
+$PJ(\chi\delta r-\delta q^{\mathrm d})=-PJ_{\mathrm o}\delta q^{\mathrm d}$.
+Both directions lie in the active coordinate space, where $J$ is invertible
+by \eqref{eq:app-restricted-bound}.
+Applying that inverse gives \eqref{eq:feedback}, which proves the
+common-origin comparison in Proposition~\ref{prop:response}.
+
+\subsubsection{The derivative of the equilibrium
+map}\label{app:equilibrium-derivative}
+
+Suppose strict complementarity holds at $q=q^*(r)$: each coordinate has positive
+capacity or a strictly positive field value.
+With $\mathcal U$ the coordinates of positive capacity,
+\begin{equation}\label{eq:equilibrium-derivative}
+  \|q^*(r')-q^*(r)-\chi\,(r'-r)\|=o(\|r'-r\|),
+\end{equation}
+so $\chi$ is the derivative of the equilibrium map and inactive
+coordinates do not
+respond.
+
+The field is a rational function of capacities with positive
+denominators, so it is
+Fréchet differentiable, and its derivative along every line is $J$
+(Appendix~\ref{app:response-jacobian}).
+At an equilibrium every field coordinate is nonnegative and vanishes
+where capacity
+is positive.
+Let $m>0$ bound from below each positive capacity and
+each positive field value at $q$.
+By \eqref{eq:response-continuity} and the Lipschitz continuity of $F$
+on the orthant,
+for $\|r'-r\|$ small the equilibrium $q'=q^*(r')$ keeps every
+positive coordinate
+positive, and every coordinate with a positive field value stays at zero.
+Both equilibria therefore satisfy $PF=0$ with $P(q'-q)=q'-q$.
+Expanding, $F(q';r')-F(q;r)=J(q'-q)-\mathcal G\,\delta r+R$, where
+$R$ collects the
+Fréchet remainder and the change in $\mathcal G$ between $q$ and $q'$; both are
+$o(\|q'-q\|+\|\delta r\|)$.
+The error $q'-q-\chi\delta r$ is supported on $\mathcal U$ and solves
+the linearized
+system with forcing $-R$, so \eqref{eq:app-restricted-bound} bounds it by
+$\|PR\|/\nu=o(\|\delta r\|)$.
+This proves \eqref{eq:equilibrium-derivative}.
+
+Linear costs enter the field additively, $F(q;c')-F(q;c)=c'-c$.
+The same argument with forcing $-(c'-c)$ in place of $\mathcal
+G\,\delta r$ shows that,
+under strict complementarity and for nearby nonnegative costs $c'$,
+\begin{equation}\label{eq:cost-response}
+  \|q^*(c')-q^*(c)-u\|=o(\|c'-c\|),\qquad PJu=-P(c'-c),\quad Pu=u.
+\end{equation}
+The forcing does not depend on capacities, so the remainder is the
+Fréchet remainder
+alone.
+If $c'-c$ is supported on one firm, every other firm's problem
+against frozen rivals
+is unchanged, so its frozen-rival response is zero.
+The opportunity and cost responses are established separately, each for one
+type of disturbance at a time.
+
+\subsection{Proof of the composition-feedback
+benchmark}\label{app:composition-feedback}
+
+For $S=\mathbf1^\top q>0$, the quotient rule gives
+$Dp_q(h)=(h-p\mathbf1^\top h)/S$.
+Its kernel consists exactly of $h=\lambda q$: substituting this form gives
+zero, and a zero numerator gives $h=(\mathbf1^\top h/S)q$.
+Linearity yields \eqref{eq:proportional-feedback}.
+
+At the affected activity the negative marginal payoff is $g_i=k_i+\omega_i
+A_i-rB_i/D^2$, where $k_i$ is its linear cost and $\omega_i>0$ its curvature.
+Differentiating the interior first-order conditions gives
+\begin{equation}\label{eq:separable-jacobian}
+  J=\operatorname{diag}(a)+c\mathbf1^\top,\qquad
+  a_i=\omega_i+r/D^2>0,\qquad c_i=r(B_i-A_i)/D^3>0.
+\end{equation}
+Indeed the own derivative is $\omega_i+2rB_i/D^3=a_i+c_i$ and every rival
+derivative in row $i$ is $c_i$.
+Let $u$ denote the capacity derivative and $T=\sum_i u_i$.
+The cost reduction imposes $a_i u_i+c_i T=s\,\mathbf{1}_{\{i=j\}}$.
+Dividing by $a_i$ and summing yields
+\begin{equation}\label{eq:separable-response}
+  \begin{aligned}
+    \Delta&=1+\sum_i c_i/a_i>0,&
+    T&=\frac{s/a_j}{\Delta}>0,\\
+    u_j&=\frac{s}{a_j}\frac{1+\sum_{i\ne j}c_i/a_i}{\Delta}>0,&
+    u_i&=-\frac{c_i}{a_i}T<0\quad(i\ne j).
+  \end{aligned}
+\end{equation}
+For uniqueness, the difference of two solutions has aggregate $U$ satisfying
+$\Delta U=0$, hence each difference coordinate is zero.
+Each unaffected activity has zero forcing and an invertible block by
+positive-curvature strong monotonicity, so its response vanishes.
+If firm $i$ has positive capacity $q_{ib}$ at another activity $b$, its share
+derivative there is $-q_{ib}u_i/S_i^2\ne0$.
+This proves the business-mix claim under the maintained interior path.
+Entry and exit require a directional analysis; these derivatives make no
+assertion across active-set changes.
+
+\input{chapters/two_site_example}
+
+\subsection{Cash-flow exposure and competitive news}\label{app:cash-flow-support}
+
+\subsubsection{Cash-flow exposure}
+
+The node shares also determine operating cash-flow exposure.
+Write $X(q)$ for the matrix of node shares
+$X_{i\ell}=A_{i\ell}/D_\ell$.
+
+\begin{corollary}[Cash-flow exposure]\label{cor:exposure}
+  At fixed capacities, payoff is affine in opportunity values,
+  $\pi_i(q;r')-\pi_i(q;r)=\sum_\ell(r'_\ell-r_\ell)X_{i\ell}(q)$.
+  If opportunity innovations $\varepsilon$ have covariance $\Omega$, then
+  \begin{equation}\label{eq:exposure-covariance}
+    \operatorname{Cov}\bigl(X(q)\varepsilon\bigr)=X(q)\,\Omega\,X(q)^\top.
+  \end{equation}
+  A rival's expansion weakly lowers the firm's payoff: if $q_j'\geq q_j$ for
+  some $j\neq i$, then
+  \begin{equation}\label{eq:rival-cross}
+    \pi_i(q_j',q_{-j};r)\leq\pi_i(q;r).
+  \end{equation}
+\end{corollary}
+
+Uncorrelated innovations therefore already produce correlated operating
+cash flow whenever firms' appeal overlaps at common nodes.
+Any strategic contribution to cash-flow covariance has to be measured
+against this shared-exposure baseline.
+
+\begin{proof}
+  At fixed capacities, the margin is linear in $r$ with coefficients
+  $A_{i\ell}/D_\ell$, and costs do not depend on $r$.
+  The covariance formula \eqref{eq:exposure-covariance} is bilinearity of
+  covariance for square-integrable innovations and a predetermined $X(q)$.
+  If $q_j'\geq q_j$ for a rival $j$, then $A_{i\ell}$ and $C_i$ are unchanged
+  while each $D_\ell$ weakly rises because $K\geq0$.
+  Each term $r_\ell A_{i\ell}/D_\ell$ weakly falls, which gives
+  \eqref{eq:rival-cross}.
+\end{proof}
+
+\begin{remark}[Envelope split]\label{rem:envelope}
+  Along a direction $(u,\delta r)$ of capacities and opportunity
+  values, firm $i$'s
+  cash flow changes at the rate
+  \begin{equation}\label{eq:envelope}
+    \sum_\ell\delta r_\ell X_{i\ell}-\sum_a F_{ia}u_{ia}
+    -\sum_\ell\frac{r_\ell A_{i\ell}}{D_\ell^2}\Bigl(\sum_{j}k_\ell^\top
+    u_j-k_\ell^\top u_i\Bigr).
+  \end{equation}
+  At a static equilibrium $F_{ia}=0$ wherever the response moves the firm's
+  capacity, so the change is direct opportunity news plus the value effect of
+  rivals' movement.
+  Along the equilibrium response $u=\chi\delta r$, under strict complementarity,
+  the equilibrium cash-flow sensitivity is therefore
+  given by \eqref{eq:equilibrium-cash-flow}:
+  direct opportunity news plus the value of rivals' equilibrium repositioning.
+\end{remark}
+
+\begin{proof}
+  The margin is linear in $r$, so the opportunity term is the share $X_{i\ell}$.
+  The quotient rule gives each node's capacity derivative, and symmetry of $H_i$
+  collects the own terms into $-F_i^\top u_i$.
+  The remaining node terms involve only rivals' appeal changes.
+  For \eqref{eq:equilibrium-cash-flow}, cash flow is Fréchet differentiable and
+  shares are continuous, so \eqref{eq:equilibrium-derivative} replaces
+  $q^*(r+t\delta r)-q^*(r)$ by $t\chi\delta r$ up to $o(t)$.
+  The own term vanishes because $\chi\delta r$ is supported where $F$ vanishes.
+\end{proof}
+
+\subsubsection{Common and differential competitive news}\label{app:common-news}
+
+The retained share in Proposition~\ref{prop:common-news} measures the
+common-node component, separately from its own-appeal correction.
+Let $\vartheta_i=\Lambda_i\psi_i$, with mean
+$\bar\vartheta=N^{-1}\sum_i\vartheta_i$, and let $\zeta_i=-\vartheta_i^\top g$ be
+the common-node part of~\eqref{eq:rival-return}, with cross-sectional mean
+$\bar\zeta$.
+Across disturbances, treat node growth $g$ as a random vector with
+second-moment matrix $\Sigma_g=\mathbb E[gg^\top]$.
+Whenever $\sum_i\vartheta_i^\top\Sigma_g\vartheta_i>0$, the fraction of the
+common-node part's expected cross-sectional second moment that survives
+removal of the cross-sectional mean is
+\begin{equation}\label{eq:retained-share}
+  \varrho=\frac{\mathbb E\sum_i(\zeta_i-\bar\zeta)^2}{\mathbb E\sum_i\zeta_i^2}
+  =\frac{\sum_i(\vartheta_i-\bar\vartheta)^\top\Sigma_g(\vartheta_i-\bar\vartheta)}
+  {\sum_i\vartheta_i^\top\Sigma_g\vartheta_i}.
+\end{equation}
+The common-node projection identity is algebraic; it does not establish
+that demeaning by itself makes competitive news statistically undetectable.
+
+\begin{proof}[Proof of Proposition~\ref{prop:common-news}]
+  By \eqref{eq:envelope}, the cash-flow change along $(u,\delta r)$ is direct
+  opportunity news, an own term $-\sum_a F_{ia}u_{ia}$, and the rival term
+  $-\sum_\ell r_\ell A_{i\ell}D_\ell^{-2}(\sum_j k_\ell^\top
+  u_j-k_\ell^\top u_i)$.
+  The own term vanishes because $u$ is supported where $F$ vanishes.
+  A linear-cost direction $\delta c$ adds the direct effect
+  $-\delta c_i^\top q_i$, which does not involve rivals, so the rival
+  term is unchanged.
+  Since $r_\ell A_{i\ell}/D_\ell=r_\ell X_{i\ell}=\mathcal M_i\psi_{i\ell}$ and
+  $\sum_j k_\ell^\top u_j-k_\ell^\top u_i=D_\ell g_\ell-k_\ell^\top u_i$,
+  dividing the rival term by $\pi_i$ gives \eqref{eq:rival-return}.
+  For the retained fraction,
+  $\sum_i(\vartheta_i^\top g-\bar\vartheta^\top
+  g)^2=\sum_i((\vartheta_i-\bar\vartheta)^\top g)^2$,
+  whose expectation is
+  $\sum_i(\vartheta_i-\bar\vartheta)^\top\Sigma_g(\vartheta_i-\bar\vartheta)$;
+  the expected second moment before demeaning is
+  $\sum_i\vartheta_i^\top\Sigma_g\vartheta_i$.
+  If all $\vartheta_i$ are equal, every deviation is zero.
+\end{proof}
+
+\subsection{Numerical equilibrium and composition
+certificates}\label{app:certificates}
+
+Projected extragradient locates each equilibrium; independently evaluated
+residuals determine whether to accept it.
+For a feasible numerical profile $\widehat q$, define the orthant
+stationarity residual by
+\begin{equation}\label{eq:residual}
+  s_{ia}(\widehat q)=
+  \begin{cases}
+    F_{ia}(\widehat q),&\widehat q_{ia}>0,\\
+    \min\{F_{ia}(\widehat q),0\},&\widehat q_{ia}=0.
+  \end{cases}
+\end{equation}
+At an inactive coordinate, positive $F_{ia}$ discourages entry and contributes
+no error; a negative value records an unexploited incentive to enter.
+
+\subsubsection{Capacity error and unilateral regret}\label{app:regret-proof}
+
+\begin{proposition}[Equilibrium accuracy and unilateral payoff
+  regret]\label{prop:certificate}
+  Under Assumption~\ref{ass:primitives}, the strategic and
+  independent operators each satisfy
+  \begin{equation}\label{eq:certificate}
+    \|\widehat q-q^*\|\leq\frac{\|s(\widehat q)\|}{\nu},\qquad
+    \operatorname{Regret}_i(\widehat q)\leq\frac{\|s_i(\widehat q)\|^2}{2\nu},
+  \end{equation}
+  where regret is the supremum of the unilateral payoff improvement
+  holding rivals fixed.
+\end{proposition}
+
+\begin{proof}
+  Put $n=F(\widehat q)-s$.
+  By construction $n\geq0$ and $n_{ia}\widehat q_{ia}=0$.
+  For every feasible $z$,
+  \begin{equation}\label{eq:app-approx-vi}
+    \langle F(\widehat q),z-\widehat q\rangle
+    =\langle s,z-\widehat q\rangle+\langle n,z\rangle
+    \geq-\|s\|\|z-\widehat q\|.
+  \end{equation}
+  With $h=\widehat q-q^*$, this inequality at $z=q^*$ and the equilibrium VI
+  give
+  \begin{equation}\label{eq:app-distance-chain}
+    \nu\|h\|^2\leq\langle F(\widehat q)-F(q^*),h\rangle
+    \leq\|s\|\|h\|.
+  \end{equation}
+  Dividing by $\nu\|h\|$ when $h\ne0$ proves the distance bound; the case
+  $h=0$ is immediate.
+  \label{app:independent-distance}
+  The independent product operator has the same modulus, so the bound applies
+  to its unique equilibrium as well.
+
+  For a feasible unilateral deviation $d_i=z_i-\widehat q_i$, the block form
+  of \eqref{eq:app-approx-vi} and the exact payoff expansion give
+  \begin{align}
+    \pi_i(z_i,\widehat q_{-i})-\pi_i(\widehat q)
+    &\leq\|s_i\|\|d_i\|-\tfrac\nu2\|d_i\|^2\nonumber\\
+    &=\frac{\|s_i\|^2}{2\nu}
+    -\frac\nu2\left(\|d_i\|-\frac{\|s_i\|}{\nu}\right)^2
+    \leq\frac{\|s_i\|^2}{2\nu}.\label{eq:app-regret-square}
+  \end{align}
+  Taking the supremum over $z_i\geq0$ proves the regret bound.
+  \label{app:independent-regret}
+  The independent payoff expansion has the same form, giving the identical
+  bound for each independent firm's objective.
+\end{proof}
+
+\subsubsection{Accuracy after capacity normalization}\label{app:observation}
+
+Because composition divides capacities by total mass, a small capacity error
+can matter when that mass is small.
+For feasible profiles, the product norm bounds each block,
+\begin{equation}\label{eq:app-block-bound}
+  \|\widehat q_i-q_i^*\|^2\leq\sum_j\|\widehat q_j-q_j^*\|^2
+  =\|\widehat q-q^*\|^2,
+\end{equation}
+so the joint certificate supplies a conservative error radius for every firm.
+
+\begin{proposition}[Observation error under
+  normalization]\label{prop:normalization}
+  Suppose $\|\widehat q_i-q_i^*\|\leq e$ and
+  $\widehat S_i=\mathbf1^\top\widehat q_i>\sqrt m\,e$.
+  Then $S_i^*>0$ and
+  \begin{equation}\label{eq:normalization-bound}
+    \left\|\frac{\widehat q_i}{\widehat S_i}-\frac{q_i^*}{S_i^*}\right\|
+    \leq\frac{2\sqrt m\,e}{\widehat S_i-\sqrt m\,e}.
+  \end{equation}
+\end{proposition}
+
+\begin{proof}
+  Cauchy--Schwarz bounds the mass error by
+  \begin{equation}\label{eq:app-mass-error}
+    |\widehat S_i-S_i^*|
+    =|\langle\mathbf1,\widehat q_i-q_i^*\rangle|\leq\sqrt m\,e.
+  \end{equation}
+  Hence $S_i^*\geq\widehat S_i-\sqrt m\,e>0$.
+  Nonnegativity gives $\|\widehat q_i\|\leq\widehat S_i$, and the identity
+  \begin{equation}\label{eq:app-normalization-split}
+    \frac{\widehat q_i}{\widehat S_i}-\frac{q_i^*}{S_i^*}
+    =\frac{\widehat q_i-q_i^*}{S_i^*}
+    +\frac{S_i^*-\widehat S_i}{\widehat S_i S_i^*}\widehat q_i
+  \end{equation}
+  therefore implies
+  \begin{equation}\label{eq:app-normalization-chain}
+    \left\|\frac{\widehat q_i}{\widehat S_i}-\frac{q_i^*}{S_i^*}\right\|
+    \leq\frac{(1+\sqrt m)e}{S_i^*}
+    \leq\frac{2\sqrt m\,e}{\widehat S_i-\sqrt m\,e},
+  \end{equation}
+  where the last step uses $m\geq1$.
+\end{proof}
+
+The benchmark experiments accept profiles using the independently evaluated
+relative stationarity-distance target \ppnume[0]{ir-solve-target}.
+If multiple starts give error radii $e_a,e_b$, uniqueness and the triangle
+inequality bound their distance by $e_a+e_b$; agreement across starts
+supplements the residual check.
+These inequalities hold in real arithmetic, while their numerical evaluations
+use floating-point capacities and residuals without interval-arithmetic
+enclosures.

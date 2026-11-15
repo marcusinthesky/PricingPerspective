@@ -21,5 +21,3 @@ issue: '5'
 publisher: Institute of Mathematical Statistics
 page: 2263-2291
 ---
-
-# Equivalence of Distance-Based and RKHS-Based Statistics in Hypothesis Testing

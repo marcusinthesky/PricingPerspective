@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script>
+  MathJax = { 
+    tex: {
+		    inlineMath: [['$','$'], ['\\(','\\)']]
+	} }
+</script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+<meta name="generator" content="plasTeX" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>03 distance implied mpt</title>
+<link rel="next" href="sect0016.html" title="05 spatial pricing" />
+<link rel="prev" href="sect0014.html" title="01 continuous bounds" />
+<link rel="up" href="chap-native-claims.html" title="Further approved native claims" />
+<link rel="stylesheet" href="styles/theme-white.css" />
+<link rel="stylesheet" href="styles/amsthm.css" />
+<link rel="stylesheet" href="styles/blueprint.css" />
+<link rel="stylesheet" href="styles/extra_styles.css" />
+</head>
+
+<body>
+<header>
+<svg  id="toc-toggle" class="icon icon-list-numbered "><use xlink:href="symbol-defs.svg#icon-list-numbered"></use></svg>
+<h1 id="doc_title"><a href="index.html">Pricing Perspective: Formalization Blueprint</a></h1>
+</header>
+
+<div class="wrapper">
+<nav class="toc">
+<ul class="sub-toc-0">
+<li class="">
+  <a href="chap-random-exposure.html"><span class="toc_ref">1</span> <span class="toc_entry">Random functional exposures and the covariance envelope</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0001.html"><span class="toc_ref">1.1</span> <span class="toc_entry">The exposure law and its risk coordinates</span></a>
+ </li>
+<li class="">
+  <a href="sect0002.html"><span class="toc_ref">1.2</span> <span class="toc_entry">The Fréchet class and its endpoints</span></a>
+ </li>
+<li class="">
+  <a href="sect0003.html"><span class="toc_ref">1.3</span> <span class="toc_entry">Transfer from observable characteristics</span></a>
+ </li>
+<li class="">
+  <a href="sect0004.html"><span class="toc_ref">1.4</span> <span class="toc_entry">Coherent aggregation</span></a>
+ </li>
+<li class="">
+  <a href="sect0005.html"><span class="toc_ref">1.5</span> <span class="toc_entry">Rehomed from the retired deterministic chapter</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-distance-implied.html"><span class="toc_ref">2</span> <span class="toc_entry">Paper 3: information-certified portfolio variance</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0006.html"><span class="toc_ref">2.1</span> <span class="toc_entry">Coherent certificate</span></a>
+ </li>
+<li class="">
+  <a href="sect0007.html"><span class="toc_ref">2.2</span> <span class="toc_entry">Return bridge</span></a>
+ </li>
+<li class="">
+  <a href="sect0008.html"><span class="toc_ref">2.3</span> <span class="toc_entry">Portfolio choice</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-robust-slack.html"><span class="toc_ref">3</span> <span class="toc_entry">Robust envelopes under measurement slack</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0009.html"><span class="toc_ref">3.1</span> <span class="toc_entry">Radii propagate through the embedding</span></a>
+ </li>
+<li class="">
+  <a href="sect0010.html"><span class="toc_ref">3.2</span> <span class="toc_entry">Maximizing over the box</span></a>
+ </li>
+<li class="">
+  <a href="sect0011.html"><span class="toc_ref">3.3</span> <span class="toc_entry">Reconciling the two geometries</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class="">
+  <a href="chap-spatial.html"><span class="toc_ref">4</span> <span class="toc_entry">Spatial interaction and the rank-one boundary</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0012.html"><span class="toc_ref">4.1</span> <span class="toc_entry">Operator and convergence certificate</span></a>
+ </li>
+<li class="">
+  <a href="sect0013.html"><span class="toc_ref">4.2</span> <span class="toc_entry">Finite interaction and the strong-interaction boundary</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li class=" active">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▼</span>
+  <ul class="sub-toc-1 active">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class=" active current">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
+<li ><a href="dep_graph_document.html">Dependency graph</a></li>
+</ul>
+</nav>
+
+<div class="content">
+<div class="content-wrapper">
+
+
+<div class="main-text">
+<h1 id="a0000000016">5.2 03 distance implied mpt</h1>
+<div class="theorem_thmwrapper theorem-style-plain" id="prop:p3-barycenter-representation">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">41</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#prop:p3-barycenter-representation">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000056"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/WassersteinGeometry.Multimarginal.wassersteinBarycenterDispersionSq_eq_toReal_wassersteinDispersionSq_unconditional" class="lean_decl">WassersteinGeometry.Multimarginal.wassersteinBarycenterDispersionSq_eq_toReal_wassersteinDispersionSq_unconditional</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  For finitely many probability laws on a separable real Hilbert space, weighted multimarginal quadratic dispersion equals the infimum of the weighted sum of squared quadratic Wasserstein distances to a common barycentre law. Assumptions: finitely many probability laws with finite second moments on a separable real Hilbert space; nonnegative weights summing to one. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000056">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:p3-aggregate-transfer">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">42</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#thm:p3-aggregate-transfer">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000057"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.aggregateCarrierFloor_le_of_rms_slack_unconditional" class="lean_decl">PricingPerspective.Transmission.Dispersion.aggregateCarrierFloor_le_of_rms_slack_unconditional</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  For a measurable antilipschitz carrier and heterogeneous synchronous transmission slack, exposure dispersion is at least the positive part of inverse carrier distortion times characteristic dispersion minus weighted root-mean-square slack. Assumptions: a measurable embedding that is antilipschitz with nonzero constant; common carrier and realized transmission laws are coordinatewise pushforwards; each realized transmission has the stated integrated squared slack radius. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000057">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:p3-sharp-certificate">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">43</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#thm:p3-sharp-certificate">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000058"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.jointPortfolioVariance_le_aggregateCertifiedCap" class="lean_decl">PricingPerspective.Transmission.Dispersion.jointPortfolioVariance_le_aggregateCertifiedCap</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  Under a measurable antilipschitz carrier with integrated synchronous slack, coherent systematic portfolio variance is at most the weighted marginal second moments minus the square of the aggregate carrier floor built from multi-firm characteristic dispersion. Assumptions: finite asset universe and normalized long-only risk weights; a measurable embedding that is antilipschitz with nonzero constant; common carrier and realized exposure laws are coordinatewise pushforwards of the characteristic laws; each realized transmission has the stated integrated squared slack radius; one coherent joint exposure law with the declared coordinate marginals; integrability of every pairwise exposure inner product. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000058">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:p3-envelope-exactness">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">44</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#thm:p3-envelope-exactness">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000059"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.isGreatest_attainableJointPortfolioVariances" class="lean_decl">PricingPerspective.Transmission.Dispersion.isGreatest_attainableJointPortfolioVariances</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  Given a coherent joint law attaining the multi-marginal dispersion minimum, the weighted marginal second moments minus that minimum is the greatest systematic portfolio variance attainable across all coherent joint laws with integrable pairwise inner products. Assumptions: finite asset universe and normalized risk weights; a supplied certificate that some coherent joint law attains the dispersion minimum; integrability of every pairwise inner product under that attaining law. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000059">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:p3-certificate-convexity">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">45</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#thm:p3-certificate-convexity">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000060"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.standardizedCertifiedObjective_convex_of_cnd" class="lean_decl">PricingPerspective.Transmission.Dispersion.standardizedCertifiedObjective_convex_of_cnd</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  If the squared pairwise distance matrix is conditionally negative definite, then one minus the pairwise certificate is convex along mixtures of normalized risk weights. Assumptions: finite asset universe; the squared distance matrix is conditionally negative definite; two sets of normalized risk weights and a mixing parameter in the unit interval. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000060">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:p3-pairwise-bridge">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">46</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0015.html#thm:p3-pairwise-bridge">#</a>
+    
+    <a class="icon proof" href="sect0015.html#a0000000061"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.optimalTwoAssetPortfolioVariance_eq_paperOne" class="lean_decl">PricingPerspective.Transmission.Dispersion.optimalTwoAssetPortfolioVariance_eq_paperOne</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  For two assets, the optimal coherent portfolio variance is the weighted marginal second moments minus the product of the two weights and the squared quadratic Wasserstein distance between the exposure laws. Assumptions: exactly two assets with normalized risk weights; a supplied certificate that some coherent joint law attains the dispersion minimum; integrability of every pairwise inner product under that attaining law. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000061">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+
+</div> <!--main-text -->
+</div> <!-- content-wrapper -->
+</div> <!-- content -->
+</div> <!-- wrapper -->
+
+<nav class="prev_up_next">
+  <a href="sect0014.html" title="01 continuous bounds"><svg  class="icon icon-arrow-left "><use xlink:href="symbol-defs.svg#icon-arrow-left"></use></svg>
+</a>
+  <a href="chap-native-claims.html" title="Further approved native claims"><svg  class="icon icon-arrow-up "><use xlink:href="symbol-defs.svg#icon-arrow-up"></use></svg>
+</a>
+  <a href="sect0016.html" title="05 spatial pricing"><svg  class="icon icon-arrow-right "><use xlink:href="symbol-defs.svg#icon-arrow-right"></use></svg>
+</a>
+</nav>
+
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/plastex.js"></script>
+<script type="text/javascript" src="js/svgxuse.js"></script>
+</body>
+</html>

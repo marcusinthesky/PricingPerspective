@@ -1,0 +1,54 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=30mm]{geometry}
+\usepackage[round,authoryear]{natbib}
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+\setlength{\emergencystretch}{2em}
+% Keep paragraph openings, endings and hyphenated words together at page breaks.
+\clubpenalty=10000
+\widowpenalty=10000
+\brokenpenalty=10000
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+% Finish the recovery exhibits before the uncertainty appendix begins.
+\AddToHook{file/primary_profile_support.tex/before}{\clearpage}
+
+\input{metadata}
+\hypersetup{pdftitle={\papertitle}}
+\input{generated/information_recovery_numbers}
+\input{generated/corporate_analysis_numbers}
+\input{generated/information_audit_numbers}
+\input{generated/article_redraw_validation_numbers}
+\input{generated/inference_audit_numbers}
+\input{generated/lean_status}
+
+\title{\papertitle}
+\author{\paperauthors\\\paperaffiliations}
+\date{\paperdate}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  \input{chapters/abstract}
+\end{abstract}
+
+\noindent\textit{Keywords:} \paperkeywords
+
+\medskip
+
+\noindent\textit{JEL classification:} \paperjel
+
+\input{body}
+\input{chapters/declarations}
+
+\clearpage
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\clearpage
+\appendix
+\input{appendix}
+\end{document}

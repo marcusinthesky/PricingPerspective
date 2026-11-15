@@ -15,5 +15,3 @@ issue: '3'
 publisher: Wiley
 page: 241-258
 ---
-
-# The Term Structure of Interest Rates as a Gaussian Random Field

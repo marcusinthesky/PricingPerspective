@@ -13,5 +13,3 @@ issued:
     - 7
     - 13
 ---
-
-# Robust Minimum-Variance Portfolios under Energy-Distance Ambiguity

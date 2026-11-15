@@ -1,3 +1,5 @@
 """Pipeline — DVC data-pipeline stages for the pricing-perspective project."""
 
-__version__ = "0.1.0"
+from importlib.metadata import version as _distribution_version
+
+__version__ = _distribution_version("pipeline")

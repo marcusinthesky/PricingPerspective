@@ -1,0 +1,5 @@
+outs:
+- md5: ba505876f840ebcae2db9a5d5ea7fc58
+  size: 1698
+  hash: md5
+  path: summary.yaml

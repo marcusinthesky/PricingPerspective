@@ -16,7 +16,7 @@ For any coupling `π` of two loading laws in risk coordinates,
 so **minimizing transport cost and maximizing systematic covariance are the same problem**.
 Taking the infimum over `Π(P, Q)` on the left gives `W₂²`, and the covariance ceiling
 
-  `κ̄ = (v(P) + v(Q) − W₂²) / 2`
+  `kappa_bar = (v(P) + v(Q) − W₂²) / 2`
 
 follows. Nothing here optimizes anything: it converts one optimization into the other, and
 the sharpness that buys is precisely what an unoptimized distance such as energy cannot

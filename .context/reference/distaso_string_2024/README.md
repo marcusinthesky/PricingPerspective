@@ -24,5 +24,3 @@ cites:
 - ross_arbitrage_1976
 - santa_clara_sornette_2001
 ---
-
-# Cross-Section without Factors: A String Model for Expected Returns

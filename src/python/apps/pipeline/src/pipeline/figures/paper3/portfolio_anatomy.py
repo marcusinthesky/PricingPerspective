@@ -18,7 +18,6 @@ from pipeline.figures._common import (
     figsize,
     figure,
 )
-from pipeline.figures.paper3.manifests import write_paper3_manifest
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -470,9 +469,8 @@ def render_paper3_portfolio_anatomy(
     anatomy_dir: Path,
     output_dir: Path,
     table_path: Path,
-    manifest_path: Path,
 ) -> None:
-    """Render the two anatomy figures, holdings table, and exhibit manifest."""
+    """Render the two anatomy figures and the holdings table."""
     firms = pd.read_parquet(anatomy_dir / "firm_anatomy.parquet")
     pairs = pd.read_parquet(anatomy_dir / "pair_contributions.parquet")
     sectors = pd.read_parquet(anatomy_dir / "sector_summary.parquet")
@@ -488,25 +486,6 @@ def render_paper3_portfolio_anatomy(
         vintage_summary,
     )
     _render_holdings_table(table_path, firms)
-    outputs = [output_dir / name for name in ANATOMY_EXHIBIT_NAMES] + [table_path]
-    upstreams = tuple(
-        anatomy_dir / name
-        for name in (
-            "firm_anatomy.parquet",
-            "pair_contributions.parquet",
-            "sector_summary.parquet",
-            "vintage_weights.parquet",
-            "vintage_summary.parquet",
-            "summary.yaml",
-        )
-    )
-    write_paper3_manifest(
-        manifest_path,
-        stage_key="p3_portfolio_anatomy_exhibits",
-        phase="exhibit",
-        outputs=outputs,
-        upstreams=upstreams,
-    )
 
 
 __all__ = ["ANATOMY_EXHIBIT_NAMES", "render_paper3_portfolio_anatomy"]

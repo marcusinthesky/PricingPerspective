@@ -17,5 +17,3 @@ issue: '2'
 publisher: Elsevier
 page: 365-411
 ---
-
-# A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices

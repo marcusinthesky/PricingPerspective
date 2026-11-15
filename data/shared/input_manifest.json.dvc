@@ -1,0 +1,5 @@
+outs:
+- md5: 88e2bdb1cdc5f3ff35215edbe061360e
+  size: 1111404
+  hash: md5
+  path: input_manifest.json

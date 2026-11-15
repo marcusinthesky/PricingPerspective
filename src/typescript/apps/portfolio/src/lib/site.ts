@@ -1,4 +1,4 @@
-const fallbackUrl = "https://marcusinthesky.github.io/pricing-perspective";
+const fallbackUrl = "https://marcusinthesky.github.io/PricingPerspective";
 const configuredBasePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const basePath = configuredBasePath.replace(/\/$/, "");
 

@@ -12,13 +12,13 @@ systematic covariance, by polarization alone.
 
 ## Why this file exists
 
-These two theorems were previously declared in `Continuous.Energy.Core`, which made them
+These two theorems were previously declared in `Exposure.Energy.Core`, which made them
 read as results *about energy distance*. They are not. Neither statement mentions a
 characteristic distance at all: both take a bare nonnegative real `D`, and energy distance
 is one instantiation among many. Blueprint `chap:energy-specialization` records the
 correction — "any nonnegative dissimilarity satisfying the transmission bound serves" —
 and names `cor:approximate-map-bound` as one of the two nodes to rehome into the trunk.
-This file is that rehoming; `Continuous.Energy.Core` now imports it rather than owning it.
+This file is that rehoming; `Exposure.Energy.Core` now imports it rather than owning it.
 
 Contrast with `Transmission.Envelope`, which is *not* dissimilarity-agnostic: the sharp
 covariance envelope needs quadratic transport specifically, because minimizing
@@ -28,19 +28,15 @@ no demand on which distance is used.
 
 ## Namespace
 
-Declarations stay in `PricingPerspective.ContinuousAPT` for now. Renaming them into
-`PricingPerspective.Transmission` would move every mapped claim's `declaration` field and
-force a disclosure re-review; the measure-theoretic port re-states these theorems anyway,
-so the rename is deferred to that step and paid once.
+The model-independent floor belongs to `PricingPerspective.Transmission`.
+Energy-specific exposure results import this leaf and specialize its hypotheses.
 
 ## References
 
 * Gawronsky & Huang, transmission covariance floor (`thm:energy-bound`).
-* `.context/chat/2026-08-16_random_functions/figures/hilbert_model.md`, turn 4, which is
-  where the distance-agnosticism of the floor was argued explicitly.
 -/
 
-namespace PricingPerspective.ContinuousAPT
+namespace PricingPerspective.Transmission
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 
@@ -132,4 +128,4 @@ theorem systematic_covariance_lower_bound_of_approximate_map
   simpa using
     systematic_covariance_lower_bound β_i β_j 1 (L * d + τ_i + τ_j) zero_le_one hBnn hchain
 
-end PricingPerspective.ContinuousAPT
+end PricingPerspective.Transmission

@@ -53,8 +53,6 @@ claim:
 
 ## References
 
-* `.context/chat/2026-08-16_random_functions/figures/hilbert_model.md`, final turn.
-* `.context/chat/2026-08-16_random_functions/README.md`, "The transmission kernel".
 -/
 
 namespace PricingPerspective.Transmission

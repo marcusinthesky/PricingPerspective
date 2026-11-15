@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from pipeline.stages.papers.paper5._gate.driver import _load_gate_operator
+from pipeline.stages.papers.paper5.operators import load_operator
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -18,11 +18,12 @@ if TYPE_CHECKING:
 
 @dataclass(frozen=True)
 class Paper5NetworkCertificatePaths:
-    """Inputs and output for the network-theory certificate."""
+    """Inputs and output folder for the network-theory certificate."""
 
     shared_barycentre_dir: Path
     qmle_results: Path
-    output_json: Path
+    output_dir: Path
+    factor_conditioned_results: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -114,7 +115,8 @@ def build_network_certificate(
         if not 0.0 <= rho < 1.0:
             message = f"{variant} rho must lie in [0, 1)"
             raise ValueError(message)
-        normalized = (1.0 - rho) * np.linalg.inv(identity - rho * matrix)
+        resolvent = np.linalg.inv(identity - rho * matrix)
+        normalized = (1.0 - rho) * resolvent
         actual_error = operator_infinity_norm(normalized - projection)
         contraction_bound = 2.0 * (1.0 - rho) / (1.0 - rho * delta)
         if actual_error > contraction_bound + 100.0 * tolerance:
@@ -128,8 +130,26 @@ def build_network_certificate(
                 * (1.0 / (1.0 - complement_norm))
                 * operator_infinity_norm(identity - projection)
             )
+        own_exposure = np.diag(normalized)
+        other_exposure = 1.0 - own_exposure
+        g_common_mode = resolvent @ np.ones(n_assets, dtype=np.float64)
+        h_common_mode = normalized @ np.ones(n_assets, dtype=np.float64)
         finite_rho[variant] = {
             "rho": rho,
+            "resolvent_common_mode_mean": float(np.mean(g_common_mode)),
+            "resolvent_common_mode_identity_error": float(
+                np.max(np.abs(g_common_mode - np.full(n_assets, 1.0 / (1.0 - rho))))
+            ),
+            "normalized_common_mode_mean": float(np.mean(h_common_mode)),
+            "normalized_common_mode_identity_error": float(
+                np.max(np.abs(h_common_mode - 1.0))
+            ),
+            "own_exposure_weight_mean": float(np.mean(own_exposure)),
+            "own_exposure_weight_minimum": float(np.min(own_exposure)),
+            "own_exposure_weight_maximum": float(np.max(own_exposure)),
+            "other_exposure_weight_mean": float(np.mean(other_exposure)),
+            "other_exposure_weight_minimum": float(np.min(other_exposure)),
+            "other_exposure_weight_maximum": float(np.max(other_exposure)),
             "normalized_resolvent_error_linf": actual_error,
             "dobrushin_upper_bound_linf": contraction_bound,
             "bound_slack": contraction_bound - actual_error,
@@ -201,25 +221,57 @@ def _pooled_rhos_from_qmle_payload(payload: object) -> dict[str, float]:
     return pooled_rhos
 
 
+def _factor_conditioned_w2_rho(payload: object) -> float:
+    """Extract the primary spherical W2 estimate from spatial-value results."""
+    if not isinstance(payload, dict):
+        message = "factor-conditioned results JSON must be an object"
+        raise TypeError(message)
+    rows = payload.get("model_rows")
+    if not isinstance(rows, list):
+        message = "factor-conditioned results lack model rows"
+        raise TypeError(message)
+    for raw_row in rows:
+        if not isinstance(raw_row, dict):
+            continue
+        if (
+            raw_row.get("scope") == "spatial_value"
+            and raw_row.get("variance_model") == "spherical"
+            and raw_row.get("model") == "w2"
+        ):
+            rho = raw_row.get("rho_hat")
+            if isinstance(rho, bool) or not isinstance(rho, (int, float)):
+                break
+            return float(rho)
+    message = "factor-conditioned results lack the primary spherical W2 rho"
+    raise ValueError(message)
+
+
 def run_paper5_network_certificate(
     paths: Paper5NetworkCertificatePaths,
     config: Paper5NetworkCertificateConfig,
 ) -> dict[str, object]:
     """Load the frozen operator and pooled QMLE estimates, then write the witness."""
-    _tickers, weights, _summary = _load_gate_operator(
+    _tickers, weights, _summary = load_operator(
         paths.shared_barycentre_dir,
         config,
     )
     qmle_payload: object = json.loads(paths.qmle_results.read_text(encoding="utf-8"))
     pooled_rhos = _pooled_rhos_from_qmle_payload(qmle_payload)
+    if paths.factor_conditioned_results is not None:
+        factor_payload = json.loads(
+            paths.factor_conditioned_results.read_text(encoding="utf-8")
+        )
+        pooled_rhos["factor_conditioned_w2"] = _factor_conditioned_w2_rho(
+            factor_payload
+        )
     payload = build_network_certificate(
         weights,
         pooled_rhos,
         tolerance=config.tolerance,
         max_iterations=config.max_iterations,
     )
-    paths.output_json.parent.mkdir(parents=True, exist_ok=True)
-    paths.output_json.write_text(
+    paths.output_dir.mkdir(parents=True, exist_ok=True)
+    (paths.output_dir / "results.json").write_text(
         json.dumps(payload, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )

@@ -503,10 +503,9 @@ def _nearest_same_sector_pairs(
 ) -> dict[str, tuple[str, str]]:
     """Rank neighbours once, then read each sector's nearest pair off the ranking.
 
-    Delegates the ordering to :func:`jcor.geometry.neighbour.neighbour_order`
-    -- the same kernel behind ``p1_encoder_neighbour_stability`` and the
-    ``dimensionality_analysis`` neighbour table -- rather than re-sorting a
-    pair frame. Its tie-break is ascending ``(distance, object id)`` on ids
+    Delegates the ordering to :func:`statadic.geometry.graph.neighbour.neighbour_order`
+    rather than re-sorting a pair frame. Its tie-break is ascending
+    ``(distance, object id)`` on ids
     that are ranks in the sorted ticker list, so walking anchors in id order
     reproduces the preregistered ``(w2_distance, symbol1, symbol2)`` sort
     exactly: the minimal-distance pair is reported from both endpoints, and the
@@ -798,6 +797,8 @@ def run_neighbour_outcome_split(
         paths, universe, geometry, selection, artifacts
     )
     _write_canonical_json(output_dir / "selection.json", selection_document)
-    _write_canonical_json(output_dir / "summary.json", summary)
+    (output_dir / "results.json").write_text(
+        json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     _write_canonical_json(output_dir / "provenance.json", provenance)
     return summary

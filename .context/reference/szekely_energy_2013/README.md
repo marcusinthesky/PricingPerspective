@@ -15,5 +15,3 @@ volume: '143'
 issue: '8'
 page: 1249-1272
 ---
-
-# Energy statistics: {A} class of statistics based on distances

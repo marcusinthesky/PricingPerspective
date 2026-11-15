@@ -18,5 +18,3 @@ issue: '1'
 publisher: Wiley
 page: 35-65
 ---
-
-# When Is a Liability Not a Liability?

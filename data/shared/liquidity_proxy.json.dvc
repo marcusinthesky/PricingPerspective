@@ -1,0 +1,5 @@
+outs:
+- md5: a360beac4792211458fbdbf943d7f70d
+  size: 2938
+  hash: md5
+  path: liquidity_proxy.json

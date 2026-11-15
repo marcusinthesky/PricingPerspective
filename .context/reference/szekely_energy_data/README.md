@@ -21,5 +21,3 @@ cites:
 - sejdinovic_equivalence_2013
 - szekely_measuring_2007
 ---
-
-# Energy Distance

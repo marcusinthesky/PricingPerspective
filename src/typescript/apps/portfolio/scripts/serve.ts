@@ -2,6 +2,7 @@ import { extname, join, normalize, resolve } from "node:path";
 
 const root = resolve(process.argv[2] ?? "out");
 const port = Number.parseInt(process.env.PORT ?? "3000", 10);
+const basePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/\/$/, "");
 
 const mime = new Map([
   [".html", "text/html; charset=utf-8"],
@@ -30,7 +31,11 @@ Bun.serve({
   port,
   async fetch(request) {
     const url = new URL(request.url);
-    let filePath = safePath(url.pathname);
+    const pathname =
+      basePath && (url.pathname === basePath || url.pathname.startsWith(`${basePath}/`))
+        ? url.pathname.slice(basePath.length) || "/"
+        : url.pathname;
+    let filePath = safePath(pathname);
     if (!filePath) return new Response("Bad request", { status: 400 });
 
     let file = Bun.file(filePath);

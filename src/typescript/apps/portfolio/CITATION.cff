@@ -7,9 +7,9 @@ authors:
     given-names: Marcus
   - family-names: Huang
     given-names: Chun-Sung
-repository-code: "https://github.com/marcusinthesky"
+repository-code: "https://github.com/marcusinthesky/PricingPerspective"
 license: MIT
-date-released: 2026-09-03
+date-released: 2026-11-15
 references:
   - type: article
     title: "Systematic Covariance Envelopes from Wasserstein Geometry: Evidence from Language-Model Representations"
@@ -41,3 +41,13 @@ references:
     year: 2026
     doi: "10.48550/arXiv.2608.29692"
     url: "https://arxiv.org/abs/2608.29692"
+  - type: article
+    title: "Information Games: Strategic Crowding and Firm Repositioning in Language-Model Space"
+    authors:
+      - family-names: Gawronsky
+        given-names: Marcus
+      - family-names: Huang
+        given-names: Chun-Sung
+    year: 2026
+    doi: "10.48550/arXiv.2609.37820"
+    url: "https://arxiv.org/abs/2609.37820"

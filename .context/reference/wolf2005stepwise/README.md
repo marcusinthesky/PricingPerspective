@@ -17,5 +17,3 @@ volume: '73'
 issue: '4'
 publisher: The Econometric Society
 ---
-
-# Stepwise Multiple Testing as Formalized Data Snooping

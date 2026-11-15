@@ -15,5 +15,3 @@ accessed:
 publisher: Nasdaq, Inc.
 URL: https://www.nasdaq.com/market-activity/quotes/news-headlines
 ---
-
-# Nasdaq ticker-indexed news headlines

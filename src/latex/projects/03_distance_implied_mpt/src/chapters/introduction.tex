@@ -136,6 +136,19 @@ benchmark expressed in normalized risk-weight coordinates---lies between
 These rankings are descriptive and in-sample; they illustrate the
 allocation implied by the maintained model rather than forecast
 out-of-sample performance.
+A retrospective chronological return-holdout benchmark extends the empirical
+design to a fixed-capital comparison conditional on the frozen representation
+and selected universe. It forms data-dependent portfolio weights using
+factor-complete excess returns from the 2018--2022 calibration period, solves
+the dated 2022-12-31 W2 certificate, and evaluates constant-weight mixtures on
+the 2023--2026 holdout period. The primary covariance candidates minimize
+total excess-return risk: conventional sample and scaled-identity
+Ledoit--Wolf benchmarks, a matched factor-only constant-correlation
+shrinkage control, and W1/W2 barycentric spatial-covariance portfolios. The
+residual-risk spatial GMV allocations remain explicitly labeled diagnostics.
+The comparison therefore places the information-certified allocation's
+holdout risk alongside return-based, matched factor, and barycentric spatial
+alternatives without claiming historical point-in-time implementability.
 
 The paper makes three contributions.
 First, it derives a coherent portfolio variance bound in a sharp
@@ -144,10 +157,10 @@ pairwise relaxation used by the decision rule.
 Second, it shows that when firm-specific slack is zero, the common
 carrier scale changes the certified variance reduction but not the
 normalized allocation, which is determined by the observed information geometry.
-Third, in a \ppnum[0]{n-tickers}-firm in-sample exercise, it reports
-how the allocation's
-conventionally evaluated variance ranks under four prespecified
-feasible-portfolio laws.
+Third, in a \ppnum[0]{n-tickers}-firm exercise, it reports how the allocation's
+conventionally evaluated variance ranks under four prespecified feasible-
+portfolio laws and defines a chronological benchmark against conventional and
+barycentric spatial-covariance portfolios.
 
 The argument proceeds from identification to decision and then to
 descriptive evaluation.
@@ -156,7 +169,8 @@ covariance, factor-risk, and textual-characteristic research.
 \Cref{sec:model} defines the observed, latent, and coherent portfolio
 objects and derives the information-certified variance bound.
 \Cref{sec:portfolio-choice} turns the pairwise certificate into a decision rule.
-\Cref{sec:empirical-design,sec:results} describe the data and report
-the in-sample variance ranking.
+\Cref{sec:empirical-design,sec:results} describe the data and report the
+in-sample variance ranking; \Cref{sec:p3-covariance-benchmark-design} defines
+the chronological covariance benchmark.
 \Cref{sec:limitations} discusses what the results establish and where
 their boundaries lie before \Cref{sec:conclusion} concludes.

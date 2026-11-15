@@ -21,5 +21,3 @@ cites:
 - connor_unified_1984
 - kreps_arbitrage_1981
 ---
-
-# Implications of Security Market Data for Models of Dynamic Economies

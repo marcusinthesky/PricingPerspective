@@ -20,5 +20,3 @@ cites:
 - reisman1992reference
 - ross_arbitrage_1976
 ---
-
-# A Multibeta Representation Theorem for Linear Asset Pricing Theories

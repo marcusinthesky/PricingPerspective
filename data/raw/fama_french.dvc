@@ -1,0 +1,6 @@
+outs:
+- md5: 3830e3582dbc8be760bdf1508ef70910.dir
+  size: 412885
+  nfiles: 3
+  hash: md5
+  path: fama_french

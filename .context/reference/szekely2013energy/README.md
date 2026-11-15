@@ -16,5 +16,3 @@ issue: '8'
 publisher: Elsevier
 page: 1249-1272
 ---
-
-# Energy statistics: A class of statistics based on distances

@@ -15,5 +15,3 @@ issue: '1'
 publisher: Elsevier
 page: 15-35
 ---
-
-# Arbitrage and Equilibrium in Economies with Infinitely Many Commodities

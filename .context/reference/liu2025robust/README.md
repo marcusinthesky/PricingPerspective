@@ -15,5 +15,3 @@ issued:
 URL: https://arxiv.org/abs/2511.08662
 container-title: arXiv preprint arXiv:2511.08662
 ---
-
-# Robust Distortion Risk Metrics and Portfolio Optimization

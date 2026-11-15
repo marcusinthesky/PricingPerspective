@@ -1,88 +1,17 @@
 \section{Empirical results and discussion}\label{sec:results}
 
-The results proceed in three steps.
-First, we ask when the conditional envelope classifies firm pairs informatively.
-Second, we estimate whether article-embedding distance is associated with
-return distance after symmetric firm effects.
-Third, we assess whether the sign survives a later return window and
-alternative representations.
+Article distance is positively associated with return distance across both
+return windows and after classification and product-market controls.
+We present that evidence first, examine its stability across representations,
+and then assess the informativeness of the covariance restriction.
 
-\subsection{Conditional W$_2$ envelope}\label{sec:fixed-w2-test}
-
-How tightly must the characteristic-to-exposure map be restricted for the
-conditional covariance envelope to classify observed firm pairs?
-The envelope classifies pairs informatively only under tight restrictions:
-the zero-slack isometric case is decisive, but informativeness deteriorates
-rapidly once even modest transmission slack is admitted.
-The envelope exercise evaluates \Cref{eq:random-kappa-bracket} with the
-common 128-article exact W$_2$ matrix and standardized total-return moments.
-A covered dyad has nonnegative transport excess throughout the
-scenario-implied latent distance interval; a violated dyad has negative
-excess throughout; and an unresolved dyad has an interval that spans zero.
-The zero-slack isometric cell $(L,\tau)=(1,0)$ covers
-\ppnum[3]{confound-w2-l1-tau0-coverage} of observed dyads and violates the
-restriction for \ppnum[3]{confound-w2-l1-tau0-violation}, leaving no
-dyads unresolved.
-Even the modest relaxation $(L,\tau)=(1,0.05)$ leaves
-\ppnum[3]{confound-w2-l1-tau0p05-unresolved} unresolved, and
-$(L,\tau)=(1,0.10)$ leaves
-\ppnum[3]{confound-w2-l1-tau0p1-unresolved} unresolved.
-The envelope therefore loses informativeness rapidly unless the
-characteristic-to-exposure map is tightly constrained, so its classifications
-should be read as conditional scenario classifications rather than as
-structural systematic-covariance estimates.
-
-\input{generated/random_exposure_diagnostic}
-
-Before estimating an average association, we ask an intuition-building
-question: when two firms are selected because their article distributions are
-nearest neighbours within sector, must their subsequent return paths also
-track one another?
-\Cref{fig:neighbour-outcome-paths} traces cumulative log returns for
-\ppnum[0]{neighbour-holdout-n-selected}
-within-sector pairs whose firms are Wasserstein nearest neighbours in the
-frozen 2018--2020 W$_2$ geometry.
-These selected pairs are informative because they make the envelope's
-permissive implication visible, but they do not constitute a hypothesis test
-or a clean validation sample.
-
-\begin{figure}[htbp]
-  \centering
-  \ppfigure{0.78}{neighbour_holdout_paths}
-  \caption{Illustrative cumulative-log-return paths for
-    \ppnum[0]{neighbour-holdout-n-selected} nearest
-    within-sector pairs in the frozen 2018--2020 exact W$_2$ matrix.
-    Each panel represents one sector, dates run from 4 January 2021 to 30
-    December 2022, and solid and dashed lines identify the printed tickers.
-    Insets report W$_2$ (characteristic distance), RMS gap (root-mean-square
-    path difference), terminal gap (final-date difference), and RMS
-    percentile (rank among all within-sector pairs, with 0 denoting the
-    closest-tracking pair).
-    The selected pairs provide intuition rather than a test, and the
-    evaluation window belongs to the broader return panel rather than
-    a clean holdout.
-  Authors' calculations.}
-  \label{fig:neighbour-outcome-paths}
-\end{figure}
-
-Some neighbouring pairs track closely over 2021--2022, whereas others
-separate materially.
-The display therefore does not validate the envelope.
-Instead, it clarifies the one-sided implication that textually close firms
-\emph{can} comove tightly but need not.
-That heterogeneity motivates estimating the average relation over all dyads
-rather than drawing an inference from selected pairs.
-
-\subsection{Canonical and timing-separated associations}
+\subsection{Article distance and return co-movement}
 \label{sec:post-window-dyadic}
 
-We next ask whether greater article-embedding distance is associated with
-weaker return co-movement after symmetric firm effects absorb stable endpoint
-heterogeneity, and whether the sign persists when the article-embedding
-geometry is held fixed for a later return window.
-The canonical estimate answers the first question affirmatively: at
-representative dyads across the interquartile range, a pair one standard
-deviation farther apart in news content has an implied return correlation
+Greater article-embedding distance is associated with weaker return
+co-movement after symmetric firm effects.
+Across representative dyads in the interquartile range, a pair one standard
+deviation farther apart in news content has a fitted return correlation
 roughly eight points lower.
 Return-chord distance maps deterministically to the familiar correlation
 scale through \eqref{eq:chord-distance}, because $\hat\rho=1-\hat D^2/2$.
@@ -107,11 +36,8 @@ for \ppnum[3]{confound-partial-r2} of residual variation relative to
 symmetric firm effects.
 The positive estimate is consistent with the directional expectation in
 \Cref{hyp:monotonicity}.
-Endpoint margins are absorbed, but pair-specific common causes remain, so the
-coefficient is neither causal nor a numerical estimate of transport excess.
 
-The later-window estimate provides timing-separated corroboration, not
-point-in-time out-of-sample validation.
+The positive association persists in the later return window.
 The exercise fixes the 2018--2022 article-embedding geometry before
 recomputing return chord distances and firm effects for
 \ppvalue{oos-return-panel-date-start} through
@@ -119,17 +45,13 @@ recomputing return chord distances and firm effects for
 The coefficient rises to \ppnum[3]{oos-dyadic-w2-coef}, with 95\% interval
 [\ppnum[3]{oos-dyadic-w2-ci-low}, \ppnum[3]{oos-dyadic-w2-ci-high}], and the
 standardized effect is \ppnum[3]{oos-dyadic-w2-effect-one-sd}.
-The sign persists after separating article selection from the later return
-outcomes, but the encoder has no documented training cutoff and common latent
-drivers may persist across windows.
-Accordingly, the design does not recreate point-in-time feature construction
-or establish predictive validation.
+Thus the same article geometry is associated with co-movement in both
+return windows.
 
 \input{generated/w2_primary_results}
 
-Having established the average magnitude, we ask whether the canonical
-coefficient reflects a visible residual-space relation and whether its sign
-depends on functional form or any single firm.
+The residual-space diagnostics show how the fitted relation is distributed
+across pairs and how it responds to changes in functional form and firm composition.
 By the Frisch--Waugh--Lovell result, Panel A of
 \Cref{fig:dyadic-postfit-diagnostics} residualizes both return distance and
 W$_2$ with respect to the symmetric firm effects, so the slope through those
@@ -147,45 +69,152 @@ Panels B and C assess functional form and single-firm influence.
     Panel B plots raw W$_2$ against the residualized outcome and overlays the
     prespecified quadratic sensitivity.
     Panel C reports the ten largest leave-one-firm-out coefficient shifts.
-    The diagnostics show a positive residual-space relation without a single
-    sign-reversing firm, but they do not remove pair-specific confounding.
-  Authors' calculations.}
+    The residual relation is positive, and the coefficient remains
+    positive after removing each firm in turn.
+  }
   \label{fig:dyadic-postfit-diagnostics}
 \end{figure}
 
-The diagnostics support the stability of the positive association across
-these checks, but neither residualization, the functional-form comparison,
-nor leave-one-firm-out analysis identifies the relation or removes
-pair-specific confounding.
-This distinction motivates asking next whether the association also survives
-changes to the representation itself.
+The positive association is stable across these checks.
+Classification controls next assess how much of it remains after accounting
+for familiar measures of pair-level economic similarity.
 
-\subsection{Representation sensitivity and limits}
+\subsection{Sector, industry, and product-market
+comparisons}\label{sec:classification-controls}
+
+\Cref{tab:classification-controls} adds sector matching directly to the
+primary symmetric-firm-effects design.
+The coefficient remains positive under this combined adjustment.
+The W$_2$ coefficient is \ppnum[3]{classification-sector-coefficient}, with
+bootstrap standard error \ppnum[3]{classification-sector-se} and 95\%
+interval [\ppnum[3]{classification-sector-ci-low},
+\ppnum[3]{classification-sector-ci-high}].
+For a one-standard-deviation increase in distance, the fitted chord contrast
+is \ppnum[3]{classification-sector-effect-one-sd}, corresponding to a change
+of \ppnum[3]{classification-sector-delta-correlation} in implied correlation
+at the median pair.
+Distance explains \ppnum[3]{classification-sector-partial-r2} of the
+variation remaining after both firm effects and sector matching.
+
+Adding same-industry matching, or restricting the fit to within-industry
+pairs, leaves the coefficient positive with a 95\% interval excluding zero;
+\Cref{sec:empirical-robustness} discusses these finer fits.
+
+Industry labels are coarse relative to product-market similarity measured
+from firms' own disclosures.
+The last two rows of \Cref{tab:classification-controls} therefore restrict the
+panel to the \ppnum[0]{etnic-n-firms} firms covered by the Hoberg--Phillips
+ETNIC network and add its 10-K business-description similarity, averaged over
+fiscal years \ppvalue{etnic-year-start}--\ppvalue{etnic-year-end}
+\citep{hoberg2025scope}.
+News W$_2$ and 10-K business-description distance have correlation
+\ppnum[3]{etnic-matrix-correlation-w2}
+(permutation $p\le\ppnum[4]{etnic-matrix-correlation-pvalue-max}$ under
+  \ppnum[0]{etnic-matrix-correlation-permutations} joint row-and-column
+firm relabelings).
+After removing sector matching from both matrices, their descriptive
+correlation is \ppnum[3]{etnic-matrix-correlation-w2-partial-sector}.
+This agreement provides convergent evidence across news and disclosure text.
+Both sources reflect reporting choices, and journalists also draw on company
+disclosures.
+Adding ETNIC similarity to firm effects and sector matching lowers the W$_2$
+coefficient from \ppnum[3]{classification-etnic-roster-coefficient} to
+\ppnum[3]{classification-etnic-coefficient}, with 95\% interval
+[\ppnum[3]{classification-etnic-ci-low},
+\ppnum[3]{classification-etnic-ci-high}].
+Distance explains \ppnum[3]{classification-etnic-partial-r2} of the variation
+remaining after firm effects, sector matching, and ETNIC similarity; ETNIC
+similarity explains \ppnum[3]{classification-etnic-control-partial-r2} after
+the other terms.
+Both rows use the same firms and resampling draws, so the change reflects the
+control rather than the sample.
+The remaining association is consistent with additional economic content in
+news, imperfect measurement of product similarity, and shared reporting
+patterns.
+The regression establishes its incremental contribution conditional on the
+recorded ETNIC measure.
+
+\input{generated/classification_controls}
+
+\subsection{Stability across representations}
 \label{sec:representation-sensitivity}
 
-What should readers infer when the article-embedding geometry is compressed,
-measured with another encoder or distance metric, or constructed using
-encoders trained on a different data vintage?
-The sensitivity evidence indicates that the positive association is not
-unique to the full-width canonical representation, although sufficiently
-severe compression weakens it and the comparisons do not rank representations.
+Consistent with \citet{box2018qualitative}, lexical similarity is associated
+with return comovement.
+This association also appears when firms are represented as distributions
+of TF--IDF article vectors: greater W$_2$ distance is associated with greater
+return distance after symmetric firm effects, with a 95\% node-bootstrap
+interval excluding zero and a partial $R^2$ of
+\ppnum[3]{text-controls-tfidf-document-partial-r2}
+(\Cref{tab:text-controls}).
+These results support the empirical usefulness of distribution-valued firm
+representations and Wasserstein comparison beyond the headline
+language-model representation.
+
+The positive distance association persists across encoder families,
+embedding widths, alternative distance summaries, and reported
+training-information vintages.
 Moderate compression preserves the association, whereas the more severe
-compression steps attenuate it, locating a stress boundary at which
-discarding semantic coordinates begins to weaken the measured relation.
+compression steps attenuate it, showing where the loss of semantic
+coordinates weakens the measured relation.
 The Qwen capacity variants and the BGE representation retain positive
 associations, and their paired differences from the relevant references are
 not distinguishable after adjustment.
 W$_1$ nearly preserves the canonical dyad ordering, whereas energy retains a
 positive association under a materially different ordering.
-The three matched EttaX vintage contrasts likewise meet their declared
-equivalence rule within the benchmark-calibrated margin when architecture,
-training recipe, compute, tokenizer, sampler, and seed are held fixed across
-pre-, within-, and post-sample Wikipedia snapshots.
-These results and their paired contrasts are reported in
-\Cref{tab:w2-representation-sensitivity}, with construction details and the
-article-sampling checks in \Cref{sec:representation-diagnostics}.
-The evidence therefore supports descriptive robustness to several
-representation choices, not encoder superiority, a causal interpretation, or
-the absence of a vintage effect at the much larger capacity of the
-production encoder.
-These are sensitivity checks rather than additional hypotheses.
+The close W$_1$/W$_2$ agreement may partly reflect the geometry imposed by
+unit normalization.
+This maps embeddings to the unit sphere, retaining direction while removing
+vector length, as in many contrastive representation systems
+\citep{wang_isola_hypersphere_2020}.
+If the distances relevant to article matching occupy a narrow range,
+proportional and quadratic costs can produce similar orderings.
+This suggests a measurement question: whether representations designed to
+preserve economically meaningful variation in both direction and magnitude
+would distinguish the two costs more sharply.
+\Cref{sec:representation-diagnostics} develops this interpretation as a
+hypothesis about the representation.
+
+The ChronoBERT annual comparisons meet the inherited benchmark-calibrated
+equivalence rule for every pair, but some differences are distinguishable
+from zero after vintage-family Holm adjustment
+(\Cref{tab:w2-vintage-contrasts}).
+Later training cutoffs neither monotonically strengthen nor monotonically
+weaken the standardized association.
+Thus the paired differences are bounded under this robustness margin,
+not exactly zero; cumulative training also prevents a causal interpretation
+as the effect of later information alone.
+\Cref{tab:w2-representation-sensitivity} reports the annual cells, with
+construction details and article-sampling checks in
+\Cref{sec:representation-diagnostics}.
+
+\subsection{Covariance sensitivity}\label{sec:fixed-w2-test}
+
+The association establishes the empirical relevance of article distance.
+The sensitivity grid addresses the next question: how tightly must economic
+transmission be specified for that distance to restrict covariance informatively?
+\Cref{tab:random-exposure-w2} applies the interval in
+\Cref{eq:random-transport-excess-bracket} across nine transmission scenarios.
+The zero-slack isometric cell $(L,\tau)=(1,0)$ gives nonnegative intervals for
+\ppnum[3]{confound-w2-l1-tau0-coverage} of observed dyads and violations for
+\ppnum[3]{confound-w2-l1-tau0-violation}, resolving every interval's sign.
+With $(L,\tau)=(1,0.05)$, the unresolved share rises to
+\ppnum[3]{confound-w2-l1-tau0p05-unresolved}; at $(1,0.10)$ it reaches
+\ppnum[3]{confound-w2-l1-tau0p1-unresolved}.
+Even modest firm-specific departures therefore widen the interval enough to
+leave most comparisons unresolved.
+
+\input{generated/random_exposure_diagnostic}
+
+For an investment manager assessing a prospective holding, the workflow
+begins by comparing its distribution of reported activities with those of
+existing holdings, including firms outside its sector.
+The analyst then reviews the underlying articles for shared customers,
+suppliers, and contracts, and examines how pricing power, hedging, and
+financing transmit those risks to equity returns.
+Those economic judgments specify the transmission scenario and exposure
+magnitudes used to assess candidate covariances against the ceiling.
+The sensitivity grid shows how precise these inputs must be for that
+assessment to discriminate among candidate covariances.
+The neighbour paths in \Cref{sec:exploratory-geometry-outcomes} illustrate
+the range of return behaviour that the economic review must explain.

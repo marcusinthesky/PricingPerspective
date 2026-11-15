@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pricing-perspective.local/schemas/lean-claim-manifest.json",
   "title": "Lean claim manifest",
-  "description": "Renderer-neutral record of manuscript claims backed by machine-checked Lean declarations. Populated only from human-authored mapping.toml entries (see t24.1 blocker B1) — nothing here is inferred from name or notation similarity.",
+  "description": "Renderer-neutral record of manuscript claims backed by machine-checked Lean declarations. Joins authored publication metadata bijectively to native LeanArchitect annotations; declarations, summaries and source locations come from compiled native metadata. Nothing is inferred from name or notation similarity.",
   "type": "object",
   "required": ["schema_version", "claims", "content_hash"],
   "additionalProperties": false,
@@ -17,7 +17,7 @@
     },
     "content_hash": {
       "type": "string",
-      "description": "sha256 hex digest of the canonical JSON encoding of `claims`, computed identically by both renderer bindings so they can be proven to share one manifest.",
+      "description": "sha256 hex digest of the canonical JSON encoding of `claims`, including native declaration bindings, summaries and independently checked statement types, so publication projections share one reviewed identity.",
       "pattern": "^[0-9a-f]{64}$"
     }
   },
@@ -49,7 +49,7 @@
         },
         "statement_summary": {
           "type": "string",
-          "description": "Plain-language statement of the mathematical claim, independent of Lean notation."
+          "description": "Plain-language statement from the native LeanArchitect annotation, independent of Lean notation."
         },
         "declaration": {
           "type": "string",
@@ -76,7 +76,7 @@
         "axioms": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Axiom set reported by `#print axioms <declaration>`. A build_result of 'checked' implies this is a subset of the allowlist {propext, Classical.choice, Quot.sound} and does not contain sorryAx."
+          "description": "Axiom set reported by `#print axioms <declaration>`. A build_result of 'checked' also requires an independently classified non-True contract and implies this is a subset of the allowlist {propext, Classical.choice, Quot.sound} and does not contain sorryAx."
         },
         "statement_type": {
           "type": "string",

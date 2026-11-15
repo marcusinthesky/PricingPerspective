@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING, NoReturn
 
 import numpy as np
@@ -17,6 +16,8 @@ from pipeline._kernels.typed_geometry import (
 )
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from pipeline._kernels.typed_geometry import EmbeddingCloud
     from pipeline.io.typed_analysis import (
         ProviderConfig,
@@ -69,8 +70,7 @@ def _apply_window(
     """Restrict one provider frame to a declared inclusive observation window.
 
     This is the only place in the typed stack that drops provider rows on an
-    observation date.  It rejects rather than repairs, in the sense of the
-    doors described in ``jcor/sample/evidence.py``: an undated row cannot be
+    observation date. An undated row cannot be
     placed inside or outside the window, so imputing one would silently decide
     a sample-inclusion question the caller never asked about.
     """
@@ -102,6 +102,7 @@ def load_provider_clouds(  # noqa: C901, PLR0912
     provider: ProviderConfig,
     representation: RepresentationSpec,
     *,
+    embeddings_dir: Path,
     item_ids: list[str] | tuple[str, ...] | None = None,
     sample_size: int | None = None,
     window: SampleWindowSpec | None = None,
@@ -116,7 +117,7 @@ def load_provider_clouds(  # noqa: C901, PLR0912
     """
     if representation.provider_id != provider.provider_id:
         _provider_error("representation/provider identity mismatch")
-    root = Path(provider.artifact_root)
+    root = embeddings_dir
     files = {path.stem: path for path in root.glob("*.parquet")}
     if not files:
         _provider_error(
@@ -191,6 +192,7 @@ def load_dated_provider_observations(
     provider: ProviderConfig,
     representation: RepresentationSpec,
     *,
+    embeddings_dir: Path,
     item_ids: list[str] | tuple[str, ...] | None = None,
     sample_size: int | None = None,
     window: SampleWindowSpec | None = None,
@@ -198,12 +200,12 @@ def load_dated_provider_observations(
     """Load deterministic provider rows while retaining dates for resampling.
 
     Selection deliberately matches :func:`load_provider_clouds`: canonical URL-hash
-    order, then the declared date window, then optional truncation.  The existing
-    cloud loader remains unchanged because dated rows are an inference-only contract.
+    order, then the declared date window, then optional truncation. Dated rows
+    are an inference-only contract.
     """
     if representation.provider_id != provider.provider_id:
         _provider_error("representation/provider identity mismatch")
-    root = Path(provider.artifact_root)
+    root = embeddings_dir
     files = {path.stem: path for path in root.glob("*.parquet")}
     selected = sorted(files) if item_ids is None else sorted(item_ids)
     if not files or any(item_id not in files for item_id in selected):

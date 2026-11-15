@@ -18,5 +18,3 @@ issue: '2'
 publisher: Elsevier
 page: 779-815
 ---
-
-# News-Implied Linkages and Local Dependency in the Equity Market

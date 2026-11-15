@@ -14,25 +14,41 @@ Qwen3-4B@1024 & 1024 & 0.17 & 0.17 & 0.29 & 0.73 & 148.5 \\
 BGE-large-v1.5 full & 1024 & -- & 0.01 & 0.03 & 0.18 & 145.3 \\
 Qwen3-8B@256 & 256 & 0.27 & 0.29 & 0.46 & 0.98 & 149.4 \\
 Qwen3-8B@64 & 64 & 0.01 & 0.01 & 0.01 & 0.13 & 144.6 \\
-EttaX V0 & 320 & -- & 0.33 & 0.53 & 1.10 & 149.7 \\
-EttaX V1 & 320 & 1.19 & 1.10 & 1.59 & 2.60 & 152.0 \\
-EttaX V3 & 320 & -- & 0.77 & 1.20 & 2.05 & 151.4 \\
+ChronoBERT 2017 & 768 & -- & -- & -- & -- & 164.4 \\
+ChronoBERT 2018 & 768 & -- & -- & -- & -- & 166.7 \\
+ChronoBERT 2019 & 768 & -- & -- & -- & -- & 160.7 \\
+ChronoBERT 2020 & 768 & -- & -- & -- & -- & 158.5 \\
+ChronoBERT 2021 & 768 & -- & -- & -- & -- & 160.2 \\
+ChronoBERT 2022 & 768 & -- & -- & -- & -- & 165.3 \\
+ChronoBERT 2023 & 768 & -- & -- & -- & -- & 158.7 \\
+ChronoBERT 2024 & 768 & -- & -- & -- & -- & 161.6 \\
 \midrule
 Equal risk weights & -- & 34.73 & 34.02 & 32.84 & 28.33 & 162.6 \\
 \bottomrule
 \end{tabular}
-\caption{Representation sensitivity of the news-only allocation across seven base representations and three matched EttaX encoder vintages on the common 100-firm, 1,207-date standardized-return panel. The four middle columns report the percentage of fixed-law allocations with standardized variance no greater than the candidate's; lower is better. Relative variance indexes the long-only sample GMV to 100, so values above 100 measure percentage excess variance and lower is better. A dash marks a candidate that violates the law's unchanged cap. The $\alpha=0.8$ law is a fixed moderately concentrated comparison; its realized mean effective $N$ is reported rather than assumed to match the primary allocation. Returns evaluate every fixed news-only allocation in sample; they do not construct it.}
+\caption{Representation sensitivity of the news-only allocation across seven base representations and eight published annual ChronoBERT encoder vintages on the common 100-firm, 1,207-date standardized-return panel. The four middle columns report the percentage of fixed-law allocations with standardized variance no greater than the candidate's; lower is better. Relative variance indexes the long-only sample GMV to 100, so values above 100 measure percentage excess variance and lower is better. A dash marks a candidate that violates the law's unchanged cap. The $\alpha=0.8$ law is a fixed moderately concentrated comparison; its realized mean effective $N$ is reported rather than assumed to match the primary allocation. Returns evaluate every fixed news-only allocation in sample; they do not construct it.}
 \label{tab:p3-representation-ablation}
 \end{table}
 \medskip
-\begin{table}[H]
-\centering
+\begingroup
 \scriptsize
 \setlength{\tabcolsep}{3.0pt}
-\begin{tabularx}{\linewidth}{Xrrrrrr}
+\begin{longtable}{@{}p{0.35\linewidth}rrrrrr@{}}
+\caption{Paired stationary-return-bootstrap contrasts for the 15-cell representation ladder. The seven base contrasts are descriptive candidate-minus-reference relative-GMV index-point differences, so a negative estimate favours the candidate. $p$ denotes two-sided add-one sign-tail probabilities; $p_H$ denotes Holm adjustment separately within the seven base and 28 vintage contrasts. The ChronoBERT rows use the BGE-large-minus-Qwen3-8B@1024 interval as a benchmark-calibrated, post-specified robustness threshold. Eq. requires strict containment of the full marginal interval; intervals are not simultaneous. Published annual cumulative training is not a matched-compute causal or architecture-only comparison.}
+\label{tab:p3-representation-contrasts} \\
 \toprule
-Contrast ($c-r$) & Estimate & 95\% CI & Raw $p$ & Holm $p$ & Bound & Equiv. \\
+Contrast ($c-r$) & Estimate & 95\% CI & $p$ & $p_H$ & Bound & Eq. \\
 \midrule
+\endfirsthead
+\multicolumn{7}{c}{\tablename\ \thetable\ (continued)} \\
+\toprule
+Contrast ($c-r$) & Estimate & 95\% CI & $p$ & $p_H$ & Bound & Eq. \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
 Qwen3-4B full $-$ Qwen3-8B full & -0.842 & [-2.664, 1.649] & 0.454 & 0.873 & -- & -- \\
 Qwen3-4B@1024 $-$ Qwen3-8B@1024 & 1.811 & [-0.863, 3.486] & 0.192 & 0.768 & -- & -- \\
 Qwen3-8B@1024 $-$ Qwen3-8B full & -0.794 & [-1.934, 0.762] & 0.291 & 0.873 & -- & -- \\
@@ -41,11 +57,33 @@ Qwen3-8B@64 $-$ Qwen3-8B@256 & -4.774 & [-8.324, 0.365] & 0.065 & 0.390 & -- & -
 BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -1.446 & [-3.807, 1.674] & 0.349 & 0.873 & -- & -- \\
 BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -3.257 & [-5.526, 0.733] & 0.115 & 0.575 & -- & -- \\
 \addlinespace[1.5pt]
-EttaX V1 $-$ EttaX V0 & 2.365 & [-2.930, 5.212] & 0.370 & 1.000 & 3.807 & No \\
-EttaX V3 $-$ EttaX V0 & 1.693 & [-2.465, 4.096] & 0.467 & 1.000 & 3.807 & No \\
-EttaX V3 $-$ EttaX V1 & -0.673 & [-2.713, 1.793] & 0.599 & 1.000 & 3.807 & Yes \\
-\bottomrule
-\end{tabularx}
-\caption{Paired stationary-return-bootstrap contrasts for the ten-cell representation ladder. The seven base contrasts are descriptive candidate-minus-reference relative-GMV index-point differences, so a negative estimate favours the candidate. Raw $p$-values are two-sided add-one sign-tail probabilities; Holm adjustment is applied separately to the seven base and three vintage contrasts. The EttaX rows additionally use the BGE-large-minus-Qwen3-8B@1024 interval as a benchmark-calibrated, post-specified robustness threshold. Equivalence requires strict containment of the full interval; this is not a causal or architecture-only comparison.}
-\label{tab:p3-representation-contrasts}
-\end{table}
+ChronoBERT 2018 $-$ ChronoBERT 2017 & 2.252 & [1.170, 4.326] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2019 $-$ ChronoBERT 2017 & -3.795 & [-6.322, -2.501] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2019 $-$ ChronoBERT 2018 & -6.047 & [-10.132, -4.313] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2020 $-$ ChronoBERT 2017 & -5.960 & [-11.077, -3.918] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2020 $-$ ChronoBERT 2018 & -8.212 & [-14.985, -5.533] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2020 $-$ ChronoBERT 2019 & -2.165 & [-5.258, -0.789] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2017 & -4.209 & [-9.080, -2.089] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2018 & -6.461 & [-13.015, -3.710] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2019 & -0.414 & [-3.500, 1.169] & 0.576 & 1.000 & 3.807 & Yes \\
+ChronoBERT 2021 $-$ ChronoBERT 2020 & 1.751 & [0.486, 3.072] & 0.013 & 0.117 & 3.807 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2017 & 0.893 & [-2.228, 3.110] & 0.535 & 1.000 & 3.807 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2018 & -1.359 & [-5.718, 1.175] & 0.305 & 1.000 & 3.807 & No \\
+ChronoBERT 2022 $-$ ChronoBERT 2019 & 4.688 & [3.284, 6.615] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2022 $-$ ChronoBERT 2020 & 6.852 & [5.381, 10.737] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2022 $-$ ChronoBERT 2021 & 5.102 & [3.913, 8.582] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2017 & -5.703 & [-10.542, -3.385] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2018 & -7.955 & [-14.412, -5.048] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2019 & -1.908 & [-4.976, -0.125] & 0.035 & 0.280 & 3.807 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2020 & 0.257 & [-0.967, 1.629] & 0.643 & 1.000 & 3.807 & Yes \\
+ChronoBERT 2023 $-$ ChronoBERT 2021 & -1.494 & [-3.093, 0.113] & 0.068 & 0.408 & 3.807 & Yes \\
+ChronoBERT 2023 $-$ ChronoBERT 2022 & -6.595 & [-10.218, -4.922] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2017 & -2.821 & [-5.549, -1.127] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2018 & -5.073 & [-9.026, -2.862] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2019 & 0.974 & [-0.358, 2.294] & 0.146 & 0.730 & 3.807 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2020 & 3.139 & [1.980, 6.280] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2021 & 1.388 & [0.041, 4.493] & 0.048 & 0.336 & 3.807 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2022 & -3.713 & [-5.678, -2.351] & 0.001 & 0.028 & 3.807 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2023 & 2.882 & [1.991, 5.585] & 0.001 & 0.028 & 3.807 & No \\
+\end{longtable}
+\endgroup

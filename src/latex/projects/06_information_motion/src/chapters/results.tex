@@ -1,0 +1,66 @@
+\section{Results}\label{sec:results}
+
+\subsection{Historical Directional Evidence}\label{sec:historical-evidence}
+
+Across all four measurement specifications, decreases in Wasserstein squared
+distance are positively
+associated with reference firms' relative weighted excess returns, and the central
+article-redraw ranges remain positive
+(Table~\ref{tab:directional-evidence}).
+For a scale-free comparison within the primary specification, a difference of
+one root-mean-square unit in centered weighted excess returns corresponds to
+a fitted decrease in distance equal to \ppnum[3]{ir-normalized-alignment}
+times the root-mean-square variation in centered distance changes.
+This normalized alignment,
+$\widehat\beta\operatorname{RMS}(\widetilde R)/\operatorname{RMS}(\widetilde A)$,
+has square \ppnum[4]{ir-d2560-expanded-within-fit}, the in-sample fit of this
+single-regressor, within-transformed projection.
+It describes a small alignment in the observed sample.
+
+For the primary specification, the coefficient is
+\ppnum[6]{ir-primary-beta} squared-distance units per unit additive
+weighted excess-return measure, with conditional article-redraw range
+$[\ppnum[6]{ir-primary-low},\ppnum[6]{ir-primary-high}]$.
+A \ppnum[2]{ir-financial-example} difference in the weighted excess-return measure
+corresponds to a fitted approach
+difference of \ppnume[2]{ir-primary-percent-effect} squared-distance units.
+Because the coefficient describes direction in embedding geometry, its scale
+differs across representations and has no percentage-capacity interpretation.
+
+\input{generated/information_recovery_empirical_table}
+
+All annual and deletion-based estimates remain positive.
+The primary annual ratios are \ppnum[6]{ir-annual-2019-beta},
+\ppnum[6]{ir-annual-2020-beta}, \ppnum[6]{ir-annual-2021-beta} and
+\ppnum[6]{ir-annual-2022-beta} in 2019--2022, while leaving out one
+transition gives coefficients from
+\ppnum[6]{ir-year-deletion-low} to \ppnum[6]{ir-year-deletion-high}.
+
+Removing each firm in all target and reference roles, then recentering over
+remaining references, gives the primary range
+$[\ppnum[6]{ir-role-deletion-low},\ppnum[6]{ir-role-deletion-high}]$.
+
+These comparisons contribute unevenly to the pooled estimate:
+the 2020 transition contributes \ppnum[1]{ir-primary-2020-weight-pct}\%
+of the pooled second moment, and the largest reference share is
+\ppnum[1]{ir-reference-share-pct}\%, compared with
+\ppnum[2]{ir-target-share-pct}\% for a target.
+A reference with unusually dispersed weighted returns can affect many target
+comparisons, so equal reference weights need not imply equal influence on
+the pooled slope.
+
+The restricted movement profile improves held-out reconstruction of annual
+news changes by only \ppnum[2]{ir-observation-primary-heldout-pct}\%
+relative to predicting zero centered change, and two alternative
+specifications perform worse than that benchmark.
+This article-fold audit examines changes in news geometry separately from
+their association with returns.
+With the profile and reference ordering fixed from 2018 geometry, it fits an
+annual movement magnitude on one article fold and evaluates it on the other.
+Weak held-out reconstruction shows that annual article changes extend beyond
+this local benchmark.
+The measured movements also frequently reach or exceed the distance to the
+nearest distinct reference distribution at the initial date.
+These geometric departures do not identify crossings of operating positions,
+which remain unobserved.
+Appendix~\ref{app:observation-audit} reports the complete audit.

@@ -8,23 +8,18 @@ bootstrap convention from the in-sample specification.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pandas as pd
-import yaml
-from jcor.model.dyadic import (
-    DyadicComputationError,
-    DyadicFit,
-    DyadicInference,
-    DyadicInputError,
-    DyadicModel,
-    DyadicSample,
-)
-from jcor.model.dyadic import (
+from statadic.estimation.least_squares.dyadic import DyadicComputationError
+from statadic.inference.dyadic import DyadicFitRequest, DyadicInference
+from statadic.inference.dyadic import (
     bootstrap_coefficient_inference as _bootstrap_inference,
 )
+from statadic.law.dyadic import DyadicInputError, DyadicModel, DyadicSample
 
 from pipeline.stages.papers.paper1.dyadic_confound import (
     _fit_spec,
@@ -179,9 +174,8 @@ def _arm_record(
         raise DyadicComputationError(message)
     coefficients = cast("dict[str, dict[str, float]]", fit["coefficients"])
     coefficient = float(coefficients[regressor]["coef"])
-    standard_error, t_statistic, p_value, ci_low, ci_high = _bootstrap_inference(
-        draws, coefficient
-    )
+    uncertainty = _bootstrap_inference(draws, coefficient)
+    ci_low, ci_high = uncertainty.ci_lower, uncertainty.ci_upper
     regressor_sd = float(np.std(regressor_values, ddof=1))
     record: dict[str, object] = {
         "specification": (
@@ -190,9 +184,9 @@ def _arm_record(
         ),
         "regressor": regressor,
         "coef": coefficient,
-        "se": standard_error,
-        "t": float(t_statistic),
-        "pvalue": float(p_value),
+        "se": uncertainty.standard_error,
+        "t": uncertainty.t_statistic,
+        "pvalue": uncertainty.pvalue,
         "ci_low": ci_low,
         "ci_high": ci_high,
         "interval_excludes_zero": bool(ci_low > 0.0 or ci_high < 0.0),
@@ -235,18 +229,22 @@ def run_dyadic_oos(config: DyadicOosConfig) -> dict[str, object]:
     energy_universe, tickers, columns, y, firm_i, firm_j = _arm_columns(
         config.distance_artifact_dir, config.covariance_matrix
     )
-    sample = DyadicSample[str](y, firm_i, firm_j)
+    sample = DyadicSample[str](y, firm_i.tolist(), firm_j.tolist())
     node_counts = _draw_node_counts(
         len(tickers), config.bootstrap_iters, config.bootstrap_seed
     )
     node_schedule = legacy_node_count_schedule(sample, node_counts)
 
     w2_fit = _fit_spec(
-        DyadicFit[str](
-            model=DyadicModel[str](["w2_distance"], columns, sample),
-            inference=DyadicInference[str](
+        DyadicFitRequest[str](
+            model=DyadicModel[str](
+                ["w2_distance"],
+                columns,
+                sample,
                 node_effects=True,
                 effect_name_prefix="firm_fe",
+            ),
+            inference=DyadicInference[str](
                 bootstrap_iters=config.bootstrap_iters,
                 bootstrap_seed=config.bootstrap_seed,
                 node_schedule=node_schedule,
@@ -317,6 +315,6 @@ def run_dyadic_oos(config: DyadicOosConfig) -> dict[str, object]:
         config.output_file.parent / "node_bootstrap_counts.parquet", index=False
     )
     config.output_file.write_text(
-        yaml.safe_dump(result, sort_keys=False), encoding="utf-8"
+        json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return result

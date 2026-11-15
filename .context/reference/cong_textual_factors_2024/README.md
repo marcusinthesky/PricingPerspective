@@ -19,5 +19,3 @@ number: '33168'
 publisher: National Bureau of Economic Research
 URL: https://www.nber.org/papers/w33168
 ---
-
-# Textual Factors

@@ -1,7 +1,7 @@
 # Lean toolchain as a store derivation (GC-safe), replacing imperative `elan`.
 # Reuses lean4-nix's `fetchBinaryLean`: it fetches the official prebuilt tarball,
 # autoPatchelfs it, swaps in nixpkgs clang/lld, and wraps lean/leanc/lake with
-# the C compiler on PATH. Upstream has no v4.31.0 manifest (it tops out at
+# the C compiler on PATH. Upstream has no v4.35.0 manifest (it tops out at
 # v4.30.0, as does nixpkgs' own `lean4`), so the manifest below is inline.
 #
 # Why a store derivation at all, and the self-contained alternative we did not
@@ -13,17 +13,17 @@
 { pkgs, lean4-nix }:
 let
   leanManifest = {
-    tag = "v4.31.0";
+    tag = "v4.35.0";
     toolchain = {
       x86_64-linux = {
-        url = "https://github.com/leanprover/lean4/releases/download/v4.31.0/lean-4.31.0-linux.tar.zst";
-        hash = "sha256-B6YzzI2RUcvAiCXqTN2lDUsCosnLhSwBMbEwRvScrX8=";
+        url = "https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst";
+        hash = "sha256-colZekRUMkbJInuMrlAXZ+CVzhf21Ei5X8So3Jcmj20=";
       };
       aarch64-linux = {
-        url = "https://github.com/leanprover/lean4/releases/download/v4.31.0/lean-4.31.0-linux_aarch64.tar.zst";
-        hash = "sha256-sb8dPFhrds9KhiEqWV2Lnt2Z9DikHM6F1XgPqTR8gRs=";
+        url = "https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux_aarch64.tar.zst";
+        hash = "sha256-yPD4o5IOg5cYsTQ+Z4H9gKPpsQJPvNcHjrMPVOgGsCg=";
       };
-      # macOS: add lean-4.31.0-darwin.tar.zst / lean-4.31.0-darwin_aarch64.tar.zst
+      # macOS: add lean-4.35.0-darwin.tar.zst / lean-4.35.0-darwin_aarch64.tar.zst
       # (+ hashes) here if you ever add a *-darwin system to eachSystem.
     };
   };

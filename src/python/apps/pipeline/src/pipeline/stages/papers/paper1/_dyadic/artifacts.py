@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
-import yaml
 
 if TYPE_CHECKING:
     from pipeline.stages.papers.paper1._dyadic.contracts import DyadicArtifacts
@@ -45,5 +45,5 @@ def write_dyadic_artifacts(artifacts: DyadicArtifacts) -> None:
     for filename, frame in frames.items():
         frame.to_parquet(artifacts.output_file.parent / filename, index=False)
     artifacts.output_file.write_text(
-        yaml.safe_dump(artifacts.result, sort_keys=False), encoding="utf-8"
+        json.dumps(artifacts.result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )

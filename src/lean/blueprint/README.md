@@ -1,74 +1,59 @@
-# LeanBlueprint proof-development companion
+# Native LeanArchitect and LeanBlueprint companion
 
-This directory is a proof-development companion. Its PDF and web outputs are
-not arXiv, journal, or canonical manuscript sources.
+This proof-development companion is separate from the canonical journal/arXiv
+manuscripts. Project statements live in `@[blueprint]` annotations at their original
+Lean declarations beside the proofs. The `Publication` assembly library retains only
+the external mathlib annotation; it does not duplicate project statements or proofs.
 
-The production claim mapping lives in `../tools/claim-manifest/mapping.toml`
-(author-approved entries — see that directory's `README.md`). Authored Blueprint
-prose may name an approved manuscript claim ID through `\ppClaimBinding{<claim-id>}`
-and may author mathematical `\uses{...}` edges. It must not copy declaration names
-or write `\leanok`; `../tools/claim-manifest/render.py` generates those bindings
-only for entries that passed declaration, placeholder, and axiom validation.
+The companion includes native nodes with `\inputleannode{<claim-id>}`. LeanArchitect
+owns declaration links, generated verification markers and inferred proof dependencies.
+Authored chapters retain informal explanations and their reviewed dependency edges.
+Every approved publication node appears once; missing inputs, duplicate labels and
+unresolved authored or exported dependency references fail validation.
 
-`content.tex` assembles four authored chapters covering random functional
-exposures, information-certified portfolio variance, robust measurement slack,
-and spatial interaction. The generated web companion currently exposes those
-chapters as a table of contents with 13 section pages; approved declaration
-bindings are generated from the claim manifest. This remains independent of the
-manuscripts, which consume verification status directly
-(`../tools/claim-manifest/README.md`).
+The `Publication`, `PricingPerspective` and `WassersteinGeometry` library facets each
+export their own modules. `just lean::certify` builds all three native LaTeX/JSON exports,
+runs the independent global integrity policy, rechecks mapped statement types and axioms,
+and renders identifier-free publication disclosures. Native readiness does not replace
+that policy or establish that an informal statement matches a formal theorem.
 
 ## Commands
 
-Run from the repository's activated development shell:
-
 ```bash
-just lean::build          # after changing Lean declarations or namespaces
+just lean::certify
+just lean::claims-publication-check
 just lean::blueprint-check
 just lean::blueprint-pdf
 just lean::blueprint-web
 just lean::blueprint-all
 ```
 
-The web and PDF targets read the compiled Lean environment while regenerating
-the claim manifest. Rebuild first when declaration sources have changed; a
-stale Lake environment can otherwise report valid mappings as unknown names.
+Every companion render first runs fresh certification. `blueprint-check` also validates
+native JSON/LaTeX against the manifests, builds the web graph and runs the pinned upstream
+LeanBlueprint declaration checker. `blueprint-pdf` compiles native LaTeX with the repository's
+existing Tectonic engine and vendored bundle; it does not require a separate latexmk/XeLaTeX
+installation. Generated native exports, `print/`, `web/` and `lean_decls` are ignored.
 
-`blueprint-check` builds the main Lean workspace and the `checkdecls` helper
-root, regenerates and tests the claim manifest, checks authored/generated
-boundaries, builds the web extraction, and runs the pinned upstream declaration
-checker. Generated output lives in `print/`, `web/`, and `lean_decls`; all three
-are ignored.
+`claims-publication-check` is intentionally cheap: it uses committed manifests, checks
+manuscript labels and boundaries, and compares each status file exactly with the renderer,
+including its owning manifest hash. It needs neither Lake nor generated native exports.
+`claims-check` also runs the checker regressions and checks every retained manuscript.
+The DVC `lean_claims` and `lean_bindings_check` stages preserve this proof/prose separation.
+Submission bundles run shared proof certification and publication checks before staging;
+interactive LaTeX build/watch remain independent of a Lean build.
 
-On a cold checkout — a fresh worktree, or after a nix GC — run
-`just lean::warm` once. `checkdecls/` is a **second Lake root** that `lake build`
-at `src/lean` never touches, and its git dependency is fetched on first build,
-so without warming the only symptom is `blueprint-check` failing at its final
-step for a provisioning reason. `just agents::worktree <name> <ref> 1`
-provisions it at worktree-creation time.
+## Provisioning and scope
 
-The manuscript-facing half of the claim manifest is DAG-coupled: the DVC
-`lean_claims` stage owns `claim_bindings.tex` and each paper's
-`src/generated/lean_status.tex` and re-derives them from the proofs, and every
-`render` target depends on its paper's status file. A manuscript render on the
-`dvc repro` path therefore cannot outrun the proofs it cites. The `blueprint-*`
-recipes remain the interactive entry point to the same work; the inner
-`just latex::build`/`watch` loop is deliberately not gated on a Lake build.
+On a cold checkout, run `just lean::warm`. `checkdecls/` remains a second Lake root needed
+by upstream LeanBlueprint; the main workspace build does not provision it. The small
+`run_leanblueprint.py` adapter supplies the nested Git/Lake root and delegates declaration
+checking to this pinned helper. Its `BlueprintPublication` library reuses the canonical
+`Publication` assembly and the parent dependency cache, keeping the checked declaration
+scope aligned with native exports. LeanArchitect complements this renderer rather than
+replacing it. LeanBlueprint 0.0.20 and its Python closure remain locked by `uv.lock`.
 
-## Validation layers
-
-1. Lean kernel validation is the main workspace build and sorry gate.
-2. Claim-manifest validation checks approved mappings, declaration existence,
-   placeholders, and the axiom allowlist.
-3. LeanBlueprint's declaration check confirms every generated `\lean` target
-   is present in the imported workspace environment.
-4. Humans own the informal mathematical exposition and `\uses` dependency
-   graph. Neither is inferred from Lean syntax.
-
-LeanBlueprint 0.0.20 and its Python dependency closure are locked by `uv.lock`.
-Graphviz, XeLaTeX, and the measured dynamic-library closure needed by the
-pinned pygraphviz wheel remain owned by the repository's Nix shell. Upstream
-LeanBlueprint assumes the Git and Lake roots coincide; `run_leanblueprint.py`
-supplies the repository's nested `src/lean` root and delegates `checkdecls` to
-the pinned helper project under `checkdecls/`. It does not run `leanblueprint
-new`, alter Git state, create deployment files, or change repository settings.
+The native library set is explicit. Adding annotations to another package requires adding
+that package's facets to certification and the adapter's native-library set; it is not an
+implicit claim of complete repository coverage. New publication registries must also be
+listed as DVC dependencies. Human review owns mathematical prose equivalence and the
+scope of assumptions/disclosures.

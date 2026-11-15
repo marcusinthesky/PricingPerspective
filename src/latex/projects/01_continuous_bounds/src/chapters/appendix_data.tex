@@ -18,7 +18,7 @@ offers narrower market coverage than large proprietary archives.
   \centering
   \caption{Data construction and estimation flow. Counts are pipeline-generated;
     article selection uses stable URL-hash order and return dates use an exact
-  complete-case rule. Authors' calculations.}
+  complete-case rule. }
   \label{tab:data-provenance}
   \label{tab:sample-flow}
   \begin{tabularx}{\linewidth}{lXr}
@@ -33,12 +33,14 @@ offers narrower market coverage than large proprietary archives.
     Analysis window & Articles dated
     \ppvalue{sample-year-start}--\ppvalue{sample-year-end} &
     \ppnum[0]{corpus-articles-window} \\
-    Deterministic cap & Up to \ppvalue{n-samples-cap} articles per firm &
-    \ppvalue{sample-desc-total-articles} \\
+    Source pool & Up to \ppvalue{n-samples-cap} articles per news-frame firm &
+    \ppnum[0]{source-pool-total-articles} \\
     News firms & Prespecified coverage-qualified frame &
     \ppvalue{n-firms-news} \\
     Priced firms & Intersection with local adjusted-close histories &
     \ppvalue{n-firms} \\
+    Estimation articles & \ppnum[0]{sample-desc-articles-per-firm} per priced firm &
+    \ppnum[0]{sample-desc-total-articles} \\
     Return dates & Common dates from \ppvalue{return-panel-date-start} to
     \ppvalue{return-panel-date-end} &
     \ppvalue{return-panel-n-observations} \\
@@ -63,7 +65,59 @@ estimates is listed in \Cref{tab:sample-universe}.
 
 \Cref{tab:sample-descriptives-sectors}, reported in the body, gives coverage,
 mean daily return volatility, and within- versus cross-sector W$_2$ distances.
-Counts are near the declared cap by construction. Energy and Financial Services
+The estimation design selects the same number of articles for each priced
+firm. Energy and Financial Services
 are singleton sectors in the current roster, so their within-sector quantities
 are reported as undefined rather than zero. The imbalance and the missing
 timestamp on Nasdaq sector metadata limit sector-based interpretation.
+The same roster supplies \ppnum[0]{classification-n-industries} finer
+industry labels for the classification checks in
+\Cref{tab:classification-controls}.
+Every priced firm has both labels, but the roster records no effective dates
+or classification history.
+The labels serve as retrospective classification controls.
+
+The product-market comparison uses the Hoberg--Phillips ETNIC-All pair
+scores, a preliminary release keyed by Compustat identifier, for fiscal years
+\ppvalue{etnic-year-start}--\ppvalue{etnic-year-end}
+\citep{hoberg_phillips_2016,hoberg2025scope}.
+The preliminary files were downloaded on 23 September 2026; the frozen
+sample extract and matching crosswalk are preserved with checksums in the
+replication materials.
+A curated ticker--CIK--Compustat crosswalk links the roster to the network.
+Foreign issuers filing annual reports on Form 20-F are excluded by the
+network's construction, firms without a crosswalk link are omitted, and firms
+without co-observed pairs are dropped, leaving \ppnum[0]{etnic-n-firms} firms
+whose every pair is scored.
+ETNIC trains a separate doc2vec model on each year's business descriptions
+and scores each pair by the cosine similarity of its boilerplate-purged
+representations.
+Pair similarity here is the mean of those scores over co-observed fiscal
+years.
+The fiscal-year average overlaps the return window and serves as a
+retrospective product-market control; filing dates are not used for alignment.
+
+The headline encoder is \texttt{qwen/qwen3-embedding-8b}, a fixed
+semantic-retrieval model with no documented
+training cutoff.
+The later-window comparison uses articles dated before the evaluation
+returns and embeddings computed retrospectively with that model.
+
+The sample correlation underlying the chord distance in
+equation~\ref{eq:chord-distance} is
+\begin{equation}\label{eq:sample-correlation}
+  \hat{\rho}_{ij}
+  =
+  \frac{
+    \sum_{t=1}^{N_T} (r_t^i - \bar{r}^i)(r_t^j - \bar{r}^j)
+  }{
+    \sqrt{
+      \sum_{t=1}^{N_T} (r_t^i - \bar{r}^i)^2
+      \sum_{t=1}^{N_T} (r_t^j - \bar{r}^j)^2
+    }
+  },
+\end{equation}
+where $N_T$ is the number of common return dates and $\bar{r}^i$ is the
+sample average of asset $i$'s returns, yielding a
+$\ppvalue{n-firms} \times \ppvalue{n-firms}$ symmetric chord distance matrix
+$D$ with zero diagonal.

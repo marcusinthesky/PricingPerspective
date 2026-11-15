@@ -24,5 +24,3 @@ volume: '568'
 publisher: Elsevier
 page: '127063'
 ---
-
-# RoFormer: Enhanced Transformer with Rotary Position Embedding

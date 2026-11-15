@@ -1,3 +1,4 @@
+import Architect
 import WassersteinGeometry.Gluing
 import WassersteinGeometry.Multimarginal.Barycenter.Basic
 
@@ -407,6 +408,13 @@ theorem ofReal_wassersteinBarycenterDispersionSq_eq_wassersteinDispersionSq_unco
 
 No optimizer existence is used: equality holds at the level of infima.
 -/
+@[blueprint "prop:p3-barycenter-representation"
+  (statement := /--
+    For finitely many probability laws on a separable real Hilbert space, weighted multimarginal
+    quadratic dispersion equals the infimum of the weighted sum of squared quadratic Wasserstein
+    distances to a common barycentre law. Assumptions: finitely many probability laws with
+    finite second moments on a separable real Hilbert space; nonnegative weights summing to one.
+  -/)]
 theorem wassersteinBarycenterDispersionSq_eq_toReal_wassersteinDispersionSq_unconditional
     (q : ProbabilityWeight A) (P : A → WassersteinMeasure H) :
     wassersteinBarycenterDispersionSq q P =

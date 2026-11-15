@@ -18,5 +18,3 @@ container-title: Proceedings of the 2019 Conference on Empirical Methods in Natu
 publisher: Association for Computational Linguistics
 page: 3982-3992
 ---
-
-# Sentence-BERT

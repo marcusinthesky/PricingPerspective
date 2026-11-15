@@ -12,5 +12,3 @@ issued:
   - - 2005
 publisher: Springer Science & Business Media
 ---
-
-# Testing statistical hypotheses

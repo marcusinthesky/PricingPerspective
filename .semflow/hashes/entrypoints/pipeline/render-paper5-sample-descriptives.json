@@ -1,0 +1,37 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p5.sample_descriptives:cli_render_paper5_sample_descriptives",
+  "digest": "sha256:a28cb9815a248188a683e5dccc7cc274270ebaf2069334070ad66eda51106197",
+  "entrypoint": "pipeline render-paper5-sample-descriptives",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:701b162d541e1c9506cca310ef2b8a90b9ce4ab016c5aeb67a529eb0e89c9e8f","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/sample_descriptives.py","symbol":"pipeline.cli.commands.p5.sample_descriptives:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/sample_descriptives.py","symbol":"pipeline.cli.commands.p5.sample_descriptives:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/sample_descriptives.py","symbol":"pipeline.cli.commands.p5.sample_descriptives:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/sample_descriptives.py","symbol":"pipeline.cli.commands.p5.sample_descriptives:<binding:typer=typer>"},
+    {"digest":"sha256:63b4ff1c537c5df7f5dc4a2e38ec318719605812f5bb035e0b21bdc06f2e7e77","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/sample_descriptives.py","symbol":"pipeline.cli.commands.p5.sample_descriptives:_P5_DESCRIPTIVES_CAPTION"},
+    {"digest":"sha256:e2168b8054f156bf6e41fc68ec099f9b5b9e6c74cf07953c9ed40d153ed0d42f","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/sample_descriptives.py","symbol":"pipeline.cli.commands.p5.sample_descriptives:cli_render_paper5_sample_descriptives"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/sample_descriptives.py","symbol":"pipeline.cli.commands.p5.sample_descriptives:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:d1e9c47ceb17a97de5ec09a9ff4a9f88aa251adbfb204c2f5887c7e80dc06cf4","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:_TEX_SPECIALS"},
+    {"digest":"sha256:2e3cda6994f92700f4fa27cef44561f25a8728081b6ae266974e721af2f972d9","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:escape_latex"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/_format.py","symbol":"pipeline.figures.paper1._format:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:e25c3a6c621dba9a02705a801942253b4af4954873134a4d0da0440bbe0a2de6","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/_format.py","symbol":"pipeline.figures.paper1._format:EM_DASH"},
+    {"digest":"sha256:902fc7cc222f40e5974990650993ec6ad00e18a8ae5bef31d2c8624efcbe7744","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/_format.py","symbol":"pipeline.figures.paper1._format:fmt"},
+    {"digest":"sha256:c8c92ca025d7bbdae1928484e28a8475990e43cd3508f6a0bcb4bead29647369","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/_format.py","symbol":"pipeline.figures.paper1._format:fmt_int"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:743393e26478fe3c2af67fbd0391f963eb7dd8a1dd64a047e1e6f015c8954861","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:<binding:cast=typing:cast>"},
+    {"digest":"sha256:dd4bf60e55265a9e6cf38eaf781fe0f3bef2d89af2c1f59bb4bc1963a6530db9","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:<binding:escape_latex=pipeline.figures._latex:escape_latex>"},
+    {"digest":"sha256:56b96023499121b4e8d7366e7810eca37922c0604b21de015928f62a6bc4ba7a","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:<binding:fmt=pipeline.figures.paper1._format:fmt>"},
+    {"digest":"sha256:56b96023499121b4e8d7366e7810eca37922c0604b21de015928f62a6bc4ba7a","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:<binding:fmt_int=pipeline.figures.paper1._format:fmt_int>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:<binding:json=json>"},
+    {"digest":"sha256:b98b9285ff6ad9e467a68b2952d0d774ced24f09741c39dd4d350dd10f93244e","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:_PAPER1_CAPTION"},
+    {"digest":"sha256:227e7c6f7d7717a08f4d2e0c37a8a39308eb4947490f57b89a18004832948bc1","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:_sector_row"},
+    {"digest":"sha256:64a28cfa75c18d0d30d2849deabe972f19ad82940eb17886d04e137a7bf93834","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:render_sample_descriptives_table"},
+    {"digest":"sha256:daa5b116e215f047fa1d3b032f1780e93e3488e62d6eeecb5fdb1ac97c7d66c8","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/sample_descriptives.py","symbol":"pipeline.figures.paper1.sample_descriptives:render_sector_table"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

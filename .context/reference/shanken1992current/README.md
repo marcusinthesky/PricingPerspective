@@ -19,5 +19,3 @@ cites:
 - reisman1992reference
 - ross_arbitrage_1976
 ---
-
-# The Current State of the Arbitrage Pricing Theory

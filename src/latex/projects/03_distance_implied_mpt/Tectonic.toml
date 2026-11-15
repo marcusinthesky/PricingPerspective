@@ -11,3 +11,13 @@ inputs = ["targets/draft.tex"]
 name = "arxiv"
 type = "pdf"
 inputs = ["targets/arxiv.tex"]
+
+[[output]]
+name = "ejf-anonymous"
+type = "pdf"
+inputs = ["targets/ejf-anonymous.tex"]
+
+[[output]]
+name = "ejf"
+type = "pdf"
+inputs = ["targets/ejf.tex"]

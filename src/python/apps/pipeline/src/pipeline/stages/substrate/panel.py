@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, cast
 import duckdb
 import numpy as np
 import pandas as pd
-import pyarrow.parquet as pq
 
 from pipeline.stages.shared.typed_artifacts import read_typed_distance_artifact
 
@@ -16,24 +15,6 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 logger = logging.getLogger(__name__)
-
-
-#: Parquet metadata key written by ``scripts/strip_close_price``.
-SEAM_RETURN_KEY = b"seam_return"
-
-
-def read_seam_return(path: Path) -> float | None:
-    """Return the OOS seam return against the last in-sample close, if recorded.
-
-    The return panels carry no close price -- it is the withheld vendor series --
-    so the seam return cannot be recomputed from the published files. It is
-    recorded in the OOS panel's Parquet metadata instead of its leading row,
-    which stays null so that single-window readers keep dropping it from the
-    complete-case panel.
-    """
-    metadata = pq.read_schema(path).metadata or {}
-    raw = metadata.get(SEAM_RETURN_KEY)
-    return None if raw is None else float(raw)
 
 
 def load_aligned_return_panel(
@@ -74,28 +55,22 @@ def load_aligned_return_panel(
                         "every in-sample ticker must also have an OOS parquet."
                     )
                     raise FileNotFoundError(message)
-                # The panels carry no close price -- it is the withheld vendor
-                # series (see `scripts/strip_close_price`). The OOS panel's
-                # leading row instead stores the seam return measured against
-                # the last in-sample close, so concatenating the stored returns
-                # reproduces the unioned series exactly.
                 train = con.execute(
-                    "SELECT Date, return FROM read_parquet(?) ORDER BY Date",
+                    "SELECT Date, close_price FROM read_parquet(?) ORDER BY Date",
                     [str(path)],
                 ).df()
                 evaluation = con.execute(
-                    "SELECT Date, return FROM read_parquet(?) ORDER BY Date",
+                    "SELECT Date, close_price FROM read_parquet(?) ORDER BY Date",
                     [str(oos_path)],
                 ).df()
-                seam = read_seam_return(oos_path)
-                if seam is not None and not evaluation.empty:
-                    evaluation.loc[evaluation.index[0], "return"] = seam
                 frame = (
                     pd.concat([train, evaluation], ignore_index=True)
                     .drop_duplicates(subset="Date", keep="first")
                     .sort_values("Date")
                     .reset_index(drop=True)
                 )
+                frame["return"] = frame["close_price"].pct_change()
+                frame = frame.drop(columns="close_price")
 
             if start:
                 frame = frame[frame["Date"] >= pd.Timestamp(start)]

@@ -1,7 +1,5 @@
-# A pdflatex for Matplotlib's PGF backend — measurement only, renders no
-# manuscript artifact. Why an engine is unavoidable and why Tectonic cannot serve
-# the role: ../ARCHITECTURE.md § "Why Tectonic is the sole renderer, yet a second
-# TeX engine still ships".
+# Matplotlib's PGF backend uses pdflatex to measure text interactively.
+# Tectonic renders the manuscripts; this small tree supplies PGF metrics only.
 #
 # CHANGING THE LIST: this is the smallest set that compiles matplotlib's own PGF
 #   header plus every math label the manuscripts use — texliveBasic fails.

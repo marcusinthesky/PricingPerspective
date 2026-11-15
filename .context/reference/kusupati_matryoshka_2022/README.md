@@ -34,5 +34,3 @@ archive_location: '2205.13147'
 container-title: Advances in Neural Information Processing Systems 35
 publisher: Curran Associates, Inc.
 ---
-
-# Matryoshka Representation Learning

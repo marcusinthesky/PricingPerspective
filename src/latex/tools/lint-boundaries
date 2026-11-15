@@ -74,32 +74,10 @@ fi
 
 while IFS= read -r config; do
   project=${config%/Tectonic.toml}
-  if [[ -f "$project/dissertation.toml" ]]; then
-    required_paths=(
-      src/metadata.tex src/chapters src/essays src/appendices src/targets src/refs.bib
-      src/targets/draft.tex src/targets/uct-thesis.tex
-    )
-    if ! uv run --script tools/assemble-dissertation \
-      list-projects "$project/dissertation.toml" >/dev/null; then
-      status=1
-    fi
-    while IFS= read -r included; do
-      for interface in body.tex appendix.tex; do
-        if [[ ! -f "projects/$included/src/$interface" ]]; then
-          echo "$project includes $included without public interface src/$interface" >&2
-          status=1
-        fi
-      done
-    done < <(
-      uv run --script tools/assemble-dissertation \
-        list-projects "$project/dissertation.toml" 2>/dev/null || true
-    )
-  else
-    required_paths=(
-      src/metadata.tex src/chapters src/targets src/refs.bib
-      src/targets/arxiv.tex
-    )
-  fi
+  required_paths=(
+    src/metadata.tex src/chapters src/targets src/refs.bib
+    src/targets/arxiv.tex
+  )
   for required in "${required_paths[@]}"; do
     if [[ ! -e "$project/$required" ]]; then
       echo "$project is missing required boundary $required" >&2
@@ -152,8 +130,8 @@ fi
 
 # Generated interpretation contracts bind an empirical protocol and displayed
 # values to exactly one adjacent manuscript declaration. Zero registrations is
-# valid; once generated/*.interpretation.json exists, semantic and numeric drift
-# is release-blocking.
+# valid; substantive interpretation drift is release-blocking. The contract
+# checker reports explicitly permitted roundoff against a fixed reviewed snapshot.
 if ! uv run --script tools/interpretation-contract --root .; then
   status=1
 fi

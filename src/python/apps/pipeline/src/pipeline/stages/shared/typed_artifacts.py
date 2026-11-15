@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
 from typing import TYPE_CHECKING, NoReturn, cast
 
 import jax.numpy as jnp
@@ -30,9 +29,9 @@ from pipeline.io.barycentre_artifacts import (
 )
 from pipeline.io.contracts import read_manifest, write_manifest
 from pipeline.io.params import load_params
+from pipeline.io.semantic_identity import entrypoint_code_identity
 from pipeline.io.typed_analysis import (
     StatisticalDistanceSpec,
-    load_dvc_scientific_config,
     load_typed_analysis,
     typed_analysis_parameter_identity,
 )
@@ -41,6 +40,7 @@ from pipeline.io.typed_providers import load_provider_clouds
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
+    from pathlib import Path
 
     from pipeline._kernels.typed_barycentre import MeasureBarycentreKernelResult
     from pipeline._kernels.typed_geometry import (
@@ -71,10 +71,12 @@ def run_typed_distance(
     representation_id: str,
     distance_id: str,
     output_dir: Path,
+    embeddings_dir: Path | None = None,
     component_dir: Path | None = None,
-    params_file: Path = Path("params.yaml"),
+    params_file: Path,
 ) -> dict[str, object]:
     """Materialize one typed statistical-distance matrix."""
+    code_identity = entrypoint_code_identity("typed-distance")
     config = load_typed_analysis(params_file)
     provider, representation, distance = _resolve_distance(
         config, provider_id, representation_id, distance_id
@@ -91,9 +93,15 @@ def run_typed_distance(
         )
         result = statistical_distance_from_components(component, distance)
     else:
+        if embeddings_dir is None:
+            _stage_error(
+                "Direct distance computation requires --embeddings-dir; only "
+                "energy/MMD can use --geometry-component-dir."
+            )
         clouds = load_provider_clouds(
             provider,
             representation,
+            embeddings_dir=embeddings_dir,
             item_ids=_market_items(params_file),
             sample_size=distance.sample_size,
             window=config.window_for(distance),
@@ -117,7 +125,6 @@ def run_typed_distance(
         representation_ids=(representation_id,),
         distance_ids=(distance_id,),
     )
-    code_identity = _code_identity()
     metadata = {
         **result.metadata.as_dict(),
         "code_identity": code_identity,
@@ -160,82 +167,6 @@ def run_typed_distance(
         },
     )
     return cast("dict[str, object]", summary)
-
-
-def run_typed_distance_roster(
-    *,
-    provider_id: str,
-    roster_key: str,
-    output_dir: Path,
-    params_file: Path = Path("params.yaml"),
-) -> None:
-    """Materialize every configured representation/distance arm for a provider."""
-    scientific = load_dvc_scientific_config(params_file)
-    roster = scientific.typed_distance_providers.get(roster_key)
-    if roster is None or roster.provider_id != provider_id:
-        _stage_error(f"typed-distance roster {roster_key!r} does not match provider")
-    representation_ids = [
-        scientific.typed_analysis.representations[key].representation_id
-        for key in roster.representation_keys
-    ]
-    distances = list(roster.distance_ids or scientific.typed_distance_ids)
-    if not representation_ids or not distances:
-        _stage_error("typed-distance roster axes must not be empty")
-    cells = [
-        (representation_id, distance_id)
-        for representation_id in representation_ids
-        for distance_id in distances
-    ]
-    full_representation_id = scientific.typed_analysis.representations[
-        roster.representation_full_key
-    ].representation_id
-    cells.extend(
-        (full_representation_id, distance_id)
-        for distance_id in roster.extra_full_distance_ids
-    )
-    for representation_id, distance_id in cells:
-        distance = scientific.typed_analysis.distances[distance_id]
-        if not isinstance(distance, StatisticalDistanceSpec):
-            _stage_error(
-                f"typed-distance roster includes non-statistical {distance_id}"
-            )
-        artifact_dir = output_dir / representation_id / distance_id
-        if all(
-            (artifact_dir / filename).is_file()
-            for filename in (
-                "distances.parquet",
-                "summary.json",
-                "provenance.manifest.json",
-            )
-        ):
-            try:
-                read_typed_distance_artifact(
-                    artifact_dir,
-                    expected_identity={
-                        "provider_id": provider_id,
-                        "representation_id": representation_id,
-                        "distance_id": distance_id,
-                        "value_semantics": distance.value_semantics,
-                    },
-                )
-            except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError):
-                pass
-            else:
-                continue
-        run_typed_distance(
-            provider_id=provider_id,
-            representation_id=representation_id,
-            distance_id=distance_id,
-            output_dir=artifact_dir,
-            component_dir=(
-                output_dir.parents[1]
-                / "typed_geometry_components"
-                / provider_id
-                / representation_id
-                / distance_id
-            ),
-            params_file=params_file,
-        )
 
 
 def read_typed_distance_artifact(  # noqa: C901, PLR0912
@@ -365,9 +296,10 @@ def run_typed_barycentre(
     provider_id: str,
     representation_id: str,
     arm_id: str,
+    embeddings_dir: Path,
     output_dir: Path,
     geometry_component_dir: Path | None = None,
-    params_file: Path = Path("params.yaml"),
+    params_file: Path,
 ) -> dict[str, object]:
     """Materialize one typed barycentre artifact.
 
@@ -375,6 +307,7 @@ def run_typed_barycentre(
     command-line default, so it stays inside the DVC-tracked ``typed_analysis``
     parameter and is republished in the artifact's own provenance.
     """
+    code_identity = entrypoint_code_identity("typed-barycentre")
     config = load_typed_analysis(params_file)
     provider, representation, geometry, arm = _resolve_barycentre(
         config, provider_id, representation_id, arm_id
@@ -382,6 +315,7 @@ def run_typed_barycentre(
     clouds = load_provider_clouds(
         provider,
         representation,
+        embeddings_dir=embeddings_dir,
         item_ids=_market_items(params_file),
         sample_size=(
             geometry.sample_size
@@ -395,7 +329,6 @@ def run_typed_barycentre(
         representation_ids=(representation_id,),
         arm_ids=(arm_id,),
     )
-    code_identity = _code_identity()
     component = None
     if geometry.family in {"energy", "mmd"}:
         if geometry_component_dir is None:
@@ -575,28 +508,6 @@ def _market_items(params_file: Path) -> list[str]:
     return cast("list[str]", items)
 
 
-def _code_identity() -> str:
-    package_root = Path(__file__).resolve().parents[2]
-    barycentre_package = package_root / "_kernels/typed_barycentre"
-    paths = (
-        package_root / "stages/shared/typed_artifacts.py",
-        package_root / "_kernels/typed_distances.py",
-        package_root / "_kernels/typed_geometry.py",
-        *sorted(
-            barycentre_package.rglob("*.py"),
-            key=lambda path: path.relative_to(package_root).as_posix(),
-        ),
-        package_root / "io/typed_analysis.py",
-        package_root / "io/typed_providers.py",
-        package_root / "io/typed_geometry_artifacts.py",
-    )
-    digest = hashlib.sha256()
-    for path in paths:
-        digest.update(str(path.relative_to(package_root)).encode())
-        digest.update(path.read_bytes())
-    return digest.hexdigest()
-
-
 def _identity(path: Path) -> dict[str, object]:
     content = path.read_bytes()
     return {
@@ -612,5 +523,4 @@ __all__ = [
     "read_typed_distance_artifact",
     "run_typed_barycentre",
     "run_typed_distance",
-    "run_typed_distance_roster",
 ]

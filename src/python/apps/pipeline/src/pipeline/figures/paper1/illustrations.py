@@ -12,15 +12,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
-from pipeline.figures._common import _save, _style, figsize, fit_to_width
+from pipeline.figures._common import _save, figsize, fit_to_width
+from pipeline.figures.paper1._typography import MIN_PT, paper1_style
 
 logger = logging.getLogger(__name__)
 
 
 def _fig_continuous_bound_construction(out: Path) -> None:
     """Draw the connected three-step construction of the covariance bound."""
-    _style()
-    fig, ax = plt.subplots(figsize=figsize(1.0, 2.6 / 7.2), facecolor="white")
+    paper1_style()
+    fig, ax = plt.subplots(figsize=figsize(1.0, 3.3 / 7.2), facecolor="white")
     ax.set_axis_off()
     ax.set_xlim(0.0, 15.0)
     ax.set_ylim(0.0, 5.2)
@@ -29,10 +30,11 @@ def _fig_continuous_bound_construction(out: Path) -> None:
     # authoring at the printed width (5.906in, down from 7.2in) grows every label
     # ~22% relative to the box that has to hold it. Widths are therefore set from
     # measured text extents (scratch `measure.py` in t39) rather than kept
-    # uniform: A's three-line header and C's second display formula are the two
-    # binding constraints, and both now clear their box by >=6%.
-    centers = (2.125, 7.25, 12.575)
-    widths = (4.15, 4.60, 4.65)
+    # uniform. At the 9 pt floor (see `_typography`) the binding constraints are
+    # B's kernel formula and C's envelope formula, so A cedes width to them and
+    # the canvas is taller, giving the stacked formulas vertical room.
+    centers = (1.925, 6.8, 12.375)
+    widths = (3.75, 5.0, 5.15)
     panel_y, panel_h = 0.48, 4.18
     for center, width in zip(centers, widths, strict=True):
         ax.add_patch(
@@ -89,7 +91,7 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         "A  Distribution-valued\ncharacteristics",
         ha="center",
         va="center",
-        fontsize=8.5,
+        fontsize=MIN_PT,
         fontweight="semibold",
         linespacing=0.95,
     )
@@ -99,7 +101,7 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         r"$C_i,C_j\in\mathcal{P}_2(\Omega)$",
         ha="center",
         va="center",
-        fontsize=8.5,
+        fontsize=MIN_PT,
     )
     ax.text(
         centers[0],
@@ -107,10 +109,10 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         r"compare with $W_2(C_i,C_j)$",
         ha="center",
         va="center",
-        fontsize=8.0,
+        fontsize=MIN_PT,
     )
-    ax.text(centers[0] - 1.5, 2.73, r"$C_i$", fontsize=8.0, ha="left")
-    ax.text(centers[0] + 1.34, 2.48, r"$C_j$", fontsize=8.0, ha="right")
+    ax.text(centers[0] - 1.5, 2.73, r"$C_i$", fontsize=MIN_PT, ha="left")
+    ax.text(centers[0] + 1.34, 2.48, r"$C_j$", fontsize=MIN_PT, ha="right")
 
     ax.text(
         centers[1],
@@ -118,24 +120,24 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         "B  Stochastic transmission\nkernel",
         ha="center",
         va="center",
-        fontsize=8.5,
+        fontsize=MIN_PT,
         fontweight="semibold",
     )
     ax.text(
         centers[1],
         3.36,
-        r"$X_i\sim C_i,\quad B_i=T(X_i,U_i)$",
+        r"$X_i\sim C_i,\quad B_i=T_i(X_i,U_i)$",
         ha="center",
         va="center",
-        fontsize=8.5,
+        fontsize=MIN_PT,
     )
     ax.text(
         centers[1],
         2.43,
-        r"$P_i=C_iK,\quad K(x,\cdot)=\mathcal{L}(T(x,U))$",
+        r"$P_i=C_iK_i,\quad B_i=t(X_i)+\varepsilon_i$",
         ha="center",
         va="center",
-        fontsize=8.5,
+        fontsize=MIN_PT,
     )
     ax.text(
         centers[1],
@@ -143,17 +145,17 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         r"$W_{2,\Gamma}(P_i,P_j)$",
         ha="center",
         va="center",
-        fontsize=8.5,
+        fontsize=MIN_PT,
     )
     ax.text(
         centers[1],
         1.06,
         r"$\leq L\,W_2(C_i,C_j)+\tau_i+\tau_j$"
         "\n"
-        "common kernel and scales\nare maintained, not estimated",
+        "common carrier and scales\nare maintained, not estimated",
         ha="center",
         va="center",
-        fontsize=8.0,
+        fontsize=MIN_PT,
     )
 
     ax.text(
@@ -162,7 +164,7 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         "C  Hilbert return and\ncovariance envelope",
         ha="center",
         va="center",
-        fontsize=8.5,
+        fontsize=MIN_PT,
         fontweight="semibold",
     )
     ax.text(
@@ -173,8 +175,8 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         r"$Z_i=\Gamma^{1/2}B_i$",
         ha="center",
         va="center",
-        fontsize=8.0,
-        linespacing=1.25,
+        fontsize=MIN_PT,
+        linespacing=1.5,
     )
     ax.text(centers[2], 2.62, r"$\Downarrow$", ha="center", va="center", fontsize=9)
     ax.text(
@@ -186,8 +188,8 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         r"$\kappa_\pi=\bar\kappa_{ij}-\frac{1}{2}\Delta_\pi$",
         ha="center",
         va="center",
-        fontsize=8.0,
-        linespacing=1.25,
+        fontsize=MIN_PT,
+        linespacing=1.5,
     )
     ax.text(
         centers[2],
@@ -197,7 +199,7 @@ def _fig_continuous_bound_construction(out: Path) -> None:
         "energy is a comparator",
         ha="center",
         va="center",
-        fontsize=8.0,
+        fontsize=MIN_PT,
     )
 
     fig.subplots_adjust(left=0.012, right=0.988, top=0.985, bottom=0.025)
@@ -209,6 +211,6 @@ def render_paper1_illustrations(
     output_dir: Path = Path("src/latex/projects/01_continuous_bounds/src/images"),
 ) -> None:
     """Render Paper 1's analytic bound-construction schematic."""
-    _style()
+    paper1_style()
     output_dir.mkdir(parents=True, exist_ok=True)
     _fig_continuous_bound_construction(output_dir / "continuous_bound_construction.pgf")

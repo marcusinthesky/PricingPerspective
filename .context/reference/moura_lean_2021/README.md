@@ -15,5 +15,3 @@ container-title: Automated Deduction — CADE 28
 publisher: Springer
 page: 625-635
 ---
-
-# The Lean 4 Theorem Prover and Programming Language

@@ -1,56 +1,52 @@
-# Lean claim manifest (t24.4)
+# Publication claim adapter
 
-Renderer-neutral record of which manuscript claims are backed by which
-successfully machine-checked Lean declarations, plus their axiom status.
+Native LeanArchitect annotations beside the original project declarations own the exact
+manuscript label → declaration association and statement summary. The root
+`Publication` library retains the external mathlib annotation and imports the
+annotated project modules. Native `Publication`, `PricingPerspective`, and
+`WassersteinGeometry` library facets export their own annotations; the companion
+Blueprint consumes their native TeX nodes.
 
-**No claim may be marked "Lean-verified" in a manuscript until a mapping
-entry for it has been authored here AND `extract.py` has validated it with
-`build_result: "checked"`.** Nothing is inferred from name or notation
-similarity — see t24.1 blocker B1. Every entry is author-approved before it is
-added; see [Adding a claim](#adding-a-claim).
+`mapping.toml` and `*-publication.toml` retain publication ownership, assumptions,
+and identifier-free disclosure text. They do not repeat declarations, summaries,
+or source locations. Every native label must occur exactly once across those
+registries, and every registry label must exist in the fresh native export.
+Duplicate, missing, and unclaimed labels fail extraction. Native nodes must
+explicitly carry `notReady: false` and `hasLean: true`; absent or incorrectly typed
+flags fail. Project annotations must originate in their declaration module. Only
+imported `Mathlib.*` declarations may be annotated in `Publication.Claims`.
 
-## Files
+`extract.py` rebuilds all three native JSON library facets before reading their library/module
+exports. It derives each declaration's original source module and package from
+native metadata, then independently checks its elaborated statement and
+transitive axioms through Lean. It reuses the compiled `sorry-audit/Audit.lean`
+classifier to reject mapped `True` conclusions, aliases, definitions,
+equivalences, and premises, including globally inventoried scaffolds. Native
+`leanOk` markers never establish publication safety. Only `propext`,
+`Classical.choice`, and `Quot.sound` are accepted; admissions and custom axioms
+fail. The global integrity gate remains a separate required certification step.
 
-- `schema.json` — JSON Schema for a manifest claim record.
-- `mapping.toml` — human-authored input (one `[[claims]]` row per approved
-  claim; commented template row inside).
-- `extract.py` — for each mapping entry, runs `lake env lean` (from
-  `src/lean`) on a generated `#check @<decl>` / `#print axioms <decl>`
-  snippet, classifies the result, and writes `generated/manifest.json`.
-  Fails a claim (and the process exit code) if the declaration is missing,
-  its namespace changed, it depends on `sorryAx`, or it uses an axiom outside
-  the allowlist `{propext, Classical.choice, Quot.sound}`.
-- `render.py` — turns a validated `generated/manifest.json` into thin
-  `generated/claim_manifest.tex` (shared), each paper's
-  `src/latex/projects/<paper>/src/generated/lean_status.tex` (value bindings +
-  `\ppLeanStatusList`), and `../../blueprint/src/generated/claim_bindings.tex`
-  bindings. All are stamped
-  with the manifest's `content_hash`. The Blueprint projection is the only
-  place that emits literal `\lean` / `\leanok` commands, and only checked
-  claims receive them.
-- `tests/test_manifest.py` — positive + negative tests against the pre-built
-  `src/lean` Lake workspace (no full `lake build`; single-declaration
-  `lake env lean` checks are fast).
+The schema and generated JSON contract retain `statement_type`, `axioms`, and
+`content_hash`. Hashes include the native declaration, normalized summary, and
+independently elaborated statement, so a native binding, metadata, or theorem
+statement edit changes the publication identity and requires review.
 
-## Run
+`render.py` emits only each paper's identifier-free
+`src/latex/projects/<paper>/src/generated/lean_status.tex`. Each paper preserves
+its owning registry's hash. A withdrawn paper receives an empty projection;
+failed claims never receive checked status. No custom Blueprint declaration or
+proof-marker projection is retained.
 
 ```bash
-uv run src/lean/tools/claim-manifest/extract.py -v
-uv run src/lean/tools/claim-manifest/render.py
+just lean::certify
+just lean::claims-publication-check
 uv run src/lean/tools/claim-manifest/tests/test_manifest.py
 ```
 
-## Adding a claim
-
-1. Confirm the exact fully-qualified declaration name with `rg` and a manual
-   `lake env lean` probe first — do not guess from paper notation.
-2. Uncomment/copy the template row in `mapping.toml`, fill in `paper`,
-   `claim_id`, `statement_summary`, `declaration`, `package`, `file`,
-   `assumptions`, `disclosure`. Do not author `build_result` or `axioms` —
-   `extract.py` fills those in from the actual build.
-3. Re-run `extract.py`; a nonzero exit means the entry did not validate.
-4. Re-run `render.py`. Blueprint prose may consume a claim by its approved
-   manuscript label with `\ppClaimBinding{<claim-id>}`; it must never hand-copy
-   a Lean declaration or `\leanok`. Publication prose consumes only the
-   human-facing status/disclosure projection and never a Lean identifier
-   (`src/latex/AGENTS.md`).
+For a new claim, author its native annotation after reviewing the exact theorem
+and add its label, paper, assumptions and disclosure to the owning TOML registry.
+Run certification and review the resulting manifest and publication projection.
+Direct `extract.py` invocation also rebuilds native JSON and validates mapped
+contracts, but full certification additionally audits all first-party compiled
+declarations. Manuscript prose changes use the cheaper publication check; Paper 6
+certification requires both proof and publication checks to be current.

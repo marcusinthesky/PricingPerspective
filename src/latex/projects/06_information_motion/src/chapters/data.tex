@@ -1,0 +1,42 @@
+\subsection{Empirical Design and Data}\label{sec:data}
+
+To examine whether the association that the simulation recovers only imperfectly
+also appears in corporate news, we apply the estimator of
+Section~\ref{sec:adjustment-design} to \ppnum[0]{ir-firms}
+Nasdaq-listed firms over five article years from 2018 through 2022, giving four
+transitions ending in 2019--2022.
+
+We measure semantic similarity between articles by embedding them with
+Qwen3-Embedding-4B \citep{qwen3_embedding_2025}, a four-billion-parameter
+transformer developed for information retrieval.
+Because the model postdates the sample, these vectors give a retrospective
+representation of the articles.
+We assess the role of representation by comparing its native
+\ppnum[0]{ir-native-dimension}-dimensional vectors with a compressed
+64-dimensional representation.
+As the model is trained with Matryoshka representation learning
+\citep{kusupati_matryoshka_2022}, we obtain the compressed vectors from the first
+64 coordinates of each native vector, renormalized to unit length.
+
+We also compare two article samples within each representation to measure
+sensitivity to the amount and balance of coverage.
+While the expanded sample contains \ppnum[0]{ir-expanded-articles} existing
+article embeddings, the matched sample restricts these to the first 128 per firm
+in URL-hash order after the corpus date and body-length filters, giving
+\ppnum[0]{ir-matched-articles} articles.
+Taking the native expanded specification as primary, we treat the other three as
+diagnostic comparisons, none selected by its financial coefficient.
+All retain the same roster, origin references and annual financial windows,
+but changing the article sample changes both geometry and the dates entering
+\eqref{eq:dated-financial}.
+
+For \ppnum[0]{ir-redraws} paired conditional article redraws, each firm-year
+cloud is redrawn once within its canonical and additional-article strata and
+reused in every target and reference role.
+Origin draws remain shared across all transitions and representations, and
+the return weights are recomputed from the sampled article dates.
+The reported 2.5th, 5th and 97.5th percentiles describe article-selection
+sensitivity conditional on the observed articles, firms, financial histories
+and four annual environments.
+Shared stories, common shocks and reused references make the
+\ppnum[0]{ir-coordinates} directional coordinates dependent.

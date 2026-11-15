@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-  MathJax = {
+  MathJax = { 
     tex: {
 		    inlineMath: [['$','$'], ['\\(','\\)']]
 	} }
@@ -98,6 +98,25 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -121,8 +140,8 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0002.html#def:frechet-class">#</a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -132,18 +151,18 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0001.html#def:finite-exposure-cloud">Definition 2</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="definition_thmcontent">
@@ -157,211 +176,20 @@
     Theorem
     </span>
     <span class="theorem_thmlabel">6</span>
-    <span class="theorem_thmtitle">Covariance envelope from optimal transport</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0002.html#thm:random-exposure-envelope">#</a>
-
-    <a class="icon proof" href="sect0002.html#a0000000021"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
-</a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0002.html#def:frechet-class">Definition 5</a></li>
-
-          <li><a href="sect0001.html#lem:transport-polarization">Lemma 4</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
-    <button class="modal lean">L∃∀N</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Lean declarations</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.isGreatest_frechetClass" class="lean_decl">PricingPerspective.Transmission.isGreatest_frechetClass</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-        </div>
-  </div>
-  <div class="theorem_thmcontent">
-  <p>    Given a finite optimal transport-cost certificate, the ceiling </p>
-<div class="displaymath" id="a0000000022">
-  \[  \kappa ^{\max }_{ij}=\tfrac 12\left(v_i+v_j-W_{2,\Gamma }^2(P_i,P_j)\right)  \]
-</div>
-<p> is the greatest systematic covariance attainable over the coupling set. This is a statement about what the two marginal laws permit; it does not identify the realized covariance, which requires the economic joint law. It is the <em>upper</em> endpoint only; the lower one is ??thm:random-exposure-lower-endpoint, a separate theorem. </p>
-
-  </div>
-</div>
-<div class="proof_wrapper" id="a0000000021">
-  <div class="proof_heading">
-    <span class="proof_caption">
-    Proof
-    </span>
-    <span class="expand-proof">▼</span>
-  </div>
-  <div class="proof_content">
-  <p>  ??lem:transport-polarization turns least cost into greatest covariance monotonically, and the certificate supplies leastness. </p>
-
-  </div>
-</div>
-<div class="theorem_thmwrapper theorem-style-plain" id="thm:random-exposure-lower-endpoint">
-  <div class="theorem_thmheading">
-    <span class="theorem_thmcaption">
-    Theorem
-    </span>
-    <span class="theorem_thmlabel">7</span>
-    <span class="theorem_thmtitle">Reflected lower endpoint</span>
-    <div class="thm_header_extras">
-
-
-    ✓
-        </div>
-    <div class="thm_header_hidden_extras">
-
-    <a class="icon proof" href="sect0002.html#thm:random-exposure-lower-endpoint">#</a>
-
-    <a class="icon proof" href="sect0002.html#a0000000023"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
-</a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0002.html#def:frechet-class">Definition 5</a></li>
-
-          <li><a href="sect0001.html#lem:transport-polarization">Lemma 4</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
-    <button class="modal lean">L∃∀N</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Lean declarations</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.isLeast_frechetClass_of_reflection" class="lean_decl">PricingPerspective.Transmission.isLeast_frechetClass_of_reflection</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-        </div>
-  </div>
-  <div class="theorem_thmcontent">
-  <p>    Applying the same argument to the reflected law \((-I)_\# P_j\) gives the sharp lower endpoint of the Fréchet class. </p>
-
-  </div>
-</div>
-<div class="proof_wrapper" id="a0000000023">
-  <div class="proof_heading">
-    <span class="proof_caption">
-    Proof
-    </span>
-    <span class="expand-proof">▼</span>
-  </div>
-  <div class="proof_content">
-  <p>  Covariance is odd and the second moment even under reflection of one argument, so the greatest covariance against the reflected law is the least covariance against the original. </p>
-
-  </div>
-</div>
-<div class="theorem_thmwrapper theorem-style-plain" id="eq:random-exposure-gap">
-  <div class="theorem_thmheading">
-    <span class="theorem_thmcaption">
-    Theorem
-    </span>
-    <span class="theorem_thmlabel">8</span>
-    <span class="theorem_thmtitle">Transport-excess gap</span>
-    <div class="thm_header_extras">
-
-
-    ✓
-        </div>
-    <div class="thm_header_hidden_extras">
-
-    <a class="icon proof" href="sect0002.html#eq:random-exposure-gap">#</a>
-
+    
     <a class="icon proof" href="sect0002.html#a0000000024"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0001.html#def:finite-exposure-cloud">Definition 2</a></li>
-
-          <li><a href="sect0002.html#thm:random-exposure-envelope">Theorem 6</a></li>
-
-          <li><a href="sect0001.html#lem:transport-polarization">Lemma 4</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -370,21 +198,21 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.systCov_eq_ceiling_sub_excess" class="lean_decl">PricingPerspective.Transmission.systCov_eq_ceiling_sub_excess</a></li>
-
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.isGreatest_frechetClass" class="lean_decl">PricingPerspective.Transmission.isGreatest_frechetClass</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    For any coupling, \(\kappa ^\pi _{ij}=\kappa ^{\max }_{ij}-\tfrac 12\operatorname {excess}(\pi )\). The checked statement is an identity in the reference cost: it holds for any scalar placed where the optimal cost sits, and therefore asserts nothing about the sign of the excess on its own. </p>
+  <p>  For every coupling of two exposure laws in \(\mathcal{P}_2(H)\) whose polarization terms are integrable, the covariance ceiling (one half of the sum of second moments minus the optimal transport cost) is the greatest attainable systematic covariance, and a certified optimal plan attains it. Assumptions: loading laws in \(\mathcal{P}_2\) of a separable real Hilbert space; couplings carrying integrability of both second moments and the cross term; a certified optimal transport plan, supplied rather than proved to exist. </p>
 
   </div>
 </div>
@@ -396,53 +224,30 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p>  Subtract the reference cost from the coupling cost inside ??lem:transport-polarization and rearrange. </p>
+  
 
   </div>
 </div>
-<div class="theorem_thmwrapper theorem-style-plain" id="eq:random-exposure-excess-nonneg">
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:random-exposure-lower-endpoint">
   <div class="theorem_thmheading">
     <span class="theorem_thmcaption">
     Theorem
     </span>
-    <span class="theorem_thmlabel">9</span>
-    <span class="theorem_thmtitle">The excess is nonnegative</span>
+    <span class="theorem_thmlabel">7</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
-    <a class="icon proof" href="sect0002.html#eq:random-exposure-excess-nonneg">#</a>
-
+    <a class="icon proof" href="sect0002.html#thm:random-exposure-lower-endpoint">#</a>
+    
     <a class="icon proof" href="sect0002.html#a0000000025"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0002.html#def:frechet-class">Definition 5</a></li>
-
-          <li><a href="sect0002.html#def:frechet-class">Definition 5</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -451,21 +256,21 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.excess_nonneg" class="lean_decl">PricingPerspective.Transmission.excess_nonneg</a></li>
-
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.isLeast_frechetClass_of_reflection" class="lean_decl">PricingPerspective.Transmission.isLeast_frechetClass_of_reflection</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    Against a certified optimal transport cost, \(\operatorname {excess}(\pi )\ge 0\) for every coupling. This is what makes the gap a one-sided moment inequality and hence testable; it is a separate theorem from the identity above, because the identity holds for any reference cost while the sign needs that cost to be the infimum. </p>
+  <p>  The reflected law gives the sharp lower endpoint of the Frechet class of attainable systematic covariances: the least attainable covariance equals (optimal reflected transport cost minus the two second moments) divided by two. Assumptions: loading laws in \(\mathcal{P}_2\) of a separable real Hilbert space; the reflected second law is the pushforward of the second under negation; a certified optimal transport plan against the reflected law. </p>
 
   </div>
 </div>
@@ -477,7 +282,123 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p>  Immediate from minimality of the certified cost over the coupling set. </p>
+  
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="eq:random-exposure-gap">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">8</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#eq:random-exposure-gap">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000026"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.systCov_eq_ceiling_sub_excess" class="lean_decl">PricingPerspective.Transmission.systCov_eq_ceiling_sub_excess</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  For any integrable coupling of two exposure laws in \(\mathcal{P}_2(H)\), covariance equals the optimal covariance envelope minus one half of the excess transport cost of that coupling. Assumptions: loading laws in \(\mathcal{P}_2\) of a separable real Hilbert space; couplings carrying integrability of both second moments and the cross term; a certified optimal transport plan, supplied rather than proved to exist. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000026">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="eq:random-exposure-excess-nonneg">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">9</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0002.html#eq:random-exposure-excess-nonneg">#</a>
+    
+    <a class="icon proof" href="sect0002.html#a0000000027"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.excess_nonneg" class="lean_decl">PricingPerspective.Transmission.excess_nonneg</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  Against a certified optimal transport cost, the excess of any integrable coupling is nonnegative. Stated separately from the gap identity because that identity holds for an arbitrary reference cost and therefore carries no sign information; the sign requires the reference cost to be the certified minimum. Assumptions: loading laws in \(\mathcal{P}_2\) of a separable real Hilbert space; a certified optimal transport plan, supplied rather than proved to exist. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000027">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
 
   </div>
 </div>
@@ -494,8 +415,8 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0002.html#prop:pairwise-not-psd">#</a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -505,24 +426,24 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0002.html#thm:random-exposure-envelope">Theorem 6</a></li>
-
+          
           <li><a href="sect0004.html#thm:joint-coherence">Theorem 16</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="proposition_thmcontent">
-  <p>   The matrix of independently optimal pairwise envelopes \(\left[\kappa ^{\max }_{ij}\right]\) need not be positive semidefinite, because pairwise-optimal couplings may be mutually inconsistent. A globally coherent covariance requires one joint law, as in ??thm:joint-coherence. Stating this boundary is part of the contribution and is not a defect of the envelope. </p>
+  <p>   The matrix of independently optimal pairwise envelopes \(\left[\kappa ^{\max }_{ij}\right]\) need not be positive semidefinite, because pairwise-optimal couplings may be mutually inconsistent. A globally coherent covariance requires one joint law, as in <a href="sect0004.html#thm:joint-coherence">Theorem 16</a>. Stating this boundary is part of the contribution and is not a defect of the envelope. </p>
 
   </div>
 </div>

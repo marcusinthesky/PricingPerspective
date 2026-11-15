@@ -1,0 +1,34 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=30mm]{geometry}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{pp-manuscript}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+
+\input{metadata}
+
+\title{\papertitle}
+\author{\paperauthors\\\paperaffiliations}
+\date{\paperdate}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  This document is a hostile fixture: it references an unstaged figure.
+\end{abstract}
+
+\noindent\textit{Keywords:} \paperkeywords
+
+\medskip
+
+\noindent\textit{JEL classification:} \paperjel
+
+\section{Introduction}
+
+This figure was never staged: \includegraphics{images/missing_fig}.
+
+\end{document}

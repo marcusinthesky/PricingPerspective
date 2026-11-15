@@ -1,0 +1,38 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p5.gmv_validation:cli_render_paper5_gmv_validation",
+  "digest": "sha256:cc156201ccbe42d9fac1a39a3554a75404c66afe975415b7a615d623b1649ca3",
+  "entrypoint": "pipeline render-paper5-gmv-validation",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:23d076ea9d1ab419b82159266bcf23ef0cd76a98fb45b8ee03c205ec383bde47","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/gmv_validation.py","symbol":"pipeline.cli.commands.p5.gmv_validation:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/gmv_validation.py","symbol":"pipeline.cli.commands.p5.gmv_validation:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/gmv_validation.py","symbol":"pipeline.cli.commands.p5.gmv_validation:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/gmv_validation.py","symbol":"pipeline.cli.commands.p5.gmv_validation:<binding:typer=typer>"},
+    {"digest":"sha256:4187aeab7b6bfd3a4e8237d15729b2b88c7ba542ac19eda091ddc5eb35275d89","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/gmv_validation.py","symbol":"pipeline.cli.commands.p5.gmv_validation:cli_render_paper5_gmv_validation"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/gmv_validation.py","symbol":"pipeline.cli.commands.p5.gmv_validation:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:435debbbd6540e79f9a9a0e13f6d1dc70a966f66b55f0db4b6a2dece31144faf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:<binding:cast=typing:cast>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:<binding:json=json>"},
+    {"digest":"sha256:f329650e2c61a07a1bab85b32296a6d93760e313e108904819fa27d09cf3954d","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:<binding:math=math>"},
+    {"digest":"sha256:60fcc889a4e32eb808ed5945c1f3f5cfd931e5d740f69b7594a25ac097690f16","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:<binding:pd=pandas>"},
+    {"digest":"sha256:195e95a5e9291e0bc46c0fa36b354701f450094c2e32d7f7ecd103fb2dc4965d","kind":"class","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:Paper5GMVValidationError"},
+    {"digest":"sha256:690805d7cce5545d30807955e8565c1e310eae0f4abc33f60338caf308feb807","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_EXPECTED_ANALYSIS_ID"},
+    {"digest":"sha256:1d7537d5a12f2616467e01a4b7d4ed7bf8bda9554d21f31b965aec157a616b57","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_EXPECTED_CANDIDATES"},
+    {"digest":"sha256:d3f850bbe5cac401599f4c5a551e7d158bce8be6d20ee1c24c7d150557f9a7ed","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_EXPECTED_CAP"},
+    {"digest":"sha256:c727e2ff3157309c0c0cb87951fc231abeac664eaa4712b78f80bbe56685bdd1","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_EXPECTED_PANEL"},
+    {"digest":"sha256:9515d5aa526ef04375e91d475def28740c3fe2949280bbc8a8950b0a49f0f267","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_EXPECTED_REFERENCE_DESIGN"},
+    {"digest":"sha256:e3c75be97fc1378d52c3abc9af57339af12dab7ca0e56fb6d810048d29014c6e","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_EXPECTED_SCHEMA_VERSION"},
+    {"digest":"sha256:f4be348e2a8aa7dfd0d57b76bed2d8fc9ca96b0f1bad3fdbe63987071358591a","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_LABELS"},
+    {"digest":"sha256:a9153666d2931e67695c6571246679bca3e850b28033cade9535a6dbf9ba65dd","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_finite"},
+    {"digest":"sha256:ac6f7c8a687bd59c09a22247648b802ffe1df91f0fa59e8c93dbc43b8d2abe03","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_invalid"},
+    {"digest":"sha256:3bd11ce00a572915463325a63a2d331e005a2650de6d75cea599ce7d39656d0c","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_mapping"},
+    {"digest":"sha256:9c6a9b743ac93a122d84b63bc032a11a6d60ac064194cddfa145dfd764060533","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_validate_frame"},
+    {"digest":"sha256:43180f587eb0de1cfeae3170a5497dc249d804a790d82618faa3881f6d307743","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_validate_summary"},
+    {"digest":"sha256:e50e116365d62b18433eeff63a5a83d69132f812d843884faea64e2d9bafe310","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:_validated_rows"},
+    {"digest":"sha256:deecfa67bc90a1be2b34735fd9e7b1b1cc9f2a6df59830e68c24d2c5fccf3c11","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/gmv_validation.py","symbol":"pipeline.figures.paper5.gmv_validation:render_paper5_gmv_validation_table"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

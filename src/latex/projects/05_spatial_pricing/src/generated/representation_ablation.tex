@@ -1,86 +1,166 @@
 % AUTO-GENERATED -- do not edit by hand.
-\begin{table}[H]
-\centering
+\begingroup
 \scriptsize
 \setlength{\tabcolsep}{3.3pt}
-\begin{tabular}{lllrrr}
+\begin{longtable}{@{}p{0.35\linewidth}llrrr@{}}
+\caption{Pooled 2023--2026 representation sensitivity of the single-field spatial horse race across seven base representations and eight published annual ChronoBERT vintages. Each encoder row compares the barycentric interaction field $W^\flat$, obtained by target-anchored Wasserstein-barycentric reconstruction, with the median-bandwidth RBF transform of its matching squared-W$_2$ matrix. Intervals use the same 2,000 joint-date stationary bootstrap on the common 815-date schedule. $\hat\lambda=\hat\rho/(1-\hat\rho)$ is the implied adjustment index; log-likelihood is descriptive. Persistent news co-mentions are embedding-free; equal active support is shown once for the primary barycentric interaction field. These are paired conditional-fit sensitivity comparisons across the registered representation cells. Published cumulative-training checkpoints are not a matched-compute causal leakage test.}
+\label{tab:p5-representation-ablation} \\
 \toprule
 Encoder & Dim. & Interaction matrix & $\hat\rho$ [95\% CI] & $\hat\lambda$ & Log-likelihood \\
 \midrule
-Qwen3-8B full (primary) & 4096 & Barycentric $W^\flat$ & 0.843 [0.816, 0.869] & 5.36 & 204875.0 \\
- &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.33 & 199835.0 \\
+\endfirsthead
+\multicolumn{6}{c}{\tablename\ \thetable\ (continued)} \\
+\toprule
+Encoder & Dim. & Interaction matrix & $\hat\rho$ [95\% CI] & $\hat\lambda$ & Log-likelihood \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
+Qwen3-8B full (primary) & 4096 & Barycentric $W^\flat$ & 0.843 [0.815, 0.869] & 5.36 & 205146.3 \\
+ &  & RBF--Wasserstein $W^h$ & 0.812 [0.780, 0.842] & 4.33 & 200099.7 \\
 \addlinespace[1.5pt]
-Qwen3-4B full & 2560 & Barycentric $W^\flat$ & 0.844 [0.818, 0.870] & 5.42 & 204564.3 \\
- &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.32 & 199803.8 \\
+Qwen3-4B full & 2560 & Barycentric $W^\flat$ & 0.844 [0.816, 0.870] & 5.42 & 204835.4 \\
+ &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.32 & 200068.5 \\
 \addlinespace[1.5pt]
-Qwen3-8B@1024 & 1024 & Barycentric $W^\flat$ & 0.844 [0.817, 0.870] & 5.40 & 204799.6 \\
- &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.33 & 199840.0 \\
+Qwen3-8B@1024 & 1024 & Barycentric $W^\flat$ & 0.844 [0.815, 0.870] & 5.40 & 205070.3 \\
+ &  & RBF--Wasserstein $W^h$ & 0.812 [0.780, 0.842] & 4.33 & 200104.7 \\
 \addlinespace[1.5pt]
-Qwen3-4B@1024 & 1024 & Barycentric $W^\flat$ & 0.842 [0.815, 0.868] & 5.33 & 204588.1 \\
- &  & RBF--Wasserstein $W^h$ & 0.812 [0.779, 0.842] & 4.33 & 199829.6 \\
+Qwen3-4B@1024 & 1024 & Barycentric $W^\flat$ & 0.842 [0.813, 0.868] & 5.33 & 204859.1 \\
+ &  & RBF--Wasserstein $W^h$ & 0.812 [0.780, 0.842] & 4.33 & 200094.3 \\
 \addlinespace[1.5pt]
-BGE-large-v1.5 full & 1024 & Barycentric $W^\flat$ & 0.840 [0.812, 0.866] & 5.24 & 203802.4 \\
- &  & RBF--Wasserstein $W^h$ & 0.811 [0.777, 0.841] & 4.29 & 199777.8 \\
+BGE-large-v1.5 full & 1024 & Barycentric $W^\flat$ & 0.840 [0.811, 0.866] & 5.24 & 204072.1 \\
+ &  & RBF--Wasserstein $W^h$ & 0.811 [0.778, 0.841] & 4.29 & 200042.4 \\
 \addlinespace[1.5pt]
-Qwen3-8B@256 & 256 & Barycentric $W^\flat$ & 0.839 [0.812, 0.866] & 5.22 & 204600.6 \\
- &  & RBF--Wasserstein $W^h$ & 0.814 [0.781, 0.844] & 4.37 & 199862.8 \\
+Qwen3-8B@256 & 256 & Barycentric $W^\flat$ & 0.839 [0.810, 0.866] & 5.22 & 204870.9 \\
+ &  & RBF--Wasserstein $W^h$ & 0.814 [0.781, 0.844] & 4.37 & 200127.5 \\
 \addlinespace[1.5pt]
-Qwen3-8B@64 & 64 & Barycentric $W^\flat$ & 0.821 [0.790, 0.852] & 4.59 & 203924.6 \\
- &  & RBF--Wasserstein $W^h$ & 0.816 [0.783, 0.845] & 4.43 & 199950.6 \\
+Qwen3-8B@64 & 64 & Barycentric $W^\flat$ & 0.821 [0.787, 0.852] & 4.59 & 204193.7 \\
+ &  & RBF--Wasserstein $W^h$ & 0.816 [0.784, 0.845] & 4.43 & 200215.3 \\
 \addlinespace[1.5pt]
-EttaX V0 & 320 & Barycentric $W^\flat$ & 0.828 [0.797, 0.856] & 4.81 & 201979.3 \\
- &  & RBF--Wasserstein $W^h$ & 0.809 [0.774, 0.840] & 4.24 & 199701.6 \\
+ChronoBERT 2017 & 768 & Barycentric $W^\flat$ & 0.784 [0.741, 0.822] & 3.62 & 201973.8 \\
+ &  & RBF--Wasserstein $W^h$ & 0.811 [0.777, 0.841] & 4.28 & 200041.7 \\
 \addlinespace[1.5pt]
-EttaX V1 & 320 & Barycentric $W^\flat$ & 0.828 [0.798, 0.855] & 4.81 & 202157.7 \\
- &  & RBF--Wasserstein $W^h$ & 0.809 [0.775, 0.840] & 4.25 & 199704.0 \\
+ChronoBERT 2018 & 768 & Barycentric $W^\flat$ & 0.781 [0.738, 0.820] & 3.56 & 201824.1 \\
+ &  & RBF--Wasserstein $W^h$ & 0.810 [0.777, 0.841] & 4.28 & 200031.9 \\
 \addlinespace[1.5pt]
-EttaX V3 & 320 & Barycentric $W^\flat$ & 0.829 [0.799, 0.857] & 4.85 & 202087.1 \\
- &  & RBF--Wasserstein $W^h$ & 0.809 [0.775, 0.840] & 4.25 & 199706.4 \\
+ChronoBERT 2019 & 768 & Barycentric $W^\flat$ & 0.781 [0.738, 0.821] & 3.57 & 201786.3 \\
+ &  & RBF--Wasserstein $W^h$ & 0.810 [0.776, 0.841] & 4.27 & 200026.7 \\
+\addlinespace[1.5pt]
+ChronoBERT 2020 & 768 & Barycentric $W^\flat$ & 0.781 [0.738, 0.820] & 3.57 & 201811.2 \\
+ &  & RBF--Wasserstein $W^h$ & 0.810 [0.776, 0.841] & 4.27 & 200027.5 \\
+\addlinespace[1.5pt]
+ChronoBERT 2021 & 768 & Barycentric $W^\flat$ & 0.776 [0.732, 0.816] & 3.47 & 201664.2 \\
+ &  & RBF--Wasserstein $W^h$ & 0.810 [0.776, 0.840] & 4.26 & 200027.8 \\
+\addlinespace[1.5pt]
+ChronoBERT 2022 & 768 & Barycentric $W^\flat$ & 0.782 [0.739, 0.820] & 3.58 & 201883.2 \\
+ &  & RBF--Wasserstein $W^h$ & 0.810 [0.777, 0.841] & 4.27 & 200040.1 \\
+\addlinespace[1.5pt]
+ChronoBERT 2023 & 768 & Barycentric $W^\flat$ & 0.786 [0.744, 0.824] & 3.67 & 202016.8 \\
+ &  & RBF--Wasserstein $W^h$ & 0.810 [0.777, 0.840] & 4.26 & 200043.2 \\
+\addlinespace[1.5pt]
+ChronoBERT 2024 & 768 & Barycentric $W^\flat$ & 0.783 [0.741, 0.822] & 3.62 & 201936.1 \\
+ &  & RBF--Wasserstein $W^h$ & 0.810 [0.777, 0.840] & 4.27 & 200036.6 \\
 \addlinespace[1.5pt]
 \midrule
-Embedding-free & -- & Persistent news $W^{\mathrm{news}}$ & 0.667 [0.621, 0.718] & 2.01 & 203224.5 \\
-Primary support & -- & Equal active support & 0.841 [0.815, 0.864] & 5.27 & 201857.1 \\
-\bottomrule
-\end{tabular}
-\caption{Pooled 2023--2026 representation sensitivity of the single-field spatial horse race across seven base representations and three matched EttaX encoder vintages. Each encoder row compares the barycentric interaction field $W^\flat$, obtained by target-anchored Wasserstein-barycentric reconstruction, with the median-bandwidth RBF transform of its matching squared-W$_2$ matrix. Intervals use the same 2,000 joint-date stationary bootstrap on the common 814-date schedule. $\hat\lambda=\hat\rho/(1-\hat\rho)$ is the implied adjustment index; log-likelihood is descriptive. Persistent news co-mentions are embedding-free; equal active support is shown once for the primary barycentric interaction field. These are paired conditional-fit sensitivities, not a representation-selection test.}
-\label{tab:p5-representation-ablation}
-\end{table}
-\medskip
-\begin{table}[H]
-\centering
+Embedding-free & -- & Persistent news $W^{\mathrm{news}}$ & 0.667 [0.618, 0.716] & 2.01 & 203493.8 \\
+Primary support & -- & Equal active support & 0.841 [0.814, 0.865] & 5.27 & 202124.6 \\
+\end{longtable}
+\endgroup
+\begingroup
 \scriptsize
 \setlength{\tabcolsep}{3.0pt}
-\begin{tabularx}{\linewidth}{Xrrrrrr}
+\begin{longtable}{@{}p{0.35\linewidth}rrrrrr@{}}
+\caption{Paired common-schedule QMLE contrasts. Panel A estimates $\rho^\flat_c-\rho^\flat_r$; Panel B estimates $(\rho^\flat_c-\rho^h_c)-(\rho^\flat_r-\rho^h_r)$. $p$ denotes two-sided add-one sign-tail probabilities; $p_H$ denotes Holm adjustment separately within each metric's seven base and 28 vintage contrasts. Estimates and intervals retain five decimal places so endpoints near zero remain visible. Vintage equivalence requires both intervals to lie strictly inside their respective BGE-large-minus-Qwen3-8B@1024 benchmark-calibrated, post-specified bounds; Eq. is this joint two-metric decision. Intervals are marginal, not simultaneous. The contrasts compare conditional fit on a common return schedule.}
+\label{tab:p5-representation-contrasts} \\
 \toprule
-Contrast ($c-r$) & Estimate & 95\% CI & Raw $p$ & Holm $p$ & Bound & Joint equiv. \\
+Contrast ($c-r$) & Estimate & 95\% CI & $p$ & $p_H$ & Bound & Eq. \\
 \midrule
+\endfirsthead
+\multicolumn{7}{c}{\tablename\ \thetable\ (continued)} \\
+\toprule
+Contrast ($c-r$) & Estimate & 95\% CI & $p$ & $p_H$ & Bound & Eq. \\
+\midrule
+\endhead
+\midrule
+\endfoot
+\bottomrule
+\endlastfoot
 \multicolumn{7}{l}{\textit{Panel A: direct barycentric-$\rho$ contrasts}} \\
-Qwen3-4B full $-$ Qwen3-8B full & 0.00134 & [0.00061, 0.00212] & 0.001 & 0.007 & -- & -- \\
-Qwen3-4B@1024 $-$ Qwen3-8B@1024 & -0.00180 & [-0.00288, -0.00079] & 0.002 & 0.007 & -- & -- \\
-Qwen3-8B@1024 $-$ Qwen3-8B full & 0.00091 & [-0.00000, 0.00165] & 0.052 & 0.052 & -- & -- \\
-Qwen3-8B@256 $-$ Qwen3-8B@1024 & -0.00449 & [-0.00602, -0.00320] & 0.001 & 0.007 & -- & -- \\
-Qwen3-8B@64 $-$ Qwen3-8B@256 & -0.01803 & [-0.02296, -0.01344] & 0.001 & 0.007 & -- & -- \\
-BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -0.00392 & [-0.00572, -0.00241] & 0.001 & 0.007 & -- & -- \\
-BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -0.00212 & [-0.00358, -0.00079] & 0.005 & 0.010 & -- & -- \\
+Qwen3-4B full $-$ Qwen3-8B full & 0.00134 & [0.00058, 0.00219] & 0.001 & 0.007 & -- & -- \\
+Qwen3-4B@1024 $-$ Qwen3-8B@1024 & -0.00179 & [-0.00291, -0.00077] & 0.004 & 0.008 & -- & -- \\
+Qwen3-8B@1024 $-$ Qwen3-8B full & 0.00090 & [0.00001, 0.00164] & 0.049 & 0.049 & -- & -- \\
+Qwen3-8B@256 $-$ Qwen3-8B@1024 & -0.00449 & [-0.00600, -0.00324] & 0.001 & 0.007 & -- & -- \\
+Qwen3-8B@64 $-$ Qwen3-8B@256 & -0.01805 & [-0.02296, -0.01353] & 0.001 & 0.007 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -0.00392 & [-0.00572, -0.00245] & 0.001 & 0.007 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -0.00213 & [-0.00359, -0.00080] & 0.002 & 0.007 & -- & -- \\
 \addlinespace[1.5pt]
-EttaX V1 $-$ EttaX V0 & -0.00005 & [-0.00149, 0.00180] & 0.922 & 0.922 & 0.00572 & Yes \\
-EttaX V3 $-$ EttaX V0 & 0.00124 & [-0.00012, 0.00274] & 0.076 & 0.228 & 0.00572 & Yes \\
-EttaX V3 $-$ EttaX V1 & 0.00129 & [-0.00035, 0.00264] & 0.112 & 0.228 & 0.00572 & Yes \\
+ChronoBERT 2018 $-$ ChronoBERT 2017 & -0.00297 & [-0.00406, -0.00215] & 0.001 & 0.028 & 0.00572 & Yes \\
+ChronoBERT 2019 $-$ ChronoBERT 2017 & -0.00240 & [-0.00367, -0.00147] & 0.001 & 0.028 & 0.00572 & Yes \\
+ChronoBERT 2019 $-$ ChronoBERT 2018 & 0.00056 & [-0.00057, 0.00142] & 0.257 & 1.000 & 0.00572 & Yes \\
+ChronoBERT 2020 $-$ ChronoBERT 2017 & -0.00267 & [-0.00371, -0.00171] & 0.001 & 0.028 & 0.00572 & Yes \\
+ChronoBERT 2020 $-$ ChronoBERT 2018 & 0.00030 & [-0.00052, 0.00135] & 0.527 & 1.000 & 0.00572 & Yes \\
+ChronoBERT 2020 $-$ ChronoBERT 2019 & -0.00026 & [-0.00134, 0.00109] & 0.693 & 1.000 & 0.00572 & Yes \\
+ChronoBERT 2021 $-$ ChronoBERT 2017 & -0.00740 & [-0.00931, -0.00605] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2018 & -0.00444 & [-0.00577, -0.00340] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2019 & -0.00500 & [-0.00646, -0.00381] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2020 & -0.00474 & [-0.00631, -0.00352] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2022 $-$ ChronoBERT 2017 & -0.00200 & [-0.00281, -0.00128] & 0.001 & 0.028 & 0.00572 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2018 & 0.00096 & [-0.00001, 0.00214] & 0.052 & 0.364 & 0.00572 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2019 & 0.00040 & [-0.00055, 0.00170] & 0.454 & 1.000 & 0.00572 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2020 & 0.00066 & [-0.00044, 0.00174] & 0.242 & 1.000 & 0.00572 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2021 & 0.00540 & [0.00408, 0.00713] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2017 & 0.00217 & [0.00099, 0.00367] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2018 & 0.00514 & [0.00359, 0.00720] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2019 & 0.00458 & [0.00297, 0.00673] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2020 & 0.00484 & [0.00345, 0.00665] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2021 & 0.00958 & [0.00734, 0.01257] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2022 & 0.00418 & [0.00286, 0.00593] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2017 & -0.00042 & [-0.00125, 0.00056] & 0.369 & 1.000 & 0.00572 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2018 & 0.00255 & [0.00146, 0.00410] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2019 & 0.00199 & [0.00093, 0.00350] & 0.001 & 0.028 & 0.00572 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2020 & 0.00225 & [0.00116, 0.00349] & 0.001 & 0.028 & 0.00572 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2021 & 0.00699 & [0.00531, 0.00930] & 0.001 & 0.028 & 0.00572 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2022 & 0.00159 & [0.00054, 0.00284] & 0.005 & 0.040 & 0.00572 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2023 & -0.00259 & [-0.00361, -0.00177] & 0.001 & 0.028 & 0.00572 & Yes \\
 \midrule
 \multicolumn{7}{l}{\textit{Panel B: barycentric-minus-RBF gap contrasts}} \\
-Qwen3-4B full $-$ Qwen3-8B full & 0.00157 & [0.00078, 0.00250] & 0.001 & 0.007 & -- & -- \\
-Qwen3-4B@1024 $-$ Qwen3-8B@1024 & -0.00174 & [-0.00277, -0.00076] & 0.002 & 0.008 & -- & -- \\
-Qwen3-8B@1024 $-$ Qwen3-8B full & 0.00084 & [-0.00008, 0.00158] & 0.082 & 0.164 & -- & -- \\
-Qwen3-8B@256 $-$ Qwen3-8B@1024 & -0.00593 & [-0.00762, -0.00447] & 0.001 & 0.007 & -- & -- \\
-Qwen3-8B@64 $-$ Qwen3-8B@256 & -0.02000 & [-0.02573, -0.01470] & 0.001 & 0.007 & -- & -- \\
-BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -0.00244 & [-0.00393, -0.00091] & 0.005 & 0.015 & -- & -- \\
-BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -0.00070 & [-0.00194, 0.00072] & 0.312 & 0.312 & -- & -- \\
+Qwen3-4B full $-$ Qwen3-8B full & 0.00158 & [0.00076, 0.00255] & 0.001 & 0.007 & -- & -- \\
+Qwen3-4B@1024 $-$ Qwen3-8B@1024 & -0.00173 & [-0.00283, -0.00075] & 0.004 & 0.012 & -- & -- \\
+Qwen3-8B@1024 $-$ Qwen3-8B full & 0.00083 & [-0.00007, 0.00159] & 0.081 & 0.162 & -- & -- \\
+Qwen3-8B@256 $-$ Qwen3-8B@1024 & -0.00593 & [-0.00762, -0.00451] & 0.001 & 0.007 & -- & -- \\
+Qwen3-8B@64 $-$ Qwen3-8B@256 & -0.02002 & [-0.02565, -0.01496] & 0.001 & 0.007 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-8B@1024 & -0.00244 & [-0.00392, -0.00091] & 0.001 & 0.007 & -- & -- \\
+BGE-large-v1.5 full $-$ Qwen3-4B@1024 & -0.00071 & [-0.00192, 0.00073] & 0.276 & 0.276 & -- & -- \\
 \addlinespace[1.5pt]
-EttaX V1 $-$ EttaX V0 & -0.00035 & [-0.00179, 0.00148] & 0.658 & 0.658 & 0.00393 & Yes \\
-EttaX V3 $-$ EttaX V0 & 0.00092 & [-0.00039, 0.00236] & 0.169 & 0.366 & 0.00393 & Yes \\
-EttaX V3 $-$ EttaX V1 & 0.00126 & [-0.00039, 0.00258] & 0.122 & 0.366 & 0.00393 & Yes \\
-\bottomrule
-\end{tabularx}
-\caption{Paired common-schedule QMLE contrasts. Panel A estimates $\rho^\flat_c-\rho^\flat_r$; Panel B estimates $(\rho^\flat_c-\rho^h_c)-(\rho^\flat_r-\rho^h_r)$. Raw $p$-values are two-sided add-one sign-tail probabilities, and Holm adjustment is applied separately within each metric's seven base and three vintage contrasts. Estimates and intervals retain five decimal places so endpoints near zero remain visible. Vintage equivalence requires both intervals to lie strictly inside their respective BGE-large-minus-Qwen3-8B@1024 benchmark-calibrated, post-specified bounds; the decision shown is joint. No contrast is causal or an encoder-superiority claim.}
-\label{tab:p5-representation-contrasts}
-\end{table}
+ChronoBERT 2018 $-$ ChronoBERT 2017 & -0.00268 & [-0.00375, -0.00190] & 0.001 & 0.028 & 0.00392 & Yes \\
+ChronoBERT 2019 $-$ ChronoBERT 2017 & -0.00174 & [-0.00296, -0.00081] & 0.001 & 0.028 & 0.00392 & Yes \\
+ChronoBERT 2019 $-$ ChronoBERT 2018 & 0.00095 & [-0.00015, 0.00181] & 0.083 & 0.498 & 0.00392 & Yes \\
+ChronoBERT 2020 $-$ ChronoBERT 2017 & -0.00203 & [-0.00301, -0.00110] & 0.001 & 0.028 & 0.00392 & Yes \\
+ChronoBERT 2020 $-$ ChronoBERT 2018 & 0.00065 & [-0.00015, 0.00169] & 0.132 & 0.660 & 0.00392 & Yes \\
+ChronoBERT 2020 $-$ ChronoBERT 2019 & -0.00029 & [-0.00137, 0.00105] & 0.650 & 1.000 & 0.00392 & Yes \\
+ChronoBERT 2021 $-$ ChronoBERT 2017 & -0.00648 & [-0.00829, -0.00521] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2018 & -0.00380 & [-0.00509, -0.00280] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2019 & -0.00475 & [-0.00621, -0.00357] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2021 $-$ ChronoBERT 2020 & -0.00445 & [-0.00603, -0.00322] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2022 $-$ ChronoBERT 2017 & -0.00144 & [-0.00229, -0.00068] & 0.001 & 0.028 & 0.00392 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2018 & 0.00124 & [0.00026, 0.00242] & 0.015 & 0.105 & 0.00392 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2019 & 0.00030 & [-0.00066, 0.00160] & 0.613 & 1.000 & 0.00392 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2020 & 0.00059 & [-0.00053, 0.00167] & 0.312 & 1.000 & 0.00392 & Yes \\
+ChronoBERT 2022 $-$ ChronoBERT 2021 & 0.00504 & [0.00378, 0.00669] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2017 & 0.00293 & [0.00175, 0.00436] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2018 & 0.00561 & [0.00413, 0.00759] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2019 & 0.00466 & [0.00314, 0.00668] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2020 & 0.00496 & [0.00363, 0.00665] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2021 & 0.00941 & [0.00727, 0.01219] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2023 $-$ ChronoBERT 2022 & 0.00437 & [0.00308, 0.00609] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2017 & 0.00026 & [-0.00058, 0.00122] & 0.548 & 1.000 & 0.00392 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2018 & 0.00295 & [0.00189, 0.00446] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2019 & 0.00200 & [0.00102, 0.00342] & 0.001 & 0.028 & 0.00392 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2020 & 0.00229 & [0.00123, 0.00346] & 0.001 & 0.028 & 0.00392 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2021 & 0.00675 & [0.00515, 0.00894] & 0.001 & 0.028 & 0.00392 & No \\
+ChronoBERT 2024 $-$ ChronoBERT 2022 & 0.00170 & [0.00062, 0.00293] & 0.004 & 0.032 & 0.00392 & Yes \\
+ChronoBERT 2024 $-$ ChronoBERT 2023 & -0.00266 & [-0.00365, -0.00186] & 0.001 & 0.028 & 0.00392 & Yes \\
+\end{longtable}
+\endgroup

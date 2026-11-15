@@ -1,27 +1,25 @@
 Firm characteristics are commonly represented as fixed vectors, even though
 evidence about firms' operations arrives as heterogeneous collections of
 articles and reports.
-We study how distances between distributions of firm characteristics restrict
-systematic covariance.
-For given latent exposure laws, quadratic Wasserstein geometry yields sharp
-covariance endpoints over admissible couplings.
-Under a common randomized bi-Lipschitz characteristic-to-exposure map, bounded
-risk-coordinate slack, and a maintained return-covariance bridge,
-characteristic-side distance yields a conditional interval for the covariance ceiling.
-Greater separation then leaves less scope for aligned systematic exposures when
-these assumptions are tight, while a nonnegative transport-excess term records
-the gap between realized and maximum-covariance arrangements.
-The resulting envelope is scenario analysis rather than an expected-return,
-no-arbitrage, or identified structural model.
-Empirically, we proxy characteristic distributions with encoder-only
-language-model embeddings of financial news articles, disclosures, and analyst
-reports for Nasdaq firms over
+We represent firms by distributions and derive restrictions on the systematic
+covariance their factor exposures can support.
+Quadratic Wasserstein distance measures the minimum displacement needed to
+align two distributions; in exposure space, it determines their sharp
+covariance ceiling.
+A common characteristic-to-exposure benchmark with bounded distortion and
+firm-specific departures transfers this restriction to characteristic space.
+The framework makes explicit how transmission uncertainty widens the range
+of feasible covariance ceilings.
+We construct firm distributions from language-model embeddings of financial
+news, disclosures, and analyst reports for Nasdaq firms over
 \ppvalue{sample-year-start}--\ppvalue{sample-year-end}.
-In a dyadic regression with symmetric firm effects, greater pairwise
-article-embedding W$_2$ distance is associated with weaker return co-movement:
-the coefficient is
+Greater article-embedding distance is associated with weaker return
+co-movement after symmetric firm effects: the return-distance coefficient is
 \ppnum[3]{confound-w2-coef}, with 95\% interval
 [\ppnum[3]{confound-w2-ci-low}, \ppnum[3]{confound-w2-ci-high}].
-The estimate retains the same sign when returns are measured in a later window,
-although the feature construction is not point-in-time and the evidence remains
-reduced form.
+The association remains positive after sector, industry, and 10-K
+product-market controls, and retains its sign in a later return window.
+A sensitivity grid shows how quickly the covariance restriction loses
+informativeness as transmission tolerances widen.
+Together, the framework and evidence support screening firm pairs for shared
+exposures and assessing covariance under explicit economic scenarios.

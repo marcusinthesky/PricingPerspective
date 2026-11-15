@@ -1,0 +1,28 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p5.point_in_time_encoder:cli_render_paper5_point_in_time_encoder",
+  "digest": "sha256:c9bcda06dff5462639ae2f03f0da328375c0917d7cd862fdfd0fef67b0249b61",
+  "entrypoint": "pipeline render-paper5-point-in-time-encoder",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:23d076ea9d1ab419b82159266bcf23ef0cd76a98fb45b8ee03c205ec383bde47","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/point_in_time_encoder.py","symbol":"pipeline.cli.commands.p5.point_in_time_encoder:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/point_in_time_encoder.py","symbol":"pipeline.cli.commands.p5.point_in_time_encoder:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/point_in_time_encoder.py","symbol":"pipeline.cli.commands.p5.point_in_time_encoder:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/point_in_time_encoder.py","symbol":"pipeline.cli.commands.p5.point_in_time_encoder:<binding:typer=typer>"},
+    {"digest":"sha256:bd9cc0b3dd2097c50d63b5c3257292dca5701978a051a225fe699d910127f37d","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/point_in_time_encoder.py","symbol":"pipeline.cli.commands.p5.point_in_time_encoder:cli_render_paper5_point_in_time_encoder"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/point_in_time_encoder.py","symbol":"pipeline.cli.commands.p5.point_in_time_encoder:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:28b8a2b34f36e2f271cf8c4473f66531d0e2c5fdb59c149ba632190b76e9bfa4","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:<binding:cast=typing:cast>"},
+    {"digest":"sha256:a86975c5ed70dfa4f4cc5799bb9efd192f6a6a6d5034baea4503057af6ecf800","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:<binding:date=datetime:date>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:<binding:json=json>"},
+    {"digest":"sha256:9c3161996482cb57a87a6c65baf626c384d3fdf0caba56cb38f68a340e39d803","kind":"class","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:Paper5PointInTimeTableError"},
+    {"digest":"sha256:4b203f84a714c271b2c7ff24aa6b7b655d7861df12e0b99dab1dddacf575912b","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:_invalid"},
+    {"digest":"sha256:913fcda198f4429295313ffb19c3c965626eff8c15c231a719445e3a073578d2","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:_load"},
+    {"digest":"sha256:67f3ab1b4e43af42bdee0a5303b423c4b39b411411c01cfea5e8579786234ae2","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:_number"},
+    {"digest":"sha256:22e32baff1112486d63441723d1f24b449540d3aa71ded132fc43ac1f8437898","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:render_paper5_point_in_time_table"},
+    {"digest":"sha256:35a2279a7a90b3fce3d53c20f0aaae741c0ab6a288a50e31a4fb022f6435d7e9","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/point_in_time.py","symbol":"pipeline.figures.paper5.point_in_time:validate_point_in_time_metadata"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, NoReturn, cast
 
 import yaml
 
@@ -11,7 +11,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 _PUBLICATION_ROSTER_SIZE = 7
-_EXTENDED_ROSTER_SIZE = 10
+_EXTENDED_ROSTER_SIZE = 15
+_EXPECTED_VINTAGE_IDS = tuple(f"chronobert_{year}" for year in range(2017, 2025))
 _CANONICAL_CONTRAST_ROLE = "canonical"
 # Sole role of the separate encoder-vintage registry. Kept out of
 # `_GOVERNED_CONTRAST_ROLES` so a vintage cell cannot be authored into the
@@ -31,11 +32,11 @@ _GOVERNED_CONTRAST_ROLES = frozenset(
 )
 
 
-def _raise_type(message: str) -> None:
+def _raise_type(message: str) -> NoReturn:
     raise TypeError(message)
 
 
-def _raise_value(message: str) -> None:
+def _raise_value(message: str) -> NoReturn:
     raise ValueError(message)
 
 
@@ -200,9 +201,9 @@ def load_encoder_vintage_specs(
     """Load the encoder-vintage roster, which is separate by design.
 
     `representation_ablation_specs` is the locked seven-cell base contract.
-    Vintage arms live in their own registry because Paper 1 treats them as a
-    paired negative control, while Papers 3 and 5 append them as ordinary
-    representation-sensitivity rows.
+    Vintage arms live in their own registry because Paper 1 treats them as an
+    annual training-exposure sensitivity, while Papers 3 and 5 append them as
+    ordinary representation-sensitivity rows.
 
     An empty or absent registry is valid and yields no cells.
     """
@@ -243,7 +244,7 @@ def load_encoder_vintage_specs(
 def load_extended_representation_ablation_specs(
     params_file: Path,
 ) -> tuple[RepresentationAblationSpec, ...]:
-    """Return the seven base cells followed by the three encoder vintages."""
+    """Return the seven base cells followed by the eight annual encoder vintages."""
     base = load_representation_ablation_specs(params_file)
     vintages = load_encoder_vintage_specs(params_file)
     extended = (*base, *vintages)
@@ -254,7 +255,13 @@ def load_extended_representation_ablation_specs(
         message = "extended representation ladder representation IDs must be unique"
         raise ValueError(message)
     if len(extended) != _EXTENDED_ROSTER_SIZE:
-        message = "extended representation ladder must contain exactly ten cells"
+        message = "extended representation ladder must contain exactly fifteen cells"
+        raise ValueError(message)
+    if tuple(spec.cell_id for spec in vintages) != _EXPECTED_VINTAGE_IDS:
+        message = (
+            "extended representation ladder must contain the ordered "
+            "ChronoBERT 2017-2024 vintage cells"
+        )
         raise ValueError(message)
     return extended
 
@@ -304,9 +311,16 @@ _EXPECTED_CONTRASTS = (
     ("qwen8b_64_minus_qwen8b_256", "qwen8b_64", "qwen8b_256", "base"),
     ("bge_large_minus_qwen8b_1024", "bge_large_full", "qwen8b_1024", "base"),
     ("bge_large_minus_qwen4b_1024", "bge_large_full", "qwen4b_1024", "base"),
-    ("ettax_v1_minus_ettax_v0", "ettax_v1", "ettax_v0", "vintage"),
-    ("ettax_v3_minus_ettax_v0", "ettax_v3", "ettax_v0", "vintage"),
-    ("ettax_v3_minus_ettax_v1", "ettax_v3", "ettax_v1", "vintage"),
+    *(
+        (
+            f"chronobert_{candidate}_minus_chronobert_{reference}",
+            f"chronobert_{candidate}",
+            f"chronobert_{reference}",
+            "vintage",
+        )
+        for candidate in range(2018, 2025)
+        for reference in range(2017, candidate)
+    ),
 )
 
 
@@ -327,8 +341,10 @@ def load_representation_contrast_specs(  # noqa: C901
         )
     )
     if len(parsed) != len(_EXPECTED_CONTRASTS):
-        _raise_value("representation contrast registry must contain ten cells")
-    if [item.display_order for item in parsed] != list(range(1, 11)):
+        _raise_value("representation contrast registry must contain thirty-five cells")
+    if [item.display_order for item in parsed] != list(
+        range(1, len(_EXPECTED_CONTRASTS) + 1)
+    ):
         _raise_value("representation contrast display_order must be consecutive")
     observed = tuple(
         (item.contrast_id, item.candidate_cell_id, item.reference_cell_id, item.family)

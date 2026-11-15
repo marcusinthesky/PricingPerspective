@@ -4,7 +4,6 @@
 This appendix first audits the dyadic estimator and inference, then turns to
 representation and finite article sampling, and finally considers the sector
 projection and exploratory return-path display used in \Cref{sec:results}.
-These diagnostics preserve the main estimand and do not add independent theorem tests.
 
 \subsection{Dyadic specification and inference audit}
 \label{sec:dyadic-diagnostics}
@@ -39,6 +38,35 @@ where $\mathrm{SSE}_{\mathrm{FE}}$ is the residual sum of squares from the
 intercept and symmetric firm effects, and $\mathrm{SSE}_{\mathrm{FE}+X}$ is
 from that model with $X$ added. It is defined only for the restricted
 fixed-effect model and is therefore omitted on pooled rungs.
+For the classification-adjusted estimates in
+\Cref{tab:classification-controls}, replace $F$ by the joint nuisance block
+containing firm effects and the included matching indicators or ETNIC
+similarity.
+The corresponding numerator and denominator in \eqref{eq:partial-r2} retain
+those controls, so the partial $R^2$ isolates the contribution of $X$.
+The within-industry fit uses the same construction on its restricted graph;
+redundant endpoint indicators in disconnected industry groups are removed
+by rank selection.
+
+The finer classification fits in \Cref{tab:classification-controls} support
+the sector-adjusted estimate.
+Adding the same-industry indicator gives a W$_2$ coefficient of
+\ppnum[3]{classification-industry-coefficient}, with 95\% interval
+[\ppnum[3]{classification-industry-ci-low},
+\ppnum[3]{classification-industry-ci-high}], and a partial $R^2$ of
+\ppnum[3]{classification-industry-partial-r2} relative to the combined
+firm-effects, sector, and industry baseline.
+Restricting attention to within-industry pairs yields a coefficient of
+\ppnum[3]{classification-within-industry-coefficient}, with 95\% interval
+[\ppnum[3]{classification-within-industry-ci-low},
+\ppnum[3]{classification-within-industry-ci-high}].
+This interval is appreciably wider because the estimate uses only
+\ppnum[0]{classification-within-industry-n-dyads} pairs among
+\ppnum[0]{classification-within-industry-n-firms} incident firms.
+Industries with only two or three firms supply no residual pair variation
+after symmetric firm effects; the identifying sample comprises
+\ppvalue{classification-identifying-industries} larger industries containing
+\ppvalue{classification-identifying-firms} firms.
 
 The six-rung W$_2$ ladder asks whether the association between
 article-embedding distance and return distance is confined to raw sample
@@ -50,10 +78,16 @@ rather than simply adding another pooled control.
 Specification 1 records the unadjusted W$_2$ association.
 Specification 2 adds a same-sector indicator to address broad sector sorting;
 because sector remains a coarse description of firm composition,
-specification 3 introduces the declared pooled controls for firm-size
-differences and crisis-window coverage.
-The preceding firm and window controls do not address differential news
-coverage, so specification 4 adds declared article-count level and imbalance controls.
+specification 3 adds the absolute difference in firms' mean log dollar
+trading volume and an indicator that both return histories cover the
+COVID-19 crisis window.
+Specification 4 additionally declares the absolute difference and minimum
+of the two firms' log article counts.
+All firms cover the crisis window and have the same article count in this
+sample, so the crisis indicator and both count controls are collinear with
+the intercept or zero and are removed by rank selection.
+Specifications 3 and 4 therefore have the same effective regressors
+and estimates.
 Article counts do not capture within-firm content dispersion, so
 specification 5 adds the sum and absolute difference of that dispersion.
 This decomposition diagnostic separates between-firm transport distance from
@@ -61,8 +95,10 @@ heterogeneity in the breadth of the two article clouds.
 Because the pooled controls address only their measured dimensions,
 specification 6 replaces them with symmetric firm effects that absorb stable
 additive endpoint heterogeneity.
-Only this sixth specification is primary; the preceding five document the
-path from raw association to the preferred design.
+This sixth specification supplies the firm-effects benchmark; the preceding
+five document the path from raw association to that design.
+The classification tests in the main text extend the same firm-effects
+design by including sector and industry matching directly.
 
 \Cref{tab:dyadic-ladder} reports these six prespecified specifications.
 Pooled and firm-effect $R^2$ values are not comparable because the latter
@@ -73,7 +109,6 @@ only with the restricted firm-effect model.
 
 The focal coefficient remains positive throughout, showing that none of the
 declared adjustments reverses the sample association.
-This sign stability does not establish causality or rule out pair-specific confounding.
 
 To distinguish substantive specification changes from rank or conditioning
 problems, \Cref{tab:dyadic-design-diagnostics} records the observation count,
@@ -106,8 +141,8 @@ multiplicity through $w_{ib}w_{jb}$.
 
 The add-one correction prevents zero simulated tail probabilities
 \citep{phipson2010permutation}. Percentile intervals are first-order summaries
-of firm-level sampling uncertainty; they do not incorporate article selection,
-encoder estimation, or return measurement as additional generated regressors.
+of firm-level sampling uncertainty conditional on the constructed article
+and return matrices.
 
 \subsection{Representation and article-sampling sensitivity}
 \label{sec:representation-diagnostics}
@@ -122,7 +157,8 @@ firm sample, and node-bootstrap schedule fixed while changing encoder, width,
 or distance.
 Rank agreement is Spearman correlation with the canonical Qwen3-Embedding-8B,
 128-article W$_2$ matrix; the standardized effect is the change in return
-chord distance associated with one dyadic standard deviation of the row's metric.
+chord distance associated with one dyadic standard deviation of the
+row's metric.
 Writing this effect as $s_r$ for representation $r$, every paired contrast is
 $\Delta_{c,r}=s_c-s_r$; a negative value therefore means that the candidate
 has the smaller standardized association.
@@ -130,7 +166,6 @@ All cell-level association intervals remain positive.
 Within these comparisons, W$_1$ nearly preserves the canonical ordering,
 while energy produces a materially different ordering but a similar positive
 association.
-These are sensitivity comparisons, not tests that one representation dominates another.
 
 The lower-cost distance comparators reuse the same deterministic article
 samples and Euclidean chord ground metric, so their formulas isolate the
@@ -162,19 +197,49 @@ It is the minimum average semantic displacement needed to align two firms'
 article distributions. Unlike W$_2$, it does not give larger displacements
 quadratically greater weight.
 
-The seven-row encoder panel organizes three distinct comparisons.
-First, full-width Qwen3-Embedding-8B and 4B compare capacities within one
-causal-attention family, while their common 1,024-coordinate outputs isolate
-capacity at fixed width.
-Second, the 256- and 64-coordinate Qwen3-8B prefixes hold the encoder fixed
-and vary its Matryoshka output width.
-Third, full-width BGE-large-v1.5 introduces a bidirectional
-BERT/RetroMAE-style training lineage from another provider, changing
-architecture, pretraining, and provider jointly rather than isolating one
-mechanism \citep{xiao_cpack_2023,qwen3_embedding_2025}.
-The compact contrast table reports the seven candidate-minus-reference pairs
-descriptively with paired intervals and Holm-adjusted $p$-values; none is a
-causal or encoder-superiority claim.
+The close rank agreement between these costs motivates a hypothesis about
+representation geometry.
+Row normalization maps a nonzero vector $x$ to $x/\norm{x}$ on
+$S^{d-1}\subset\mathbb R^d$, with $d=\ppvalue{embed-dim}$ for the canonical
+encoder, and bounds chord distances between zero and two.
+The Qwen training objective uses cosine similarity
+\citep{qwen3_embedding_2025}; more generally, contrastive learning on
+normalized representations encourages alignment of related examples and
+uniformity across the sphere \citep{wang_isola_hypersphere_2020}.
+We conjecture that normalization and the resulting distribution of matching
+distances contribute to the observed W$_1$/W$_2$ agreement.
+Over a narrow range of positive distances, squared cost is approximately
+affine in distance, giving the two assignment objectives similar weights.
+Normalization alone neither establishes that concentration nor fixes the
+ordering of optimal assignment costs.
+The measurement question is whether a representation can retain meaningful
+variation in economic magnitude alongside semantic direction.
+It motivates representations designed for economic measurement and a
+separate assessment of the information carried by vector length.
+
+The seven-row encoder panel targets three measurement concerns.
+The capacity comparison asks whether model scale drives the association by
+pairing Qwen3-Embedding-8B with its 4B variant at the same native width and
+at a common 1,024-dimensional output.
+The output-width comparison asks whether the estimated association depends on
+the full coordinate set.
+It uses Matryoshka prefixes, for which the encoder's training makes
+leading-coordinate prefixes usable as nested, lower-capacity embeddings at
+256 and 64 coordinates.
+These prefixes are fixed before the analysis, not principal components or
+selected coordinates \citep{kusupati_matryoshka_2022}.
+The architecture comparison asks whether the association is specific to the
+Qwen training pipeline.
+It uses BGE-large-v1.5, a bidirectional encoder from a different provider and
+training pipeline that changes architecture, pretraining, and provider
+jointly \citep{xiao_cpack_2023}.
+Paired intervals and Holm-adjusted $p$-values compare standardized
+associations across representations.
+W$_1$ and energy are substituted for $X_{ij}$ only in the descriptive
+representation table.
+Because all rows share the node schedule, endpoint effects, and omitted
+indicator, their standardized effects are comparable even though one-unit
+coefficients inherit different distance scales.
 
 \input{generated/w2_representation_sensitivity}
 
@@ -183,35 +248,101 @@ standardized association statistically indistinguishable from the canonical
 cell. The subsequent 1,024-to-256 and 256-to-64 compression steps are negative
 and remain distinguishable from zero after Holm adjustment. Neither capacity
 comparison nor either BGE contrast is distinguishable after the same
-base-family adjustment. This pattern locates a compression stress boundary for
-the measured association; it does not rank the encoders' general quality.
+base-family adjustment. This pattern locates the compression levels at which
+the measured
+association weakens.
 
-The base comparisons do not isolate training-data vintage, so Panel C uses a
-matched negative control for that narrower dimension.
-The three EttaX arms hold architecture, recipe, compute budget, tokenizer,
-corpus sampler, and seed fixed while moving the Wikipedia snapshot from
-before the sample through a post-sample date.
-Their standardized associations remain close to the primary estimate.
-Because all cells reuse the same node-bootstrap schedule, the
-later-minus-earlier contrasts are paired.
-The point contrasts and intervals are reported together with the seven base
-contrasts; vintage equivalence retains the symmetric $0.012$ margin
-calibrated to the previously computed Qwen3-8B--BGE-large paired contrast.
-Within this compact architecture and frozen recipe, all three intervals lie
-strictly inside the margin and meet the declared equivalence rule.
-The design does not exclude a vintage effect that emerges only at the much
-larger capacity of the production encoder.
-The positive association is not interpreted as causal, and BGE is not used to
-attribute a difference to architecture alone.
+The supplementary lexical comparisons connect the representation checks to
+\citet{box2018qualitative} using the same articles and return window.
+We compare cosine distance between firms' aggregate TF--IDF vectors with
+W$_2$ between equally weighted distributions of TF--IDF article vectors.
+Each construction estimates its vocabulary and term weights separately,
+with \ppnum[0]{text-controls-max-features} features to match the canonical
+Qwen output width, providing a lexical benchmark.
 
-Association stability alone does not show how truncation alters the
-underlying dyad geometry.
-The Matryoshka and deterministic-prefix diagnostics therefore separate
-geometry from association.
+Four further comparisons use the common 610-million-parameter architecture
+of \citet{gisserot2026should}.
+One model is pretrained to predict the next token (CLM), while Masked
+Language Modelling (MLM) models predict
+masked tokens at masking rates of 30\%, 40\%, and 50\%.
+All four use bidirectional attention when representing articles, average
+token representations into an article vector, and normalize its length
+before computing W$_2$.
+Crucially, unlike our other QWEN models, these models receive no contrastive
+fine-tuning for document similarity, demonstrating the relative efficiency
+and efficacy of various self-supervised learning techniques, when data,
+initialization and compute are held fixed. These results replicate the
+findings of \citet{gisserot2026should} on market-priced tasks, showing that
+low masking ratios demonstrate the strongest learned representations without
+further fine-tuning.
+
+\input{generated/text_controls}
+
+All supplementary slopes are positive, with pointwise node-bootstrap
+intervals excluding zero (\Cref{tab:text-controls}).
+The TF--IDF W$_2$ result shows that the association survives simple lexical
+representations of article distributions.
+Its higher fit than aggregate cosine distance reflects a joint change in
+aggregation, weighting, and distance construction.
+
+Within the masked-prediction models, both the standardized association and
+partial $R^2$ decline as the masking rate rises from 30\% to 50\%.
+The 30\% model has the strongest point-estimate fit among the four base
+models; CLM and the 40\% model have similar fit, and the 50\% model has the weakest.
+Thus the news--comovement association appears under both training objectives,
+with no uniform point-estimate advantage for masked prediction.
+More extensive masking does not yield a stronger measured connection to
+return dependence in this sample.
+These rankings are descriptive; the pointwise intervals test each association,
+not differences between objectives or masking rates.
+All four base models have lower fit than lexical W$_2$ and canonical Qwen.
+These supplementary comparisons use 2018--2022 returns and remain separate
+from the paired-contrast families above.
+
+Training-information cutoff requires a separate design because comparisons
+across off-the-shelf encoders also change architecture and training pipeline.
+We use the eight published ChronoBERT checkpoints dated at each year-end from
+2017 through 2024 \citep{he_chronobert_2025}.
+These ModernBERT-based encoders were pretrained by masked token prediction.
+Later checkpoints continue training the preceding checkpoint on newly
+available text; the panel therefore combines later information with cumulative
+training exposure, rather than holding token budget or compute fixed.
+For each fixed checkpoint, we encode the same 128 articles per firm and average
+the final-layer token states over all non-padding positions, including special
+tokens, to obtain a 768-coordinate document representation.
+The common inference policy retains at most 8,000 characters and 1,024 tokens
+per article and uses bfloat16 autocast with float32 model parameters and
+token-mean pooling.
+We apply row-L2 normalization once before distance construction, without
+selecting layers using returns.
+
+The 2017 training cutoff precedes the
+\ppvalue{sample-year-start}--\ppvalue{sample-year-end} article window;
+2018--2022 cutoffs fall within construction, and 2023--2024 cutoffs follow it.
+The last two nevertheless overlap, rather than postdate, the full 2023--2026
+return-evaluation period.
+Publication occurred later: the comparison concerns reported training
+information, not historical deployment availability or point-in-time validity
+of every other input.
+All 28 later-minus-earlier contrasts use the common node-bootstrap draws, with
+Holm adjustment within this vintage family.
+Equivalence requires the full marginal 95\% paired interval to lie strictly
+inside the symmetric inherited benchmark-calibrated margin reported in
+\Cref{tab:w2-vintage-contrasts}.
+This is a fixed robustness margin, not a new ChronoBERT preregistration;
+the intervals are not simultaneous confidence intervals.
+All annual pairs meet this inherited equivalence rule, although some paired
+differences reject zero after Holm adjustment.
+The estimates do not change monotonically with the cutoff year.
+This combination supports bounded sensitivity under the stated margin,
+not exact representation invariance or the absence of training leakage.
+
+The Matryoshka diagnostics show how truncation changes the underlying
+dyad geometry.
 In \Cref{fig:matryoshka-preservation}, the diagonal is exact distance
 preservation and $\rho$ measures dyad-rank agreement with full width.
 The 256-coordinate representation is closer to the full matrix than the
-64-coordinate representation, although neither prefix is identical.
+64-coordinate representation.
 
 \begin{figure}[H]
   \centering
@@ -220,63 +351,188 @@ The 256-coordinate representation is closer to the full matrix than the
     common firm pairs. Both axes are rooted W$_2$ distance in unit-chord
     embedding space; dashed lines mark equality and $\rho$ is Spearman rank
     agreement with the full-width matrix. The 256-coordinate prefix preserves
-    the canonical geometry more closely than the 64-coordinate prefix. These
-    projections diagnose truncation, not economic validity. Authors'
-  calculations.}
+  the canonical geometry more closely than the 64-coordinate prefix.}
   \label{fig:matryoshka-preservation}
 \end{figure}
 
-Compression sensitivity does not address whether the result depends on the
-finite article prefix used to construct each firm distribution.
+Article-sampling checks vary the number of observations representing each firm.
 \Cref{tab:w2-sampling-diagnostics} therefore varies the deterministic
 per-firm article prefix at fixed encoder and distance.
 Standardized effects remain positive and rank agreement increases toward the
 128-article benchmark.
-The exercise measures sensitivity to the declared sample construction; it is
-not a sampling-theory correction for the latent article distribution.
 
 \input{generated/w2_sampling_diagnostics}
 
 \subsection{Sector structure and projection validity}
 \label{sec:projection-validity}
 \label{sec:geometric-representation}
+\label{sec:geometric-diagnostics}
 
-The remaining diagnostics separate sector structure in the original distance
-geometry from the fidelity of its two-dimensional display in \Cref{fig:sector-mds}.
-DISCO (distance components) addresses the first question by decomposing total
-energy dispersion in the original distance matrix into within- and
-between-sector components \citep{szekely_energy_2013}.
-The labels come from Nasdaq summary metadata without a recorded snapshot date.
-Sector membership accounts for $R^2_{\mathcal E}=\ppnum[3]{disco-r2}$ of
-total dispersion, so sector is relevant but leaves most geometry unexplained.
-The permutation statistic asks whether the observed sector grouping is more
-distinct than relabelled firms; it does not validate the article proxy or
-identify sector as the mechanism behind the W$_2$--return association.
+Metric multidimensional scaling (MDS) constructs a descriptive two-dimensional
+map by minimizing squared discrepancies between projected Euclidean distances
+and the original W$_2$ distances between firms.
+\Cref{fig:sector-metric-mds} displays the fitted map, whose axes have no assigned
+economic meaning.
+Its compression can distort both local neighbours and global distances, so
+economic pair comparisons and all estimation use the original W$_2$ matrix.
 
-\input{generated/disco_decomposition}
+\begin{figure}[htbp]
+  \centering
+  \ppfigure{0.96}{metric_mds_sector_plot}
+  \caption{Descriptive two-dimensional metric MDS of the exact 128-article W$_2$
+    matrix for the canonical Qwen3-Embedding-8B representation.
+    Both axes are unitless fitted coordinates; each labelled point is a
+    priced firm, and colours identify sectors.
+    Pair selection and estimation use the original W$_2$ matrix;
+    \Cref{fig:metric-mds-shepard-diagnostic} reports projection fidelity.
+  }
+  \label{fig:sector-metric-mds}
+\end{figure}
 
-The projection audit addresses the second question.
-Because the MDS projection (\Cref{fig:sector-mds}) compresses
-high-dimensional distances into two coordinates, local-neighbour fidelity is limited.
-\Cref{fig:mds-shepard-diagnostic} quantifies this: the projection supports a
-global description but not local pair selection.
+Sector structure is assessed directly in the canonical W$_2$ geometry by a
+one-way permutational multivariate analysis of variance (PERMANOVA)
+\citep{anderson_permanova_2001}.
+Let $d_{ij}=W_2(Q_i,Q_j)$ for the $N$ observed firms, grouped into $K$ sectors
+with sizes $n_g$.
+The distance-based decomposition uses squared original distances:
+\[
+  SS_T=\frac{1}{N}\sum_{i<j}d_{ij}^2,\qquad
+  SS_W=\sum_g\frac{1}{n_g}\sum_{\substack{i<j\\i,j\in g}}d_{ij}^2,
+  \qquad R^2=1-\frac{SS_W}{SS_T}.
+\]
+The observed sector share is $R^2=\ppnum[3]{w2-permanova-r2}$, compared with
+the fixed-size random-label expectation $(K-1)/(N-1)
+=\ppnum[3]{w2-permanova-null-r2}$.
+The pseudo-$F$ ratio divides $(SS_T-SS_W)/(K-1)$ by $SS_W/(N-K)$;
+its permutation reference reassigns whole firms' labels while preserving sector
+sizes and holding the distance matrix fixed.
+This post-hoc diagnostic describes sector association conditional on the observed
+firms and distances; inference requires exchangeability under the reference null
+and does not identify a causal sector effect.
+
+\input{generated/w2_permanova}
+
+The dispersion companion in \Cref{tab:w2-permanova} compares distances to
+within-sector spatial medians in the full principal-coordinate representation
+\citep{anderson_dispersion_2006}.
+Singleton sectors remain in the main decomposition but cannot estimate
+within-sector spread and are excluded from this companion.
+Unequal sector sizes make spread differences consequential for interpreting the
+grouping test; a nonsignificant companion does not establish equal spreads.
+The grouping test has $p=\ppnum[4]{w2-permanova-p}$, and the dispersion
+companion has $p=\ppnum[4]{w2-permanova-dispersion-p}$.
+The detected sector organization may therefore include spread differences, so
+the main test does not isolate sector location.
+\Cref{fig:metric-mds-shepard-diagnostic} separately assesses whether the
+two-dimensional display preserves the original distances and neighbours.
 
 \begin{figure}[H]
   \centering
-  \ppfigure{0.62}{mds_shepard_diagnostic}
-  \caption{Fidelity of the two-dimensional metric MDS projection. The
+  \ppfigure{0.62}{metric_mds_shepard_diagnostic}
+  \caption{Fidelity of the canonical two-dimensional W$_2$ metric-MDS map. The
     horizontal axis is exact pairwise W$_2$ and the vertical axis is projected
-    Euclidean distance. Stress-1 is \ppnum[3]{mds-stress-1}; Pearson and
-    Spearman Shepard correlations are \ppnum[3]{mds-shepard-pearson} and
-    \ppnum[3]{mds-shepard-spearman}. Mean top-five-neighbour recall is
-    \ppnum[3]{mds-top5-neighbour-recall}, and the exact nearest neighbour is
-    preserved for \ppvalue{mds-exact-nearest-preserved} of
-    \ppvalue{n-firms} firms. The projection supports a global description but
-  not local pair selection. Authors' calculations.}
-  \label{fig:mds-shepard-diagnostic}
+    Euclidean distance $\hat d_{ij}$. Stress-1,
+    $\{\sum_{i<j}(d_{ij}-\hat d_{ij})^2/\sum_{i<j}d_{ij}^2\}^{1/2}$,
+    is \ppnum[3]{metric-mds-stress-1}; Pearson and
+    Spearman Shepard correlations are \ppnum[3]{metric-mds-shepard-pearson} and
+    \ppnum[3]{metric-mds-shepard-spearman}. Mean top-five-neighbour recall is
+    \ppnum[3]{metric-mds-top5-neighbour-recall}, and the exact nearest neighbour is
+    preserved for \ppvalue{metric-mds-exact-nearest-preserved} of
+    \ppvalue{n-firms} firms. Pair selection uses the original distance matrix.
+  }
+  \label{fig:metric-mds-shepard-diagnostic}
 \end{figure}
 
-% Exploratory Later Outcome Paths moved to main-text §5 opening
-% (\Cref{fig:neighbour-outcome-paths}).
+Principal coordinates analysis (PCoA) provides a separate spectral diagnostic.
+It double-centres the squared W$_2$ matrix, multiplies by $-1/2$, and
+eigendecomposes the result.
+The full spectrum distinguishes concentration in a few positive axes from
+geometry that a Euclidean map cannot reproduce.
+For the canonical representation, its first two positive axes retain
+\ppnum[3]{pcoa-two-axis-share} of total positive inertia; this share does not
+describe the metric-MDS coordinates.
+For each representation, an axis's positive-inertia share divides its positive
+eigenvalue by the sum of all positive eigenvalues, including axes beyond those
+shown in the scree panel.
+Material negative eigenvalues indicate non-Euclidean structure in the squared
+distance matrix; their absolute sum divided by the sum of absolute eigenvalues
+measures its negative-inertia share.
+For the canonical representation this share is
+\ppnum[3]{pcoa-negative-inertia-share}.
+It is reported separately rather than folded into explained positive inertia.
+
+\Cref{fig:pcoa-scree,fig:pcoa-vintage-scree} compare spectral concentration
+across the seven encoder/width cells and the eight annual ChronoBERT cells,
+respectively, using the same firms and each cell's 128-article W$_2$ matrix.
+The return benchmark uses the eigenvalues of the same firms' unstandardized
+in-sample covariance matrix.
+This is PCA of returns with dates as observations and firms as variables.
+Its eigenvalue shares measure explained return variance, whereas the W$_2$
+curves measure positive inertia in firm-distance geometry.
+Their comparison describes spectral concentration and does not measure return
+variance explained by news coordinates.
+\Cref{tab:pcoa-spectrum} reports the two-axis positive-inertia and negative-mass
+shares for all fifteen representations.
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{1}{pcoa_scree}
+  \caption{Spectral concentration of the seven base encoder/width W$_2$
+    geometries and in-sample return PCA on the common firm universe.
+    The upper panel overlays the first twenty positive-axis shares; the lower
+    panel overlays cumulative shares over the full available spectra.
+    Each W$_2$ eigenvalue is divided by its matrix's total positive inertia;
+    return PCA eigenvalues are divided by total return variance.
+    The seven geometries are Qwen3-8B at 4,096, 1,024, 256 and 64 coordinates,
+    Qwen3-4B at 2,560 and 1,024 coordinates, and BGE-large-v1.5 at 1,024
+    coordinates, each using 128 articles per firm.
+    Return PCA uses the unstandardized in-sample covariance matrix.
+    Negative W$_2$ inertia is reported separately in
+    \Cref{tab:pcoa-spectrum}; the curves do not estimate return variance
+  explained by news. }
+  \label{fig:pcoa-scree}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{1}{pcoa_vintage_scree}
+  \caption{Spectral concentration of the eight ChronoBERT W$_2$ geometries
+    and the same in-sample return-PCA benchmark as \Cref{fig:pcoa-scree}.
+    Each annual checkpoint from 2017 through 2024 represents the same 128
+    articles per firm in 768 coordinates.
+    The upper panel overlays the first twenty positive-axis shares and the
+    lower panel cumulative shares over the full available spectra.
+    W$_2$ shares use total positive inertia as their denominator; return-PCA
+    shares use total variance of the unstandardized in-sample covariance
+    matrix. Negative W$_2$ inertia is reported separately in
+    \Cref{tab:pcoa-spectrum}.
+    These cumulative-training checkpoints do not hold training exposure or
+  compute fixed. }
+  \label{fig:pcoa-vintage-scree}
+\end{figure}
+
+\input{generated/pcoa_spectrum}
+
+\subsection{Returns of neighbouring firms}
 \label{sec:exploratory-geometry-outcomes}
-% pp-interpretation-hash{paper1-neighbour-outcome-split-v2}{14d0af58abc8f7e7de5a2956c26ef0e2170d3722946055a5ad9b44cae4512926}
+
+\Cref{fig:neighbour-outcome-paths} traces cumulative log returns for
+\ppnum[0]{neighbour-holdout-n-selected} within-sector pairs selected as
+nearest neighbours in the 2018--2020 W$_2$ article geometry.
+Some pairs track closely over 2021--2022, while others separate materially.
+The display illustrates the variety of realized dependence among firms with
+similar reported information.
+% pp-interpretation-hash{paper1-neighbour-outcome-split-v2}{68dc897bf1a58e688391c7b3cdb7c314c0ec28aa7f5f7b9ac91a7f6fe37d5af7}
+
+\begin{figure}[H]
+  \centering
+  \ppfigure{0.78}{neighbour_holdout_paths}
+  \caption{Cumulative log returns for
+    \ppnum[0]{neighbour-holdout-n-selected} within-sector nearest-neighbour
+    pairs selected using 2018--2020 article W$_2$.
+    Panels label sectors and tickers over 4 January 2021--30 December 2022.
+    Insets show W$_2$, RMS and terminal path gaps, and RMS percentile among
+    within-sector pairs (zero denotes closest tracking).
+  }
+  \label{fig:neighbour-outcome-paths}
+\end{figure}

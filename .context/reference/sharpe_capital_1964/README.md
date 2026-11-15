@@ -16,5 +16,3 @@ issue: '3'
 publisher: Wiley
 page: 425-442
 ---
-
-# Capital Asset Prices: A Theory of Market Equilibrium under Conditions of Risk

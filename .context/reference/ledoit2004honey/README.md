@@ -16,5 +16,3 @@ issue: '4'
 publisher: Institutional Investor Journals
 page: 110-119
 ---
-
-# Honey, I Shrunk the Sample Covariance Matrix

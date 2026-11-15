@@ -9,11 +9,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="styles/theme-white.css" />
   <link rel="stylesheet" href="styles/dep_graph.css" />
-
+  
   <script type="text/x-mathjax-config">
-
+  
     MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
-
+  
   </script>
 
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">  </script>
@@ -36,39 +36,279 @@
        <div class="bar"></div>
        <div class="bar"></div>
        <div class="bar"></div>
-    </div></span>
+    </div></span> 
     <dl class="legend">
-
+      
       <dt>Boxes</dt><dd>definitions</dd>
-
+      
       <dt>Ellipses</dt><dd>theorems and lemmas</dd>
-
+      
       <dt>Blue border</dt><dd>the <em>statement</em> of this result is ready to be formalized; all prerequisites are done</dd>
-
+      
       <dt>Orange border</dt><dd>the <em>statement</em> of this result is not ready to be formalized; the blueprint needs more work</dd>
-
+      
       <dt>Blue background</dt><dd>the <em>proof</em> of this result is ready to be formalized; all prerequisites are done</dd>
-
+      
       <dt>Green border</dt><dd>the <em>statement</em> of this result is formalized</dd>
-
+      
       <dt>Green background</dt><dd>the <em>proof</em> of this result is formalized</dd>
-
+      
       <dt>Dark green background</dt><dd>the <em>proof</em> of this result and all its ancestors are formalized</dd>
-
+      
       <dt>Dark green border</dt><dd>this is in Mathlib</dd>
-
+      
     </dl>
   </div>
     <div id="graph"></div>
 <div id="statements">
 
+    
+    <div class="dep-modal-container" id="app:anchored-stage_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="app:anchored-stage" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">74</span></div>
+    <div class="thm_thmcontent"><p>  Every anchored stage game of the rational-share economy has a unique equilibrium on the capacity orthant. Assumptions: Uniformly positive cost curvature, a nonnegative adjustment weight, contemporaneous rivals, and any anchor. </p>
+</div>
 
+    <a class="latex_link" href="sect0017.html#app:anchored-stage">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.existsUnique_proxSolvesVI_capacityOrthant">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="app:equilibrium-derivative_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="app:equilibrium-derivative" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">76</span></div>
+    <div class="thm_thmcontent"><p>  The negative marginal-profit field is Fréchet differentiable with derivative equal to the Jacobian blocks. Assumptions: A profile with positive share denominators. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#app:equilibrium-derivative">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.hasFDerivAt_pseudoGradient">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="app:independent-distance_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="app:independent-distance" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">63</span></div>
+    <div class="thm_thmcontent"><p>  The independent product residual bounds joint equilibrium error. Assumptions: Independent one-firm rational-share objectives, feasibility, and positive cost curvature. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#app:independent-distance">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.dist_equilibrium_le_equilibriumStationarityResidual">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="app:independent-proof_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="app:independent-proof" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">58</span></div>
+    <div class="thm_thmcontent"><p>  Unique equilibrium of the independent product economy. Assumptions: Nonnegative one-firm rational-share appeals and positive cost curvature. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#app:independent-proof">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.existsUnique_isEquilibrium">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="app:independent-regret_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="app:independent-regret" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">64</span></div>
+    <div class="thm_thmcontent"><p>  Independent firm residual bounds unilateral regret. Assumptions: Independent one-firm rational-share objectives, feasibility, and positive cost curvature. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#app:independent-regret">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.unilateralPayoffGain_le_sq_norm_firmStationarityResidual_div">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="app:regret-proof_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="app:regret-proof" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">61</span></div>
+    <div class="thm_thmcontent"><p>  Firm stationarity residual bounds unilateral regret. Assumptions: Own strong concavity, feasibility, and frozen rivals. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#app:regret-proof">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.SolverCertificates.EquilibriumRegretCertificate.unilateralPayoffGain_le_sq_norm_firmStationarityResidual_div">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="app:response-jacobian_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="app:response-jacobian" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">66</span></div>
+    <div class="thm_thmcontent"><p>  The own and rival Jacobian blocks are the directional derivative of the negative marginal-profit field. Assumptions: A profile with positive share denominators and any direction. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#app:response-jacobian">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.hasDerivAt_pseudoGradient_line">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="app:symmetry-proof_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="app:symmetry-proof" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">59</span></div>
+    <div class="thm_thmcontent"><p>  Identical primitives and uniqueness imply equal firm blocks. Assumptions: Common firm primitives and a unique Nash equilibrium. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#app:symmetry-proof">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.equilibrium_blocks_eq_of_common_primitives">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="ass:random-common-map_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="ass:random-common-map" style="display: none">
     <div class="thm_thmheading">
       <span class="definition_thmcaption">
@@ -76,33 +316,33 @@
       </span>
       <span class="definition_thmlabel">11</span><span class="definition_thmtitle">Randomized bi-Lipschitz pushforward</span></div>
     <div class="thm_thmcontent"><p>   The exposure law is generated from an observable characteristic law by one common stochastic map with bounded slack: </p>
-<div class="displaymath" id="a0000000026">
+<div class="displaymath" id="a0000000028">
   \[  B_i=T(X_i,U_i)=t(X_i)+\delta _i(X_i,U_i),\qquad X_i\sim C_i,\qquad \lVert \delta _i(X_i,U_i)\rVert \le \tau _i,  \]
 </div>
 <p> with the common carrier \(t\) bi-Lipschitz, \(\ell \, d(x,y)\le \lVert t(x)-t(y)\rVert \le L\, d(x,y)\) for \(0{\lt}\ell \le L\). The constants \(L\), \(\ell \), and the slack radii \(\tau _i\) are maintained modelling restrictions, not quantities the observed distances identify or the empirical design estimates. </p>
 </div>
 
     <a class="latex_link" href="sect0003.html#ass:random-common-map">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="cor:approximate-map-bound_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="cor:approximate-map-bound" style="display: none">
     <div class="thm_thmheading">
       <span class="corollary_thmcaption">
@@ -110,30 +350,90 @@
       </span>
       <span class="corollary_thmlabel">18</span><span class="corollary_thmtitle">Approximate common map</span></div>
     <div class="thm_thmcontent"><p>   If each exposure deviates from a common map value by at most \(\tau _i\), the covariance floor holds with \(LD\) inflated to \(LD+\tau _i+\tau _j\), and exact transmission is the \(\tau =0\) case. </p>
-<p>The statement fixes no characteristic distance: \(D\) is an arbitrary nonnegative dissimilarity, and energy distance was only ever one instance. Hosting it under the energy development misread that generality, which is why the declaration now lives in <span class="ttfamily">Transmission.Floor</span> and the node here. Contrast ??thm:random-exposure-envelope, which is <em>not</em> distance-agnostic: the sharp envelope needs quadratic transport specifically, because minimising the coupling cost is the same optimisation polarisation turns into an inner product. </p>
+<p>The statement fixes no characteristic distance: \(D\) is an arbitrary nonnegative dissimilarity, and energy distance was only ever one instance. Hosting it under the energy development misread that generality, which is why the declaration now lives in <span class="ttfamily">Transmission.Floor</span> and the node here. Contrast <a href="sect0002.html#thm:random-exposure-envelope">Theorem 6</a>, which is <em>not</em> distance-agnostic: the sharp envelope needs quadratic transport specifically, because minimising the coupling cost is the same optimisation polarisation turns into an inner product. </p>
 </div>
 
     <a class="latex_link" href="sect0005.html#cor:approximate-map-bound">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="cor:exposure_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="cor:exposure" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">71</span></div>
+    <div class="thm_thmcontent"><p>  At fixed capacities, payoff is affine in opportunity values with slopes equal to node shares. Assumptions: Fixed capacities and two opportunity-value vectors. </p>
+</div>
 
+    <a class="latex_link" href="sect0017.html#cor:exposure">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.payoff_withRevenue_sub">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="cor:mixture-nesting_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="cor:mixture-nesting" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">49</span></div>
+    <div class="thm_thmcontent"><p>  A convex combination of two nonnegative, unit-row-sum interaction matrices is again nonnegative and unit-row-sum. Assumptions: both interaction matrices are row-stochastic; the mixture weight lies in the unit interval. This declaration does not establish a zero-diagonal condition. </p>
+</div>
+
+    <a class="latex_link" href="sect0016.html#cor:mixture-nesting">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Transmission.mixField_mem_rowStochastic">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="cor:random-w2-metric_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="cor:random-w2-metric" style="display: none">
     <div class="thm_thmheading">
       <span class="corollary_thmcaption">
@@ -141,7 +441,7 @@
       </span>
       <span class="corollary_thmlabel">14</span><span class="corollary_thmtitle">Metric-level bracket</span></div>
     <div class="thm_thmcontent"><p>   At the level of the metric rather than the squared optimized cost, the slack enters additively and no support diameter appears: </p>
-<div class="displaymath" id="a0000000029">
+<div class="displaymath" id="a0000000031">
   \[  \ell ^{-1}W_2(C_i,C_j)-(\tau _i+\tau _j) \le W_{2,\Gamma }(P_i,P_j) \le L\, W_2(C_i,C_j)+(\tau _i+\tau _j).  \]
 </div>
 <p> This sharper form is what the empirical diagnostic uses. </p>
@@ -149,26 +449,90 @@
 </div>
 
     <a class="latex_link" href="sect0003.html#cor:random-w2-metric">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="cor:zero-feedback-nesting_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="cor:zero-feedback-nesting" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">54</span></div>
+    <div class="thm_thmcontent"><p>  At zero spatial feedback the Hilbert-valued spatial autoregression reduces exactly to the primitive randomized transmission exposure. </p>
+</div>
 
+    <a class="latex_link" href="sect0016.html#cor:zero-feedback-nesting">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Transmission.hilbert_sar_zero_eq_primitive">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="def:energy-distance_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="def:energy-distance" style="display: none">
+    <div class="thm_thmheading">
+      <span class="definition_thmcaption">
+      Definition
+      </span>
+      <span class="definition_thmlabel">29</span><span class="definition_thmtitle">Squared energy functional</span></div>
+    <div class="thm_thmcontent"><p>  For laws with finite first distance moments, let </p>
+<div class="displaymath" id="a0000000045">
+  \[  \mathcal E^2(\mu ,\nu ) =2\mathbb E d(X,Y)-\mathbb E d(X,X')-\mathbb E d(Y,Y'),  \]
+</div>
+<p> where the four draws are independent with the indicated marginal laws. Negative type ensures nonnegativity; the upper bound below does not require that additional geometric property. </p>
+</div>
+
+    <a class="latex_link" href="sect0011.html#def:energy-distance">LaTeX</a>
+    
+    
+  
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="def:exposure-law_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="def:exposure-law" style="display: none">
     <div class="thm_thmheading">
       <span class="definition_thmcaption">
@@ -176,38 +540,38 @@
       </span>
       <span class="definition_thmlabel">1</span><span class="definition_thmtitle">Random functional exposure law</span></div>
     <div class="thm_thmcontent"><p>  Asset \(i\) carries a random loading \(B_i\sim P_i\in \mathcal P_2(\mathcal H)\) in a real Hilbert space \(\mathcal H\), and the common factor process has covariance operator \(\Gamma \). The risk coordinates and factor-weighted second moments are </p>
-<div class="displaymath" id="a0000000015">
+<div class="displaymath" id="a0000000019">
   \[  Z_i=\Gamma ^{1/2}B_i,\qquad v_i=\mathbb E\lVert Z_i\rVert ^2 .  \]
 </div>
 <p> For a coupling \(\pi \in \Pi (P_i,P_j)\) the systematic covariance is \(\kappa ^\pi _{ij}=\mathbb E_\pi \langle Z_i,Z_j\rangle \), and the factor-weighted quadratic transport cost is </p>
-<div class="displaymath" id="a0000000016">
+<div class="displaymath" id="a0000000020">
   \[  W_{2,\Gamma }^2(P_i,P_j) =\inf _{\pi \in \Pi (P_i,P_j)}\mathbb E_\pi \lVert Z_i-Z_j\rVert ^2 .  \]
 </div>
-<p> Every object above is now formalized at this level, not only interpreted: risk coordinates as a pushforward under \(\Gamma ^{1/2}\), the second moment and systematic covariance as Bochner integrals, and the transport cost as the infimum defining \(W_2\) on \(\mathcal P_2(\mathcal H)\). The finite instance of ??def:finite-exposure-cloud is the estimator of this object rather than a separate model, and the two agree exactly on finitely supported laws. </p>
+<p> Every object above is now formalized at this level, not only interpreted: risk coordinates as a pushforward under \(\Gamma ^{1/2}\), the second moment and systematic covariance as Bochner integrals, and the transport cost as the infimum defining \(W_2\) on \(\mathcal P_2(\mathcal H)\). The finite instance of <a href="sect0001.html#def:finite-exposure-cloud">Definition 2</a> is the estimator of this object rather than a separate model, and the two agree exactly on finitely supported laws. </p>
 <p>One caveat survives and is unchanged: existence of an optimal plan on \(\mathcal P_2(\mathcal H)\) is <em>not</em> proved. It is supplied as a certificate wherever an optimum is needed, so every attainment statement below reads “given such a plan”, never “one exists”. </p>
 </div>
 
     <a class="latex_link" href="sect0001.html#def:exposure-law">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="def:finite-exposure-cloud_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="def:finite-exposure-cloud" style="display: none">
     <div class="thm_thmheading">
       <span class="definition_thmcaption">
@@ -218,26 +582,26 @@
 </div>
 
     <a class="latex_link" href="sect0001.html#def:finite-exposure-cloud">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="def:frechet-class_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="def:frechet-class" style="display: none">
     <div class="thm_thmheading">
       <span class="definition_thmcaption">
@@ -248,90 +612,386 @@
 </div>
 
     <a class="latex_link" href="sect0002.html#def:frechet-class">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="def:perron-limit_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="def:perron-limit" style="display: none">
     <div class="thm_thmheading">
       <span class="definition_thmcaption">
       Definition
       </span>
-      <span class="definition_thmlabel">31</span><span class="definition_thmtitle">Geometric Perron certificate</span></div>
-    <div class="thm_thmcontent"><p>   For \(P=\mathbf1\pi ^\top \), a geometric Perron certificate records constants \(C\geq 0\) and \(0\leq q{\lt}1\) such that \(\lVert W^k-P\rVert \leq Cq^k\) for every natural number \(k\). </p>
+      <span class="definition_thmlabel">32</span></div>
+    <div class="thm_thmcontent"><p>  A quantitative geometric Perron certificate records that the operator powers approach the rank-one stationary projection at rate \(Cq^k\). </p>
 </div>
 
     <a class="latex_link" href="sect0012.html#def:perron-limit">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.HasGeometricPerronBound">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.HasGeometricPerronBound">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="eq:certificate_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:certificate" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">60</span></div>
+    <div class="thm_thmcontent"><p>  Joint stationarity bounds equilibrium distance. Assumptions: Feasible profile and strongly monotone rational-share operator. </p>
+</div>
 
+    <a class="latex_link" href="sect0017.html#eq:certificate">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.SolverCertificates.EquilibriumRegretCertificate.dist_orthantEquilibrium_le_equilibriumStationarityResidual">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:composition-derivative_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:composition-derivative" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">70</span></div>
+    <div class="thm_thmcontent"><p>  The derivative of composition with respect to capacity removes the proportional scale direction. Assumptions: A capacity block with positive total mass. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:composition-derivative">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.hasDerivAt_composition">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:cost-response_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:cost-response" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">80</span></div>
+    <div class="thm_thmcontent"><p>  Under strict complementarity the equilibrium responds to a change in linear activity costs through the restricted linear system with forcing minus the cost change. Assumptions: Assumption 1 primitives, an equilibrium with strict complementarity, the active set of positive capacities, and nonnegative nearby linear costs. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:cost-response">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.equilibrium_sub_costResponse_le">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:envelope_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:envelope" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">77</span></div>
+    <div class="thm_thmcontent"><p>  Cash flow along a joint capacity and opportunity direction changes by direct news, the own-adjustment term, and the rival value effect. Assumptions: Symmetric cost curvature and positive share denominators. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:envelope">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.Valuation.CashFlowResponse.hasDerivAt_cashFlowLine">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:equilibrium-cash-flow_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:equilibrium-cash-flow" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">79</span></div>
+    <div class="thm_thmcontent"><p>  Equilibrium free cash flow responds to opportunity values through direct news plus the value of rivals’ equilibrium repositioning. Assumptions: Assumption 1 primitives and an equilibrium with strict complementarity. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:equilibrium-cash-flow">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.Valuation.EquilibriumCashFlow.equilibriumCashFlow_sub_le">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:equilibrium-derivative_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:equilibrium-derivative" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">75</span></div>
+    <div class="thm_thmcontent"><p>  Under strict complementarity the linear response is the derivative of the equilibrium map in opportunity values. Assumptions: Assumption 1 primitives, an equilibrium with strict complementarity, the active set of positive capacities, and nonnegative nearby opportunity values. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:equilibrium-derivative">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.equilibrium_sub_linearResponse_le">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:exposure-covariance_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:exposure-covariance" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">72</span></div>
+    <div class="thm_thmcontent"><p>  Share-weighted opportunity innovations have covariance \(S\Omega S^\top \). Assumptions: Square-integrable innovations and a predetermined share matrix. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:exposure-covariance">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.covariance_exposure">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:feedback_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:feedback" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">69</span></div>
+    <div class="thm_thmcontent"><p>  Full minus direct response is the full response to the rival forcing generated by the direct response. Assumptions: Full and direct responses on the same active set. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:feedback">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.feedback_eq_response_to_rival_forcing">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:linear-response_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:linear-response" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">68</span></div>
+    <div class="thm_thmcontent"><p>  The linearized response is bounded by the restricted opportunity impulse divided by nu. Assumptions: A nonnegative profile, uniformly positive cost curvature, and any set of active coordinates. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:linear-response">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.linearResponse_norm_le">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:normalization-bound_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:normalization-bound" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">62</span></div>
+    <div class="thm_thmcontent"><p>  Joint capacity error bounds normalized firm composition error. Assumptions: Nonnegative capacities and computed mass exceeding the error-dependent threshold. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:normalization-bound">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.SolverCertificates.NormalizationCertificate.norm_normalized_incumbentBlock_sub_normalized_incumbentBlock_le">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="eq:p3-residual-budget-cap_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="eq:p3-residual-budget-cap" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">21</span><span class="theorem_thmtitle">Additive residual-budget cap</span></div>
-    <div class="thm_thmcontent"><p>    If standardized total variance decomposes into the certified systematic term and an aggregate residual contribution bounded by \(\delta \geq 0\), then </p>
-<div class="displaymath" id="a0000000037">
-  \[  \operatorname {Var}(R_q)\leq 1-\mathcal C(q)+\delta .  \]
-</div>
-<p> Multiplication by a nonnegative raw scale gives the corresponding raw-variance inequality. The theorem assumes \(\delta \); it does not estimate it or derive residual orthogonality. </p>
+      <span class="theorem_thmlabel">21</span></div>
+    <div class="thm_thmcontent"><p>  A systematic standardized variance cap and an assumed aggregate residual-covariance budget imply the additive total-return cap, with a nonnegative-scale raw-variance corollary. Assumptions: an additive decomposition of total standardized variance into systematic and residual contributions; the information-certificate systematic variance cap; an assumed upper budget for the aggregate residual contribution. </p>
 </div>
 
     <a class="latex_link" href="sect0007.html#eq:p3-residual-budget-cap">LaTeX</a>
-
-
+    
+    
   <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.totalVariance_le_informationCertificate_add_residualBudget">Lean</a>
-
-
-
-
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="eq:portfolio-envelope_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="eq:portfolio-envelope" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
@@ -339,90 +999,119 @@
       </span>
       <span class="theorem_thmlabel">19</span><span class="theorem_thmtitle">Portfolio variance floor</span></div>
     <div class="thm_thmcontent"><p>   For a finite book with nonnegative weights, the pairwise floors aggregate termwise into a floor on the squared systematic risk. Nonnegativity is a hypothesis, not a convention: signed weights can reverse individual pairwise inequalities and there is no signed-weight counterpart. No weight normalization is assumed, so the screen applies a fortiori to fully-invested long-only books. </p>
-<p>??chap:distance-implied carries its own label for this declaration under the distance-implied reading; the two manuscripts consume one theorem. </p>
 </div>
 
     <a class="latex_link" href="sect0005.html#eq:portfolio-envelope">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="eq:proportional-feedback_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:proportional-feedback" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">82</span></div>
+    <div class="thm_thmcontent"><p>  Full and direct normalized derivatives coincide exactly when capacity feedback is proportional to the initial allocation. Assumptions: Finite activity set and strictly positive total initial capacity. </p>
+</div>
 
+    <a class="latex_link" href="sect0017.html#eq:proportional-feedback">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.full_eq_direct_iff_feedback_proportional">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="eq:random-exposure-excess-nonneg_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="eq:random-exposure-excess-nonneg" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">9</span><span class="theorem_thmtitle">The excess is nonnegative</span></div>
-    <div class="thm_thmcontent"><p>    Against a certified optimal transport cost, \(\operatorname {excess}(\pi )\ge 0\) for every coupling. This is what makes the gap a one-sided moment inequality and hence testable; it is a separate theorem from the identity above, because the identity holds for any reference cost while the sign needs that cost to be the infimum. </p>
+      <span class="theorem_thmlabel">9</span></div>
+    <div class="thm_thmcontent"><p>  Against a certified optimal transport cost, the excess of any integrable coupling is nonnegative. Stated separately from the gap identity because that identity holds for an arbitrary reference cost and therefore carries no sign information; the sign requires the reference cost to be the certified minimum. Assumptions: loading laws in \(\mathcal{P}_2\) of a separable real Hilbert space; a certified optimal transport plan, supplied rather than proved to exist. </p>
 </div>
 
     <a class="latex_link" href="sect0002.html#eq:random-exposure-excess-nonneg">LaTeX</a>
-
-
+    
+    
   <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.excess_nonneg">Lean</a>
-
-
-
-
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="eq:random-exposure-gap_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="eq:random-exposure-gap" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">8</span><span class="theorem_thmtitle">Transport-excess gap</span></div>
-    <div class="thm_thmcontent"><p>    For any coupling, \(\kappa ^\pi _{ij}=\kappa ^{\max }_{ij}-\tfrac 12\operatorname {excess}(\pi )\). The checked statement is an identity in the reference cost: it holds for any scalar placed where the optimal cost sits, and therefore asserts nothing about the sign of the excess on its own. </p>
+      <span class="theorem_thmlabel">8</span></div>
+    <div class="thm_thmcontent"><p>  For any integrable coupling of two exposure laws in \(\mathcal{P}_2(H)\), covariance equals the optimal covariance envelope minus one half of the excess transport cost of that coupling. Assumptions: loading laws in \(\mathcal{P}_2\) of a separable real Hilbert space; couplings carrying integrability of both second moments and the cross term; a certified optimal transport plan, supplied rather than proved to exist. </p>
 </div>
 
     <a class="latex_link" href="sect0002.html#eq:random-exposure-gap">LaTeX</a>
-
-
+    
+    
   <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.systCov_eq_ceiling_sub_excess">Lean</a>
-
-
-
-
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="eq:random-kappa-bracket_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="eq:random-kappa-bracket" style="display: none">
     <div class="thm_thmheading">
       <span class="corollary_thmcaption">
@@ -433,119 +1122,266 @@
 </div>
 
     <a class="latex_link" href="sect0003.html#eq:random-kappa-bracket">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="eq:random-w2-lower-transfer_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="eq:random-w2-lower-transfer" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">13</span><span class="theorem_thmtitle">Lower transport transfer under slack</span></div>
-    <div class="thm_thmcontent"><p>    Under a positive lower Lipschitz constant and bounded per-endpoint slack, the optimized squared exposure transport cost is at least \(\ell ^{-2}\) times the optimized squared characteristic cost, less a slack term carrying the maintained support diameter. </p>
+      <span class="theorem_thmlabel">13</span></div>
+    <div class="thm_thmcontent"><p>  Under a positive lower Lipschitz constant and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at least the inverse squared Lipschitz constant times the optimized squared characteristic cost, less a slack term carrying the maintained support diameter. Assumptions: finite-support source and target laws with finite transport certificates; positive lower Lipschitz constant; lower Lipschitz transmission bound; nonnegative endpoint slack bounds; a maintained support-diameter bound. </p>
 </div>
 
     <a class="latex_link" href="sect0003.html#eq:random-w2-lower-transfer">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.RandomExposure.optimized_transportCost_ge_of_lower_lipschitz_slack">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Finite.optimized_transportCost_ge_of_lower_lipschitz_slack">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="eq:random-w2-upper-metric_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:random-w2-upper-metric" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">39</span></div>
+    <div class="thm_thmcontent"><p>  For exposure maps differing from a common \(L\)-Lipschitz map by a pointwise-bounded slack synchronous with the characteristic draw, the factor-weighted \(W_2\) distance between the induced exposure laws is at most \(\tau _i\) plus \(L\) times the characteristic \(W_2\) distance plus \(\tau _j\). Slack enters additively and no support diameter appears. Assumptions: characteristic laws in \(\mathcal{P}_2\) of a separable complete metric space; a common L-Lipschitz measurable transmission map in risk coordinates; pointwise slack bounds on each firm’s exposure map, synchronous with the draw. </p>
+</div>
 
+    <a class="latex_link" href="sect0014.html#eq:random-w2-upper-metric">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.wassersteinDistance_boundedSlack_le">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="eq:random-w2-upper-transfer_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="eq:random-w2-upper-transfer" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">12</span><span class="theorem_thmtitle">Upper transport transfer under slack</span></div>
-    <div class="thm_thmcontent"><p>    Under the upper Lipschitz bound and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at most \(L^2\) times the optimized squared characteristic cost, plus a slack term carrying the maintained support diameter. </p>
+      <span class="theorem_thmlabel">12</span></div>
+    <div class="thm_thmcontent"><p>  Under an upper Lipschitz transmission bound and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at most the squared Lipschitz constant times the optimized squared characteristic cost, plus a slack term carrying the maintained support diameter. Assumptions: finite-support source and target laws with finite transport certificates; upper Lipschitz transmission bound; nonnegative endpoint slack bounds; a maintained support-diameter bound. </p>
 </div>
 
     <a class="latex_link" href="sect0003.html#eq:random-w2-upper-transfer">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.RandomExposure.optimized_transportCost_le_of_upper_lipschitz_slack">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Finite.optimized_transportCost_le_of_upper_lipschitz_slack">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="eq:response-continuity_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:response-continuity" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">65</span></div>
+    <div class="thm_thmcontent"><p>  Equilibrium capacities are Lipschitz in opportunity values with constant \(L_r/\nu \). Assumptions: Nash equilibria of two rational-share economies that differ only in nonnegative opportunity values, with symmetric uniformly positive cost curvature and nonnegative linear costs. </p>
+</div>
 
+    <a class="latex_link" href="sect0017.html#eq:response-continuity">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.orthantEquilibrium_dist_le_opportunityShift">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:rival-cross_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:rival-cross" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">73</span></div>
+    <div class="thm_thmcontent"><p>  A rival’s weak capacity expansion weakly lowers a firm’s payoff. Assumptions: A nonnegative profile and a rival whose capacities weakly rise. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:rival-cross">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.payoff_replaceFirm_rival_le">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:total-return-excess-correction_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:total-return-excess-correction" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">40</span></div>
+    <div class="thm_thmcontent"><p>  Under an independent centered isotropic factor law, square-integrable systematic returns and centered residuals, and zero systematic-residual and cross-residual moments, total-return squared distance minus certified optimal exposure cost equals systematic transport excess plus the two residual variances. Assumptions: an integrable coupling of exposure laws and a certified optimal transport plan; a centered isotropic factor law independent of the joint exposure draw; square-integrable systematic returns and centered square-integrable residuals; all four systematic-residual cross moments and the cross-residual moment are zero. </p>
+</div>
+
+    <a class="latex_link" href="sect0014.html#eq:total-return-excess-correction">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.totalReturnDiagnostic_eq_excess_add_residualVarianceSum">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="eq:two-site-transport_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="eq:two-site-transport" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">81</span></div>
+    <div class="thm_thmcontent"><p>  The finite two-site squared optimal transport infimum is d squared times the absolute probability-share difference. Assumptions: Both shares lie in the unit interval; diagonal transport costs zero and cross-site transport costs d squared. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#eq:two-site-transport">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/WassersteinGeometry.twoSiteDistanceSq_eq">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="lem:polarization_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="lem:polarization" style="display: none">
     <div class="thm_thmheading">
-      <span class="lemma_thmcaption">
-      Lemma
+      <span class="theorem_thmcaption">
+      Theorem
       </span>
-      <span class="lemma_thmlabel">3</span><span class="lemma_thmtitle">Polarization</span></div>
-    <div class="thm_thmcontent"><p>   For any \(x,y\) in a real inner-product space, </p>
-<div class="displaymath" id="a0000000018">
-  \[  \langle x,y\rangle =\tfrac 12\left(\lVert x\rVert ^2+\lVert y\rVert ^2-\lVert x-y\rVert ^2\right).  \]
-</div>
+      <span class="theorem_thmlabel">3</span></div>
+    <div class="thm_thmcontent"><p>  For any \(x,y\) in a real inner product space, \(\langle x,y\rangle = \frac12(\lVert x\rVert ^2+\lVert y\rVert ^2-\lVert x-y\rVert ^2)\). </p>
 </div>
 
     <a class="latex_link" href="sect0001.html#lem:polarization">LaTeX</a>
-
-
+    
+    
   <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/norm_sub_sq_real">Lean</a>
-
-
-
-
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="lem:transport-polarization_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="lem:transport-polarization" style="display: none">
     <div class="thm_thmheading">
       <span class="lemma_thmcaption">
@@ -553,126 +1389,363 @@
       </span>
       <span class="lemma_thmlabel">4</span><span class="lemma_thmtitle">Transport polarization for a coupling</span></div>
     <div class="thm_thmcontent"><p>   For every coupling \(\pi \) of two finite exposure clouds, </p>
-<div class="displaymath" id="a0000000020">
+<div class="displaymath" id="a0000000023">
   \[  \kappa ^\pi _{ij}=\tfrac 12\left(v_i+v_j-C(\pi )\right).  \]
 </div>
 <p> The identity is exact and holds coupling by coupling; no optimality is involved. </p>
 </div>
 
     <a class="latex_link" href="sect0001.html#lem:transport-polarization">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="prop:channel-inversion_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:channel-inversion" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">51</span></div>
+    <div class="thm_thmcontent"><p>  Each channel’s adjustment intensity equals its own spatial coefficient divided by one minus the sum of both coefficients. Assumptions: nonnegative adjustment intensity in each channel. </p>
+</div>
 
+    <a class="latex_link" href="sect0016.html#prop:channel-inversion">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Transmission.channelRho_inversion">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="prop:composition-feedback_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:composition-feedback" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">83</span></div>
+    <div class="thm_thmcontent"><p>  Conditional many-firm activity-local cost-response signs support the composition benchmark. Assumptions: Positive curvature, opportunity value, denominator and cost reduction, strict strategic substitution at the affected activity. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#prop:composition-feedback">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.RankOneCostShock.primitive_response_signs">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="prop:equilibrium_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:equilibrium" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">57</span></div>
+    <div class="thm_thmcontent"><p>  Unique Nash equilibrium of the rational-share capacity economy under primitive curvature conditions. Assumptions: Finite fixed sites, nonnegative opportunities and costs, positive outside appeal and own curvature. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#prop:equilibrium">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.existsUnique_isNashOrthant_of_primitives">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="prop:finite-rho-bound_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="prop:finite-rho-bound" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">35</span><span class="theorem_thmtitle">Finite-\(\rho \) resolvent bound</span></div>
-    <div class="thm_thmcontent"><p>   If \(\lVert \rho (W-P)\rVert {\lt}1\), then </p>
-<div class="displaymath" id="a0000000051">
-  \[  \left\lVert (1-\rho )(I-\rho W)^{-1}-P\right\rVert \leq |1-\rho |\{ 1-\lVert \rho (W-P)\rVert \} ^{-1}\lVert I-P\rVert .  \]
-</div>
+      <span class="theorem_thmlabel">36</span></div>
+    <div class="thm_thmcontent"><p>  At finite rho, the normalized Leontief multiplier differs from its rank-one projection by an exact complementary resolvent and is bounded by a Neumann denominator whenever the complementary norm is below one. Assumptions: absorbing idempotent projection; \(\rho \ne 1\); the complementary Neumann norm is below one; the index set is nonempty. </p>
 </div>
 
     <a class="latex_link" href="sect0013.html#prop:finite-rho-bound">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.normalized_leontief_error_le">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.normalized_leontief_error_le">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="prop:p3-barycenter-representation_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:p3-barycenter-representation" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">41</span></div>
+    <div class="thm_thmcontent"><p>  For finitely many probability laws on a separable real Hilbert space, weighted multimarginal quadratic dispersion equals the infimum of the weighted sum of squared quadratic Wasserstein distances to a common barycentre law. Assumptions: finitely many probability laws with finite second moments on a separable real Hilbert space; nonnegative weights summing to one. </p>
+</div>
 
+    <a class="latex_link" href="sect0015.html#prop:p3-barycenter-representation">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/WassersteinGeometry.Multimarginal.wassersteinBarycenterDispersionSq_eq_toReal_wassersteinDispersionSq_unconditional">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="prop:pairwise-not-psd_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="prop:pairwise-not-psd" style="display: none">
     <div class="thm_thmheading">
       <span class="proposition_thmcaption">
       Proposition
       </span>
       <span class="proposition_thmlabel">10</span><span class="proposition_thmtitle">Pairwise envelopes do not assemble</span></div>
-    <div class="thm_thmcontent"><p>   The matrix of independently optimal pairwise envelopes \(\left[\kappa ^{\max }_{ij}\right]\) need not be positive semidefinite, because pairwise-optimal couplings may be mutually inconsistent. A globally coherent covariance requires one joint law, as in ??thm:joint-coherence. Stating this boundary is part of the contribution and is not a defect of the envelope. </p>
+    <div class="thm_thmcontent"><p>   The matrix of independently optimal pairwise envelopes \(\left[\kappa ^{\max }_{ij}\right]\) need not be positive semidefinite, because pairwise-optimal couplings may be mutually inconsistent. A globally coherent covariance requires one joint law, as in <a href="sect0004.html#thm:joint-coherence">Theorem 16</a>. Stating this boundary is part of the contribution and is not a defect of the envelope. </p>
 </div>
 
     <a class="latex_link" href="sect0002.html#prop:pairwise-not-psd">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="prop:response_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:response" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">67</span></div>
+    <div class="thm_thmcontent"><p>  The equilibrium conditions linearized on any active set have a unique solution. Assumptions: A nonnegative profile, uniformly positive cost curvature, and any set of active coordinates. </p>
+</div>
 
+    <a class="latex_link" href="sect0017.html#prop:response">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.RationalShare.EquilibriumResponse.linearResponse_existsUnique">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="prop:scalar-projection_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="prop:scalar-projection" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">53</span></div>
+    <div class="thm_thmcontent"><p>  Every scalar inner-product projection of a Hilbert-valued spatial autoregression satisfies the ordinary scalar spatial autoregression with the same interaction matrix and feedback parameter, with the corresponding scalar reduced form. Assumptions: the scaled interaction operator has norm below one. </p>
+</div>
+
+    <a class="latex_link" href="sect0016.html#prop:scalar-projection">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Transmission.scalarProjection_reduced_form">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="rem:envelope_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="rem:envelope" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">78</span></div>
+    <div class="thm_thmcontent"><p>  At a static equilibrium the own term vanishes, leaving direct opportunity news plus the rival value effect. Assumptions: Symmetric cost curvature, positive share denominators, and a field that vanishes wherever the direction moves the firm’s capacity. </p>
+</div>
+
+    <a class="latex_link" href="sect0017.html#rem:envelope">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Operating.Valuation.CashFlowResponse.hasDerivAt_cashFlowLine_static">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:adjustment-equilibrium_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:adjustment-equilibrium" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">47</span></div>
+    <div class="thm_thmcontent"><p>  For nonnegative adjustment intensity and a row-stochastic interaction matrix, a profile minimizes every firm’s quadratic adjustment objective coordinatewise if and only if it satisfies the exact vanishing-gradient equation. Assumptions: nonnegative adjustment intensity; row-stochastic interaction matrix. </p>
+</div>
+
+    <a class="latex_link" href="sect0016.html#thm:adjustment-equilibrium">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Transmission.quadraticAdjustmentEquilibrium_iff_stationary">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="thm:ball-inclusion_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:ball-inclusion" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">29</span><span class="theorem_thmtitle">Wasserstein balls sit inside energy balls</span></div>
-    <div class="thm_thmcontent"><p>   If \(W_2(\mu ,\nu )\le \delta \) then \(\mathcal E^2(\mu ,\nu )\le 2\delta \); the Wasserstein ball of radius \(\delta \) is therefore contained in the energy-distance ball of radius \(2\delta \). The inclusion is one-directional, and that direction is the pivot’s justification: a \(W_2\) hypothesis is the stronger one, so results proved under it apply to the energy ball, while the converse fails. This node belongs with the trunk rather than with this chapter. </p>
+      <span class="theorem_thmlabel">30</span><span class="theorem_thmtitle">Wasserstein balls sit inside energy balls</span></div>
+    <div class="thm_thmcontent"><p>   For probability laws with finite first distance moments, if \(W_2(\mu ,\nu )\le \delta \) then \(\mathcal E^2(\mu ,\nu )\le 2\delta \); the Wasserstein ball of radius \(\delta \) is therefore contained in the squared-energy sublevel set with threshold \(2\delta \). A guarantee uniform over this larger sublevel set also holds over the Wasserstein ball; the inclusion does not give the reverse implication. This node belongs with the trunk rather than with this chapter. </p>
 </div>
 
     <a class="latex_link" href="sect0011.html#thm:ball-inclusion">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:box-corner_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:box-corner" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
@@ -683,26 +1756,26 @@
 </div>
 
     <a class="latex_link" href="sect0010.html#thm:box-corner">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:covariance-bracket_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:covariance-bracket" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
@@ -713,56 +1786,56 @@
 </div>
 
     <a class="latex_link" href="sect0009.html#thm:covariance-bracket">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:dist-bracket_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:dist-bracket" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
       <span class="theorem_thmlabel">24</span><span class="theorem_thmtitle">Radii add on the metric</span></div>
-    <div class="thm_thmcontent"><p>   Under the same radii, \(\lvert \operatorname {dist}(\mu _i',\mu _j')-\operatorname {dist}(\mu _i,\mu _j)\rvert \le \varepsilon _i+\varepsilon _j\). Additivity on the metric, rather than on the squared quantity, is the same structural fact that makes the metric-level bracket of ??cor:random-w2-metric sharper than its squared counterpart. </p>
+    <div class="thm_thmcontent"><p>   Under the same radii, \(\lvert \operatorname {dist}(\mu _i',\mu _j')-\operatorname {dist}(\mu _i,\mu _j)\rvert \le \varepsilon _i+\varepsilon _j\). Additivity on the metric, rather than on the squared quantity, is the same structural fact that makes the metric-level bracket of <a href="sect0003.html#cor:random-w2-metric">Corollary 14</a> sharper than its squared counterpart. </p>
 </div>
 
     <a class="latex_link" href="sect0009.html#thm:dist-bracket">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:energy-bracket_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:energy-bracket" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
@@ -773,26 +1846,26 @@
 </div>
 
     <a class="latex_link" href="sect0009.html#thm:energy-bracket">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:factor-return-semantics_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:factor-return-semantics" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
@@ -803,26 +1876,26 @@
 </div>
 
     <a class="latex_link" href="sect0004.html#thm:factor-return-semantics">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:inner-perturbation_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:inner-perturbation" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
@@ -833,307 +1906,476 @@
 </div>
 
     <a class="latex_link" href="sect0009.html#thm:inner-perturbation">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:joint-coherence_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:joint-coherence" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
       <span class="theorem_thmlabel">16</span><span class="theorem_thmtitle">One joint law gives a coherent covariance</span></div>
-    <div class="thm_thmcontent"><p>   A joint exposure law over all assets reproduces each pairwise systematic covariance on its diagonal coupling, and the induced portfolio quadratic form equals the second moment of the aggregated loading \(B_w=\sum _i w_iB_i\). Coherence is therefore automatic once the object is a single joint law, and the quadratic form is positive semidefinite for that reason alone. This is the honest route around ??prop:pairwise-not-psd. </p>
+    <div class="thm_thmcontent"><p>   A joint exposure law over all assets reproduces each pairwise systematic covariance on its diagonal coupling, and the induced portfolio quadratic form equals the second moment of the aggregated loading \(B_w=\sum _i w_iB_i\). Coherence is therefore automatic once the object is a single joint law, and the quadratic form is positive semidefinite for that reason alone. This is the honest route around <a href="sect0002.html#prop:pairwise-not-psd">Proposition 10</a>. </p>
 </div>
 
     <a class="latex_link" href="sect0004.html#thm:joint-coherence">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="thm:p3-aggregate-transfer_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:p3-aggregate-transfer" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">42</span></div>
+    <div class="thm_thmcontent"><p>  For a measurable antilipschitz carrier and heterogeneous synchronous transmission slack, exposure dispersion is at least the positive part of inverse carrier distortion times characteristic dispersion minus weighted root-mean-square slack. Assumptions: a measurable embedding that is antilipschitz with nonzero constant; common carrier and realized transmission laws are coordinatewise pushforwards; each realized transmission has the stated integrated squared slack radius. </p>
+</div>
 
+    <a class="latex_link" href="sect0015.html#thm:p3-aggregate-transfer">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.aggregateCarrierFloor_le_of_rms_slack_unconditional">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:p3-certificate-convexity_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:p3-certificate-convexity" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">45</span></div>
+    <div class="thm_thmcontent"><p>  If the squared pairwise distance matrix is conditionally negative definite, then one minus the pairwise certificate is convex along mixtures of normalized risk weights. Assumptions: finite asset universe; the squared distance matrix is conditionally negative definite; two sets of normalized risk weights and a mixing parameter in the unit interval. </p>
+</div>
+
+    <a class="latex_link" href="sect0015.html#thm:p3-certificate-convexity">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.standardizedCertifiedObjective_convex_of_cnd">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="thm:p3-certified-minimizer_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:p3-certified-minimizer" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">22</span><span class="theorem_thmtitle">Certified minimizer</span></div>
-    <div class="thm_thmcontent"><p>    Every nonempty compact feasible subset of the long-only simplex admits a minimizer of the continuous certified-variance objective. Any pointwise variance certificate on that set is inherited at the minimizer. </p>
+      <span class="theorem_thmlabel">22</span></div>
+    <div class="thm_thmcontent"><p>  Every nonempty compact feasible subset of the long-only simplex has a minimizer of the characteristic-induced certified-variance objective, retaining any pointwise actual-variance certificate imposed on that set. Assumptions: finite asset universe; nonempty compact feasible subset of the long-only simplex; pointwise actual-variance upper certificate on the feasible set. </p>
 </div>
 
     <a class="latex_link" href="sect0008.html#thm:p3-certified-minimizer">LaTeX</a>
-
-
+    
+    
   <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.exists_minimumInformationCertifiedVariance">Lean</a>
-
-
-
-
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="thm:p3-envelope-exactness_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:p3-envelope-exactness" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">44</span></div>
+    <div class="thm_thmcontent"><p>  Given a coherent joint law attaining the multi-marginal dispersion minimum, the weighted marginal second moments minus that minimum is the greatest systematic portfolio variance attainable across all coherent joint laws with integrable pairwise inner products. Assumptions: finite asset universe and normalized risk weights; a supplied certificate that some coherent joint law attains the dispersion minimum; integrability of every pairwise inner product under that attaining law. </p>
+</div>
 
+    <a class="latex_link" href="sect0015.html#thm:p3-envelope-exactness">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.isGreatest_attainableJointPortfolioVariances">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="thm:p3-information-certified-cap_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:p3-information-certified-cap" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">20</span><span class="theorem_thmtitle">Information-certified coherent portfolio variance</span></div>
-    <div class="thm_thmcontent"><p>    Under the common non-collapsing carrier, asset-specific synchronous slack, coherent joint-law, marginal, and integrability premises, every normalized long-only portfolio satisfies </p>
-<div class="displaymath" id="a0000000035">
-  \[  V_{\mathrm{sys}}(q) \leq \sum _i q_i v_i-\mathcal C(q).  \]
-</div>
-<p> The result is a conditional upper bound on systematic variance, not a covariance point estimate or an empirical coverage statement. </p>
+      <span class="theorem_thmlabel">20</span></div>
+    <div class="thm_thmcontent"><p>  A common measurable antilipschitz carrier with asset-specific synchronous slack converts observable pairwise characteristic-law W2 distances into a computable deduction from coherent systematic portfolio variance. Assumptions: finite asset universe and normalized long-only portfolio weights; common measurable antilipschitz carrier and measurable asset-specific exposure maps; pointwise draw-synchronous asset-specific slack bounds; one coherent joint exposure law with the declared coordinate marginals; integrability of every pairwise exposure inner product. </p>
 </div>
 
     <a class="latex_link" href="sect0006.html#thm:p3-information-certified-cap">LaTeX</a>
-
-
+    
+    
   <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.jointPortfolioVariance_le_informationCertifiedCap">Lean</a>
-
-
-
-
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="thm:p3-pairwise-bridge_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:p3-pairwise-bridge" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">46</span></div>
+    <div class="thm_thmcontent"><p>  For two assets, the optimal coherent portfolio variance is the weighted marginal second moments minus the product of the two weights and the squared quadratic Wasserstein distance between the exposure laws. Assumptions: exactly two assets with normalized risk weights; a supplied certificate that some coherent joint law attains the dispersion minimum; integrability of every pairwise inner product under that attaining law. </p>
+</div>
 
+    <a class="latex_link" href="sect0015.html#thm:p3-pairwise-bridge">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.optimalTwoAssetPortfolioVariance_eq_paperOne">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:p3-sharp-certificate_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:p3-sharp-certificate" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">43</span></div>
+    <div class="thm_thmcontent"><p>  Under a measurable antilipschitz carrier with integrated synchronous slack, coherent systematic portfolio variance is at most the weighted marginal second moments minus the square of the aggregate carrier floor built from multi-firm characteristic dispersion. Assumptions: finite asset universe and normalized long-only risk weights; a measurable embedding that is antilipschitz with nonzero constant; common carrier and realized exposure laws are coordinatewise pushforwards of the characteristic laws; each realized transmission has the stated integrated squared slack radius; one coherent joint exposure law with the declared coordinate marginals; integrability of every pairwise exposure inner product. </p>
+</div>
+
+    <a class="latex_link" href="sect0015.html#thm:p3-sharp-certificate">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.jointPortfolioVariance_le_aggregateCertifiedCap">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:pairwise-nesting_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:pairwise-nesting" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">55</span></div>
+    <div class="thm_thmcontent"><p>  For two marginals, the weighted multi-marginal quadratic dispersion equals the product of the two weights and the squared quadratic Wasserstein distance between them. Assumptions: two probability laws on a second-countable pseudometric space. </p>
+</div>
+
+    <a class="latex_link" href="sect0016.html#thm:pairwise-nesting">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/WassersteinGeometry.Multimarginal.wassersteinDispersionSq_finTwo">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="thm:perron-from-geometric_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:perron-from-geometric" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">32</span><span class="theorem_thmtitle">Geometric certificate implies the Perron limit</span></div>
-    <div class="thm_thmcontent"><p>    A geometric Perron certificate implies \(W^k\to P\). </p>
+      <span class="theorem_thmlabel">33</span></div>
+    <div class="thm_thmcontent"><p>   Any geometric Perron certificate with rate \(0\leq q{\lt}1\) implies convergence of \(W^k\) to the rank-one stationary projection. Assumptions: \(0\leq q{\lt}1\); the stated geometric matrix-norm bound holds for every natural k. </p>
 </div>
 
     <a class="latex_link" href="sect0012.html#thm:perron-from-geometric">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.isPerronLimit_of_geometric_bound">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.isPerronLimit_of_geometric_bound">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:random-exposure-envelope_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:random-exposure-envelope" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">6</span><span class="theorem_thmtitle">Covariance envelope from optimal transport</span></div>
-    <div class="thm_thmcontent"><p>    Given a finite optimal transport-cost certificate, the ceiling </p>
-<div class="displaymath" id="a0000000022">
-  \[  \kappa ^{\max }_{ij}=\tfrac 12\left(v_i+v_j-W_{2,\Gamma }^2(P_i,P_j)\right)  \]
-</div>
-<p> is the greatest systematic covariance attainable over the coupling set. This is a statement about what the two marginal laws permit; it does not identify the realized covariance, which requires the economic joint law. It is the <em>upper</em> endpoint only; the lower one is ??thm:random-exposure-lower-endpoint, a separate theorem. </p>
+      <span class="theorem_thmlabel">6</span></div>
+    <div class="thm_thmcontent"><p>  For every coupling of two exposure laws in \(\mathcal{P}_2(H)\) whose polarization terms are integrable, the covariance ceiling (one half of the sum of second moments minus the optimal transport cost) is the greatest attainable systematic covariance, and a certified optimal plan attains it. Assumptions: loading laws in \(\mathcal{P}_2\) of a separable real Hilbert space; couplings carrying integrability of both second moments and the cross term; a certified optimal transport plan, supplied rather than proved to exist. </p>
 </div>
 
     <a class="latex_link" href="sect0002.html#thm:random-exposure-envelope">LaTeX</a>
-
-
+    
+    
   <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.isGreatest_frechetClass">Lean</a>
-
-
-
-
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:random-exposure-lower-endpoint_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:random-exposure-lower-endpoint" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">7</span><span class="theorem_thmtitle">Reflected lower endpoint</span></div>
-    <div class="thm_thmcontent"><p>    Applying the same argument to the reflected law \((-I)_\# P_j\) gives the sharp lower endpoint of the Fréchet class. </p>
+      <span class="theorem_thmlabel">7</span></div>
+    <div class="thm_thmcontent"><p>  The reflected law gives the sharp lower endpoint of the Frechet class of attainable systematic covariances: the least attainable covariance equals (optimal reflected transport cost minus the two second moments) divided by two. Assumptions: loading laws in \(\mathcal{P}_2\) of a separable real Hilbert space; the reflected second law is the pushforward of the second under negation; a certified optimal transport plan against the reflected law. </p>
 </div>
 
     <a class="latex_link" href="sect0002.html#thm:random-exposure-lower-endpoint">LaTeX</a>
-
-
+    
+    
   <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.isLeast_frechetClass_of_reflection">Lean</a>
-
-
-
-
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:rankone-collapse_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:rankone-collapse" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">37</span><span class="theorem_thmtitle">Rank-one collapse of rescaled covariance</span></div>
-    <div class="thm_thmcontent"><p>    For innovation covariance \(V\), row-stochastic \(W\), and the Perron power limit, </p>
-<div class="displaymath" id="a0000000054">
-  \[  (1-\rho )^2\Sigma _{\mathrm{SAR}} \longrightarrow (\pi ^\top V\pi )\mathbf1\mathbf1^\top .  \]
-</div>
+      <span class="theorem_thmlabel">38</span></div>
+    <div class="thm_thmcontent"><p>  For a row-stochastic \(W\), conditional on the Perron power limit hypothesis for \((W,\pi )\), \((1-\rho )^2\Sigma _{\mathrm{SAR}}\) converges to \((\pi ^\top V\pi )\mathbf{1}\mathbf{1}^\top \) as \(\rho \to 1\) from below. Assumptions: the Perron power-limit premise for \((W,\pi )\); W row-stochastic; \(\iota \) nonempty. </p>
 </div>
 
     <a class="latex_link" href="sect0013.html#thm:rankone-collapse">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.sigmaSAR_rankOne_limit_of_perron">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.sigmaSAR_rankOne_limit_of_perron">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:replication-centrality_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:replication-centrality" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">33</span><span class="theorem_thmtitle">Interaction cascades converge to a constant vector</span></div>
-    <div class="thm_thmcontent"><p>    Under the Perron limit, \(W^kx\to (\pi ^\top x)\mathbf1\) for every vector \(x\). The limit is a constant vector, not a traded basket. </p>
+      <span class="theorem_thmlabel">34</span></div>
+    <div class="thm_thmcontent"><p>  Conditional on the Perron limit hypothesis for \((W,\pi )\), every \(k\)-step interaction cascade converges to a constant vector whose common entry is the \(\pi \)-weighted average of the starting vector: \(W^kx\to (\pi ^\top x)\mathbf{1}\) as \(k\to \infty \), for any vector \(x\). The limit is a constant vector; nothing here identifies \(\pi \) as a portfolio or a traded object. Assumptions: the Perron power-limit premise for \((W,\pi )\). </p>
 </div>
 
     <a class="latex_link" href="sect0012.html#thm:replication-centrality">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.replication_centrality">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.replication_centrality">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:resolvent-from-perron_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:resolvent-from-perron" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">36</span><span class="theorem_thmtitle">Resolvent limit from the power limit</span></div>
-    <div class="thm_thmcontent"><p>    For row-stochastic \(W\), the Perron power limit implies \((1-\rho )(I-\rho W)^{-1}\to P\) as \(\rho \uparrow 1\). </p>
+      <span class="theorem_thmlabel">37</span></div>
+    <div class="thm_thmcontent"><p>  For a row-stochastic \(W\) satisfying the Perron power limit \(W^k\to \mathbf{1}\pi ^\top \) for \((W,\pi )\), the pair \((W,\pi )\) satisfies the resolvent limit \((1-\rho )(I-\rho W)^{-1}\to \mathbf{1}\pi ^\top \) as \(\rho \to 1\) from below. Assumptions: the Perron power-limit premise for \((W,\pi )\); W row-stochastic; \(\iota \) nonempty. </p>
 </div>
 
     <a class="latex_link" href="sect0013.html#thm:resolvent-from-perron">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.isResolventLimit_of_isPerronLimit">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.isResolventLimit_of_isPerronLimit">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
-
+    
     <div class="dep-modal-container" id="thm:robust-envelope_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:robust-envelope" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
@@ -1144,75 +2386,195 @@
 </div>
 
     <a class="latex_link" href="sect0010.html#thm:robust-envelope">LaTeX</a>
-
-
-
-
-
-
-
+    
+    
+  
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="thm:sar-reduced-form_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:sar-reduced-form" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">52</span></div>
+    <div class="thm_thmcontent"><p>  Under the operator-norm gate, a coordinatewise equilibrium of the quadratic adjustment problem equals the normalized Leontief multiplier applied to the primitive exposure profile. Assumptions: nonnegative adjustment intensity; row-stochastic interaction matrix; the scaled interaction operator has norm below one. </p>
+</div>
 
+    <a class="latex_link" href="sect0016.html#thm:sar-reduced-form">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Transmission.quadraticAdjustmentEquilibrium_leontief_reduced_form">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:spatial-attenuation_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:spatial-attenuation" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">56</span></div>
+    <div class="thm_thmcontent"><p>  For a nonnegative row-stochastic interaction matrix with a strictly positive stationary probability vector and feedback between zero and one, the normalized spatial multiplier brackets stationary-weighted squared dispersion between the squared ratio of one minus feedback to one plus feedback, and one. Assumptions: nonnegative row-stochastic interaction matrix; strictly positive stationary probability weights; feedback parameter in the unit interval below one; nonempty finite cross-section. </p>
+</div>
+
+    <a class="latex_link" href="sect0016.html#thm:spatial-attenuation">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Dispersion.normalizedSAR_stationaryWeightedDispersionSq_bracket">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
+    <div class="dep-modal-container" id="thm:spatial-closure_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:spatial-closure" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">48</span></div>
+    <div class="thm_thmcontent"><p>  The first-order condition of the coordinatewise quadratic adjustment problem is exactly a Hilbert-valued spatial autoregression whose feedback parameter is the adjustment intensity divided by one plus that intensity. Assumptions: nonnegative adjustment intensity; row-stochastic interaction matrix. </p>
+</div>
+
+    <a class="latex_link" href="sect0016.html#thm:spatial-closure">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Transmission.sar_of_quadraticAdjustmentEquilibrium">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="thm:stationarity_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:stationarity" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">34</span><span class="theorem_thmtitle">Stationarity</span></div>
-    <div class="thm_thmcontent"><p>    Under the Perron limit, the limiting vector obeys \(\pi ^\top W=\pi ^\top \). </p>
+      <span class="theorem_thmlabel">35</span></div>
+    <div class="thm_thmcontent"><p>  Conditional on the Perron limit hypothesis for \((W,\pi )\), the limiting weight vector \(\pi \) satisfies the fixed-point relation \(\pi ^\top W=\pi ^\top \). The declaration proves only that relation; nonnegativity and unit mass are separate results requiring row-stochasticity as an extra hypothesis. Assumptions: the Perron power-limit premise for \((W,\pi )\); \(\iota \) nonempty. </p>
 </div>
 
     <a class="latex_link" href="sect0012.html#thm:stationarity">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.perron_stationary">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.perron_stationary">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 
 
+    
+    <div class="dep-modal-container" id="thm:two-field-closure_modal">
+      <div class="dep-modal-content">
+          <button class="dep-closebtn">
+<svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        
+  <div class="thm" id="thm:two-field-closure" style="display: none">
+    <div class="thm_thmheading">
+      <span class="theorem_thmcaption">
+      Theorem
+      </span>
+      <span class="theorem_thmlabel">50</span></div>
+    <div class="thm_thmcontent"><p>  When a firm prices misalignment against two admissible interaction fields at nonnegative intensities, every coordinatewise equilibrium of the literal quadratic objective satisfies a two-field spatial autoregression whose channel coefficients are each intensity divided by one plus their total. Assumptions: nonnegative adjustment intensity in each channel; both interaction matrices are row-stochastic. </p>
+</div>
 
+    <a class="latex_link" href="sect0016.html#thm:two-field-closure">LaTeX</a>
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Transmission.twoField_sar_of_equilibrium">Lean</a>
+    
+    
+  
+    
+  </div>
+    
+      </div>
+    </div>
+
+
+    
     <div class="dep-modal-container" id="thm:wflat-sar-gate_modal">
       <div class="dep-modal-content">
           <button class="dep-closebtn">
 <svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
-
+        
   <div class="thm" id="thm:wflat-sar-gate" style="display: none">
     <div class="thm_thmheading">
       <span class="theorem_thmcaption">
       Theorem
       </span>
-      <span class="theorem_thmlabel">30</span><span class="theorem_thmtitle">SAR compatibility of the Wasserstein operator</span></div>
-    <div class="thm_thmcontent"><p>   A leave-one-out simplex operator is nonnegative, row stochastic, and zero-diagonal. Its induced infinity norm is at most one, so \(\lVert \rho W\rVert _\infty {\lt}1\) whenever \(|\rho |{\lt}1\). </p>
+      <span class="theorem_thmlabel">31</span></div>
+    <div class="thm_thmcontent"><p>  A leave-one-out simplex operator is nonnegative, row-stochastic and zero-diagonal, has induced infinity norm at most one, and therefore satisfies the SAR norm gate whenever absolute rho is below one. Assumptions: each row is a leave-one-out simplex vector; absolute rho below one. </p>
 </div>
 
     <a class="latex_link" href="sect0012.html#thm:wflat-sar-gate">LaTeX</a>
-
-
-  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialWasserstein.anchoredW2_sar_gate">Lean</a>
-
-
-
-
+    
+    
+  <a class="lean_link lean_decl" href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Wasserstein.anchoredW2_sar_gate">Lean</a>
+    
+    
+  
+    
   </div>
-
+    
       </div>
     </div>
 </div>
@@ -1234,7 +2596,7 @@ graphContainer.graphviz({useWorker: true})
     .width(width)
     .height(height)
     .fit(true)
-    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"thm:inner-perturbation"	[label="inner-perturbation",		shape=ellipse];	"thm:covariance-bracket"	[label="covariance-bracket",		shape=ellipse];	"thm:inner-perturbation" -> "thm:covariance-bracket";	"thm:robust-envelope"	[label="robust-envelope",		shape=ellipse];	"thm:covariance-bracket" -> "thm:robust-envelope"	[style=dashed];	"thm:joint-coherence"	[label="joint-coherence",		shape=ellipse];	"thm:factor-return-semantics"	[label="factor-return-semantics",		shape=ellipse];	"thm:joint-coherence" -> "thm:factor-return-semantics"	[style=dashed];	"prop:pairwise-not-psd"	[color="#FFAA33",		label="pairwise-not-psd",		shape=ellipse];	"thm:joint-coherence" -> "prop:pairwise-not-psd"	[style=dashed];	"eq:portfolio-envelope"	[label="portfolio-envelope",		shape=ellipse];	"ass:random-common-map"	[label="random-common-map",		shape=box];	"ass:random-common-map" -> "thm:inner-perturbation"	[style=dashed];	"thm:dist-bracket"	[label="dist-bracket",		shape=ellipse];	"ass:random-common-map" -> "thm:dist-bracket"	[style=dashed];	"eq:random-w2-upper-transfer"	[color=green,		fillcolor="#9CEC8B",		label="random-w2-upper-transfer",		shape=ellipse,		style=filled];	"ass:random-common-map" -> "eq:random-w2-upper-transfer"	[style=dashed];	"eq:random-w2-lower-transfer"	[color=green,		fillcolor="#9CEC8B",		label="random-w2-lower-transfer",		shape=ellipse,		style=filled];	"ass:random-common-map" -> "eq:random-w2-lower-transfer"	[style=dashed];	"cor:approximate-map-bound"	[label="approximate-map-bound",		shape=ellipse];	"ass:random-common-map" -> "cor:approximate-map-bound"	[style=dashed];	"thm:energy-bracket"	[label="energy-bracket",		shape=ellipse];	"thm:dist-bracket" -> "thm:energy-bracket"	[style=dashed];	"cor:random-w2-metric"	[color="#FFAA33",		label="random-w2-metric",		shape=ellipse];	"eq:random-w2-upper-transfer" -> "cor:random-w2-metric"	[style=dashed];	"eq:random-w2-lower-transfer" -> "cor:random-w2-metric"	[style=dashed];	"cor:approximate-map-bound" -> "eq:portfolio-envelope"	[style=dashed];	"thm:energy-bracket" -> "thm:covariance-bracket"	[style=dashed];	"eq:random-kappa-bracket"	[color="#FFAA33",		label="random-kappa-bracket",		shape=ellipse];	"cor:random-w2-metric" -> "eq:random-kappa-bracket"	[style=dashed];	"def:finite-exposure-cloud"	[label="finite-exposure-cloud",		shape=box];	"def:finite-exposure-cloud" -> "thm:joint-coherence"	[style=dashed];	"lem:transport-polarization"	[label="transport-polarization",		shape=ellipse];	"def:finite-exposure-cloud" -> "lem:transport-polarization"	[style=dashed];	"def:frechet-class"	[label="frechet-class",		shape=box];	"def:finite-exposure-cloud" -> "def:frechet-class"	[style=dashed];	"lem:transport-polarization" -> "eq:random-w2-upper-transfer";	"lem:transport-polarization" -> "eq:random-w2-lower-transfer";	"thm:random-exposure-lower-endpoint"	[color=green,		fillcolor="#9CEC8B",		label="random-exposure-lower-endpoint",		shape=ellipse,		style=filled];	"lem:transport-polarization" -> "thm:random-exposure-lower-endpoint";	"thm:random-exposure-envelope"	[color=green,		fillcolor="#9CEC8B",		label="random-exposure-envelope",		shape=ellipse,		style=filled];	"lem:transport-polarization" -> "thm:random-exposure-envelope";	"def:frechet-class" -> "thm:random-exposure-lower-endpoint"	[style=dashed];	"def:frechet-class" -> "thm:random-exposure-envelope"	[style=dashed];	"thm:p3-information-certified-cap"	[color=green,		fillcolor="#1CAC78",		label="p3-information-certified-cap",		shape=ellipse,		style=filled];	"def:frechet-class" -> "thm:p3-information-certified-cap"	[style=dashed];	"eq:random-exposure-excess-nonneg"	[color=green,		fillcolor="#1CAC78",		label="random-exposure-excess-nonneg",		shape=ellipse,		style=filled];	"def:frechet-class" -> "eq:random-exposure-excess-nonneg"	[style=dashed];	"thm:random-exposure-envelope" -> "prop:pairwise-not-psd"	[style=dashed];	"eq:random-exposure-gap"	[color=green,		fillcolor="#9CEC8B",		label="random-exposure-gap",		shape=ellipse,		style=filled];	"thm:random-exposure-envelope" -> "eq:random-exposure-gap";	"thm:random-exposure-envelope" -> "eq:random-kappa-bracket"	[style=dashed];	"thm:p3-certified-minimizer"	[color=green,		fillcolor="#1CAC78",		label="p3-certified-minimizer",		shape=ellipse,		style=filled];	"thm:p3-information-certified-cap" -> "thm:p3-certified-minimizer"	[style=dashed];	"eq:p3-residual-budget-cap"	[color=green,		fillcolor="#1CAC78",		label="p3-residual-budget-cap",		shape=ellipse,		style=filled];	"thm:p3-information-certified-cap" -> "eq:p3-residual-budget-cap"	[style=dashed];	"lem:polarization"	[color=green,		fillcolor="#1CAC78",		label=polarization,		shape=ellipse,		style=filled];	"lem:polarization" -> "thm:inner-perturbation";	"lem:polarization" -> "thm:joint-coherence";	"lem:polarization" -> "cor:approximate-map-bound";	"lem:polarization" -> "lem:transport-polarization";	"thm:stationarity"	[color=green,		fillcolor="#1CAC78",		label=stationarity,		shape=ellipse,		style=filled];	"thm:ball-inclusion"	[label="ball-inclusion",		shape=ellipse];	"thm:wflat-sar-gate"	[color=green,		fillcolor="#1CAC78",		label="wflat-sar-gate",		shape=ellipse,		style=filled];	"def:exposure-law"	[color=blue,		fillcolor="#A3D6FF",		label="exposure-law",		shape=box,		style=filled];	"def:exposure-law" -> "ass:random-common-map"	[style=dashed];	"def:exposure-law" -> "def:finite-exposure-cloud"	[style=dashed];	"def:exposure-law" -> "thm:ball-inclusion"	[style=dashed];	"thm:replication-centrality"	[color=green,		fillcolor="#1CAC78",		label="replication-centrality",		shape=ellipse,		style=filled];	"prop:finite-rho-bound"	[color=green,		fillcolor="#1CAC78",		label="finite-rho-bound",		shape=ellipse,		style=filled];	"thm:resolvent-from-perron"	[color=green,		fillcolor="#1CAC78",		label="resolvent-from-perron",		shape=ellipse,		style=filled];	"thm:rankone-collapse"	[color=green,		fillcolor="#1CAC78",		label="rankone-collapse",		shape=ellipse,		style=filled];	"thm:resolvent-from-perron" -> "thm:rankone-collapse"	[style=dashed];	"def:perron-limit"	[color=green,		fillcolor="#B0ECA3",		label="perron-limit",		shape=box,		style=filled];	"thm:perron-from-geometric"	[color=green,		fillcolor="#1CAC78",		label="perron-from-geometric",		shape=ellipse,		style=filled];	"def:perron-limit" -> "thm:perron-from-geometric"	[style=dashed];	"thm:perron-from-geometric" -> "thm:stationarity"	[style=dashed];	"thm:perron-from-geometric" -> "thm:replication-centrality"	[style=dashed];	"thm:perron-from-geometric" -> "thm:resolvent-from-perron"	[style=dashed];	"thm:box-corner"	[color="#FFAA33",		label="box-corner",		shape=ellipse];	"thm:box-corner" -> "thm:robust-envelope";}`)
+    .renderDot(`strict digraph "" {	graph [bgcolor=transparent];	node [label="\N",		penwidth=1.8	];	edge [arrowhead=vee];	"thm:two-field-closure"	[color=green,		fillcolor="#1CAC78",		label="two-field-closure",		shape=ellipse,		style=filled];	"eq:equilibrium-cash-flow"	[color=green,		fillcolor="#1CAC78",		label="equilibrium-cash-flow",		shape=ellipse,		style=filled];	"lem:polarization"	[color=darkgreen,		fillcolor="#1CAC78",		label=polarization,		shape=ellipse,		style=filled];	"lem:transport-polarization"	[label="transport-polarization",		shape=ellipse];	"lem:polarization" -> "lem:transport-polarization";	"thm:inner-perturbation"	[label="inner-perturbation",		shape=ellipse];	"lem:polarization" -> "thm:inner-perturbation";	"cor:approximate-map-bound"	[label="approximate-map-bound",		shape=ellipse];	"lem:polarization" -> "cor:approximate-map-bound";	"thm:joint-coherence"	[label="joint-coherence",		shape=ellipse];	"lem:polarization" -> "thm:joint-coherence";	"thm:covariance-bracket"	[label="covariance-bracket",		shape=ellipse];	"thm:inner-perturbation" -> "thm:covariance-bracket";	"eq:portfolio-envelope"	[label="portfolio-envelope",		shape=ellipse];	"cor:approximate-map-bound" -> "eq:portfolio-envelope"	[style=dashed];	"prop:pairwise-not-psd"	[color="#FFAA33",		label="pairwise-not-psd",		shape=ellipse];	"thm:joint-coherence" -> "prop:pairwise-not-psd"	[style=dashed];	"thm:factor-return-semantics"	[label="factor-return-semantics",		shape=ellipse];	"thm:joint-coherence" -> "thm:factor-return-semantics"	[style=dashed];	"thm:robust-envelope"	[label="robust-envelope",		shape=ellipse];	"thm:covariance-bracket" -> "thm:robust-envelope"	[style=dashed];	"thm:p3-sharp-certificate"	[color=green,		fillcolor="#1CAC78",		label="p3-sharp-certificate",		shape=ellipse,		style=filled];	"thm:p3-certificate-convexity"	[color=green,		fillcolor="#1CAC78",		label="p3-certificate-convexity",		shape=ellipse,		style=filled];	"eq:cost-response"	[color=green,		fillcolor="#1CAC78",		label="cost-response",		shape=ellipse,		style=filled];	"prop:finite-rho-bound"	[color=green,		fillcolor="#1CAC78",		label="finite-rho-bound",		shape=ellipse,		style=filled];	"app:response-jacobian"	[color=green,		fillcolor="#1CAC78",		label="response-jacobian",		shape=ellipse,		style=filled];	"prop:response"	[color=green,		fillcolor="#1CAC78",		label=response,		shape=ellipse,		style=filled];	"app:response-jacobian" -> "prop:response";	"eq:linear-response"	[color=green,		fillcolor="#1CAC78",		label="linear-response",		shape=ellipse,		style=filled];	"app:response-jacobian" -> "eq:linear-response";	"app:equilibrium-derivative"	[color=green,		fillcolor="#1CAC78",		label="equilibrium-derivative",		shape=ellipse,		style=filled];	"app:response-jacobian" -> "app:equilibrium-derivative";	"app:equilibrium-derivative" -> "eq:cost-response";	"eq:equilibrium-derivative"	[color=green,		fillcolor="#1CAC78",		label="equilibrium-derivative",		shape=ellipse,		style=filled];	"app:equilibrium-derivative" -> "eq:equilibrium-derivative";	"eq:equilibrium-derivative" -> "eq:equilibrium-cash-flow";	"thm:dist-bracket"	[label="dist-bracket",		shape=ellipse];	"thm:energy-bracket"	[label="energy-bracket",		shape=ellipse];	"thm:dist-bracket" -> "thm:energy-bracket"	[style=dashed];	"thm:energy-bracket" -> "thm:covariance-bracket"	[style=dashed];	"def:energy-distance"	[color=blue,		fillcolor="#A3D6FF",		label="energy-distance",		shape=box,		style=filled];	"thm:ball-inclusion"	[label="ball-inclusion",		shape=ellipse];	"def:energy-distance" -> "thm:ball-inclusion"	[style=dashed];	"eq:response-continuity"	[color=green,		fillcolor="#1CAC78",		label="response-continuity",		shape=ellipse,		style=filled];	"eq:response-continuity" -> "eq:equilibrium-derivative";	"eq:rival-cross"	[color=green,		fillcolor="#1CAC78",		label="rival-cross",		shape=ellipse,		style=filled];	"rem:envelope"	[color=green,		fillcolor="#1CAC78",		label=envelope,		shape=ellipse,		style=filled];	"def:exposure-law"	[color=blue,		fillcolor="#A3D6FF",		label="exposure-law",		shape=box,		style=filled];	"def:exposure-law" -> "thm:ball-inclusion"	[style=dashed];	"def:finite-exposure-cloud"	[label="finite-exposure-cloud",		shape=box];	"def:exposure-law" -> "def:finite-exposure-cloud"	[style=dashed];	"ass:random-common-map"	[label="random-common-map",		shape=box];	"def:exposure-law" -> "ass:random-common-map"	[style=dashed];	"def:finite-exposure-cloud" -> "lem:transport-polarization"	[style=dashed];	"def:finite-exposure-cloud" -> "thm:joint-coherence"	[style=dashed];	"def:frechet-class"	[label="frechet-class",		shape=box];	"def:finite-exposure-cloud" -> "def:frechet-class"	[style=dashed];	"ass:random-common-map" -> "thm:inner-perturbation"	[style=dashed];	"ass:random-common-map" -> "cor:approximate-map-bound"	[style=dashed];	"ass:random-common-map" -> "thm:dist-bracket"	[style=dashed];	"thm:wflat-sar-gate"	[color=green,		fillcolor="#1CAC78",		label="wflat-sar-gate",		shape=ellipse,		style=filled];	"eq:feedback"	[color=green,		fillcolor="#1CAC78",		label=feedback,		shape=ellipse,		style=filled];	"eq:random-w2-lower-transfer"	[color=green,		fillcolor="#1CAC78",		label="random-w2-lower-transfer",		shape=ellipse,		style=filled];	"cor:random-w2-metric"	[color="#FFAA33",		label="random-w2-metric",		shape=ellipse];	"eq:random-w2-lower-transfer" -> "cor:random-w2-metric"	[style=dashed];	"eq:random-kappa-bracket"	[color="#FFAA33",		label="random-kappa-bracket",		shape=ellipse];	"cor:random-w2-metric" -> "eq:random-kappa-bracket"	[style=dashed];	"thm:p3-certified-minimizer"	[color=green,		fillcolor="#1CAC78",		label="p3-certified-minimizer",		shape=ellipse,		style=filled];	"prop:p3-barycenter-representation"	[color=green,		fillcolor="#1CAC78",		label="p3-barycenter-representation",		shape=ellipse,		style=filled];	"thm:p3-aggregate-transfer"	[color=green,		fillcolor="#1CAC78",		label="p3-aggregate-transfer",		shape=ellipse,		style=filled];	"prop:p3-barycenter-representation" -> "thm:p3-aggregate-transfer";	"thm:p3-aggregate-transfer" -> "thm:p3-sharp-certificate";	"cor:zero-feedback-nesting"	[color=green,		fillcolor="#1CAC78",		label="zero-feedback-nesting",		shape=ellipse,		style=filled];	"thm:random-exposure-lower-endpoint"	[color=green,		fillcolor="#1CAC78",		label="random-exposure-lower-endpoint",		shape=ellipse,		style=filled];	"app:independent-proof"	[color=green,		fillcolor="#1CAC78",		label="independent-proof",		shape=ellipse,		style=filled];	"cor:mixture-nesting"	[color=green,		fillcolor="#1CAC78",		label="mixture-nesting",		shape=ellipse,		style=filled];	"cor:mixture-nesting" -> "thm:two-field-closure";	"app:independent-regret"	[color=green,		fillcolor="#1CAC78",		label="independent-regret",		shape=ellipse,		style=filled];	"thm:p3-pairwise-bridge"	[color=green,		fillcolor="#1CAC78",		label="p3-pairwise-bridge",		shape=ellipse,		style=filled];	"eq:proportional-feedback"	[color=green,		fillcolor="#1CAC78",		label="proportional-feedback",		shape=ellipse,		style=filled];	"thm:perron-from-geometric"	[color=green,		fillcolor="#1CAC78",		label="perron-from-geometric",		shape=ellipse,		style=filled];	"thm:stationarity"	[color=green,		fillcolor="#1CAC78",		label=stationarity,		shape=ellipse,		style=filled];	"thm:resolvent-from-perron"	[color=green,		fillcolor="#1CAC78",		label="resolvent-from-perron",		shape=ellipse,		style=filled];	"thm:stationarity" -> "thm:resolvent-from-perron";	"thm:rankone-collapse"	[color=green,		fillcolor="#1CAC78",		label="rankone-collapse",		shape=ellipse,		style=filled];	"thm:resolvent-from-perron" -> "thm:rankone-collapse";	"prop:channel-inversion"	[color=green,		fillcolor="#1CAC78",		label="channel-inversion",		shape=ellipse,		style=filled];	"app:symmetry-proof"	[color=green,		fillcolor="#1CAC78",		label="symmetry-proof",		shape=ellipse,		style=filled];	"thm:p3-information-certified-cap"	[color=green,		fillcolor="#1CAC78",		label="p3-information-certified-cap",		shape=ellipse,		style=filled];	"eq:total-return-excess-correction"	[color=green,		fillcolor="#1CAC78",		label="total-return-excess-correction",		shape=ellipse,		style=filled];	"app:anchored-stage"	[color=green,		fillcolor="#1CAC78",		label="anchored-stage",		shape=ellipse,		style=filled];	"cor:exposure"	[color=green,		fillcolor="#1CAC78",		label=exposure,		shape=ellipse,		style=filled];	"cor:exposure" -> "eq:equilibrium-cash-flow";	"prop:composition-feedback"	[color=green,		fillcolor="#1CAC78",		label="composition-feedback",		shape=ellipse,		style=filled];	"thm:sar-reduced-form"	[color=green,		fillcolor="#1CAC78",		label="sar-reduced-form",		shape=ellipse,		style=filled];	"eq:random-w2-upper-transfer"	[color=green,		fillcolor="#1CAC78",		label="random-w2-upper-transfer",		shape=ellipse,		style=filled];	"eq:random-w2-upper-transfer" -> "cor:random-w2-metric"	[style=dashed];	"eq:composition-derivative"	[color=green,		fillcolor="#1CAC78",		label="composition-derivative",		shape=ellipse,		style=filled];	"thm:random-exposure-envelope"	[color=green,		fillcolor="#1CAC78",		label="random-exposure-envelope",		shape=ellipse,		style=filled];	"thm:random-exposure-envelope" -> "prop:pairwise-not-psd"	[style=dashed];	"thm:random-exposure-envelope" -> "eq:random-kappa-bracket"	[style=dashed];	"thm:random-exposure-envelope" -> "thm:random-exposure-lower-endpoint";	"eq:random-exposure-excess-nonneg"	[color=green,		fillcolor="#1CAC78",		label="random-exposure-excess-nonneg",		shape=ellipse,		style=filled];	"eq:random-w2-upper-metric"	[color=green,		fillcolor="#1CAC78",		label="random-w2-upper-metric",		shape=ellipse,		style=filled];	"thm:box-corner"	[color="#FFAA33",		label="box-corner",		shape=ellipse];	"thm:box-corner" -> "thm:robust-envelope";	"thm:spatial-closure"	[color=green,		fillcolor="#1CAC78",		label="spatial-closure",		shape=ellipse,		style=filled];	"thm:spatial-closure" -> "thm:two-field-closure";	"thm:spatial-closure" -> "thm:sar-reduced-form";	"thm:spatial-attenuation"	[color=green,		fillcolor="#1CAC78",		label="spatial-attenuation",		shape=ellipse,		style=filled];	"eq:normalization-bound"	[color=green,		fillcolor="#1CAC78",		label="normalization-bound",		shape=ellipse,		style=filled];	"app:regret-proof"	[color=green,		fillcolor="#1CAC78",		label="regret-proof",		shape=ellipse,		style=filled];	"app:regret-proof" -> "app:independent-regret";	"app:independent-distance"	[color=green,		fillcolor="#1CAC78",		label="independent-distance",		shape=ellipse,		style=filled];	"eq:random-exposure-gap"	[color=green,		fillcolor="#1CAC78",		label="random-exposure-gap",		shape=ellipse,		style=filled];	"def:perron-limit"	[color=green,		fillcolor="#B0ECA3",		label="perron-limit",		shape=box,		style=filled];	"def:perron-limit" -> "thm:perron-from-geometric"	[style=dashed];	"thm:pairwise-nesting"	[color=green,		fillcolor="#1CAC78",		label="pairwise-nesting",		shape=ellipse,		style=filled];	"thm:pairwise-nesting" -> "thm:p3-pairwise-bridge";	"prop:equilibrium"	[color=green,		fillcolor="#1CAC78",		label=equilibrium,		shape=ellipse,		style=filled];	"prop:equilibrium" -> "app:symmetry-proof";	"thm:p3-envelope-exactness"	[color=green,		fillcolor="#1CAC78",		label="p3-envelope-exactness",		shape=ellipse,		style=filled];	"prop:scalar-projection"	[color=green,		fillcolor="#1CAC78",		label="scalar-projection",		shape=ellipse,		style=filled];	"eq:certificate"	[color=green,		fillcolor="#1CAC78",		label=certificate,		shape=ellipse,		style=filled];	"eq:envelope"	[color=green,		fillcolor="#1CAC78",		label=envelope,		shape=ellipse,		style=filled];	"eq:envelope" -> "rem:envelope";	"eq:two-site-transport"	[color=green,		fillcolor="#1CAC78",		label="two-site-transport",		shape=ellipse,		style=filled];	"eq:exposure-covariance"	[color=green,		fillcolor="#1CAC78",		label="exposure-covariance",		shape=ellipse,		style=filled];	"eq:p3-residual-budget-cap"	[color=green,		fillcolor="#1CAC78",		label="p3-residual-budget-cap",		shape=ellipse,		style=filled];	"thm:adjustment-equilibrium"	[color=green,		fillcolor="#1CAC78",		label="adjustment-equilibrium",		shape=ellipse,		style=filled];	"thm:replication-centrality"	[color=green,		fillcolor="#1CAC78",		label="replication-centrality",		shape=ellipse,		style=filled];	"thm:replication-centrality" -> "thm:resolvent-from-perron";}`)
     .on("end", interactive);
 
 latexLabelEscaper = function(label) {

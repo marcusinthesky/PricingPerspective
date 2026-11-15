@@ -13,11 +13,15 @@ from pipeline._kernels.typed_barycentre.wasserstein.measure import (
     solve_wasserstein_measure_barycentre,
 )
 from pipeline._kernels.typed_barycentre.wasserstein.projection import (
+    WassersteinProjectionSupports,
     solve_wasserstein_target_projections,
+    solve_wasserstein_target_projections_with_supports,
 )
 
 __all__ = [
+    "WassersteinProjectionSupports",
     "solve_wasserstein_free_support_barycentre",
     "solve_wasserstein_measure_barycentre",
     "solve_wasserstein_target_projections",
+    "solve_wasserstein_target_projections_with_supports",
 ]

@@ -57,31 +57,6 @@ class ContractError(ValueError):
         """Build an error that retains the invalid manifest's location."""
         return cls(f"invalid JSON manifest {path}: {error}")
 
-    @classmethod
-    def manifest_not_object(cls) -> ContractError:
-        """Build an error for a non-object manifest root."""
-        return cls("manifest must be an object")
-
-    @classmethod
-    def upstream_not_array(cls) -> ContractError:
-        """Build an error for an invalid upstream-artifact collection."""
-        return cls("manifest field 'upstream_artifacts' must be an array")
-
-    @classmethod
-    def environment_not_object(cls) -> ContractError:
-        """Build an error for invalid environment metadata."""
-        return cls("manifest field 'environment' must be an object")
-
-    @classmethod
-    def outputs_not_array(cls) -> ContractError:
-        """Build an error for an invalid output collection."""
-        return cls("manifest field 'outputs' must be a non-empty array")
-
-    @classmethod
-    def unknown_risk_class(cls) -> ContractError:
-        """Build an error for an unsupported risk classification."""
-        return cls("manifest field 'risk_class' has an unknown value")
-
 
 class UnsupportedManifestVersionError(ContractError):
     """Raised when a consumer cannot safely interpret a manifest version."""
@@ -115,7 +90,8 @@ def _check_identity(value: object, field: str) -> None:
 def _validate_outputs(outputs: object) -> None:
     """Validate output identities and their optional byte counts."""
     if not isinstance(outputs, list) or not outputs:
-        raise ContractError.outputs_not_array()
+        message = "manifest field 'outputs' must be a non-empty array"
+        raise ContractError(message)
     for index, output in enumerate(outputs):
         if not isinstance(output, dict):
             raise ContractError.invalid_output(index, " must be an object")
@@ -144,18 +120,21 @@ def _validate_nested_fields(result: dict[str, object]) -> None:
     """Validate structured manifest fields after scalar identity checks."""
     upstream = result["upstream_artifacts"]
     if not isinstance(upstream, list):
-        raise ContractError.upstream_not_array()
+        message = "manifest field 'upstream_artifacts' must be an array"
+        raise ContractError(message)
     for index, identity in enumerate(upstream):
         _check_identity(identity, f"upstream_artifacts[{index}]")
     if not isinstance(result["environment"], dict):
-        raise ContractError.environment_not_object()
+        message = "manifest field 'environment' must be an object"
+        raise ContractError(message)
     _validate_outputs(result["outputs"])
 
 
 def validate_manifest(manifest: Mapping[str, object]) -> dict[str, object]:
     """Validate and return a JSON-compatible copy of a manifest."""
     if not isinstance(manifest, Mapping):
-        raise ContractError.manifest_not_object()
+        message = "manifest must be an object"
+        raise ContractError(message)
     result = dict(manifest)
     version = result.get("schema_version")
     if version not in SUPPORTED_MANIFEST_VERSIONS:
@@ -169,7 +148,8 @@ def validate_manifest(manifest: Mapping[str, object]) -> dict[str, object]:
     _check_identity(result["parameter_identity"], "parameter_identity")
     _validate_nested_fields(result)
     if result["risk_class"] not in {"low", "moderate", "high", "protected"}:
-        raise ContractError.unknown_risk_class()
+        message = "manifest field 'risk_class' has an unknown value"
+        raise ContractError(message)
     return json.loads(json.dumps(result, ensure_ascii=False, allow_nan=False))
 
 

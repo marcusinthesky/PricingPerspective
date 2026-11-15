@@ -9,15 +9,25 @@
 /projects/*/build/**
 !/projects/*/build/
 !/projects/*/build/arxiv/
+!/projects/*/build/quantitative-finance/
+!/projects/*/build/gfj/
+!/projects/*/build/ejf/
+!/projects/*/build/wfbs/
+!/projects/*/build/wfbs-blind/
 !/projects/*/build/arxiv/arxiv.pdf
 !/projects/*/build/arxiv/arxiv.tar.gz
+!/projects/*/build/quantitative-finance/quantitative-finance.pdf
+!/projects/*/build/quantitative-finance/quantitative-finance.zip
+!/projects/*/build/gfj/gfj.pdf
+!/projects/*/build/gfj/gfj.tar.gz
+!/projects/*/build/ejf/ejf.pdf
+!/projects/*/build/ejf/ejf.tar.gz
+!/projects/*/build/wfbs/wfbs.pdf
+!/projects/*/build/wfbs-blind/wfbs-blind.pdf
 # Named per venue rather than `build/*/*.pdf`: only published targets
 # are artifacts. A wildcard also re-included scratch `draft` builds and any
 # stale directory left by an earlier layout. Nested paths such as
 # build/<target>/bundle/ stay ignored — no negation reaches them.
-# The template is scaffolding, not a publication; re-ignored last (last match
-# wins) so it keeps compiling in the smoke gate without publishing a PDF.
-/projects/_template/build/**
 
 # Setup-materialized publisher/template dependencies
 /projects/*/src/interact.cls
@@ -45,6 +55,9 @@
 /projects/*/src/array-2016-10-06.sty
 /projects/*/src/longtable-2020-01-07.sty
 /projects/*/src/pp-manuscript.sty
+/projects/*/src/tf*.bst
+/projects/*/src/elsarticle.cls
+/projects/*/src/elsarticle-*.bst
 /vendor/
 
 # Test inputs with .log extensions are authored fixtures, not build logs.
@@ -59,3 +72,9 @@
 /tools/tests/fixtures/**/main.ilg
 /tools/tests/fixtures/**/main.toc
 /tools/tests/fixtures/**/MANIFEST.json
+
+# Paper 6's paired Management Science submission and companion.
+!/projects/06_information_motion/build/management-science/
+!/projects/06_information_motion/build/management-science/management-science.pdf
+!/projects/06_information_motion/build/management-science/management-science-companion.pdf
+!/projects/06_information_motion/build/management-science/management-science.tar.gz

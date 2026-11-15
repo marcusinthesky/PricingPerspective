@@ -12,8 +12,9 @@ In the \ppnum[0]{n-tickers}-firm panel, only
 four prespecified reference populations have conventional variance no greater
 than that allocation, while equal risk weights rank materially higher under
 every comparison.
-The evidence is therefore an unusually low location among feasible allocations,
-not covariance-free replication of the covariance-informed optimum.
+The evidence therefore places the allocation unusually low among the declared
+feasible populations, and \Cref{tab:news-variance-benchmark} measures its distance
+from the covariance-informed in-sample optimum.
 Five boundaries qualify what this finding establishes and what it does not.
 
 The first is identification.
@@ -41,15 +42,16 @@ weights.
 The representation ladder evaluates this sensitivity while holding the priced
 firms and return evaluation fixed, but it does not make the canonical
 Qwen3-Embedding-8B geometry invariant to measurement choices.
-Two features of the ladder sharpen the interpretive consequence.
 The width ladder is non-monotone: extreme compression to 64 coordinates
 materially alters the point allocation and improves its in-sample variance
 ranking, although the paired contrast with 256 coordinates does not survive
 Holm adjustment, so the geometry is not simply degraded by truncation.
-Among the matched EttaX vintage contrasts, only V3--V1 satisfies the
-post-specified equivalence criterion; neither comparison involving V0 does.
-The evidence therefore does not establish broad representation invariance even
-within a fixed architecture.
+The ChronoBERT annual comparisons likewise change the in-sample allocation
+nonmonotonically: several differences survive vintage-family Holm adjustment,
+while only a subset meet the post-specified equivalence criterion.
+A common architecture therefore does not establish broad representation
+invariance, and cumulative continued training does not isolate a causal
+effect of the information cutoff.
 The primary representation was prespecified, and the ladder evaluates
 sensitivity rather than selecting a winner from the same return data.
 Prespecified alternatives using different ground metrics, unbalanced clouds,
@@ -70,8 +72,6 @@ These four laws nevertheless remain maintained design choices.
 Alternative reference populations---market-capitalization-weighted draws,
 factor-tilted draws, or draws from the empirical distribution of a historical
 allocation universe---could rank the candidate differently.
-The evidence is that the allocation is unusually low under every declared
-comparison, not under every conceivable one.
 
 The fourth boundary is portfolio implementation.
 The empirical exercise implements the standardized-asset specialization, in
@@ -80,23 +80,32 @@ weights.
 The general raw-capital objective in \eqref{eq:p3-certified-objective}
 retains the marginal volatility scales through $A(x)^2$ and the risk-weight
 mapping $q(x)$.
-Constructing a capital-weight allocation from the certificate therefore
-requires the same marginal-scale inputs as an inverse-volatility portfolio,
-though it does not require cross-asset return covariance.
-The standardized exercise isolates the certificate's information channel
-cleanly, but the practical gap between the standardized and capital-weight
-allocations remains unquantified.
+Constructing a capital-weight allocation from the certificate therefore uses
+the same marginal-scale inputs as an inverse-volatility portfolio.
+The chronological benchmark applies this mapping using calibration-period
+scales and evaluates the resulting constant-weight excess-return mixture on
+the subsequent holdout period. It retains any capital-cap violation as an
+explicit infeasibility status rather than changing the normalized certificate
+rule by clipping. The benchmark places the certificate beside total-risk
+covariance-based and spatial-covariance benchmarks while preserving its
+information-geometry construction; residual-covariance GMV results are
+diagnostics rather than matched total-risk competitors.
 
 The fifth boundary is external validity.
 The empirical universe is a coverage-screened survivor panel of
-\ppnum[0]{n-tickers} firms with complete return histories, not a historical
-index-membership universe.
-The resulting evidence characterizes firms with the required source coverage
-rather than every investable firm or a changing historical universe.
+\ppnum[0]{n-tickers} firms with complete return histories.
+The resulting evidence characterizes firms supported by the required source
+coverage rather than every investable firm or a changing historical universe.
 The information geometry and the return evaluation also draw on the same
-2018--2022 period.
-The reported percentile is therefore descriptive: it is neither a
+survivor-conditioned roster, while the chronological benchmark uses a dated
+return holdout and factor-complete excess-return panels.
+The reported percentile is therefore descriptive, and the chronological
+exercise is a retrospective return-holdout comparison conditional on the
+frozen representation and selected universe. It is neither a full historical
 point-in-time test nor an ex-ante guarantee of future realized variance.
+Maintaining constant portfolio weights is a costless-rebalancing convention;
+the calculation is not a buy-and-hold holdings simulation and includes no
+turnover or transaction costs.
 The expanding-cutoff sequence shows how the allocation evolves with
 accumulated articles, but it does not constitute out-of-sample evidence
 because the return evaluation period is unchanged.

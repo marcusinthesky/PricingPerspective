@@ -1,9 +1,9 @@
-\section{Stability and spectral diagnostics for the barycentric field}
+\section{Stability of the Barycentric Field}
 \label{sec:asymptotics}
 
-Two questions organize this appendix: what makes the constructed field a stable
-peer-averaging system, and how close is the fitted model to the
-strong-interaction boundary?
+This appendix establishes when the constructed field is a stable
+peer-averaging system and measures how far the fitted model lies from the
+strong-interaction boundary.
 We first state the maintained conditions and derive their implications for peer
 averaging, stationary weighting, and the spatial multiplier.
 We then report the fitted residual, Dobrushin, and finite-$\rho$ diagnostics
@@ -14,20 +14,17 @@ conditions.
 
 \subsection{Maintained operator conditions}
 
-The first question is which matrix properties are needed for this
-interpretation.
 The main argument requires a nonnegative row-stochastic interaction matrix
 $W$, a strictly positive stationary probability vector $\pi$, and a coefficient
-$\rho$ that satisfies the stability condition in \Cref{hyp:spectral-gate}.
+$0\leq\rho<1$, for which \Cref{prop:peer-adjustment} gives a unique equilibrium.
 Row stochasticity defines the directed peer average, the stationary vector
 supplies the weighting in \Cref{thm:spatial-attenuation}, and the stability
 condition makes the spatial multiplier well defined.
 Let $P=\1\pi^\top$.
 All matrix norms here are maximum absolute row-sum norms.
 
-In the application, $W=W^\flat$ is the barycentric interaction field obtained
-from target-anchored reconstruction.
-The spectral results operate on that fitted matrix.
+\ppAppendixRef{sec:app-network-diagnostics} evaluates these conditions for the fitted
+barycentric field $W^\flat$.
 
 The boundary analysis also requires a rate at which repeated peer averaging
 approaches $P$.
@@ -45,47 +42,35 @@ The following certificate states that condition.
 
 \subsection{Implications for peer averaging and the multiplier}
 
-The next question is whether the maintained conditions produce coherent
-long-run peer weights.
 Row stochasticity makes $Wx$ a peer average, while the stability condition
 makes $(I-\rho W)^{-1}$, and hence the equilibrium mapping from stand-alone
 exposures, well defined.
-The geometric certificate adds the limiting result needed for the boundary
-analysis.
-\begin{theorem}[Geometric certificate implies the Perron limit]
-  \label{thm:perron-from-geometric}
-  If $W$ has a geometric Perron certificate $(\pi,C,q)$, then
-  $W^k\to P$ as $k\to\infty$.
-\end{theorem}
-Because $0\leq q<1$, $Cq^k\to0$, so the defining inequality yields
-$W^k\to P$.
+The geometric certificate adds the limiting results needed for stationary
+weighting and the boundary analysis.
 
-The Perron limit has two consequences for the economic aggregation in the main
-text.
-First, repeated peer averaging replaces any initial profile by its
-$\pi$-weighted cross-sectional mean.
-\begin{theorem}[Stationary interaction centrality]
-  \label{thm:replication-centrality}
-  Under the Perron limit, $W^k x\to(\pi^\top x)\1$ for every vector $x$.
+\begin{theorem}[Perron limit and stationary weights]
+  \label{thm:perron-from-geometric}\label{thm:replication-centrality}
+  \label{thm:stationarity}
+  Let $W$ be row stochastic.
+  (i) If $W$ has a geometric Perron certificate $(\pi,C,q)$, then $W^k\to P$
+  as $k\to\infty$.
+  If $W^k\to P$, then (ii) $W^k x\to(\pi^\top x)\1$ for every vector $x$, and
+  (iii) $\pi^\top W=\pi^\top$.
 \end{theorem}
-Multiplying $W^k\to P=\1\pi^\top$ by a fixed vector $x$ gives
-$W^k x\to Px=(\pi^\top x)\1$.
-
-Second, the weights that define this long-run mean are invariant under one
+Part (i) follows from $Cq^k\to0$, and (ii) from multiplying $W^k\to P$ by
+$x$.
+For (iii), $W^{k+1}=W^{k}W$ converges both to $PW$ and to $P$, so $PW=P$, which
+is $\pi^\top W=\pi^\top$.
+Repeated peer averaging therefore replaces any profile by its $\pi$-weighted
+cross-sectional mean, and the weights of that mean are invariant under one
 application of the operator.
-\begin{theorem}[Stationarity]\label{thm:stationarity}
-  Under the Perron limit, $\pi^\top W=\pi^\top$.
-\end{theorem}
-Since $W^{k+1}=W^k W$, the Perron limit gives $W^{k+1}\to PW$, while the
-same limit with $k+1$ gives $W^{k+1}\to P$. Uniqueness of limits implies
-$PW=P$, and $P=\1\pi^\top$ then gives $\pi^\top W=\pi^\top$.
-
-Together, the two results make $\pi_i$ firm $i$'s long-run influence and justify
+Together, these results make $\pi_i$ firm $i$'s long-run influence and justify
 the stationary centring in \Cref{thm:spatial-attenuation}.
 
 \subsection{Fitted operator and finite-\texorpdfstring{$\rho$}{rho} diagnostics}
+\label{sec:app-network-diagnostics}
 
-The empirical diagnostic question is whether the fitted field and coefficient
+The fitted field and coefficient are checked for whether they
 satisfy these conditions and whether the boundary closely approximates the
 empirical model.
 The fitted $\ppvalue{n-tickers-priced}\times\ppvalue{n-tickers-priced}$
@@ -93,7 +78,7 @@ operator is row stochastic to a maximum residual of
 \ppnum[8]{network-row-sum-residual}.
 Because its entries are nonnegative and its rows sum to one, its maximum
 absolute row-sum norm is one.
-The pooled estimate
+The pooled raw-return, common-intercept estimate
 $\hat\rho=\ppnum[3]{post-pooled-2023-2026-w-flat-rho}$ therefore satisfies the
 stability condition and makes the spatial multiplier well defined.
 Power iteration also yields a strictly positive stationary distribution with
@@ -153,7 +138,8 @@ Taking norms in \eqref{eq:finite-rho-remainder} and applying the Neumann bound
 \]
 gives the displayed bound.
 
-At the pooled fitted coefficient, the exact normalized-resolvent error is
+At that raw-return, common-intercept coefficient, the exact
+normalized-resolvent error is
 \ppnum[3]{network-w-flat-resolvent-error}, against a Dobrushin bound of
 \ppnum[3]{network-w-flat-resolvent-bound}.
 The Neumann envelope does not apply on this panel: it requires
@@ -169,60 +155,69 @@ The Dobrushin bound is a valid but conservative envelope.
 Thus the fitted coefficient lies inside the stable region, but the boundary
 approximation is not the empirical working model.
 
+The finite multiplier also gives a more direct exposure interpretation than
+$\rho$ alone.  Define
+\[
+  G(\rho)=(I-\rho W)^{-1},
+  \qquad
+  H(\rho)=(1-\rho)G(\rho).
+\]
+The normalized multiplier $H$ is the object in the exposure equilibrium:
+\begin{equation}
+  B=H(\rho)\xi
+  =(1-\rho)\sum_{k\geq 0}\rho^k W^k\xi .
+  \label{eq:finite-rho-exposure-weights}
+\end{equation}
+For nonnegative row-stochastic $W$, every row of $H$ sums to one.  Hence its
+diagonal entry is the model-implied ultimate own-exposure weight and
+$1-H_{ii}$ is the corresponding total weight on other firms, including all
+higher-order paths.  At the primary factor-conditioned coefficient on $W^\flat$, the
+complete operator
+reports mean own exposure between
+\ppnum[4]{network-factor-w2-own-exposure-minimum} and
+\ppnum[4]{network-factor-w2-own-exposure-maximum}, with mean
+\ppnum[4]{network-factor-w2-own-exposure-mean}; the complementary mean other-firm
+weight is \ppnum[4]{network-factor-w2-other-exposure-mean}.  These are
+finite-network implications of the maintained closure, not estimates of return
+variance shares or causal transmission.
+
+The unnormalized resolvent and normalized exposure multiplier must be kept
+distinct.  Because $W\1=\1$,
+\[
+  G(\rho)\1=(1-\rho)^{-1}\1,\qquad H(\rho)\1=\1.
+\]
+The certificate evaluates the corresponding means as
+\ppnum[4]{network-factor-w2-g-common-mode-mean} and
+\ppnum[4]{network-factor-w2-h-common-mode-mean}, with numerical identity errors
+of respectively
+\ppnume[2]{network-factor-w2-g-common-mode-error} and
+\ppnume[2]{network-factor-w2-h-common-mode-error}.  Thus the first number is a
+resolvent scale, not a claim that common factor exposure is amplified by that
+amount; the normalized equilibrium preserves a common one-unit shift.
+
 \subsection{The rank-one boundary}
 
-The boundary question is what remains of cross-sectional variation as peer
-adjustment approaches its strong-interaction limit.
-The boundary result follows in two steps.
-First, convergence of repeated peer averaging makes the normalized spatial
-multiplier converge to the stationary projection.
-\begin{theorem}[Resolvent limit from the power limit]
-  \label{thm:resolvent-from-perron}
-  Let $W$ be row stochastic and suppose $W^k\to P$. Then
-  $(1-\rho)(I-\rho W)^{-1}\to P$ as $\rho\uparrow1$.
-\end{theorem}
-This result converts the power limit into a statement about spatial feedback.
-The normalized Neumann series is
-\[
-  S_\rho=(1-\rho)(I-\rho W)^{-1}
-  =(1-\rho)\sum_{k\geq0}\rho^k W^k.
-\]
-For any $\varepsilon>0$, choose $K$ so that
-$\lVert W^k-P\rVert<\varepsilon$ for $k\geq K$. Since
-$P=(1-\rho)\sum_{k\geq0}\rho^k P$, split the difference into its finite head
-and tail:
-\[
-  \lVert S_\rho-P\rVert
-  \leq(1-\rho)\sum_{k<K}\rho^k\lVert W^k-P\rVert
-  +(1-\rho)\sum_{k\geq K}\rho^k\lVert W^k-P\rVert.
-\]
-The finite head vanishes as $\rho\uparrow1$, while the tail is at most
-$\varepsilon$; the uniform bound
-$\lVert W^k-P\rVert\leq2$ justifies the split. Hence
-$S_\rho\to P$.
+As peer adjustment approaches its strong-interaction limit, cross-sectional
+variation collapses onto one common direction.
 
-Second, substituting that multiplier limit into the spatial covariance removes
-all cross-sectional directions except the common one.
-\begin{theorem}[Rank-one collapse of the rescaled spatial covariance]
-  \label{thm:rankone-collapse}
-  Let $\Sigma_{\mathrm{SAR}}=(I-\rho W)^{-1}V(I-\rho W)^{-\top}$. Under the
-  Perron limit,
-  \[
-    (1-\rho)^2\Sigma_{\mathrm{SAR}}
-    \longrightarrow (\pi^\top V\pi)\1\1^\top
-    \quad\text{as }\rho\uparrow1.
-  \]
+\begin{theorem}[Rank-one boundary]
+  \label{thm:resolvent-from-perron}\label{thm:rankone-collapse}
+  Let $W$ be row stochastic with $W^k\to P$, and let
+  $\Sigma_{\mathrm{SAR}}=(I-\rho W)^{-1}V(I-\rho W)^{-\top}$.
+  As $\rho\uparrow1$, (i) $S_\rho=(1-\rho)(I-\rho W)^{-1}\to P$, and
+  (ii) $(1-\rho)^2\Sigma_{\mathrm{SAR}}\to(\pi^\top V\pi)\1\1^\top$.
 \end{theorem}
-The proof follows by continuity of matrix multiplication.
-Set $S_\rho=(1-\rho)(I-\rho W)^{-1}\to P$. Continuity of matrix
-multiplication gives
-$S_\rho V S_\rho^\top\to PVP^\top$. Since $P=\1\pi^\top$,
-\[
-  PVP^\top=(\pi^\top V\pi)\1\1^\top.
-\]
+For (i), write $S_\rho=(1-\rho)\sum_{k\geq0}\rho^{k}W^{k}$ and
+$P=(1-\rho)\sum_{k\geq0}\rho^{k}P$.
+Given $\varepsilon>0$, choose $K$ with $\lVert W^k-P\rVert<\varepsilon$ for
+$k\geq K$; since $\lVert W^k-P\rVert\leq2$, the head
+$(1-\rho)\sum_{k<K}\rho^k\lVert W^k-P\rVert$ vanishes as $\rho\uparrow1$ and
+the tail is at most $\varepsilon$.
+For (ii), continuity of matrix multiplication gives
+$S_\rho VS_\rho^\top\to PVP^\top=(\pi^\top V\pi)\1\1^\top$.
 
-\Cref{thm:rankone-collapse} is the $\rho\uparrow1$ endpoint of the attenuation
-result: at the boundary, spatial feedback removes cross-sectional dispersion
-entirely and the covariance becomes rank one.
+Part (ii) is the $\rho\uparrow1$ endpoint of the attenuation result: at the
+boundary, spatial feedback removes cross-sectional dispersion entirely and the
+covariance becomes rank one.
 The finite-$\rho$ remainder shows why this endpoint is useful as a theoretical
 boundary but not as an approximation to the fitted working model.

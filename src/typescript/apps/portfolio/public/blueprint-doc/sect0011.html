@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-  MathJax = {
+  MathJax = { 
     tex: {
 		    inlineMath: [['$','$'], ['\\(','\\)']]
 	} }
@@ -98,6 +98,25 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -108,12 +127,39 @@
 
 <div class="main-text">
 <h1 id="a0000000012">3.3 Reconciling the two geometries</h1>
+<div class="definition_thmwrapper theorem-style-definition" id="def:energy-distance">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">29</span>
+    <span class="definition_thmtitle">Squared energy functional</span>
+    <div class="thm_header_extras">
+
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0011.html#def:energy-distance">#</a>
+    
+    
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  For laws with finite first distance moments, let </p>
+<div class="displaymath" id="a0000000045">
+  \[  \mathcal E^2(\mu ,\nu ) =2\mathbb E d(X,Y)-\mathbb E d(X,X')-\mathbb E d(Y,Y'),  \]
+</div>
+<p> where the four draws are independent with the indicated marginal laws. Negative type ensures nonnegativity; the upper bound below does not require that additional geometric property. </p>
+
+  </div>
+</div>
 <div class="theorem_thmwrapper theorem-style-plain" id="thm:ball-inclusion">
   <div class="theorem_thmheading">
     <span class="theorem_thmcaption">
     Theorem
     </span>
-    <span class="theorem_thmlabel">29</span>
+    <span class="theorem_thmlabel">30</span>
     <span class="theorem_thmtitle">Wasserstein balls sit inside energy balls</span>
     <div class="thm_header_extras">
 
@@ -121,11 +167,11 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0011.html#thm:ball-inclusion">#</a>
-
-    <a class="icon proof" href="sect0011.html#a0000000045"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    
+    <a class="icon proof" href="sect0011.html#a0000000046"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -135,26 +181,30 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0001.html#def:exposure-law">Definition 1</a></li>
-
+          
+          <li><a href="sect0011.html#def:energy-distance">Definition 29</a></li>
+          
+          <li><a href="sect0011.html#def:energy-distance">Definition 29</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>   If \(W_2(\mu ,\nu )\le \delta \) then \(\mathcal E^2(\mu ,\nu )\le 2\delta \); the Wasserstein ball of radius \(\delta \) is therefore contained in the energy-distance ball of radius \(2\delta \). The inclusion is one-directional, and that direction is the pivot’s justification: a \(W_2\) hypothesis is the stronger one, so results proved under it apply to the energy ball, while the converse fails. This node belongs with the trunk rather than with this chapter. </p>
+  <p>   For probability laws with finite first distance moments, if \(W_2(\mu ,\nu )\le \delta \) then \(\mathcal E^2(\mu ,\nu )\le 2\delta \); the Wasserstein ball of radius \(\delta \) is therefore contained in the squared-energy sublevel set with threshold \(2\delta \). A guarantee uniform over this larger sublevel set also holds over the Wasserstein ball; the inclusion does not give the reverse implication. This node belongs with the trunk rather than with this chapter. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000045">
+<div class="proof_wrapper" id="a0000000046">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -162,7 +212,7 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p> Bound the energy distance by the transport cost through the negative-type representation. </p>
+  <p> The triangle inequality bounds the energy functional by twice the expected distance under any coupling. Cauchy–Schwarz bounds that expectation by the root mean squared coupling cost; taking the infimum gives the Wasserstein bound. </p>
 
   </div>
 </div>

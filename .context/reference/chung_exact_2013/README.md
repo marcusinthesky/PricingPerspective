@@ -17,5 +17,3 @@ issue: '2'
 publisher: Institute of Mathematical Statistics
 page: 484-507
 ---
-
-# Exact and Asymptotically Robust Permutation Tests

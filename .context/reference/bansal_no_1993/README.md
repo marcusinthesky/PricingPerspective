@@ -23,5 +23,3 @@ cites:
 - kreps_arbitrage_1981
 - ross_arbitrage_1976
 ---
-
-# No Arbitrage and Arbitrage Pricing: A New Approach

@@ -17,5 +17,3 @@ publisher: Kluwer Academic Publishers
 publisher-place: Dordrecht, The Netherlands
 page: 1-284
 ---
-
-# Spatial Econometrics: Methods and Models

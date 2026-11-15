@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-  MathJax = {
+  MathJax = { 
     tex: {
 		    inlineMath: [['$','$'], ['\\(','\\)']]
 	} }
@@ -98,6 +98,25 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -122,11 +141,11 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0005.html#cor:approximate-map-bound">#</a>
-
-    <a class="icon proof" href="sect0005.html#a0000000032"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    
+    <a class="icon proof" href="sect0005.html#a0000000034"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -136,29 +155,29 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0003.html#ass:random-common-map">Definition 11</a></li>
-
-          <li><a href="sect0001.html#lem:polarization">Lemma 3</a></li>
-
+          
+          <li><a href="sect0001.html#lem:polarization">Theorem 3</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="corollary_thmcontent">
   <p>   If each exposure deviates from a common map value by at most \(\tau _i\), the covariance floor holds with \(LD\) inflated to \(LD+\tau _i+\tau _j\), and exact transmission is the \(\tau =0\) case. </p>
-<p>The statement fixes no characteristic distance: \(D\) is an arbitrary nonnegative dissimilarity, and energy distance was only ever one instance. Hosting it under the energy development misread that generality, which is why the declaration now lives in <span class="ttfamily">Transmission.Floor</span> and the node here. Contrast ??thm:random-exposure-envelope, which is <em>not</em> distance-agnostic: the sharp envelope needs quadratic transport specifically, because minimising the coupling cost is the same optimisation polarisation turns into an inner product. </p>
+<p>The statement fixes no characteristic distance: \(D\) is an arbitrary nonnegative dissimilarity, and energy distance was only ever one instance. Hosting it under the energy development misread that generality, which is why the declaration now lives in <span class="ttfamily">Transmission.Floor</span> and the node here. Contrast <a href="sect0002.html#thm:random-exposure-envelope">Theorem 6</a>, which is <em>not</em> distance-agnostic: the sharp envelope needs quadratic transport specifically, because minimising the coupling cost is the same optimisation polarisation turns into an inner product. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000032">
+<div class="proof_wrapper" id="a0000000034">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -183,11 +202,11 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0005.html#eq:portfolio-envelope">#</a>
-
-    <a class="icon proof" href="sect0005.html#a0000000033"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    
+    <a class="icon proof" href="sect0005.html#a0000000035"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -197,29 +216,28 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0005.html#cor:approximate-map-bound">Corollary 18</a></li>
-
+          
           <li><a href="sect0005.html#cor:approximate-map-bound">Corollary 18</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
   <p>   For a finite book with nonnegative weights, the pairwise floors aggregate termwise into a floor on the squared systematic risk. Nonnegativity is a hypothesis, not a convention: signed weights can reverse individual pairwise inequalities and there is no signed-weight counterpart. No weight normalization is assumed, so the screen applies a fortiori to fully-invested long-only books. </p>
-<p>??chap:distance-implied carries its own label for this declaration under the distance-implied reading; the two manuscripts consume one theorem. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000033">
+<div class="proof_wrapper" id="a0000000035">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof

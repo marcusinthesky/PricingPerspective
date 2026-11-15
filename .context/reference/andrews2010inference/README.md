@@ -20,5 +20,3 @@ page: 119-157
 cites:
 - hansen1982
 ---
-
-# Inference for Parameters Defined by Moment Inequalities

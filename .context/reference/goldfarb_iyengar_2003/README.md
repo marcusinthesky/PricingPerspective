@@ -16,5 +16,3 @@ volume: '28'
 issue: '1'
 page: 1-38
 ---
-
-# Robust Portfolio Selection Problems

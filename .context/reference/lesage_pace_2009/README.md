@@ -18,5 +18,3 @@ publisher: Chapman and Hall/CRC
 publisher-place: Boca Raton, Florida
 page: 1-374
 ---
-
-# Introduction to Spatial Econometrics

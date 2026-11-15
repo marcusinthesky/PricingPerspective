@@ -36,7 +36,6 @@ following Panaretos & Zemel (2020), "An Invitation to Statistics in Wasserstein 
 * `wasserstein_nonneg`: W₂(μ, ν) ≥ 0
 * `wasserstein_symm`: W₂(μ, ν) = W₂(ν, μ)
 * `wasserstein_triangle`: W₂(μ, ν) ≤ W₂(μ, λ) + W₂(λ, ν)
-* `KantorovichDualCertificate`: corrected measurable finite-cost dual contract
 
 ## References
 
@@ -566,33 +565,5 @@ structure Geodesic {Ω : Type*} [MeasurableSpace Ω] [PseudoMetricSpace Ω]
   end_ : path 1 = ν
   constant_speed : ∀ s t : ℝ, 0 ≤ s → s ≤ t → t ≤ 1 →
     WassersteinDistance (path s) (path t) = (t - s) * WassersteinDistance μ ν
-
-/-- A measurable finite-cost Kantorovich dual certificate.
-
-The generic Wasserstein layer exposes the corrected contract rather than the former unconditional
-duality statement.  Potentials are measurable, their extended integrals are finite, and the
-certificate records equality with the primal cost.  Real-line quantile constructions may provide
-such a certificate without changing generic coupling definitions.
-
-Reference: Villani (2003), Theorem 1.3; Panaretos & Zemel (2020), Chapter 2 §2.2. -/
-structure KantorovichDualCertificate
-    {Ω : Type*} [MeasurableSpace Ω] [PseudoMetricSpace Ω] [Inhabited Ω]
-    (μ ν : WassersteinMeasure Ω) where
-  potential₁ : Ω → ℝ≥0∞
-  potential₂ : Ω → ℝ≥0∞
-  measurable₁ : Measurable potential₁
-  measurable₂ : Measurable potential₂
-  admissible : ∀ x y, potential₁ x + potential₂ y ≤ (edist x y) ^ 2
-  potential₁_integral_finite : (∫⁻ x, potential₁ x ∂μ.measure) < ⊤
-  potential₂_integral_finite : (∫⁻ y, potential₂ y ∂ν.measure) < ⊤
-  dual_value :
-    ∫⁻ x, potential₁ x ∂μ.measure + ∫⁻ y, potential₂ y ∂ν.measure =
-      WassersteinDistanceSq μ ν
-
-/-- The existence proposition for a corrected finite-cost dual certificate. -/
-def HasKantorovichDualCertificate
-    {Ω : Type*} [MeasurableSpace Ω] [PseudoMetricSpace Ω] [Inhabited Ω]
-    (μ ν : WassersteinMeasure Ω) : Prop :=
-  Nonempty (KantorovichDualCertificate μ ν)
 
 end WassersteinGeometry

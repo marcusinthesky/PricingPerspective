@@ -21,5 +21,3 @@ cites:
 - chamberlain_rothschild_1983
 - ross_arbitrage_1976
 ---
-
-# Asymptotic arbitrage and the APT with or without measure-theoretic structures

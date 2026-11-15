@@ -43,9 +43,10 @@ logger = logging.getLogger(__name__)
 # argument to rescale it, which is the whole point: text comes out at the
 # document's own point size instead of whatever a scale factor happened to be.
 #
-# This is the `arxiv`/`draft` measure, and the only one: per-target variants
-# would double the figure build, and the shared body may not be conditional on
-# its target.
+# This is the `arxiv`/`draft` measure. The `quantitative-finance` target is 6.1%
+# wider (452.97pt vs 426.79pt), so figures under-fill it by 5.8% — accepted
+# deliberately, since per-target variants would double the figure build and the
+# shared body may not be conditional on its target.
 TEXTWIDTH_IN = 5.906
 
 
@@ -303,7 +304,6 @@ def _style() -> None:
     # unconditionally — so setting it changes nothing except to demand `cm-super`,
     # which `pgf-metrics` does not carry. `pgf.rcfonts=False` is what makes a figure
     # inherit the document's own font rather than restating matplotlib's.
-    # See `.context/plan/infra-tooling/tasks/t38-figures-pgf-pilot/README.md`.
     # The frame/tick block below is taken from SciencePlots' `science.mplstyle`
     # by hand rather than by depending on it: that style sets `text.usetex=True`
     # and a `prop_cycle` whose 2nd and 4th entries are a green/red pair, and it

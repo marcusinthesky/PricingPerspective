@@ -11,3 +11,18 @@ inputs = ["targets/draft.tex"]
 name = "arxiv"
 type = "pdf"
 inputs = ["targets/arxiv.tex"]
+
+[[output]]
+name = "gfj"
+type = "pdf"
+inputs = ["targets/gfj.tex"]
+
+[[output]]
+name = "gfj-anonymous"
+type = "pdf"
+inputs = ["targets/gfj-anonymous.tex"]
+
+[[output]]
+name = "gfj-title-page"
+type = "pdf"
+inputs = ["targets/gfj-title-page.tex"]

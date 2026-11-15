@@ -1,16 +1,16 @@
 import { access, readdir, readFile, stat } from "node:fs/promises";
 import { join, normalize, relative, resolve } from "node:path";
 
+import { blogPosts, papers } from "../src/content/data";
+
 const root = resolve("out");
 const basePath = (process.env.NEXT_PUBLIC_BASE_PATH ?? "").replace(/^\/+|\/+$/g, "");
-const blogSlugs = (await readdir(resolve("src/content/blog"), { withFileTypes: true }))
-  .filter((entry) => entry.isFile() && entry.name.endsWith(".mdx"))
-  .map((entry) => entry.name.slice(0, -".mdx".length));
 const required = [
   "index.html",
   "blog/index.html",
   "robots.txt",
   "sitemap.xml",
+  "llms.txt",
   "manifest.webmanifest",
   "icons/favicon.svg",
   "icons/atlas-mark.svg",
@@ -25,8 +25,11 @@ const required = [
   "video/poster.webp",
   "og/atlas-card.webp",
   ".nojekyll",
-  ...blogSlugs.map((slug) => `blog/${slug}/index.html`),
-  ...blogSlugs.flatMap((slug) => [`audio/${slug}.webm`, `audio/${slug}.vtt`]),
+  ...papers.map((paper) => `papers/${paper.slug}/index.html`),
+  ...blogPosts.map((post) => `blog/${post.slug}/index.html`),
+  ...blogPosts
+    .filter((post) => post.audio)
+    .flatMap((post) => [`audio/${post.slug}.webm`, `audio/${post.slug}.vtt`]),
 ];
 
 await Promise.all(required.map((item) => access(join(root, item))));

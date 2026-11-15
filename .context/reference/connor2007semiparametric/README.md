@@ -21,5 +21,3 @@ cites:
 - fama_multifactor_1996
 - rosenberg1974extra
 ---
-
-# Semiparametric estimation of a characteristic-based factor model of common stock returns

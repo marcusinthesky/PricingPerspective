@@ -1,0 +1,51 @@
+% Title page for Global Finance Journal's double-anonymized review: the only
+% submission file that identifies the authors (Elsevier requires the title,
+% all authors' names and affiliations, and a complete address for the
+% corresponding author).
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\input{metadata}
+
+\hypersetup{pdftitle={Title page: \papertitle}, pdfauthor={\paperauthors}}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+\begin{center}
+  {\Large\bfseries \papertitle\par}
+  \bigskip
+  {\large \paperauthorone\textsuperscript{a,*} and
+  \paperauthortwo\textsuperscript{a}\par}
+  \medskip
+  \textsuperscript{a}\paperaffiliations
+\end{center}
+
+\bigskip
+
+\textbf{Corresponding author.}
+\paperauthorone, \paperpostaladdress.
+Telephone: \paperphone.
+Email: \href{mailto:\paperemail}{\paperemail}.
+
+\textbf{Keywords.} \paperkeywords
+
+\textbf{JEL classification.} \paperjel
+
+\textbf{Acknowledgements.} None.
+
+\textbf{Declaration of competing interest.} The authors report no potential
+conflict of interest.
+
+\textbf{Funding.} The authors received no financial support for the research,
+authorship, or publication of this article.
+
+\end{document}

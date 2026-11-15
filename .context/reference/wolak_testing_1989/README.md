@@ -15,5 +15,3 @@ issue: '2'
 publisher: Taylor & Francis
 page: 229-241
 ---
-
-# Testing Inequality Constraints in Linear Econometric Models

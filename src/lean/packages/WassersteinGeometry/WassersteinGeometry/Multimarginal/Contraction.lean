@@ -35,7 +35,7 @@ noncomputable def JointCoupling.pushforward
   measure := J.measure.map (fun x a ↦ f (x a))
   marginal a := by
     have hF : Measurable fun x : A → Ω ↦ fun b ↦ f (x b) :=
-      measurable_pi_lambda _ fun b ↦ hm.comp (measurable_pi_apply b)
+      Measurable.of_eval fun b ↦ hm.comp (measurable_pi_apply b)
     rw [Measure.map_map (measurable_pi_apply a) hF]
     change J.measure.map (f ∘ fun x : A → Ω ↦ x a) = (P' a).measure
     rw [← Measure.map_map hm (measurable_pi_apply a), J.marginal a, hP a]
@@ -70,7 +70,7 @@ theorem weightedDispersionCost_pushforward_le
       (L : ℝ≥0∞) ^ 2 * weightedDispersionCost q J := by
   unfold weightedDispersionCost JointCoupling.pushforward
   have hF : Measurable fun x : A → Ω ↦ fun a ↦ f (x a) :=
-    measurable_pi_lambda _ fun a ↦ hm.comp (measurable_pi_apply a)
+    Measurable.of_eval fun a ↦ hm.comp (measurable_pi_apply a)
   have hcost : ∀ a b, Measurable fun x : A → Ω' ↦ (edist (x a) (x b)) ^ 2 :=
     fun a b ↦ (measurable_edist.comp
       ((measurable_pi_apply a).prodMk (measurable_pi_apply b))).pow_const 2
@@ -206,7 +206,7 @@ noncomputable def JointCoupling.pullback
   marginal a := by
     have hg : Measurable hme.invFun := hme.measurable_invFun
     have hG : Measurable fun x : A → Ω' ↦ fun b ↦ hme.invFun (x b) :=
-      measurable_pi_lambda _ fun b ↦ hg.comp (measurable_pi_apply b)
+      Measurable.of_eval fun b ↦ hg.comp (measurable_pi_apply b)
     rw [Measure.map_map (measurable_pi_apply a) hG]
     change J.measure.map (hme.invFun ∘ fun x : A → Ω' ↦ x a) = (P a).measure
     rw [← Measure.map_map hg (measurable_pi_apply a), J.marginal a, hP a,
@@ -229,11 +229,11 @@ lemma lintegral_coord_edist_sq_pullback_le
   have ha : ∀ᵐ x ∂J.measure, x a ∈ Set.range f := by
     apply ae_of_ae_map (measurable_pi_apply a).aemeasurable
     rw [J.marginal a, hP a]
-    exact ae_map_mem_range f hme.measurableSet_range (P a).measure
+    exact ae_map_mem_range hme.measurableSet_range hme.measurable.aemeasurable
   have hb : ∀ᵐ x ∂J.measure, x b ∈ Set.range f := by
     apply ae_of_ae_map (measurable_pi_apply b).aemeasurable
     rw [J.marginal b, hP b]
-    exact ae_map_mem_range f hme.measurableSet_range (P b).measure
+    exact ae_map_mem_range hme.measurableSet_range hme.measurable.aemeasurable
   calc
     ∫⁻ x, (edist (g (x a)) (g (x b))) ^ 2 ∂J.measure ≤
         ∫⁻ x, ((K : ℝ≥0∞) * edist (x a) (x b)) ^ 2 ∂J.measure := by
@@ -264,7 +264,7 @@ theorem weightedDispersionCost_pullback_le
   unfold weightedDispersionCost JointCoupling.pullback
   have hg : Measurable hme.invFun := hme.measurable_invFun
   have hG : Measurable fun x : A → Ω' ↦ fun a ↦ hme.invFun (x a) :=
-    measurable_pi_lambda _ fun a ↦ hg.comp (measurable_pi_apply a)
+    Measurable.of_eval fun a ↦ hg.comp (measurable_pi_apply a)
   have hcost : ∀ a b, Measurable fun x : A → Ω ↦ (edist (x a) (x b)) ^ 2 :=
     fun a b ↦ (measurable_edist.comp
       ((measurable_pi_apply a).prodMk (measurable_pi_apply b))).pow_const 2

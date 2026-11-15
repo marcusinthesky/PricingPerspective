@@ -15,5 +15,3 @@ volume: '52'
 issue: '1'
 page: 1-33
 ---
-
-# Evidence on the characteristics of cross sectional variation in stock returns

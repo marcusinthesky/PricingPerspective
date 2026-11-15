@@ -1,0 +1,59 @@
+% World Finance and Banking Symposium: shared submission layout.
+\documentclass[12pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[round,authoryear]{natbib}
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+% Times-compatible text and mathematics; override pp-manuscript's Latin Modern.
+\usepackage{newtxtext}
+\usepackage{newtxmath}
+\usepackage{setspace}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+% Finish the recovery exhibits before the uncertainty appendix begins.
+\AddToHook{file/primary_profile_support.tex/before}{\clearpage}
+
+\input{metadata}
+\input{generated/information_recovery_numbers}
+\input{generated/corporate_analysis_numbers}
+\input{generated/information_audit_numbers}
+\input{generated/article_redraw_validation_numbers}
+\input{generated/inference_audit_numbers}
+\input{generated/lean_status}
+
+\title{\papertitle}
+\date{\paperdate}
+\hypersetup{pdftitle={\papertitle},pdfsubject={},pdfkeywords={\paperkeywords}}
+\pagestyle{plain}
+\onehalfspacing
+\setlength{\emergencystretch}{2em}
+% Keep paragraph openings, endings and hyphenated words together at page breaks.
+\clubpenalty=10000
+\widowpenalty=10000
+\brokenpenalty=10000
+% Keep the abstract and generated tables at the submission's 12-point size.
+\renewenvironment{abstract}
+{
+  \begin{center}\bfseries\abstractname
+\end{center}\quotation\normalsize}
+{\endquotation}
+\AtBeginEnvironment{table}{%
+  \let\small\normalsize
+  \let\footnotesize\normalsize
+  \let\scriptsize\normalsize
+}
+% setspace resets floats to single spacing after environment-begin hooks.
+% Restore the venue spacing after that reset, including float's [H] tables.
+\makeatletter
+\apptocmd{\@xfloat}{\onehalfspacing}{}%
+{\PackageError{wfbs}{Could not set float spacing}{Check the setspace adapter.}}
+\makeatother
+\setlength{\bibsep}{0pt}
+% Flushing the last page advances the counter to the next unused page.
+% All pages use continuous Arabic numbering, including the title page.
+\AtEndDocument{%
+  \clearpage
+  \ifnum\value{page}>51
+  \PackageWarningNoLine{wfbs}{Submission exceeds the advisory 50-page limit}%
+  \fi
+}

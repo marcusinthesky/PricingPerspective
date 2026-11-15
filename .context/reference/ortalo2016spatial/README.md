@@ -18,5 +18,3 @@ issue: '329'
 publisher: Wiley-Blackwell
 page: 130-171
 ---
-
-# Spatial Asset Pricing: A First Step

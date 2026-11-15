@@ -1,52 +1,31 @@
 \section{Conclusion}\label{sec:conclusion}
 
-This paper asks what can be learned about systematic covariance when firms
-are represented by distributions of risk-relevant information rather than by
-point-valued characteristics.
-For given latent exposure laws, quadratic transport supplies sharp upper and
-lower covariance endpoints, while a nonnegative transport-excess term records
-how far a realized coupling falls below the maximum-covariance arrangement.
-Under the maintained transmission and return bridge, characteristic-side
-distance then yields a conditional interval for the covariance ceiling.
-Economically, the envelope turns distributional separation into a restriction
-on feasible systematic co-movement, because, holding marginal exposure
-magnitudes fixed, laws that remain far apart under every admissible
-transmission face a lower covariance ceiling than nearby laws.
+Representing firms by distributions preserves the heterogeneity of their
+risk-relevant information and permits covariance restrictions to be stated
+in terms of distances between probability laws.
+For given exposure laws, quadratic Wasserstein geometry determines sharp
+covariance endpoints.
+A common transmission benchmark with bounded firm-specific departures
+connects characteristic distance to the covariance ceiling.
+Holding exposure magnitudes fixed, economic characteristics that remain
+separated under admissible transmission leave less scope for shared
+systematic risk.
 
-The empirical exercises assess whether article-embedding distance is
-associated with return distance and whether the conditional restriction is
-informative.
-In the canonical association, one standard deviation more W$_2$ corresponds
-to roughly eight fewer correlation points, and the timing-separated
-later-window estimate retains the same sign.
-At the same time, envelope informativeness is fragile: the zero-slack
-isometric cell covers \ppnum[3]{confound-w2-l1-tau0-coverage} of observed
-dyads and violates the restriction for
-\ppnum[3]{confound-w2-l1-tau0-violation}, but modest slack leaves many dyads unresolved.
-Together, these exercises document an association between greater
-article-embedding distance and weaker return co-movement.
-The rapid loss of envelope informativeness also shows how tightly the
-characteristic-to-exposure map must be restricted before observed covariance
-can discipline latent exposure geometry.
+The Nasdaq application gives this framework an observable counterpart.
+A one-standard-deviation increase in article-embedding distance corresponds
+to roughly eight fewer correlation points after symmetric firm effects.
+The association persists across sector and industry controls, within
+industries, after conditioning on 10-K product-market similarity, and in a
+later return window.
+These comparisons show that news distributions contain information about
+co-movement beyond the recorded classifications and product-market measure.
 
-More broadly, distribution-valued firm information preserves within-firm
-heterogeneity that point summaries omit and thereby permits economic
-restrictions to be stated directly in terms of distances between probability laws.
-Richer distribution-valued data could support analogous scenario analysis in
-broader cross-sections, markets, or geographies, but only where the relevant
-transmission and return bridges can be defended; the Nasdaq application does
-not itself establish such transportability.
-
-The application remains reduced form and associational: article embeddings
-proxy latent characteristics, and the envelope is scenario analysis rather
-than an identified structural estimate.
-The transmission constant, exposure norms, and variance shares are maintained
-rather than estimated.
-The timing-separated exercise does not establish predictive validation
-because the encoder has no documented training cutoff and common latent
-drivers may persist across windows.
-The article-embedding proxy also requires substantial firm coverage.
-
-Within these limits, the paper shows how distribution-valued firm information
-can, under explicit transmission conditions, place transparent and
-economically interpretable restrictions on the feasible set of systematic covariance.
+The sensitivity grid identifies where the theoretical restriction is useful.
+Tight transmission scenarios discriminate among covariance comparisons;
+modest increases in distortion or firm-specific slack leave many comparisons
+unresolved.
+The practical value therefore lies in combining information about a firm's
+reported activities with an explicit account of its exposure to common shocks.
+Article distance directs attention to pairs worth examining, while the
+envelope makes the role of contracts, hedging, financing, and transmission
+uncertainty explicit in assessing their potential systematic covariance.

@@ -16,5 +16,3 @@ container-title: Journal of Computational and Applied Mathematics
 volume: '20'
 page: 53-65
 ---
-
-# Silhouettes: {A} graphical aid to the interpretation and validation of cluster analysis

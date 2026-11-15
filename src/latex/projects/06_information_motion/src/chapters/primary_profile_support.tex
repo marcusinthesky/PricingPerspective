@@ -1,0 +1,221 @@
+\section{Moment representation and uncertainty
+assessment}\label{app:annual-gmm}
+
+\subsection{Independent firm-history sampling}\label{app:history-sampling}
+
+The same firm appears as a target and as a reference across many comparisons.
+To describe how this reuse enters the moments, write them in terms of complete
+firm triples.
+
+For an unordered triple $T=\{i,j,k\}$, define symmetric kernels by averaging
+its three target assignments:
+\begin{equation}\label{eq:complete-triples}
+  H^q_y(T)=\frac13\sum_{i\in T}(R_{ijy}-R_{iky})(A_{ijy}-A_{iky}),\qquad
+  H^d_y(T)=\frac13\sum_{i\in T}(R_{ijy}-R_{iky})^2,
+\end{equation}
+where $j,k$ are the other two members; their ordering does not affect
+the product.
+Expanding each centered covariance into reference-pair contrasts gives
+\begin{equation}\label{eq:triple-identity}
+  (q_y,d_y)=c_N\binom N3^{-1}\sum_T(H^q_y(T),H^d_y(T)),\qquad
+  c_N=\frac{N-2}{2(N-1)}.
+\end{equation}
+Identity~\eqref{eq:triple-identity} expresses the all-reference moments through
+overlapping triples, making their shared firm histories explicit rather than
+treating the triples as independent observations.
+
+Under independent sampling of complete firm histories, the contribution of
+one firm must include every triple in which it appears.
+A conditional H\'ajek benchmark projects the order-three kernels onto those
+histories, preserving covariance across all years.
+For $U_y=\binom N3^{-1}\sum_T H_y(T)$, a finite incident-triple contribution is
+$\widehat\phi_{iy}=3c_N[\binom{N-1}{2}^{-1}\sum_{T\ni i}H_y(T)-U_y]$.
+Applying the ratio derivative gives
+\begin{equation}\label{eq:conditional-sandwich}
+  \widehat\psi_i=
+  \frac{\sum_y(\widehat\phi^q_{iy}-\widehat\beta\widehat\phi^d_{iy})}{\sum_y
+  d_y},\qquad
+  \widehat V_{\beta}=\frac{\widehat{\operatorname{Var}}_i(\widehat\psi_i)}{N}.
+\end{equation}
+Interpreting this benchmark as population uncertainty requires conditionally
+iid complete histories given a fixed common environment, fixed symmetric
+square-integrable kernels, a positive limiting denominator, a nondegenerate
+first projection and a consistent covariance estimator; the empirical
+incident projection is not automatically an unbiased population influence
+estimate.
+
+To assess finite-sample calibration under the iid-history assumption, let
+each firm draw independent $X_i,E_i\sim N(0,1)$ and an independent
+Rademacher $U_i$, retaining these variables across all years and roles.
+For $t=0,\ldots,3$, use the generated arrays
+\begin{equation}\label{eq:inference-fixture}
+  R_{ijt}=c_t X_j,\qquad
+  A_{ijt}=\beta R_{ijt}+g_t(E_j+\tfrac{1}{2}E_i X_j)+tU_i,
+\end{equation}
+where $c=(1,2,1,2)$ and $g=(1,1,2,2)$, with self comparisons excluded.
+Reference centering removes $tU_i$.
+The population ratio of expected pooled moments is $\beta$, its first
+influence is $0.9E_i(X_i+1/2)$, and its asymptotic variance is $1.0125/N$.
+This simulation design supplies a known sampling target while preserving
+cross-year and cross-role dependence.
+Its firms are sampled independently rather than jointly solving the
+competitive economy.
+
+For $H_0:\beta\leq0$ against $H_1:\beta>0$, the candidate lower bound is
+\begin{equation}\label{eq:one-sided-candidate}
+  L=\widehat\beta-z_{0.95}\sqrt{\widehat V_\beta},\qquad
+  z_{0.95}=\ppnum[6]{ir-inference-z},
+\end{equation}
+with rejection when $L>0$.
+We compare 16-firm and 100-firm panels, with
+\ppnum[0]{ir-inference-n100-replications} independent replications per
+target at each size and \ppnum[0]{ir-inference-n100-years} years.
+Within each size, the zero and
+$\beta=\ppnum[1]{ir-inference-n100-alternative-target}$ targets use the
+same firm draws.
+The fixed replication count bounds the worst-case Bernoulli Monte Carlo
+standard error at one percentage point.
+Table~\ref{tab:iid-inference-audit} reports target containment, null and
+alternative rejection, and the ratio of mean candidate standard error to
+empirical dispersion.
+Increasing the sample size brings coverage closer to the nominal 95\%
+within this sampling design, although some undercoverage remains.
+
+\input{generated/inference_audit_table}
+
+\subsection{Article-selection uncertainty}\label{app:article-selection}
+
+For article selection, independent generated archives supply the repeated
+samples while firms, economic histories and reported population laws remain
+fixed.
+We retain all sixteen histories and the common-reporting mechanism,
+stationary-law control and reporting-only law at amplitude 0.005.
+Each history has \ppnum[0]{ir-redraw-outer-replications} outer archives
+at observed expanded coverage.
+Within each firm-year, the canonical and additional article strata retain
+their frozen sample sizes and monthly date probabilities.
+An outer archive draws dates within each stratum and article atoms conditional
+on those dates from the reported law.
+
+Each of its \ppnum[0]{ir-redraw-inner-redraws} inner redraws resamples the
+empirical joint date--atom counts separately by stratum at unchanged sizes.
+The same counts determine article geometry and article-timing weights, and
+each origin draw is reused in every target and reference role.
+
+To assess whether the redraw ranges capture the reported-law coefficient,
+we use the population projection for the prescribed stratum-specific date
+distributions in each fixed history as the primary target.
+The archive projection and the population projection conditional on its
+article dates are also recorded.
+Linear empirical quantiles give the 2.5th--97.5th percentile range and fifth
+percentile.
+We measure how often the range contains the target, how often the target
+lies above the fifth percentile, and how often that percentile exceeds zero.
+Table~\ref{tab:article-redraw-validation} averages these events equally
+across histories; its Monte Carlo errors use independent outer archives,
+not the inner redraws as separate replications.
+Quantiles use defined inner estimates, matching the corporate procedure;
+all attempted inner draws and unavailable outer outputs remain counted.
+The stationary law has a zero target, while the reporting-only law has a
+potentially nonzero reported-law target despite fixed capacities.
+
+\input{generated/article_redraw_validation_table}
+
+An exact empirical transport problem can have a nonunique optimal dual face,
+so fixed-support mass perturbations may have different left and right
+derivatives.
+Finite directional sensitivities and the linear ratio derivative alone do
+not establish smooth article influence functions; finite-sample containment
+under the specified observation law is distinct from a general bootstrap
+validity result.
+
+The iid-history and nested-archive experiments concern distinct sampling
+populations.
+Jointly solved competitors do not become independent histories by conditioning
+on common news, and the corporate archive of Nasdaq financial news, collected
+in December
+2022--January 2023 with operating reports and market commentary from multiple
+publishers, has no established iid-history sampling design.
+Its article redraws condition on the retained firms, returns and years.
+The application therefore reports article-selection sensitivity rather than
+a corporate population confidence bound or $p$-value.
+
+\subsection{Sensitivity of the pooled projection}\label{app:projection-sensitivity}
+
+The complete-triple representation gives all-role deletion moments by
+removing every triple incident to the deleted firm and using the remaining
+sample's normalization.
+Consequently a firm is removed everywhere it appears, rather than only as a
+target or as one financial reference.
+
+When annual ratios differ, changing their weights changes the pooled
+summary.
+A fixed-weight annual GMM criterion makes that dependence explicit alongside
+the moment ratio in \eqref{eq:directional-ratio}.
+For $q=(q_y)_y$, $d=(d_y)_y$ and a fixed symmetric positive-definite weight
+$W$, minimizing $(q-\beta d)^\top W(q-\beta d)$ gives
+\begin{equation}\label{eq:annual-gmm}
+  \beta_W=\frac{d^\top Wq}{d^\top Wd},\qquad
+  d\beta_W=\frac{d^\top W\,dq+(q-2\beta_W d)^\top W\,dd}{d^\top Wd}.
+\end{equation}
+Both annual numerators and denominators vary; the term involving $dd$
+retains the common-slope misspecification residual.
+At $W=I$, annual ratios receive weights proportional to $d_y^2$.
+The original pool weights them by $d_y$.
+For the primary cell, the fixed-identity slope is \ppnum[6]{ir-observation-gmm-beta} and
+2020 receives \ppnum[1]{ir-observation-gmm-2020-weight-pct}\% effective weight rather
+than \ppnum[1]{ir-primary-2020-weight-pct}\%.
+This is a different annual compromise, not an efficiency improvement to an
+exactly identified ratio.
+No estimated optimal weighting or chi-square reference for a
+specification test is used.
+
+The deletion checks remove observed firms, but measurement errors can also
+alter the pooled alignment.
+A deterministic error frontier bounds such changes under hypothetical
+error limits.
+Write observed centered arrays as $R=R^{\mathrm{core}}+v$ and
+$A=A^{\mathrm{core}}+e$.
+Then the core alignment is exactly
+\begin{equation}\label{eq:error-frontier}
+  \langle R-v,A-e\rangle
+  =\langle R,A\rangle-\langle R,e\rangle-\langle v,A\rangle+\langle v,e\rangle.
+\end{equation}
+If the unobserved errors satisfy $\|v\|\leq\lambda_R\|R\|$ and
+$\|e\|\leq\lambda_A\|A\|$, Cauchy--Schwarz bounds the absolute departure by
+$\|R\|\|A\|(\lambda_R+\lambda_A+\lambda_R\lambda_A)$.
+The primary normalized alignment is \ppnum[5]{ir-normalized-alignment}; equal
+error budgets below \ppnum[2]{ir-observation-equal-budget-pct}\% preserve a positive
+finite core alignment under this conservative bound.
+Those percentages are hypothetical relative RMS error limits, not estimated
+reporting errors or confidence levels.
+Crossing the frontier removes the sufficient guarantee without constructing a
+sign reversal.
+
+\section{Observation-profile audit}\label{app:observation-audit}
+
+The restricted movement profile reduces held-out squared reconstruction error
+by only \ppnum[2]{ir-observation-primary-heldout-pct}\% in the primary
+specification, while two alternatives perform worse than zero centered change.
+This audit assesses the shape of annual news movements separately from their
+association with financial returns.
+
+\input{generated/information_recovery_observation_table}
+
+With profile and reference ordering fixed from 2018 article geometry,
+the observation audit fits an annual scalar magnitude on one target-article
+fold and evaluates it on the other, then reverses the roles.
+Every firm remains in both folds; the fit uses article geometry alone.
+Annual held-out scores are \ppnum[4]{ir-observation-heldout-2019},
+\ppnum[4]{ir-observation-heldout-2020}, \ppnum[4]{ir-observation-heldout-2021} and
+\ppnum[4]{ir-observation-heldout-2022}.
+Negative scores in 2020 and 2021 show poor reconstruction within the same
+firms and years.
+
+The affine-rank calibration places \ppnum[0]{ir-observation-locality-count} of
+\ppnum[0]{ir-observation-locality-defined} paths
+(\ppnum[1]{ir-observation-locality-pct}\%)
+at or beyond the distance to the nearest distinct reference distribution at
+the initial date.
+These geometric departures do not identify economic crossings: operating
+shares are unidentified and the profile fit is imperfect.

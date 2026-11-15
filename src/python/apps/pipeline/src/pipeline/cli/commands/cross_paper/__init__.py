@@ -1,1 +1,0 @@
-"""Cross-paper command adapters."""

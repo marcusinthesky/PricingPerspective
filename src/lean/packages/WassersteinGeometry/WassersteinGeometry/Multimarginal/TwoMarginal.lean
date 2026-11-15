@@ -1,3 +1,4 @@
+import Architect
 import WassersteinGeometry.Multimarginal.Pairwise
 
 set_option linter.style.longLine false
@@ -106,6 +107,12 @@ theorem weightedWasserstein_le_weightedDispersionCost_finTwo
 
 /-- For two marginals, multi-marginal dispersion is exactly
 `q₀ q₁ W₂(P₀,P₁)²`; no optimal-coupling existence theorem is required. -/
+@[blueprint "thm:pairwise-nesting"
+  (statement := /--
+    For two marginals, the weighted multi-marginal quadratic dispersion equals the product of
+    the two weights and the squared quadratic Wasserstein distance between them. Assumptions:
+    two probability laws on a second-countable pseudometric space.
+  -/)]
 theorem wassersteinDispersionSq_finTwo
     [OpensMeasurableSpace Ω] [SecondCountableTopology Ω]
     (q : ProbabilityWeight (Fin 2)) (P : Fin 2 → WassersteinMeasure Ω) :

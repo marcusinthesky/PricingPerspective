@@ -1,0 +1,37 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=30mm]{geometry}
+\usepackage[round,authoryear]{natbib}
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+
+\input{metadata}
+\input{generated/numbers}
+
+\title{\papertitle}
+\author{\paperauthors\\\paperaffiliations}
+\date{\paperdate}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  This document verifies the arXiv-compatible source target and clean-bundle build.
+\end{abstract}
+
+\noindent\textit{Keywords:} \paperkeywords
+
+\medskip
+
+\noindent\textit{JEL classification:} \paperjel
+
+\input{chapters/introduction}
+\input{@@ABS_TARGET@@}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

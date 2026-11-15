@@ -1,0 +1,123 @@
+\section{Introduction}\label{sec:introduction}
+
+A manufacturer responding to stronger demand for industrial automation must
+decide how much capacity to add and which activities to expand.
+Its investment changes the margins available to competing manufacturers,
+whose responses in turn affect the attractiveness of that expansion.
+Adjusting capacity takes time, while news of its cash-flow consequences can
+change firms' valuations before the operating response is complete.
+These linked decisions change firms' positions relative to their competitors
+and create a connection between investment, financial valuation, and the
+information reported about firms.
+
+Firms engage in several activities at once, and their competitive positions
+depend on the composition of those activities as well as their scale.
+This allocation of capacity defines a firm's economic footprint.
+Recent work by \citet{gawronsky_continuous_2026} represents firms through
+distributions of financial-news embeddings, preserving differences among the
+articles associated with each firm rather than reducing its coverage to a
+single average.
+Such distributions provide a way to compare firms' positions in information space.
+Understanding how firms' economic footprints evolve requires an account of
+the choices that change their activities.
+
+Spatial and multi-market competition provide a foundation for that account.
+Since \citet{hotelling_stability_1929}, models of product positioning have
+linked firms' locations to the demand they serve.
+Research on strategic substitutes and complements and on networked
+competition shows how firms' choices affect rivals across markets
+\citep{bulow_geanakoplos_klemperer_multimarket_1985,bimpikis_ehsani_ilkilic_cournot_2019}.
+The multi-contest framework of \citet{xu_zenou_zhou_conflict_2022} formalizes
+such interdependence when players allocate resources across overlapping contests.
+We adapt that framework to firms allocating operating capacity across
+activities that serve related customer demands, where each firm's expansion
+changes the contribution margins available to its competitors.
+
+Firms differ in the activities they can pursue at low cost, while increasing
+capacity brings additional expense.
+We establish conditions for a unique Nash equilibrium and derive how
+opportunity and cost changes affect capacity allocations, business mix, and
+rivals' responses.
+To study repositioning over time, we introduce costs of changing inherited capacity.
+Each period's operating choices form a Nash equilibrium conditional on the
+previous allocation, so adjustment unfolds gradually as competitors respond
+to one another.
+Investors value the cash flows generated along this path at a constant discount factor.
+They incorporate anticipated changes in cash flows into firms'
+valuations immediately, even as operating capacity adjusts over subsequent
+periods.
+
+In a restricted two-opportunity economy, firms with greater initial exposure
+experience larger return responses to positive exogenous free cash flow shocks.
+The shock improves one opportunity relative to the other, inducing firms to
+reallocate capacity toward it.
+If news coverage reflects the relative allocation of operating capacity, a
+firm increasing its exposure becomes closer to the initial news distributions
+of more-exposed competitors and farther from those of less-exposed competitors.
+With fixed reference distributions and the stated conditions on news timing
+and observation errors, these responses imply a nonnegative expected local
+association between relative financial returns and decreases in the target
+firm's distance to other firms.
+This result gives competitive repositioning an observable implication in
+information space.
+
+Financial news is itself produced through economic choices.
+Investors seek information about material changes in investment, products,
+and cash-flow prospects, while publishers and corporate disclosures influence
+which developments receive coverage \citep{gentzkow_media_bias_2006}.
+Following research that uses corporate text to study product-market
+relationships \citep{hoberg_phillips_2016}, we represent a firm's articles as
+a mixture of distributions associated with its activities.
+The relative weight of each activity depends on both operating capacity and
+the intensity of coverage.
+When coverage per unit of capacity is equal across activities, news
+composition follows the firm's business mix.
+Changes in coverage can also alter the reported distribution while capacity
+remains unchanged.
+
+We measure differences between firms' article distributions using squared
+Wasserstein distance.
+Optimal transport finds a minimum-cost matching between the distributions of
+article embeddings, capturing changes in their composition even when their
+average vectors change little.
+For each firm, we measure whether its annual news distribution moves closer
+to or farther from other firms' distributions fixed at their 2018 positions.
+We compare these changes with the reference firms' daily excess returns,
+summed with weights determined by the proportion of the target firm's
+articles published after each return date.
+Centering both measures across reference firms within a target-year produces
+an estimator of the predicted relative association.
+
+Multi-agent simulations assess this estimator using operating paths and
+return responses generated by the model.
+Under equal reporting intensity, the population coefficient is positive in
+each of sixteen simulated news histories, yet only
+\ppnum[1]{ir-validation-common-1-correct-pct}\% of article samples at
+observed coverage yield a numerically resolved positive estimate.
+Increasing article coverage improves recovery, although measurement error
+remains substantial.
+In a separate observation counterfactual, changing the relative coverage of
+activities also produces positive alignment while operating capacities are held fixed.
+These experiments show how article sampling and the production of news affect
+the ability to observe competitive adjustment.
+
+We apply the estimator to financial news and returns for \ppnum[0]{ir-firms}
+Nasdaq-listed firms from 2018 to 2022.
+Across four specifications, firms' movements relative to fixed reference
+distributions are positively associated with those reference firms' relative
+weighted excess returns, although the relationship is small.
+The evidence is descriptive, while the simulations establish why changes in
+news cannot be interpreted as changes in operating capacity alone.
+Together, the theory and empirical analysis extend the study of
+distribution-valued firms from comparisons of their reported economic
+footprints to an economic account of why those footprints may change over time.
+
+The remainder of the paper proceeds as follows.
+Section~\ref{sec:literature} reviews the related literature.
+Section~\ref{sec:model} develops the economic model, its directional
+prediction, the estimator and the restricted-form hypothesis.
+Section~\ref{sec:application} evaluates the estimator and its measurement
+uncertainty through multi-agent simulations, then describes the corporate data
+and empirical design.
+Section~\ref{sec:results} presents the results and their economic interpretation.
+Section~\ref{sec:conclusion} concludes.

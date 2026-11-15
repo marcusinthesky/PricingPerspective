@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Never, cast
 import numpy as np
 import pandas as pd
 
+from pipeline._kernels.multiplicity import holm_adjust
 from pipeline.stages.shared.representation_ablation import (
     load_extended_representation_ablation_specs,
     load_representation_contrast_specs,
@@ -55,19 +56,6 @@ def _load_json(path: Path) -> dict[str, object]:
         message = f"Paper 5 representation artifact must be a mapping: {path}"
         _value_error(message)
     return cast("dict[str, object]", payload)
-
-
-def _holm(pvalues: list[float | None]) -> list[float | None]:
-    available = sorted(
-        ((index, value) for index, value in enumerate(pvalues) if value is not None),
-        key=lambda pair: pair[1],
-    )
-    result: list[float | None] = [None] * len(pvalues)
-    running = 0.0
-    for rank, (index, value) in enumerate(available):
-        running = max(running, min(1.0, (len(available) - rank) * value))
-        result[index] = running
-    return result
 
 
 def _paired_metric_contrasts(
@@ -208,7 +196,7 @@ def _paired_metric_contrasts(
         ]
         for index, value in zip(
             indexes,
-            _holm(
+            holm_adjust(
                 [
                     cast("float | None", results[index].get("pvalue"))
                     if results[index].get("status") == "computed"
@@ -299,7 +287,7 @@ def _metric_frames(
 def merge_paper5_representation_ablation(  # noqa: C901, PLR0915
     paths: Paper5RepresentationMergePaths,
 ) -> dict[str, object]:
-    """Validate ten pooled cells, persistable draws, and paired contrasts."""
+    """Validate fifteen pooled cells, persistable draws, and paired contrasts."""
     specs = load_extended_representation_ablation_specs(paths.params_file)
     cells: list[dict[str, object]] = []
     period_contract: dict[str, object] | None = None

@@ -35,28 +35,30 @@ export function BlogShell({ post, children }: { post: BlogPost; children: ReactN
             <Badge key={keyword}>{keyword}</Badge>
           ))}
         </div>
-        <section className="blog-audio" aria-labelledby="blog-audio-title">
-          <div>
-            <p className="blog-audio-eyebrow" id="blog-audio-title">
-              Listen to this note
-            </p>
-            <p className="blog-audio-note">Computer-generated reading · WebM audio</p>
-          </div>
-          <audio controls preload="none" aria-label={`Listen to ${post.title}`}>
-            <source src={sitePath(`/audio/${post.slug}.webm`)} type="audio/webm" />
-            <track
-              default
-              kind="captions"
-              label="English transcript"
-              src={sitePath(`/audio/${post.slug}.vtt`)}
-              srcLang="en"
-            />
-            Your browser does not support WebM audio. Use the download link below.
-          </audio>
-          <a className="blog-audio-download" download href={sitePath(`/audio/${post.slug}.webm`)}>
-            Download WebM audio
-          </a>
-        </section>
+        {post.audio ? (
+          <section className="blog-audio" aria-labelledby="blog-audio-title">
+            <div>
+              <p className="blog-audio-eyebrow" id="blog-audio-title">
+                Listen to this note
+              </p>
+              <p className="blog-audio-note">Computer-generated reading · WebM audio</p>
+            </div>
+            <audio controls preload="none" aria-label={`Listen to ${post.title}`}>
+              <source src={sitePath(`/audio/${post.slug}.webm`)} type="audio/webm" />
+              <track
+                default
+                kind="captions"
+                label="English transcript"
+                src={sitePath(`/audio/${post.slug}.vtt`)}
+                srcLang="en"
+              />
+              Your browser does not support WebM audio. Use the download link below.
+            </audio>
+            <a className="blog-audio-download" download href={sitePath(`/audio/${post.slug}.webm`)}>
+              Download WebM audio
+            </a>
+          </section>
+        ) : null}
       </div>
       <div className="blog-post-prose">{children}</div>
       <nav className="blog-pagination" aria-label="Blog sequence">

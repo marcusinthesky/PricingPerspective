@@ -14,5 +14,3 @@ issued:
   - - 2026
 URL: https://ssrn.com/abstract=6983279
 ---
-
-# Networks in Finance: Foundations and Frontiers

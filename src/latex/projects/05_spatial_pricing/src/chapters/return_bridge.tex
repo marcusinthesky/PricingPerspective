@@ -1,0 +1,131 @@
+\section{From Exposure Adjustment to Returns}
+\label{sec:identification-estimation}
+
+\subsection{Scalar projection and the return equation}
+\label{sec:exposures-to-returns}
+
+The financial test asks whether return dependence follows the measured
+information field.
+Connecting that test to the exposure model requires a bridge from exposure
+vectors to scalar returns.
+Scalar projection carries the spatial operator and coefficient to the
+systematic return component; a working quasi-likelihood then specifies the
+observable return model.
+The exposure vectors $\xi_i$ and $B_i$ and transmission map $T$ remain latent.
+The application observes text laws $\widehat C_i$ and returns $r_t$, with
+$W^\flat$ constructed from the pre-evaluation news window.
+Projection onto a scalar risk direction preserves the exposure equilibrium.
+
+\begin{proposition}[Scalar projection]\label{prop:scalar-projection}
+  For every $h\in\mathbb R^K$, the scalar field $B_i^{\prime}h$ satisfies the
+  ordinary spatial autoregression with the same $W$ and $\rho$, with reduced
+  form $(1-\rho)(I-\rho W)^{-1}$ applied to $\xi_i^{\prime}h$.
+\end{proposition}
+By linearity of the dot product,
+\[
+  B_i^{\prime}h
+  =\rho\sum_j W_{ij}B_j^{\prime}h
+  +(1-\rho)\xi_i^{\prime}h.
+\]
+Stacking preserves the same $W$ and $\rho$; applying the inverse in
+\Cref{thm:sar-reduced-form} gives the stated reduced form.
+
+Define the systematic return component and the projected stand-alone exposure
+by $s_t^i=B_i^{\prime}F_t$ and $z_t^i=\xi_i^{\prime}F_t$, and stack them
+across firms.
+Conditional on the realized factor direction $F_t$, scalar projection gives
+$s_t=\rho Ws_t+(1-\rho)z_t$.
+Since centered excess returns satisfy $\widetilde r_t=s_t+e_t$, substitution
+yields
+
+\begin{equation}\label{eq:model-return-innovation}
+  \widetilde r_t
+  =\rho W\widetilde r_t+x_t^{\mathrm{model}},
+  \qquad
+  x_t^{\mathrm{model}}
+  =(1-\rho)z_t+(I-\rho W)e_t.
+\end{equation}
+
+Equation~\eqref{eq:model-return-innovation} is the return equation implied by
+the exposure model.
+Filtering the idiosyncratic components by $I-\rho W$ and adding the projected
+stand-alone exposure generally makes $x_t^{\mathrm{model}}$ nonspherical and
+correlated across firms, even when the components of $e_t$ are
+cross-sectionally uncorrelated.
+Allowing an intercept to absorb centering and mean components gives the
+empirical notation
+
+\begin{equation}\label{eq:spatial-lag}
+  r_t = \rho W r_t + x_t .
+\end{equation}
+
+\subsection{Estimand}
+\label{sec:estimand}
+
+Three coefficients remain distinct throughout the paper.
+The structural $\rho$ governs peer adjustment of latent exposures in
+\Cref{sec:spatial-closure} and lies on the nonnegative-intensity branch $0\leq\rho<1$ of
+\Cref{prop:peer-adjustment}, where $\lambda=\rho/(1-\rho)$.
+For the concentrated working log-likelihood $\ell_t^Q(\rho;W)$ of
+\Cref{sec:estimation}, the population target is the pseudo-true coefficient
+
+\[
+  \rho^\star
+  \in\operatorname*{argmax}_{|\rho|<1}
+  \E[\ell_t^Q(\rho;W)],
+\]
+
+and $\hat\rho$ is its sample estimate for a supplied $W$.
+Identifying the population target with the structural coefficient requires the
+population quasi-score to have its unique zero at the structural value despite
+the richer innovation in \eqref{eq:model-return-innovation}.
+This condition is additional to the algebraic result supplied by scalar
+projection.
+
+The fitted $\hat\rho$ measures conditional return dependence along the
+supplied information structure.
+Its transformation $\hat\lambda=\hat\rho/(1-\hat\rho)$ is an adjustment index
+for this working return model.
+Evaluation returns do not determine their own peer weights.
+Text and returns can nevertheless share common determinants, so causal
+interpretation requires an additional exclusion restriction or shock design.
+This estimand and interpretation govern the empirical comparisons below.
+
+\subsection{What the spatial field adds to a factor model}
+\label{sec:factor-invariance}
+
+The primary specification conditions excess returns on common factors with
+unrestricted firm coefficients,
+\begin{equation}\label{eq:factor-spatial-lag}
+  (I-\rho W)r_t^e
+  =\alpha+A f_t+\varepsilon_t,
+  \qquad \varepsilon_t\mathrel{\overset{\mathrm{work}}{\sim}}
+  \mathrm{iid}(0,\sigma^2I),
+\end{equation}
+where $r_t^e$ subtracts the daily risk-free rate, $\alpha$ contains
+firm-specific intercepts, each row of $A$ contains one firm's loadings, $f_t$
+contains the factor returns, and $W$ is the supplied interaction field,
+$W^\flat$ in the primary specification.
+Unrestricted firm coefficients pin down what the field can contribute.
+
+\begin{proposition}[Factor-beta invariance]\label{prop:factor-beta-invariance}
+  On a balanced panel with fixed $W$, common regressors $[1,f_t]$, and
+  unrestricted firm coefficients, let $C_{\mathrm{OLS}}$ collect the
+  coefficients of firm-by-firm least-squares regressions of $r_t^e$ on
+  $[1,f_t]$.
+  For every $\rho$ with $I-\rho W$ invertible, the profiled coefficients are
+  $C(\rho)=(I-\rho W)C_{\mathrm{OLS}}$, and
+  \begin{equation}\label{eq:factor-reduced-form-identity}
+    (I-\rho W)^{-1}C(\rho)=C_{\mathrm{OLS}}.
+  \end{equation}
+\end{proposition}
+Profiling applies least squares to $(I-\rho W)r_t^e$ on the common design, and
+least squares is linear in the dependent variable, which gives $C(\rho)$ and
+hence \eqref{eq:factor-reduced-form-identity}.
+
+Under these conditions, standard factor exposures and fitted means remain
+equal to their firm-by-firm regression estimates.
+The field adds information through residual covariance: which firms'
+unexpected returns move together, and how strongly.
+The held-out comparisons evaluate how well alternative peer definitions
+organize that joint distribution.

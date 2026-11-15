@@ -25,5 +25,3 @@ cites:
 - rosenberg1974extra
 - ross_arbitrage_1976
 ---
-
-# Efficient semiparametric estimation of the Fama-French model and extensions

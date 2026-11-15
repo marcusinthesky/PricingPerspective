@@ -1,6 +1,8 @@
 """V-statistic MMD target projections on the nonnegative simplex.
 
-Numerics live in :func:`jcor.geometry.kernel_barycentre_weights`; this module
+Numerics live in
+:func:`statadic.geometry.frechet.mmd.weights.kernel_barycentre_weights`;
+this module
 owns the declared-arm validation, the kernel resolution against the typed
 registry, and the certificate assembly.
 """
@@ -11,7 +13,8 @@ from typing import TYPE_CHECKING, Any
 
 import jax.numpy as jnp
 import numpy as np
-from jcor.geometry import kernel_barycentre_weights
+from statadic.geometry.frechet.mmd.weights import kernel_barycentre_weights
+from statadic.measure.clouds import PackedClouds
 
 from pipeline._kernels.typed_barycentre._common import (
     ACTIVE_WEIGHT_EPS_FACTOR,
@@ -111,10 +114,11 @@ def solve_mmd_target_projections(
         cross = jnp.asarray(kernel_means[target_index, candidate_indices])
         target_self = jnp.asarray(kernel_means[target_index, target_index])
         weights_jax, certificate = kernel_barycentre_weights(
-            jnp.asarray(target.values),
-            [jnp.asarray(candidate.values) for candidate in candidates],
+            PackedClouds(jnp.asarray(target.values), jnp.asarray(len(target.values))),
+            PackedClouds.from_clouds(
+                [jnp.asarray(candidate.values) for candidate in candidates]
+            ),
             kernel=kernel,
-            solver="qp",
             tol=tol,
             maxiter=maxiter,
             validate_psd=True,

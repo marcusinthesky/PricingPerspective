@@ -18,5 +18,3 @@ issued:
   - - 2020
 URL: https://wordnet.princeton.edu/
 ---
-
-# The {FinSim} 2020 {Shared} {Task}: {Learning} {Semantic} {Representations} for the {Financial} {Domain}

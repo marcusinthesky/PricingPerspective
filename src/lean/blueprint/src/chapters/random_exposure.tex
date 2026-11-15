@@ -12,7 +12,8 @@ separate model that borrows its polarization step.
 
 \begin{definition}[Random functional exposure law]
   \label{def:exposure-law}
-  Asset \(i\) carries a random loading \(B_i\sim P_i\in\mathcal P_2(\mathcal H)\)
+  Asset \(i\) carries a random loading \(B_i\sim P_i\in\mathcal
+  P_2(\mathcal H)\)
   in a real Hilbert space \(\mathcal H\), and the common factor process has
   covariance operator \(\Gamma\).
   The risk coordinates and factor-weighted second moments are
@@ -24,7 +25,7 @@ separate model that borrows its polarization step.
   factor-weighted quadratic transport cost is
   \[
     W_{2,\Gamma}^2(P_i,P_j)
-      =\inf_{\pi\in\Pi(P_i,P_j)}\mathbb E_\pi\lVert Z_i-Z_j\rVert^2 .
+    =\inf_{\pi\in\Pi(P_i,P_j)}\mathbb E_\pi\lVert Z_i-Z_j\rVert^2 .
   \]
   Every object above is now formalized at this level, not only interpreted:
   risk coordinates as a pushforward under \(\Gamma^{1/2}\), the second moment
@@ -54,20 +55,7 @@ separate model that borrows its polarization step.
   with the assertion that its cost is least in the coupling set.
 \end{definition}
 
-\begin{lemma}[Polarization]
-  \label{lem:polarization}
-  \ppClaimBinding{lem:polarization}
-  For any \(x,y\) in a real inner-product space,
-  \[
-    \langle x,y\rangle
-      =\tfrac12\left(\lVert x\rVert^2+\lVert y\rVert^2-\lVert x-y\rVert^2\right).
-  \]
-\end{lemma}
-
-\begin{proof}
-  \ppClaimProofBinding{lem:polarization}
-  Expand the squared norm of the difference.
-\end{proof}
+\inputleannode{lem:polarization}
 
 \begin{lemma}[Transport polarization for a coupling]
   \label{lem:transport-polarization}
@@ -97,78 +85,13 @@ separate model that borrows its polarization step.
   the class is an interval whenever both endpoints are attained.
 \end{definition}
 
-\begin{theorem}[Covariance envelope from optimal transport]
-  \label{thm:random-exposure-envelope}
-  \ppClaimBinding{thm:random-exposure-envelope}
-  \uses{def:frechet-class}
-  Given a finite optimal transport-cost certificate, the ceiling
-  \[
-    \kappa^{\max}_{ij}=\tfrac12\left(v_i+v_j-W_{2,\Gamma}^2(P_i,P_j)\right)
-  \]
-  is the greatest systematic covariance attainable over the coupling set.
-  This is a statement about what the two marginal laws permit; it does not
-  identify the realized covariance, which requires the economic joint law.
-  It is the \emph{upper} endpoint only; the lower one is
-  \Cref{thm:random-exposure-lower-endpoint}, a separate theorem.
-\end{theorem}
+\inputleannode{thm:random-exposure-envelope}
 
-\begin{proof}
-  \ppClaimProofBinding{thm:random-exposure-envelope}
-  \uses{lem:transport-polarization}
-  \Cref{lem:transport-polarization} turns least cost into greatest covariance
-  monotonically, and the certificate supplies leastness.
-\end{proof}
+\inputleannode{thm:random-exposure-lower-endpoint}
 
-\begin{theorem}[Reflected lower endpoint]
-  \label{thm:random-exposure-lower-endpoint}
-  \ppClaimBinding{thm:random-exposure-lower-endpoint}
-  \uses{def:frechet-class}
-  Applying the same argument to the reflected law \((-I)_\#P_j\) gives the
-  sharp lower endpoint of the Fréchet class.
-\end{theorem}
+\inputleannode{eq:random-exposure-gap}
 
-\begin{proof}
-  \ppClaimProofBinding{thm:random-exposure-lower-endpoint}
-  \uses{lem:transport-polarization}
-  Covariance is odd and the second moment even under reflection of one
-  argument, so the greatest covariance against the reflected law is the least
-  covariance against the original.
-\end{proof}
-
-\begin{theorem}[Transport-excess gap]
-  \label{eq:random-exposure-gap}
-  \ppClaimBinding{eq:random-exposure-gap}
-  \uses{def:finite-exposure-cloud}
-  For any coupling,
-  \(\kappa^\pi_{ij}=\kappa^{\max}_{ij}-\tfrac12\operatorname{excess}(\pi)\).
-  The checked statement is an identity in the reference cost: it holds for any
-  scalar placed where the optimal cost sits, and therefore asserts nothing
-  about the sign of the excess on its own.
-\end{theorem}
-
-\begin{proof}
-  \ppClaimProofBinding{eq:random-exposure-gap}
-  \uses{thm:random-exposure-envelope, lem:transport-polarization}
-  Subtract the reference cost from the coupling cost inside
-  \Cref{lem:transport-polarization} and rearrange.
-\end{proof}
-
-\begin{theorem}[The excess is nonnegative]
-  \label{eq:random-exposure-excess-nonneg}
-  \ppClaimBinding{eq:random-exposure-excess-nonneg}
-  \uses{def:frechet-class}
-  Against a certified optimal transport cost, \(\operatorname{excess}(\pi)\ge0\)
-  for every coupling.
-  This is what makes the gap a one-sided moment inequality and hence testable;
-  it is a separate theorem from the identity above, because the identity holds
-  for any reference cost while the sign needs that cost to be the infimum.
-\end{theorem}
-
-\begin{proof}
-  \ppClaimProofBinding{eq:random-exposure-excess-nonneg}
-  \uses{def:frechet-class}
-  Immediate from minimality of the certified cost over the coupling set.
-\end{proof}
+\inputleannode{eq:random-exposure-excess-nonneg}
 
 \begin{proposition}[Pairwise envelopes do not assemble]
   \label{prop:pairwise-not-psd}
@@ -202,39 +125,9 @@ separate model that borrows its polarization step.
   empirical design estimates.
 \end{definition}
 
-\begin{theorem}[Upper transport transfer under slack]
-  \label{eq:random-w2-upper-transfer}
-  \ppClaimBinding{eq:random-w2-upper-transfer}
-  \uses{ass:random-common-map, def:finite-exposure-cloud}
-  Under the upper Lipschitz bound and bounded per-endpoint slack, the optimized
-  squared exposure transport cost of two finitely supported clouds is at most
-  \(L^2\) times the optimized squared characteristic cost, plus a slack term
-  carrying the maintained support diameter.
-\end{theorem}
+\inputleannode{eq:random-w2-upper-transfer}
 
-\begin{proof}
-  \ppClaimProofBinding{eq:random-w2-upper-transfer}
-  \uses{lem:transport-polarization}
-  Push the certificate coupling of the characteristic clouds through \(T\),
-  bound the resulting cost pointwise, and absorb the slack endpoints.
-\end{proof}
-
-\begin{theorem}[Lower transport transfer under slack]
-  \label{eq:random-w2-lower-transfer}
-  \ppClaimBinding{eq:random-w2-lower-transfer}
-  \uses{ass:random-common-map, def:finite-exposure-cloud}
-  Under a positive lower Lipschitz constant and bounded per-endpoint slack, the
-  optimized squared exposure transport cost is at least \(\ell^{-2}\) times the
-  optimized squared characteristic cost, less a slack term carrying the
-  maintained support diameter.
-\end{theorem}
-
-\begin{proof}
-  \ppClaimProofBinding{eq:random-w2-lower-transfer}
-  \uses{lem:transport-polarization}
-  Symmetric to the upper direction, using injectivity of \(T\) supplied by the
-  lower bound.
-\end{proof}
+\inputleannode{eq:random-w2-lower-transfer}
 
 \begin{corollary}[Metric-level bracket]
   \label{cor:random-w2-metric}
@@ -244,8 +137,8 @@ separate model that borrows its polarization step.
   enters additively and no support diameter appears:
   \[
     \ell^{-1}W_2(C_i,C_j)-(\tau_i+\tau_j)
-      \le W_{2,\Gamma}(P_i,P_j)
-      \le L\,W_2(C_i,C_j)+(\tau_i+\tau_j).
+    \le W_{2,\Gamma}(P_i,P_j)
+    \le L\,W_2(C_i,C_j)+(\tau_i+\tau_j).
   \]
   This sharper form is what the empirical diagnostic uses.
 
@@ -346,8 +239,6 @@ nor declaration changed in the move.
   No weight normalization is assumed, so the screen applies a fortiori to
   fully-invested long-only books.
 
-  \Cref{chap:distance-implied} carries its own label for this declaration under
-  the distance-implied reading; the two manuscripts consume one theorem.
 \end{theorem}
 
 \begin{proof}

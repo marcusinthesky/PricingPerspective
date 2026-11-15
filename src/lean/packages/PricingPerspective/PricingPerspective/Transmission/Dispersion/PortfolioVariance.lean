@@ -1,6 +1,6 @@
 import PricingPerspective.Transmission.Dispersion.Carrier
 import PricingPerspective.Transmission.PortfolioLaw
-import PricingPerspective.Continuous.Energy.Portfolio
+import PricingPerspective.Exposure.Energy.Portfolio
 import WassersteinGeometry.Multimarginal
 
 set_option linter.style.longLine false
@@ -193,7 +193,7 @@ end JointLaw
 
 /-- **Two-asset Paper 1 bridge.**
 
-The pairwise covariance cap already proved in `Continuous.Energy.Portfolio`
+The pairwise covariance cap already proved in `Exposure.Energy.Portfolio`
 implies the corresponding variance cap for a convex two-asset portfolio.
 -/
 theorem twoAssetVariance_le_of_pairwiseFloor
@@ -206,7 +206,7 @@ theorem twoAssetVariance_le_of_pairwiseFloor
           ((1 / 2 : ℝ) * (‖βi‖ ^ 2 + ‖βj‖ ^ 2 - d ^ 2)) := by
   have hcov : ⟪βi, βj⟫_ℝ ≤
       (1 / 2 : ℝ) * (‖βi‖ ^ 2 + ‖βj‖ ^ 2 - d ^ 2) := by
-    simpa using PricingPerspective.ContinuousAPT.systematic_covariance_upper_bound
+    simpa using PricingPerspective.Exposure.Energy.systematic_covariance_upper_bound
       βi βj 1 d (by norm_num) hd (by simpa using hfloor)
   have hcross :
       2 * θ * (1 - θ) * ⟪βi, βj⟫_ℝ ≤

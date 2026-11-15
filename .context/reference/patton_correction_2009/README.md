@@ -22,5 +22,3 @@ cites:
 - politis_automatic_2004
 - politis_stationary_1994
 ---
-
-# Correction to 'Automatic Block-Length Selection for the Dependent Bootstrap'

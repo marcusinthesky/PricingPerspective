@@ -18,5 +18,3 @@ issue: '10'
 publisher: MDPI
 page: '1100'
 ---
-
-# An Elementary Introduction to Information Geometry

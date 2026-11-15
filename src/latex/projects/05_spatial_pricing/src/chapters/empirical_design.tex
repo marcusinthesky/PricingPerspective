@@ -1,0 +1,242 @@
+\section{Data and Empirical Design}
+\label{sec:empirical-design}
+
+\subsection{Data and timing}
+\label{sec:panel-data}
+
+The design evaluates the financial relevance of peer relations measured from
+an earlier information window.
+We constructed the barycentric field and every comparator field from
+information ending in 2022 and froze each matrix.
+We then evaluated conditional return dependence on
+\ppvalue{post-pooled-2023-2026-w-flat-trading-days} common trading days from
+\ppvalue{post-evaluation-date-start} through
+\ppvalue{post-evaluation-date-end}.
+No evaluation return enters the text geometry or any comparator matrix.
+Return data serve two roles.
+The reported post-corpus QMLE estimates are fitted on 2023--2026 returns, while
+the held-out density exercise fits every parameter on 2018--2022 returns and
+evaluates it on 2023--2026.
+
+We assembled firm text from Nasdaq's public per-symbol archive of syndicated
+news \citep{nasdaq_news_headlines_2026}, whose ticker-indexed retrieval and
+dated article bodies support one reproducible collection rule across the
+universe.
+Ticker assignment follows the archive and is not manually validated at the
+article level.
+Daily simple returns are Yahoo Finance adjusted-close ratios minus one,
+retrieved through a version-fixed \texttt{yfinance} client
+\citep{yahoo_finance_historical_2026,aroussi_yfinance_2026}.
+The primary specification subtracts the daily risk-free rate and aligns the
+excess-return panel with the daily Fama--French five factors and momentum.
+We keep only dates on which every firm has a return; missing returns are not filled.
+
+The universe is a prespecified Nasdaq-100-based frame admitted by an annual
+coverage screen requiring at least \ppvalue{annual-raw-article-floor} raw
+articles per firm in each year from 2018 through 2022.
+Intersecting firms that have a frozen embedding cloud with firms that have a
+compatible return history yields \ppvalue{n-tickers-priced} continuously and
+heavily covered large-cap firms, a survivor-conditioned cross-section.
+The annual floor preserves coverage in every construction year; both that
+floor and the balanced cloud size below were fixed before the return
+comparisons.
+The return window ends on 6 April 2026, the final common date before HOLX's
+take-private,
+so the 2026 fold covers
+\ppvalue{post-eval2026-w-flat-trading-days} dates while the 2023--2025 folds
+cover complete years.
+\ppAppendixRef{sec:app-sample} reports sector composition and bridges the
+estimates to an earlier 52-firm specification.
+
+Each firm's information environment is a balanced cloud of
+\ppvalue{paper5-balanced-cloud-size} articles, selected from the 2018--2022
+window by a deterministic URL-hash order.
+The common cloud size puts every empirical law on the support required by the
+balanced assignment in \eqref{eq:w2-assignment}; it makes firms comparable and,
+by design, removes raw news volume from the geometry.
+It also fixes the assignment problem's computational support across firms.
+We encoded each article with the full-width Qwen3-Embedding-8B model, which is
+trained to place semantically related texts near one another
+\citep{qwen3_embedding_2025}, and row-normalized its 4,096-coordinate vector.
+The encoder was released after the 2018--2022 article window, so the primary
+representation is a retrospective measurement of earlier news.
+The earlier-cutoff comparison in \Cref{sec:results-representation}
+examines dependence on this retrospective measurement.
+Each article has equal mass in the firm's empirical distribution.
+The representation exercises in \Cref{sec:results-representation} vary output
+width, model capacity, model family, and reported information vintage
+(\ppAppendixRef{sec:p5-representation-ablation}).
+
+\subsection{Estimation, inference, and out-of-period evaluation}
+\label{sec:estimation}
+
+We estimate conditional return dependence by quasi-maximum likelihood
+(QMLE).
+The primary specification is
+\eqref{eq:factor-spatial-lag} with the barycentric field $W^\flat$, firm-specific
+intercepts, and loadings on the market, size, value,
+profitability, investment, and momentum factors.
+At every candidate $\rho$, least squares profiles all firm intercepts and
+loadings jointly with $\sigma^2$, and the concentrated objective retains the
+spatial Jacobian $T\log|I-\rho W|$.
+The search covers the stable region $|\rho|<1$.
+The factor-only benchmark sets $\rho=0$ with the same intercepts, loadings,
+dates, and innovation specification, so comparisons with it isolate the value
+of the field.
+Following \citet{ge_news-implied_2023}, a control ladder repeats the primary
+specification under FF3, FF3 plus momentum, and FF5 on the same dates; FF5 plus
+momentum remains primary throughout.
+A robustness specification profiles firm-specific innovation variances
+$D=\operatorname{diag}(\sigma_1^2,\ldots,\sigma_N^2)$, because ignored
+heteroskedasticity can move a spatial point estimate as well as its standard
+error \citep{kelejian_prucha_2010}.
+Maximized quasi-log-likelihood (QLL) describes fit on the estimation panel.
+The appendix reports the associated working AIC, Hannan--Quinn (HQC), and BIC
+criteria, their definitions, and parameter counts
+(\ppAppendixRef{sec:app-information-criteria}).
+
+Two bootstrap procedures supply inference. A restricted-null stationary
+bootstrap tests $H_0:\rho=0$ through the quasi-likelihood-ratio (QLR) statistic
+by independently resampling standardized firm residuals on stationary-block
+paths, restoring the fitted variances and factor means before refitting both
+models. Interval estimates and every held-out comparison use 2,000 paired
+date-block refits on one common resampling schedule, which refits the
+calibration model, the evaluation coefficients, and the scored parameters on
+each draw; all models and both transport orders share every draw. Both
+procedures condition on the corpus, embeddings, and constructed fields, so they
+propagate return sampling and nuisance-parameter uncertainty. Implementation
+details are given in \ppAppendixRef{sec:app-inference}.
+
+The main financial evaluation asks whether the field improves the joint
+distribution assigned to later returns.
+All parameters are fitted on 2018--2022 returns and held fixed while 2023--2026
+returns are scored by the mean Gaussian quasi-log score per firm-day.
+Higher scores mean that the model assigns greater density to the realized
+cross-section of returns.
+Evaluation-date factors are observed when scoring, so the comparison concerns
+conditional joint density given realized factor returns.
+Paired intervals resample calibration and evaluation dates on separate
+stationary-block schedules shared by all models.
+
+\subsection{Transport order and the comparator fields}
+\label{sec:two-field-estimation}
+
+The transport-order comparison repeats the target-anchored construction under
+linear ($p=1$) and quadratic ($p=2$) displacement cost, holding fixed the firm
+clouds, ground space, leave-one-out candidates, and simplex.
+For $W^\flat_1$, each row minimizes the sum of Euclidean reconstruction norms
+after order-one optimal assignments; for $W^\flat$, the sum of squared norms
+after order-two assignments.
+Tables and the comparison below label the two orders W1 and W2.
+Changing the order changes how embedding-space displacement enters the
+measurement of the field; the exposure-adjustment criterion that maps $\rho$
+into $\lambda$ is the same for both, so the comparison measures sensitivity to
+the transport geometry rather than the curvature of adjustment costs.
+Before the final estimation we fixed an equivalence margin for the
+W2-minus-W1 held-out score and a weak-separation rule that classifies the
+fields as nearly collinear from the correlation of their induced peer-return
+signals; when the separation rule binds, the design reports paired contrasts
+rather than interpreting a joint coefficient allocation. Both thresholds and
+their construction are stated in \ppAppendixRef{sec:app-inference}.
+A Matryoshka
+dimension ladder repeats both constructions at
+$D\in\{4096,1024,256,64\}$ coordinates of the same model
+\citep{kusupati_matryoshka_2022,qwen3_embedding_2025} to locate where any
+difference between the orders enters (\ppAppendixRef{sec:p5-matryoshka}).
+
+Each comparator field changes one element of the peer definition, holding the
+firms, dates, factor controls, and likelihood fixed.
+
+\begin{table}[H]
+  \centering
+  \caption{Comparator specifications and the element of the dependence
+    definition each one changes. All fields use firm information dated through
+    2022 and are held fixed throughout the 2023--2026 evaluation; covariance
+  inputs are calibrated on 2018--2022 returns.}
+  \label{tab:comparator-design}
+  \small
+  \begin{tabular}{p{0.3\linewidth}p{0.62\linewidth}}
+    \toprule
+    Specification & Relative to the barycentric field \\
+    \midrule
+    Equal active support & Same peers; equal instead of fitted weights \\
+    RBF--Wasserstein (median or validation-tuned bandwidth) & Same
+    distributions and pairwise distances; separate distance-decay weight per
+    pair instead of joint reconstruction \\
+    Centroid reconstruction & Same simplex reconstruction; each firm's cloud
+    collapsed to its mean embedding \\
+    Persistent news co-mentions & Explicit shared coverage instead of
+    language-model geometry \\
+    Industry/sector & Conventional classification \\
+    Direct Ledoit--Wolf residual covariance & No peer field; constant-correlation
+    shrinkage of the factor-residual covariance \\
+    W1 barycentric & Linear instead of quadratic transport cost \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The equal-support, RBF, and co-mention fields are defined in
+\Cref{sec:interaction-comparators}.
+The centroid field solves the leave-one-out simplex problem on mean
+embeddings, and the tuned RBF selects its bandwidth multiplier from
+$\{0.25,0.5,1,2,4\}$ using only a 2018--2020 fit and 2021--2022 validation
+split before refitting through 2022.
+Because these fields are non-nested, their held-out gains are compared through
+paired stationary-block intervals rather than QLR statistics.
+
+As a structure-agnostic covariance benchmark, we estimate the Ledoit--Wolf
+linear-shrinkage covariance of the factor residuals in the 2018--2022
+calibration sample~\citep{ledoit_wolf_2004}. The estimator shrinks the sample
+covariance toward a constant-correlation target that preserves each residual
+variance and replaces pairwise correlations with their cross-sectional mean;
+the shrinkage intensity is estimated from the calibration residuals. We hold
+the factor fitted means and this covariance fixed when scoring the same
+2023--2026 observations. This benchmark asks whether the information field
+adds held-out density beyond a conventional covariance estimator without an
+economic peer structure.
+
+The relation between the barycentric and news-link fields is estimated jointly,
+as the two-channel model of \Cref{thm:two-field-closure} prescribes, under the
+same primary factor-conditioned return specification.
+Scalar projection applies to \eqref{eq:two-field-sar} exactly as to the
+one-field equilibrium, giving
+
+\begin{equation}\label{eq:two-field-spatial-lag}
+  (I-\rho^\flat W^\flat-\rho^{\mathrm{news}} W^{\mathrm{news}})r_t^e
+  =\alpha+A f_t+\varepsilon_t .
+\end{equation}
+
+This comparison uses the firm-specific intercepts and factor loadings of the
+primary model. Its matched-random overlap tests use the same frozen fields and
+return panel.
+The raw-return, common-intercept counterpart, which also supplies the annual
+re-estimates, is reported in the appendix as a corroborating specification:
+\[
+  r_t=\alpha\1+\rho W r_t+\varepsilon_t,
+  \qquad \varepsilon_t\mathrel{\overset{\mathrm{work}}{\sim}}
+  \mathrm{iid}(0,\sigma^2I),
+\]
+extended to two fields as in \eqref{eq:two-field-spatial-lag}.
+Both matrices enter unchanged: residualizing one on the other would create
+negative entries and non-unit row sums and destroy the peer-average
+interpretation of \Cref{def:interaction-matrix}, so the coefficient would no
+longer map to an adjustment intensity.
+Residualizing the induced signals $W^\flat r_t$ and $W^{\mathrm{news}}r_t$
+instead would use the contemporaneous returns and so would not yield
+predetermined fields for the spatial likelihood.
+Because $I-\rho^\flat W^\flat-\rho^{\mathrm{news}}
+W^{\mathrm{news}}=I-(\rho^\flat+\rho^{\mathrm{news}})W(\theta)$,
+the concentrated objective is the one-field objective at the mixture, and the
+restrictions $0\leq\theta\leq1$ and $0\leq\rho^\flat+\rho^{\mathrm{news}}<1$ impose
+$\lambda^\flat,\lambda^{\mathrm{news}}\geq0$.
+The single-field fits are the boundaries $\theta=1$ and $\theta=0$ of this
+family, so the joint quasi-log-likelihood cannot fall below either.
+The statistic
+$\mathrm{QLR}^{\mathrm{news}}=2\{\sup_{\rho^\flat,\rho^{\mathrm{news}}\geq 0}
+  \ell^Q(\rho^\flat,\rho^{\mathrm{news}})
+-\sup_{\rho^{\mathrm{news}}=0}\ell^Q(\rho^\flat,\rho^{\mathrm{news}})\}$ tests
+$\rho^{\mathrm{news}}=0$, $\mathrm{QLR}^\flat$ tests $\rho^\flat=0$
+symmetrically, and each has its
+reference distribution simulated under the restricted single-field fit because
+the null lies on the boundary
+(\ppAppendixRef{sec:p5-two-field-implementation}).

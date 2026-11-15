@@ -19,5 +19,3 @@ page: '102032'
 cites:
 - hansen1991implications
 ---
-
-# Graph-Based Multi-Factor Asset Pricing Model

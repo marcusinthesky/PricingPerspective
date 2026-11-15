@@ -1,0 +1,7 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2025) (preloaded format=pdflatex)
+entering extended mode
+LaTeX2e <2024-06-01>
+(./main.tex
+Missing character: There is no X (U+0058) in font cmr10!
+[1{/usr/local/texlive/2025/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] (./main.aux) )
+Output written on main.pdf (1 page, 12345 bytes).

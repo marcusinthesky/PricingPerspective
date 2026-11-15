@@ -15,5 +15,3 @@ accessed:
 publisher: Yahoo Inc.
 URL: https://finance.yahoo.com/
 ---
-
-# Yahoo Finance historical market data

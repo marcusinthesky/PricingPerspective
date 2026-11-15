@@ -14,5 +14,3 @@ version: 1.5.1
 publisher: Python Package Index
 URL: https://pypi.org/project/yfinance/1.5.1/
 ---
-
-# yfinance 1.5.1

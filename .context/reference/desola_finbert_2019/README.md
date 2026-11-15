@@ -15,5 +15,3 @@ issued:
 URL: http://people.ischool.berkeley.edu/
 DOI: 10.13140/RG.2.2.19153.89442
 ---
-
-# {FinBERT}: pre-trained model on {SEC} filings for financial natural language tasks

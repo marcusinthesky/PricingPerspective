@@ -18,5 +18,3 @@ URL: https://www.sec.gov/edgar.shtml.
 container-title: Punta Cana and online
 page: 37-44
 ---
-
-# Is {Domain} {Adaptation} {Worth} {Your} {Investment}? {Comparing} {BERT} and {FinBERT} on {Financial} {Tasks}

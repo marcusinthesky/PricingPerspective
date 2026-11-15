@@ -17,5 +17,3 @@ issue: '1'
 publisher: The Econometric Society
 page: 219-255
 ---
-
-# Higher Order Properties of {GMM} and Generalized Empirical Likelihood Estimators

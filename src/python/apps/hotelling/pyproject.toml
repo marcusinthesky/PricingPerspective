@@ -1,0 +1,60 @@
+[project]
+name = "hotelling"
+version = "0.1.0"
+description = "Dated capacity games and information recovery for Paper 6."
+readme = "README.md"
+requires-python = "~=3.13.0"
+dependencies = [
+  "jax[cpu]>=0.11.0,<0.12",
+  "statadic==0.5.0a2",
+  "numpy>=2",
+  "scipy>=1.18.0",
+  "mesa[network]>=3.5.1,<4",
+]
+
+[dependency-groups]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "pytest-testmon",
+  "pytest-xdist",
+  "ruff",
+  "deptry",
+  "threadpoolctl>=3.6.0",
+]
+
+[tool.uv]
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hotelling"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+addopts = "-m 'not slow' -W error::FutureWarning"
+markers = [
+  "slow: Statistical or sweep tests that take >2s (full CI only)",
+  "gpu: Tests requiring a CUDA device",
+]
+
+# --- ruff (lint + format) ------------------------------------------------
+[tool.ruff]
+extend = "../../pyproject.toml"
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"pipeline".msg = "hotelling is below pipeline and must not import it."
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/**" = ["RUF002", "RUF003", "S101"]
+# Jaxtyping dimension strings are not Python forward-reference expressions.
+"src/hotelling/dynamics/*.py" = ["F722"]
+"src/hotelling/orthant.py" = ["F722"]
+
+[tool.deptry]
+known_first_party = ["hotelling"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -16,5 +16,3 @@ volume: '58'
 issue: '3'
 page: 595-612
 ---
-
-# Distributionally Robust Optimization Under Moment Uncertainty with Application to Data-Driven Problems

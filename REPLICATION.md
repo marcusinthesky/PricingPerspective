@@ -1,176 +1,94 @@
-# Replication source snapshot
+# Reproducing the four papers
 
-This repository is a history-free source snapshot of the private research
-monorepo behind *Distributional Information Geometry for Financial Dependence*
-(University of Cape Town). It preserves the working path structure that
-`dvc.yaml` refers to, so the declared analysis stages resolve here exactly as
-they do in the source tree.
+The supported projects are `01_continuous_bounds`, `03_distance_implied_mpt`,
+`05_spatial_pricing` and `06_information_motion`. The public DVC graph computes
+their numerical analyses, renders their tables and figures, certifies the Lean
+claims and compiles the manuscripts.
 
-## Papers
+## Environment and inputs
 
-| Project | Short title | Terminal stage |
-| --- | --- | --- |
-| `src/latex/projects/01_continuous_bounds` | Wasserstein covariance envelopes | `p1_numbers` |
-| `src/latex/projects/03_distance_implied_mpt` | Portfolio risk bounds | `p3_numbers` |
-| `src/latex/projects/05_spatial_pricing` | Wasserstein-barycentric interaction fields | `p5_numbers` |
+Install Git LFS before cloning so the TeX bundle, figures and publication assets
+are materialized. Enter the pinned environment and install the locked packages:
 
-## What is included
-
-- **Python** (`src/python`) — the DVC runtime closure: `pipeline`, `simulation`,
-  `ettax`, `jcor` and `semflow`, plus `dotell`, the shared telemetry library the
-  first three import. `manimize`, the animated companion to the manuscripts, is
-  retained in full but is not part of the DVC graph. `insitu` and
-  `insitu-repository` appear as packaging metadata only.
-- **Lean 4** (`src/lean`) — the `PricingPerspective`, `WassersteinGeometry`,
-  `EnergyStatistics` and `PaperReconstructions` packages, with blueprint sources.
-- **LaTeX** (`src/latex`) — the three paper projects above, the shared templates,
-  and the vendored Tectonic bundle, so manuscript compiles stay offline.
-- **Pipeline definition** — `dvc.yaml`, `dvc.lock`, `params.yaml`, and the
-  `.semflow` semantic fingerprints.
-- **References** (`.context/reference`) — the CSL frontmatter records used to
-  verify the generated bibliographies.
-- **A configured DVC remote** (`.dvc/config`) — see *Getting the data*.
-
-`src/python/uv.lock` is locked to exactly the members present here.
-
-## What is not included
-
-- Development history, research notes, correspondence, and agent tooling.
-- Test suites, benchmarks, and implementation code outside the runtime closure.
-- The news corpus and the vendor price panels — see *What the remote does not
-  carry*.
-- The thesis aggregate under `src/latex/projects/`. The three paper chains
-  above are the supported terminals.
-
-## Checking out
-
-Figures, PDFs, the Tectonic bundle, and the recorded metric series are stored in
-Git LFS. Install it first, or the working tree will contain pointer files
-instead of content:
-
-```bash
+```sh
 git lfs install
-git clone https://github.com/marcusinthesky/PricingPerspective.git
+devenv shell -- just setup
+devenv shell -- dvc pull
 ```
 
-## Getting the data
+The default DVC remote reads anonymously from the public
+[PricingPerspective data bucket](https://huggingface.co/buckets/marcusinthesky/PricingPerspective).
+Readers need no cloud account or API credentials. Git stores the source and DVC
+graph; the data objects are downloaded separately and checked by their hashes.
+The frozen `fixed_inputs` stage groups the released numerical inputs. Its
+fail-closed command is never executed by reproduction, including with `--force`.
 
-The DVC objects live in a public Hugging Face storage bucket, configured as the
-default remote in `.dvc/config`:
+The input boundary consists of:
 
-<https://huggingface.co/buckets/marcusinthesky/PricingPerspective>
+- Computed document embeddings with stable identifiers, firm labels, dates,
+  dimensions and numeric text-length metadata. Vectors and cohort membership
+  are preserved exactly; article text and titles are excluded.
+- Text-free cohort manifests and corpus counts, separate anonymous sparse
+  TF–IDF fits, co-mention events, and per-firm numeric liquidity controls.
+- Adjusted-return panels, public factor data and classification metadata.
+- Fixed numeric historical benchmarks used by the four papers.
 
-Reads are anonymous. You need **no account, no token and no credentials**:
+The pipeline does not scrape news, download encoders or request embeddings.
+`validate-public-inputs` rejects changed shard checksums, changed row counts and
+unapproved columns before the downstream embedding computations.
 
-```bash
-dvc pull
+## Verification and execution
+
+```sh
+devenv shell -- just python::test-all
+devenv --profile lean shell -- just lean::check
+devenv --profile lean shell -- just lean::certify
+devenv shell -- just latex::check
+devenv shell -- dvc repro
+devenv shell -- just reproduction-check
 ```
 
-`dvc pull` with no targets will report errors for the artifacts the remote
-deliberately does not carry, which is expected and harmless — everything
-publishable still lands. To pull without those errors, name the published trees:
+Run each Python package's tests in its own process; the root recipes do this.
+The complete tests do not use Testmon selection. The approved numerical settings,
+resampling schedules and seeds remain in `params.yaml` and the numeric design
+inputs. Computational stages own float64 initialization.
 
-```bash
-dvc pull \
-  data/shared/embeddings data/shared/corpus/summary.yaml \
-  data/shared/co_mentions data/shared/backtest_feasibility \
-  data/shared/returns data/shared/oos/returns \
-  data/shared/covariance_matrix.parquet data/shared/oos/covariance_matrix.parquet \
-  data/shared/typed_distances data/shared/typed_distances_windowed \
-  data/shared/typed_geometry_components data/shared/barycentres \
-  data/shared/ablations data/shared/dimensionality_analysis \
-  data/shared/mantel_tests data/shared/oos/mantel_tests \
-  data/shared/validation data/shared/w2_exposure_frontier \
-  data/papers data/mc data/publication data/universe.csv
-```
+A full recomputation can use `dvc repro --force` after downloading the fixed
+inputs. Run one DVC reproduction at a time in a checkout. Ordinary `dvc repro`
+reuses unchanged intermediates and resumes at completed stage boundaries.
 
-### What the remote does not carry
+`just reproduction-check` compares manuscript values at their displayed
+precision, literal table values and exact counts with the reviewed baseline.
+It also compares the numerical geometry of 19 figures and the decoded pixels of
+two heatmaps. The baselines in `data/reference/published_values.json` and
+`data/reference/published_results.json` are fixed inputs; PDF timestamps and
+code/proof provenance are excluded. Cohort identifiers and counts are additionally
+checked by the input and experiment contracts. Numerical differences require
+review; do not replace the baselines merely to make a check pass.
 
-Three classes of artifact are withheld for licensing reasons. Their `dvc.lock`
-hashes are published, so the recorded provenance of every stage remains
-auditable even where the inputs cannot be redistributed.
+## Historical numeric benchmarks
 
-| Withheld | Reason |
-| --- | --- |
-| `data/raw/nasdaq.jsonlines` | Non-redistributable |
-| `data/shared/corpus/articles.parquet` | Normalised full article text |
-| `data/shared/subsampled_headlines/` | Sampled article bodies |
-| `data/shared/market_data/`, `data/shared/oos/market_data/`, `data/archive/market_data/` | Vendor terms restrict redistribution of the price panels |
+Paper 6's completed information-recovery campaign and historical observation
+checks are fixed, checksummed numeric inputs. Current directional calibration,
+corporate projection, article-redraw validation and inference audits are computed
+by their retained stages. The saved campaign remains read-only; its checkpoints
+and captured input hashes are audited before use.
 
-Consequently these stages cannot be re-run from this snapshot and are governed
-only by their recorded hashes: `normalize_corpus`, `subsample`, `co_mentions`,
-`backtest_feasibility`, `market_data`, `compute_returns`, and
-`p1_dyadic_confound`, which reads `market_data` directly. Everything downstream
-of `data/shared/returns` and `data/shared/embeddings` re-runs normally.
+Paper 5's reference-sample bridge recomputes point estimates from the published
+returns and interaction matrix, and compares them with the fixed reference
+estimate and historical interval endpoints. These references are benchmarks,
+not newly generated historical campaigns.
 
-Refetching the price panels is **not** an equivalent substitute: vendors restate
-adjusted prices, so re-downloaded values will not reproduce the `dvc.lock`
-hashes and the frozen `market_data` stages will never verify against them.
+Sanitizing inputs and migrating dependency namespaces can change file hashes and
+provenance without changing estimates. The public input manifest records the
+released bytes, and certification regenerates the current proof identities.
 
-`p1_dyadic_confound` is frozen for the same reason, but unlike the others its
-outputs are carried in full rather than by hash alone. Every Paper 1 result
-derives from them, so without them `p1_numbers` and `p1_tables` could not be
-reached from this snapshot at all. They hold regression coefficients, residuals,
-Wasserstein distances, leverage and bootstrap draws — no price levels, the same
-disclosure class as the published return panels.
+## Manuscripts and website
 
-### Diagnostics regenerated rather than carried
+`just latex::check` builds the four arXiv papers and retained venue targets
+against the vendored offline TeX bundle. The bibliography is generated from
+citation metadata under `.context/reference`. Submission bundles contain paper
+sources and required assets only.
 
-Seventeen further Paper 1 and Paper 5 diagnostic outputs are declared
-`cache: false` in `dvc.yaml`. DVC records their hashes but stores no objects for
-them, so no remote can carry them and `dvc pull` will not produce them. Each is
-regenerated by running its own stage, and every input those stages need is
-published:
-
-`p1_diagnostics`, `p1_disco`, `p1_distributional_comparator`, `p1_dyadic_oos`,
-`p1_neighbour_outcome_split`, `p1_representation_sensitivity`,
-`p1_sample_descriptives`, `p5_sample_descriptives`, `lean_bindings_check` and
-`refs_bib_freshness`.
-
-Running a paper terminal — `dvc repro p1_numbers`, say — produces them along the
-way, so this affects only a reader who expects `dvc pull` alone to materialise
-every path in `dvc.lock`.
-
-### The published embeddings carry no article text
-
-`data/shared/embeddings/**` holds the document embeddings for four off-the-shelf
-encoders (`qwen3-embedding-8b`, `qwen3-embedding-4b`, `bge-m3`,
-`bge-large-en-v1.5`) and three EttaX corpus vintages (`ettax-v0/v1/v3`).
-
-Each shard carries the embedding vector plus article metadata — identifiers,
-dates, the source `url`, byline and topic — but **not** `title`, `body` or
-`publisher`. Nothing in the pipeline reads those columns: the consumer contract
-is `{embedding, created_date, url_hash}` (`pipeline/io/typed_providers.py`). A
-reader who holds their own licence for the corpus can rejoin the text on
-`url_hash` or `url` and re-derive the shards.
-
-## Snapshot checks
-
-The source boundary can be verified without the data store:
-
-```bash
-uv lock --check --offline --project src/python
-dvc dag --dot
-dvc repro --dry --allow-missing p1_numbers p3_numbers p5_numbers
-```
-
-The pinned environment runs the same checks:
-
-```bash
-nix develop ./infra/nix#replication --command <command>
-```
-
-## Reproducing the results
-
-With the data pulled, drop `--dry` and `--allow-missing`:
-
-```bash
-dvc repro p1_numbers p3_numbers p5_numbers
-```
-
-`dvc status` will not report a clean tree here, by construction: the withheld
-artifacts above are reported as `not in cache`, and stages whose dependency is a
-source directory the projection prunes (for example `semflow_refresh`) are
-reported as changed. Neither indicates a problem with the published objects; to
-check those, `dvc pull` the published trees and confirm it completes without a
-checksum error.
+The website uses the same four paper identities and current results. Its static
+export is configured for `/PricingPerspective` on GitHub Pages.

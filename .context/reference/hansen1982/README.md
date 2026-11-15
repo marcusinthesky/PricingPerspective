@@ -15,5 +15,3 @@ issue: '4'
 publisher: The Econometric Society
 page: 1029-1054
 ---
-
-# Large Sample Properties of Generalized Method of Moments Estimators

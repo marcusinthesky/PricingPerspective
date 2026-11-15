@@ -1,20 +1,20 @@
 \section{Cross-Sectional Wasserstein Dispersion and Spatial Attenuation}
 \label{sec:dispersion}
 
-The dispersion analysis is the only part of the paper that uses a free-centre
+The dispersion analysis is the only part of the paper that uses a free-center
 problem.
 Unlike the fixed-target reconstruction in \Cref{sec:interaction-operator}, the
-unrestricted Wasserstein barycentre problem below selects a centre distribution
+unrestricted Wasserstein barycenter problem below selects a center distribution
 $Q$ that summarizes heterogeneity across firms.
 
-How much characteristic-implied exposure heterogeneity survives peer adjustment?
-The conditional answer is economically simple: characteristic
+This appendix bounds how much characteristic-implied exposure heterogeneity
+survives peer adjustment.
+The answer is economically simple: characteristic
 dispersion places a floor on stand-alone exposure dispersion, and
 adjustment through an admissible peer field cannot erase more than a
 coefficient-dependent share of that floor.
-This is a supporting closure result for the field constructed in
-\Cref{sec:interaction-operator}, not a second field construction or
-an empirical calibration of the carrier restrictions introduced below.
+The carrier restrictions introduced below are maintained rather than
+estimated.
 
 Fix cross-sectional weights $q=(q_1,\ldots,q_N)$ in the unit simplex.
 Assume that the laws considered below have finite second moments.
@@ -35,17 +35,17 @@ $(X_1,\dots,X_N)\sim\gamma$, define
 \]
 with $\Pi$ the joint laws on $\Omega^N$ whose $i$th marginal is $C_i$.
 The infimum asks how close the laws could be under their most
-favourable common coupling.
+favorable common coupling.
 Its units are squared embedding distance, and its value depends on
 the chosen ground metric and weights.
 
-The Hilbert-space restriction begins to matter for the centre
+The Hilbert-space restriction begins to matter for the center
 representation: for any laws $R_1,\ldots,R_N$ on a Hilbert space, the
 same functional satisfies
 $\mathcal D_q(R_1,\ldots,R_N)=\inf_Q\sum_i q_i\,W_2^2(R_i,Q)$
 \citep{agueh_carlier_barycenters_2011,gawronsky_distance_mpt_2026}.
 Here $Q$ is free and summarizes cross-sectional dispersion.
-Its minimizer is the unrestricted Wasserstein barycentre of the firm laws under
+Its minimizer is the unrestricted Wasserstein barycenter of the firm laws under
 weights $q$.
 
 For two firms, the aggregate functional reduces to the familiar
@@ -111,7 +111,7 @@ The root-mean-square aggregation matches the cross-sectional weights,
 while the positive part sets the lower floor to zero when
 transmission slack absorbs the carrier-adjusted separation.
 This restriction is stated here in full;
-\citet{gawronsky_distance_mpt_2026} studies its portfolio implications.
+\citet{gawronsky_distance_mpt_2026} study its portfolio implications.
 
 Observable separation is informative whenever its carrier-adjusted
 magnitude exceeds the root-mean-square transmission slack.
@@ -210,7 +210,8 @@ coefficient $\widehat\rho$ gives a descriptive plug-in lower
 envelope, not the exact amount of attenuation or a calibration of
 $t$, $L$, or $\tau_i$.
 It has a structural interpretation as a retained-share bound only
-under the return-projection conditions stated in the next section.
+under the return-projection conditions of
+\Cref{sec:identification-estimation}.
 The bracket needs neither symmetry nor an additional spectral-gap
 restriction, but it need not be sharp for the fitted operator.
 
@@ -264,6 +265,6 @@ peer adjustment each enter once with a known direction.
 
 The certificate is expressed in the latent risk coordinates of
 peer-adjusted exposure, whereas the application observes scalar returns.
-The next section states the return projection needed to preserve $W$
-and the common adjustment coefficient $\rho$, then distinguishes that
-structural parameter from the working-model adjustment index estimated by QMLE.
+\Cref{sec:identification-estimation} states the return projection that
+preserves $W$ and $\rho$ and relates the structural coefficient to the
+working-model index estimated by QMLE.

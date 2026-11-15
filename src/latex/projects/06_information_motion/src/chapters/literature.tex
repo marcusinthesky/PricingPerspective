@@ -1,0 +1,87 @@
+\section{Literature Review}\label{sec:literature}
+
+Spatial competition provides a foundation for understanding how firms'
+positions influence demand and the profitability of their decisions.
+In \citet{hotelling_stability_1929}, consumers choose between firms by
+weighing prices against transportation costs, making location an important
+determinant of competitive advantage.
+A firm's decision to reposition consequently depends on the customers it can
+attract and the responses of its competitors.
+These interactions become more complex when firms operate across several
+markets. \citet{bulow_geanakoplos_klemperer_multimarket_1985} establish how
+strategic substitutes and complements connect competitive decisions, while
+\citet{bimpikis_ehsani_ilkilic_cournot_2019} examine how competition and
+production linkages transmit shocks through networked markets.
+Together, these contributions motivate studying firm positioning through the
+allocation of resources across related activities and the competitive
+responses those allocations generate.
+
+The multi-contest framework of \citet{xu_zenou_zhou_conflict_2022} provides
+the closest theoretical foundation for our analysis.
+In their model, players allocate costly effort across contests, receiving
+shares of prizes that depend on their allocations relative to those of competitors.
+Their equilibrium characterization and comparative statics establish how
+competitive interactions transmit changes in incentives through a network of contests.
+We adapt this proportional-share structure to firms allocating operating
+capacity across activities that serve overlapping customer demands.
+Capacity determines a firm's ability to serve each demand opportunity, while
+rivals compete for the same available contribution margins.
+The resulting allocation problem admits a discrete-choice interpretation when
+capacity represents varieties or outlets
+\citep{mcfadden_conditional_logit_1974,train_discrete_choice_2009}.
+Building on the equilibrium and sensitivity methods of
+\citet{xu_zenou_zhou_conflict_2022}, we establish uniqueness and characterize
+firms' responses to changes in market opportunities and costs under the
+conditions of our capacity model.
+
+Competitive repositioning also depends on the costs of changing existing
+investments. \citet{sweeting_positioning_2013} studies forward-looking
+product positioning in differentiated markets, demonstrating the importance
+of adjustment costs for firms' decisions.
+We introduce persistence through quadratic costs of changing inherited
+capacity, with firms making sequential Nash choices as market opportunities
+and competitors' allocations evolve.
+The resulting operating path determines the cash flows investors anticipate
+following an exogenous free cash flow shock. \citet{berk_green_naik_growth_options_1999}
+relate investment opportunities to security returns through changes in assets
+and growth options.
+We follow this connection between operating opportunities and financial
+valuation, discounting the cash flows generated along the adjustment path.
+Firm valuations can consequently respond when new information arrives, while
+firms' operating allocations adjust over time.
+
+Corporate disclosures and financial news provide information about firms'
+activities and their competitive environments. \citet{hoberg_phillips_2016}
+demonstrate how corporate text can reveal product-market relationships and
+differences in competitive positioning, while
+\citet{gentzkow_text_as_data_2019} establish methodological foundations for
+using text as economic data.
+The information available to investors also reflects the incentives governing
+its production. \citet{gentzkow_media_bias_2006} study how reputation and
+reporting incentives influence news content, providing an economic motivation
+for considering differences in the coverage of firms' activities.
+We incorporate these considerations through an observation model in which a
+firm's news distribution depends on both its operating capacity and the
+relative intensity of reporting across activities.
+
+Representing corporate information as a distribution preserves variation
+among the activities and perspectives reflected in individual articles.
+\citet{kusner_word_embeddings_2015} develop transport-based comparisons of
+word embeddings, while \citet{gawronsky_continuous_2026} use Wasserstein
+geometry to study covariance envelopes from language-model representations.
+Optimal transport compares distributions through the minimum cost of matching
+their probability mass, retaining information about their composition and
+dispersion that may be lost when articles are represented by a single average vector.
+This provides a natural basis for comparing firms' positions in information
+space and measuring changes in those positions over time.
+
+We extend this literature by deriving an economic mechanism for changes in
+firms' economic footprints.
+Costly capacity adjustment and competitive responses determine how firms
+react to changing opportunities, while financial valuation reflects the
+cash-flow consequences of those decisions.
+In a restricted two-opportunity economy, initial exposure determines the
+ordering of firms' return responses and, under the specified reporting
+conditions, the direction of movement toward other firms' initial news distributions.
+The resulting nonnegative expected local association provides the theoretical
+basis for the estimator developed in the following section.

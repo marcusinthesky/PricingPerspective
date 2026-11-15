@@ -1,3 +1,4 @@
+import Architect
 import PricingPerspective.Transmission.Dispersion.MinimumVariance
 
 set_option linter.style.longLine false
@@ -51,6 +52,16 @@ The proof composes `pairwiseExposureFloor_le_of_antilipschitz` with
 application and assumes none of the barycenter or aggregate-dispersion structure used by
 Paper 5.
 -/
+@[blueprint "thm:p3-information-certified-cap"
+  (statement := /--
+    A common measurable antilipschitz carrier with asset-specific synchronous slack converts
+    observable pairwise characteristic-law W2 distances into a computable deduction from
+    coherent systematic portfolio variance. Assumptions: finite asset universe and normalized
+    long-only portfolio weights; common measurable antilipschitz carrier and measurable
+    asset-specific exposure maps; pointwise draw-synchronous asset-specific slack bounds; one
+    coherent joint exposure law with the declared coordinate marginals; integrability of every
+    pairwise exposure inner product.
+  -/)]
 theorem jointPortfolioVariance_le_informationCertifiedCap
     {L : ℝ≥0} {t : X → H}
     (hanti : AntilipschitzWith L t) (hme : MeasurableEmbedding t)
@@ -88,6 +99,14 @@ then total standardized variance is bounded by `1 - certificate + δ`.  The prem
 `δ` as a sensitivity budget; the theorem neither estimates it nor derives residual
 orthogonality.
 -/
+@[blueprint "eq:p3-residual-budget-cap"
+  (statement := /--
+    A systematic standardized variance cap and an assumed aggregate residual-covariance budget
+    imply the additive total-return cap, with a nonnegative-scale raw-variance corollary.
+    Assumptions: an additive decomposition of total standardized variance into systematic and
+    residual contributions; the information-certificate systematic variance cap; an assumed
+    upper budget for the aggregate residual contribution.
+  -/)]
 theorem totalVariance_le_informationCertificate_add_residualBudget
     (systematic residual total certificate δ : ℝ)
     (htotal : total = systematic + residual)
@@ -117,6 +136,14 @@ is pointwise bounded by that objective on the feasible set, the selected portfol
 the bound.  This is an existence and risk-guarantee result: it asserts neither uniqueness nor
 unconditional convexity of the certificate.
 -/
+@[blueprint "thm:p3-certified-minimizer"
+  (statement := /--
+    Every nonempty compact feasible subset of the long-only simplex has a minimizer of the
+    characteristic-induced certified-variance objective, retaining any pointwise actual-variance
+    certificate imposed on that set. Assumptions: finite asset universe; nonempty compact
+    feasible subset of the long-only simplex; pointwise actual-variance upper certificate on the
+    feasible set.
+  -/)]
 theorem exists_minimumInformationCertifiedVariance
     (L : ℝ≥0) (τ : A → ℝ≥0) (C : A → WassersteinMeasure X)
     (σ : A → ℝ) (S : Set (A → ℝ))

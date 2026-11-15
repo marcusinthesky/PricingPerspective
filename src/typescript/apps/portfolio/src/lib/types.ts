@@ -59,5 +59,6 @@ export type BlogPost = {
   dateModified: string;
   wordCount: number;
   readingTimeMinutes: number;
+  audio: boolean;
   keywords: string[];
 };

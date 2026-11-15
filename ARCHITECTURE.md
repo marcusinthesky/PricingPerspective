@@ -1,102 +1,58 @@
----
-description: Understanding-oriented documentation covering design principles and the ARCHITECTURE.md convention.
-title: Explanation
----
+# Architecture
 
-## Architecture
+The repository co-locates four papers with their numerical computations, formal
+proofs and static website so a scientific change can be reviewed across all four
+layers.
 
-### What is ARCHITECTURE.md?
+## Reproduction boundary
 
-An `ARCHITECTURE.md` is a co-located design document that **describes, explains,
-and justifies** the architectural and tool-choice decisions for the directory it
-lives in. It is the "why" to the README's "what" and "how".
+The DVC graph begins at checksummed numeric observations: computed document
+vectors, identifiers/dates, adjusted returns, classifications and derived
+controls. A schema/checksum gate admits only the published text-free vector
+representation. Removing article text changes storage and provenance; it does
+not change vector values, sample membership or the numerical estimators.
 
-The convention comes from [Matklad (rust-analyzer)](https://matklad.github.io/2021/02/06/ARCHITECTURE.md.html):
+Each expensive analysis writes reusable numeric results. Separate render stages
+produce manuscript tables, scalar bindings and figures from those saved results.
+Fixed historical numerical benchmarks are inputs with an explicit archival role;
+they are not reported as newly computed campaigns.
 
-> The biggest difference between an occasional contributor and a core developer
-> lies in the knowledge about the physical architecture of the project.
+## Computation and proofs
 
-### How this repo uses ARCHITECTURE.md
+The uv workspace contains `pipeline`, `hotelling` and `dotell`. Statadic is an
+external pinned distribution. The application owns scientific configuration,
+cohort selection and publication contracts; the dependency owns its general
+statistical and numerical implementations. Each process explicitly initializes
+its required float64 policy, and tests execute per package.
 
-This repo follows the [Diátaxis framework](https://diataxis.fr/) for
-documentation:
+Semflow fingerprints the reachable repository source for computational
+entrypoints. The numeric co-mention adapter and input-validation gate instead
+track their complete source and lockfile dependencies directly in DVC.
+Dependency versions remain locked; changing those versions requires replaying
+the affected computations rather than assuming source fingerprints establish
+numerical equivalence.
 
-| Quadrant | File | Purpose |
-|---|---|---|
-| **Explanation** | `ARCHITECTURE.md` | Why decisions were made, trade-offs, alternatives |
-| **How-to** | `README.md` | Getting started, commands, conventions |
-| **Reference** | Auto-generated API docs | Type signatures, parameters |
-| **Tutorials** | `AGENTS.md` chain | Progressive disclosure |
+Lean imports the public Statadic proof package at an immutable Git revision.
+EnergyStatistics supplies the empirical energy and explicit Gaussian embedding
+bridge. WassersteinGeometry supplies the general transport-cost results needed
+by the paper-specific proofs. These packages retain the normalization and
+hypotheses used by the manuscripts. Certification checks compiled statements and
+axioms; manuscript correspondence separately checks claim labels and disclosures.
+These checks complement numerical tests rather than proving floating-point code.
 
-### Where ARCHITECTURE.md files live
+## Environment and publishing
 
-| Location | Scope |
-|---|---|
-| Root `ARCHITECTURE.md` | Overview of the monorepo design |
-| `src/ARCHITECTURE.md` | Python + LaTeX + Lean co-location |
-| `src/python/ARCHITECTURE.md` | uv workspace design |
-| `src/latex/ARCHITECTURE.md` | Canonical arXiv and journal publishing boundary |
-| `src/lean/ARCHITECTURE.md` | Lake multi-package workspace |
-| `src/typescript/ARCHITECTURE.md` | Bun + Turbo web application workspace |
-| `infra/ARCHITECTURE.md` | Reproducible environment, static schemas, and deployment infrastructure |
-| `src/python/apps/pipeline/ARCHITECTURE.md` | Python pipeline and DVC stage design |
-| `infra/nix/docs/just/ARCHITECTURE.md` | just task runner design |
-| `infra/nix/docs/prek/ARCHITECTURE.md` | prek hooks design |
+A pinned Nix package inventory supplies devenv profiles for development, checks,
+Lean and reproduction. The same inventory drives the public tool listing.
+Insitu is externally installed and renders documentation trees. `just nix::tools`
+lists the pinned tools. These documentation views have no role in the scientific
+estimands.
 
-### Design principles
+LaTeX is the manuscript source, Tectonic is its renderer, and the required TeX
+bundle is included for offline compilation. Citation-selected bibliographies
+come from CSL frontmatter records. Source bundles stage only the required paper
+files and assets.
 
-**Co-location over centralization.** Documentation lives next to the code it describes.
-
-**Single source of truth.** Every piece of architectural documentation exists in exactly one place.
-
-**Progressive disclosure.** Documentation is layered:
-
-1. `AGENTS.md` — agent antipatterns (always loaded, under 100 lines)
-2. `README.md` — what exists, commands, structure
-3. `ARCHITECTURE.md` — why decisions were made
-4. `.agents/` — tool configs, skills, MCPs
-
-**Verification over instruction.** Linters, type checkers, test suites, and
-pre-commit hooks give immediate, deterministic feedback. Quality gates via `prek`
-enforce formatting and linting across every layer.
-
-**Mermaid for illustrations.** Use [Mermaid](https://mermaid.js.org/) for flow,
-sequence, and architecture diagrams. Prefer `flowchart TD` (top-down); use `LR`
-only when genuinely horizontal.
-
-### Why this monorepo?
-
-This research codebase co-locates Python (data pipelines, ML), LaTeX
-(research publishing), Lean (formal proofs), and TypeScript (deployable web
-applications) in a single repository. The primary benefit
-is atomic cross-layer commits: a paper development, its supporting data pipeline,
-and its formal proofs change together in one PR, one CI run, one revert.
-
-The alternative — separate repos for Python, LaTeX, Lean, and TypeScript — would require
-coordinated releases and cross-repo dependency management for every feature.
-
-### Why nix + just + prek?
-
-| Tool | Replaces | Why |
-|---|---|---|
-| **nix** | Docker, pip/system deps | Single flake provides every tool; pinned versions via `flake.lock`; reproducible dev shells |
-| **just** | Make, shell scripts, npm scripts | Polyglot command runner; `just --list` for discoverability; `mod` imports for modularity |
-| **prek** | pre-commit (Python) | Rust binary; same YAML config; auto-discovers nested configs |
-
-### Why LaTeX as the sole manuscript renderer?
-
-LaTeX (`src/latex`) is the sole, canonical manuscript source following the
-2026-07-23 t24.12 cutover, because arXiv and target journals expose their
-source templates and production systems in TeX. Tectonic preserves a
-watch-style loop; a minimal pinned TeX Live checks publisher compatibility.
-Typst was retained frozen through the cutover as a rollback baseline and as
-the source for presentation slides and the DVC DAG renderer; it has since
-been fully removed from the repository (`src/typst/` deleted) once the
-LaTeX port reached parity — never permanent dual canonical sources.
-
-### Why Lake multi-package workspace?
-
-Lake's multi-package workspace pattern keeps proofs modular: each package has
-its own `lakefile.lean` and dependencies, while the root `lakefile.lean`
-coordinates the build. This is the standard pattern for Lean 4 monorepos
-(e.g., mathlib).
+The website registry owns the four paper identities, descriptions and links.
+Pages, structured data and machine-readable summaries derive from that registry.
+Lean Blueprint pages are regenerated from the retained, certified proof tree.

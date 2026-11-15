@@ -16,5 +16,3 @@ volume: '132'
 issue: 1-4
 page: 157-187
 ---
-
-# Robust Asset Allocation

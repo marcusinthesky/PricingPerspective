@@ -215,11 +215,11 @@ lemma lintegral_edist_sq_invFun_map_le
   have hfst : ∀ᵐ p ∂π, p.1 ∈ Set.range f := by
     apply ae_of_ae_map measurable_fst.aemeasurable
     rw [hπ.1]
-    exact ae_map_mem_range f hme.measurableSet_range μ
+    exact ae_map_mem_range hme.measurableSet_range hme.measurable.aemeasurable
   have hsnd : ∀ᵐ p ∂π, p.2 ∈ Set.range f := by
     apply ae_of_ae_map measurable_snd.aemeasurable
     rw [hπ.2]
-    exact ae_map_mem_range f hme.measurableSet_range ν
+    exact ae_map_mem_range hme.measurableSet_range hme.measurable.aemeasurable
   rw [lintegral_map hcost hgg]
   calc
     ∫⁻ p, (edist (g p.1) (g p.2)) ^ 2 ∂π ≤

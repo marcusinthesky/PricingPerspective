@@ -1,21 +1,40 @@
-\section{Constructing the Barycentric Interaction Field}
+\section{Measuring the Information Field}
 \label{sec:interaction-operator}
 
-The preceding section shows how an admissible peer matrix enters the
-exposure-adjustment model.
-We now ask what should populate that matrix when each firm is represented by a
-distribution of text rather than by a single characteristic.
-For a target firm, the economic question is which combination of other firms
-best represents its information footprint within the investable universe.
-A pairwise distance can identify proximity, but it cannot determine how several
-candidate firms jointly represent the target.
+Measuring the information field requires a peer basket for every firm.
+The basket represents the target through a combination of other firms'
+information footprints.
+We collect its weights in a row of an interaction matrix $W$.
+Nonnegative weights summing to one make each basket a peer average, and a zero
+self-weight requires the target to be represented by other firms.
 
-A firm's article embeddings define an empirical characteristic law
-$\widehat C_i$; its population counterpart is $C_i$.
-Quadratic Wasserstein distance aligns two article clouds by minimizing their
-average squared displacement in embedding units.
-That pairwise alignment supplies correspondence, after which one common set of
-peer weights can be chosen across all aligned article positions.
+\begin{definition}[Row-stochastic, zero-diagonal interaction
+  matrix]\label{def:interaction-matrix}
+  An interaction matrix is any $W \in \R^{n \times n}$ with $W_{ij} \geq 0$ for
+  all $i$ and $j$, $W_{ii} = 0$ for all $i$, and $\sum_j W_{ij} = 1$ for all
+  $i$.
+  A firm never interacts with itself, weights every other firm nonnegatively,
+  and spends exactly one unit of interaction weight on the remaining firms.
+\end{definition}
+
+Each row can average a firm-level quantity in its original units, much as
+benchmark weights make a benchmark return comparable with a portfolio return.
+The definition specifies the form of a peer basket.
+To select its members and weights, we use language-model representations of
+news and find the combination that best represents the target's information
+footprint within the observed universe.
+
+A text embedding model maps each article to a fixed-dimensional vector in a
+representation space, with semantically related articles lying close together.
+A firm's articles therefore form an empirical characteristic law
+$\widehat C_i$ in the embedding space, whose population counterpart is $C_i$.
+A diversified firm occupies many positions at once, so the law records spread,
+multimodality, and internal composition that one averaged embedding would
+suppress.
+Quadratic Wasserstein distance compares two such laws by aligning their
+article clouds so as to minimize average squared displacement.
+That alignment supplies article-level correspondence, but a distance alone
+does not say how several candidate firms jointly represent one target.
 
 Consider a three-firm universe with target $A$ and candidate peers $B$ and $C$.
 After separately aligning the article positions of $B$ and $C$ with those of
@@ -25,20 +44,6 @@ In the order $(A,B,C)$, the resulting target row is
 $W^\flat_{A\cdot}=(0,0.60,0.40)$.
 The 60--40 weights are coordinates on aligned peer positions, not probabilities
 of drawing whole articles from $B$ or $C$.
-
-This coordinate problem differs from an unrestricted Wasserstein barycentre.
-An unrestricted barycentre holds input laws and barycentre weights $a_j$ fixed
-and optimizes over a new centre distribution $Q$ through an objective such as
-$\inf_Q\sum_{j\ne i}a_j W_2^2(C_j,Q)$
-\citep{agueh_carlier_barycenters_2011}.
-The present construction instead fixes the target $C_i$ and, in the empirical
-implementation, fixes its pairwise transport alignments before optimizing over
-simplex peer coordinates $w_i$.
-Target anchoring therefore narrows the claim from constructing a new centre to
-finding coordinates for an existing firm, while retaining the barycentric
-geometry.
-
-The following definition formalizes this two-stage construction.
 
 \begin{definition}[Target-anchored Wasserstein barycentric reconstruction]
   \label{def:w-flat}
@@ -67,39 +72,44 @@ The following definition formalizes this two-stage construction.
 \end{definition}
 
 Equation~\eqref{eq:w2-assignment} fixes a transport alignment for each ordered
-target--candidate pair, conditional on the empirical clouds and their ground
-metric.
-Equation~\eqref{eq:w2-barycentre} then selects the target's simplex coordinates
-by minimizing reconstruction loss across all aligned candidates jointly.
-Because the second objective is joint, a row of $W^\flat$ is not obtained by
-applying a scalar transformation separately to each pairwise distance.
-
+target--candidate pair, and Equation~\eqref{eq:w2-barycentre} selects the
+target's simplex coordinates by minimizing reconstruction loss across all
+aligned candidates jointly.
+Replacing squared with unsquared norms in both stages gives the linear-cost
+field $W^\flat_1$, used only to test sensitivity to the transport order.
+Because the second objective is joint, a row of $W^\flat$ is not a scalar
+transformation of pairwise distances.
 Every other eligible firm enters the candidate set, self-links are excluded,
 and the assignments are target specific.
-The second stage uses squared reconstruction loss and simplex-normalized
-weights, while equal cloud size is part of the implementation.
-These features, including the rule that selects among tied optimal assignments,
-are maintained design choices rather than consequences of Wasserstein distance
-alone.
+The squared reconstruction loss, simplex normalization, equal cloud size, and
+the rule that selects among tied optimal assignments are maintained design
+choices.
 
-Geometrically, the coefficients in $w_i$ are barycentric-type coordinates on the
-aligned peer positions.
-Economically, we call them approximate distributional spanning weights within
-the investable universe: the objective value records how well the aligned convex
-span represents the target's information footprint.
-A small residual supports approximate semantic substitutability of that peer
-combination for the target within the maintained representation, ground metric,
-and candidate universe; the simplex constraint does not assert exact spanning.
-The weights do not identify causal influence, a tradable replicating portfolio,
-or a literal arbitrage relation.
+The target remains fixed throughout this reconstruction.
+An unrestricted Wasserstein barycenter holds input laws and weights fixed and
+optimizes over a new center distribution $Q$, for example through
+$\inf_Q\sum_{j\ne i}a_j W_2^2(C_j,Q)$
+\citep{agueh_carlier_barycenters_2011}.
+Here the center is the target itself, and the optimization chooses the peer
+coordinates $w_i$ that best reconstruct it.
 
+Economically, a row of $W^\flat$ is a customized information-peer basket for
+one firm.
+The weights are distributional spanning weights: they identify the combination
+of other firms whose aligned information footprints jointly come closest to the
+target's, and the objective value records how well that convex combination
+represents it.
+Like benchmark weights, they are nonnegative and sum to one; economically, they
+measure target-specific information-peer relevance.
 Because the target determines both the alignments and the reconstruction
-problem, $W^\flat$ is generally asymmetric even though pairwise Wasserstein
-distance is symmetric.
-A large $W^\flat_{ij}$ need not imply a large $W^\flat_{ji}$: the direction
-records reconstruction relevance for firm $i$.
+problem, $W^\flat$ is directed even though pairwise Wasserstein distance is
+symmetric.
+Firm $j$ can contribute strongly to reconstructing firm $i$ while $i$
+contributes little to reconstructing $j$.
+The collection of these target-specific relations is the measured map of the
+latent information field.
 
-Figure~\ref{fig:w2-operator-construction} shows how article-level correspondence
+\Cref{fig:w2-operator-construction} shows how article-level correspondence
 becomes firm-level reconstruction relevance.
 
 \begin{figure}[htbp]
@@ -116,13 +126,12 @@ becomes firm-level reconstruction relevance.
     separately matched to three peer clouds; three decreasing simplex weights
     combine aligned peer points into a reconstruction of the target. The same
     weights become an interaction row with zero self-weight and unit row sum.
-    The diagram illustrates the construction for one target rather than an
-  estimated economic effect.}
+  The diagram illustrates the construction for one target.}
 \end{figure}
 
-Read the figure from left to right: transport establishes correspondence,
-simplex reconstruction selects joint coordinates, and the fitted row becomes
-the target's peer average.
+Read from left to right, transport establishes correspondence, simplex
+reconstruction selects joint coordinates, and the fitted row becomes the
+target's peer average.
 The simplex constraint and leave-one-out policy imply, row by row,
 
 \[
@@ -130,24 +139,31 @@ The simplex constraint and leave-one-out policy imply, row by row,
   \sum_{j} W^\flat_{ij}=1.
 \]
 
-Thus the construction satisfies \Cref{def:interaction-matrix} without a
-separate row-normalization step.
-It avoids a conventional kernel-bandwidth choice, not researcher choices about
-the representation, candidate set, or reconstruction rule.
-The formal norm implication needed for the spatial multiplier is stated in the
-appendix as \Cref{thm:wflat-sar-gate}; in the main argument, the economic point
-is that every empirical row has the admissible peer-average interpretation.
+The construction therefore satisfies \Cref{def:interaction-matrix} with no
+separate normalization of the rows and no kernel bandwidth.
+
+\begin{proposition}[SAR compatibility]\label{thm:wflat-sar-gate}
+  Every operator satisfying \Cref{def:w-flat} is entrywise nonnegative,
+  row-stochastic, and zero-diagonal. In the induced $\ell^\infty$ operator
+  norm, $\lVert W^\flat\rVert\leq1$; hence $|\rho|<1$ implies
+  $\lVert\rho W^\flat\rVert<1$ and is sufficient for the SAR resolvent.
+\end{proposition}
+
+The $\ell^\infty$ norm is the maximum absolute row sum, so the proposition
+follows from the display above: the constructed field enters the spatial
+multiplier without further normalization.
+\Cref{sec:results-anatomy} displays actual rows of the estimated field.
 
 \subsection{Comparators}\label{sec:interaction-comparators}
 
-The three comparators vary one margin at a time: cardinal coordinates within a
-selected support, the rule that maps transport geometry into weights, and the
-information object that defines a relation between firms.
+The comparators identify which aspects of the peer baskets carry information
+about returns.
+They distinguish the contribution of fitted weights, within-firm
+distributions, joint reconstruction, and the source used to define a link.
 
 The equal-active-support comparator holds fixed the active peer set selected by
-$W^\flat$ and changes only the cardinal magnitudes within that set.
-For each row, a peer is active when $W^\flat_{ij}>10^{-8}$, the numerical
-tolerance fixed in the empirical producer.
+$W^\flat$ and changes only the relative weights within that set.
+For each row, a peer is active when $W^\flat_{ij}>10^{-8}$, a numerical zero threshold.
 Writing $A_i=\{j\ne i:W^\flat_{ij}>10^{-8}\}$, the
 equal-active-support matrix is
 
@@ -156,16 +172,26 @@ equal-active-support matrix is
   =\frac{\mathbf{1}\{j\in A_i\}}{|A_i|}.
 \]
 
-It has exactly the same numerical support as $W^\flat$ but weights every active
-peer equally.
-Its economic question is whether fitted distributional spanning weights improve
-conditional spatial fit beyond selecting the active peer set.
+It has exactly the same support as $W^\flat$ but weights every active peer
+equally, so it measures what the fitted spanning weights add to peer
+selection.
 
-The RBF diffusion comparator holds fixed the empirical characteristic laws,
-their pairwise quadratic Wasserstein distances, and the candidate universe, but
-changes how that geometry becomes a peer row.
-It replaces joint target reconstruction with a separate proximity weight
-for each target--candidate pair.
+The centroid comparator holds fixed the target-anchored reconstruction problem
+and changes only the representation of a firm.
+It collapses each firm's articles to their mean embedding
+$\bar x_i=M^{-1}\sum_{m=1}^M x_{im}$ and then solves the same
+leave-one-out simplex problem in that averaged space, choosing for each target
+the nonnegative weights summing to one that minimize
+$\lVert\bar x_i-\sum_{j\ne i}w_{ij}\bar x_j\rVert_2^2$.
+It therefore retains target-specific joint reconstruction while discarding the
+within-firm dispersion that the distributional representation preserves, and it
+separates the two components of the barycentric construction.
+
+The radial basis function (RBF) comparator holds fixed the empirical laws,
+their pairwise quadratic
+Wasserstein distances, and the candidate universe, and replaces joint target
+reconstruction with a separate proximity weight for each target--candidate
+pair.
 For $D_{ij}=W_2(\widehat C_i,\widehat C_j)$ and bandwidth $h>0$, it sets
 
 \[
@@ -174,30 +200,23 @@ For $D_{ij}=W_2(\widehat C_i,\widehat C_j)$ and bandwidth $h>0$, it sets
   {\sum_{k\ne i}\exp(-D_{ik}^2/h)}.
 \]
 
-The application sets $h$ to the median off-diagonal value of $D_{ij}^2$.
-The economic question is whether peer dependence is organized by pairwise
-proximity alone or by the joint reconstruction of a fixed target.
-This dense operator also makes the conventional bandwidth choice explicit, and
-the appendix documents its construction.
+The primary bandwidth is the median off-diagonal value of $D_{ij}^2$.
+The comparison measures whether peer dependence follows pairwise proximity or
+the joint reconstruction of a fixed target.
 
 The persistent news co-mention comparator holds fixed the firm universe, the
-2018--2022 pre-evaluation timing, and the row-stochastic econometric role, but
-changes the information object and the link rule.
+2018--2022 construction window, and the row-stochastic role, and changes the
+information object and link rule.
 The matrix $W^{\mathrm{news}}$ links firms that are the only two tagged names in
-an article and co-occur in at least two calendar years during that period.
-Total co-mention counts are symmetrized and row normalized.
-Its economic question is whether interaction is organized by approximate
-distributional spanning or by persistent shared news coverage.
-Because it is admissible in the sense of \Cref{def:interaction-matrix}, it can
-also enter \Cref{def:two-field-adjustment} as a separate adjustment field rather
-than only as an alternative to $W^\flat$.
-\Cref{sec:results} uses it both ways: first as a comparator estimated on its
-own, then as the second channel of the joint model, where the two roles are the
-boundary and the interior of one nested family.
+an article and co-occur in at least two calendar years during that period;
+total co-mention counts are symmetrized and row normalized.
+It contrasts language-model geometry with explicit shared coverage.
+Because it satisfies \Cref{def:interaction-matrix}, it can also enter the
+adjustment problem as a second channel beside $W^\flat$, and
+\Cref{sec:results} uses it in both roles.
 
-The barycentric field establishes empirical peers from observable
-characteristic laws.
-It does not yet determine what separation between those laws implies for latent
-risk exposures.
-The next section states that characteristic-to-exposure restriction and asks how
-much of the implied exposure dispersion survives equilibrium peer adjustment.
+The industry/sector comparator assigns equal weight to all other firms in the
+target's industry. If that set is empty, it falls back to the target's sector;
+if the sector is also a singleton, it assigns equal weight to the remaining
+priced firms. This rule is applied once to the frozen universe and then held
+fixed through the return comparison.

@@ -1,0 +1,37 @@
+% Venue-owned anonymous review layout. The paired builder supplies
+% label imports.
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage[round,authoryear]{natbib}
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+\setlength{\emergencystretch}{2em}
+% Keep paragraph openings, endings and hyphenated words together at page breaks.
+\clubpenalty=10000
+\widowpenalty=10000
+\brokenpenalty=10000
+% Disable links: references into the separate companion must never point to a
+% coincident local anchor. Printed numbers and cleveref types remain available.
+\usepackage[draft,hidelinks]{hyperref}
+\usepackage[capitalise,noabbrev]{cleveref}
+% Finish the recovery exhibits before the uncertainty appendix begins.
+\AddToHook{file/primary_profile_support.tex/before}{\clearpage}
+\input{metadata}
+\input{generated/information_recovery_numbers}
+\input{generated/corporate_analysis_numbers}
+\input{generated/information_audit_numbers}
+\input{generated/article_redraw_validation_numbers}
+\input{generated/inference_audit_numbers}
+\input{generated/lean_status}
+\hypersetup{pdfauthor={},pdftitle={\papertitle},pdfsubject={Anonymous
+review manuscript}}
+\linespread{1.5}
+% Large figures with review-spaced captions should accompany their analysis
+% rather than queue until the bibliography's final float flush.
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.95}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.8}
+\title{\papertitle}
+\author{}
+\date{}
+\newcommand{\ppMSBoundary}{}

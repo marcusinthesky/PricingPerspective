@@ -6,11 +6,13 @@ uses the corresponding standardized total-return geometry,
 ``c_actual = 2 - 2 rho``.  ``L`` and ``tau`` are maintained scenario scales;
 they are not estimated from the return panel.
 
-The substitution of the standardized *total*-return correlation for the
-systematic covariance is a maintained restriction, not an identity: where
-idiosyncratic variance is present and cross-firm residuals are uncorrelated it
-makes the reported coverage share an upper bound on the coverage of the
-systematic claim.  The manuscript states this where the table is discussed.
+Under the maintained return bridge, total-return covariance equals systematic
+covariance, but total-return variances include residual variance. Thus the
+bracket concerns ``H = Delta + q``, where ``q`` is the sum of the two residual
+variances in standardized return units. A negative upper endpoint rejects the
+maintained conditions; a nonnegative lower endpoint does not certify systematic
+compatibility. Legacy ``delta_*`` and ``coverage_*`` output fields are retained
+for artifact compatibility and refer to H, not to identified systematic excess.
 """
 
 from __future__ import annotations
@@ -255,10 +257,11 @@ def fixed_w2_random_exposure_diagnostic(
 ) -> tuple[dict[str, object], pd.DataFrame]:
     """Return the fixed-W2 envelope diagnostic and its auditable dyad frame.
 
-    The null-compatible quantity is the transport excess
-    ``Delta = c_actual - W2(P_i, P_j)^2 >= 0``.  Since the latent exposure W2 is
-    only bracketed by the bi-Lipschitz/slack transfer, each scenario reports
-    robust coverage, robust violation, or unresolved dyads.
+    The necessary compatibility condition is
+    ``H = c_actual - W2(P_i, P_j)^2 = Delta + q >= 0``, with nonnegative
+    residual-variance sum q. Since latent exposure W2 is only bracketed by
+    the transmission assumptions, each scenario reports nonnegative,
+    negative, or unresolved intervals. No residual variance is estimated.
 
     Args:
         inputs: Aligned dyadic W2, return-correlation, endpoint, and
@@ -277,18 +280,28 @@ def fixed_w2_random_exposure_diagnostic(
     scenarios, dyads = _scenario_rows(checked, actual_cost)
     summary: dict[str, object] = {
         "status": "computed",
-        "theory_test": "Delta_ij = c_actual_ij - W2_exposure_ij^2 >= 0",
+        "theory_test": "H_ij = c_actual_ij - W2_exposure_ij^2 = Delta_ij + q_ij >= 0",
+        "diagnostic_quantity": (
+            "H_ij: systematic transport excess plus residual variance"
+        ),
+        "residual_variance_adjusted": False,
+        "legacy_field_semantics": (
+            "delta_* fields bracket H_ij; coverage_* and robust_coverage mean a "
+            "nonnegative H interval, not certified systematic compatibility"
+        ),
         "distance_id": "wasserstein_w2",
         "distance_scope": "qwen3-embedding-8b unit representation",
         "return_moment_geometry": (
-            "standardized total-return moments: v_i=v_j=1 and kappa_ij=rho_ij; "
-            "therefore c_actual=2-2*rho. Substituting the total-return "
-            "correlation for the systematic covariance is a maintained "
-            "restriction, so coverage is an upper bound on the systematic claim"
+            "standardized total-return variances equal 1 = v_i + sigma_e_i^2; "
+            "under the return bridge kappa_ij=rho_ij and c_actual=2-2*rho. "
+            "Subtracting latent exposure transport cost gives Delta_ij+q_ij, "
+            "where q_ij is the nonnegative residual-variance sum. The nonnegative "
+            "interval share is an upper bound on its systematic counterpart"
         ),
         "scale_contract": (
             "L and tau are maintained dimensionless scenario scales; no return-based "
-            "estimation, holdout, or cross-fitting is used"
+            "estimation, holdout, or cross-fitting is used. Normalization does not "
+            "identify an economic conversion between characteristic and exposure units"
         ),
         "classification": {
             "robust_coverage": "c_actual - (L W2 + 2 tau)^2 >= 0",

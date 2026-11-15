@@ -1,39 +1,61 @@
 \section{Conclusion}\label{sec:conclusion}
 
-Firms occupy distribution-valued information positions rather than single
-economic locations.
-This paper turns target-anchored Wasserstein barycentric reconstruction into a
-cross-sectional interaction field for those positions.
-For each target, the fitted distributional spanning weights combine aligned peer
-positions; repeated across firms, they form the admissible, directed barycentric
-interaction field $W^\flat$, with nonnegative unit-sum rows and a zero diagonal.
+Our results support a compositional view of a firm's economic peers.
+A firm's relevant peer need not be the single firm most similar to it.
+It can instead be a weighted combination of firms whose information
+environments jointly represent different parts of its activities.
+Language-model representations make those activities measurable from corporate
+news, and target-anchored optimal transport converts them into firm-specific
+peer baskets.
+Across firms, those baskets form a directed information field.
 
-Placing that field inside the quadratic exposure-adjustment problem yields
-spatial closure: peer-adjusted exposure balances its stand-alone counterpart
-against the peer average and obeys the familiar spatial autoregression.
-Within this closure, $\rho=\lambda/(1+\lambda)$ records the relative intensity
-of peer alignment, so spatial feedback acquires an exposure-adjustment
-interpretation rather than remaining an unexplained coefficient conditional on
-a supplied matrix.
+The broader contribution is to make a familiar object in spatial finance, the
+interaction structure linking firms, an object of measurement.
+Spatial asset-pricing models require a matrix $W$ describing which firms
+interact and with what weight.
+Rather than specifying that matrix from geography, industry membership, or
+contemporaneous returns, we measure it from an earlier information environment
+and then ask whether subsequent return dependence follows the resulting
+structure.
+In this sense, language models serve as a measurement instrument rather than a
+return-prediction device: they provide a representation from which an
+economically interpretable financial object can be constructed and
+independently evaluated.
 
-In the 2023--2026 return panel, the barycentric interaction field (constructed
-without using those evaluation returns) organizes conditional cross-sectional
-return dependence and delivers stronger
-conditional fit than pairwise RBF proximity constructed from the same
-Wasserstein distances.
-It selects a distinct peer structure and remains incrementally informative when
-a persistent field of explicit news co-mention links enters the same
-specification.
-Joint estimation reallocates model-implied adjustment between these fields
-rather than materially increasing total feedback.
+The return evidence gives that measured object financial content.
+The field constructed from 2018--2022 news improves held-out joint-density fit
+over 2023--2026 after conditioning on the Fama--French five factors and
+momentum.
+Because unrestricted firm coefficients leave conventional factor betas
+unchanged, the gain lies in residual covariance: information about which firms'
+unexpected returns move together after common factor exposures are accounted
+for.
+The comparator evidence further identifies what matters in the measurement.
+Target-specific joint reconstruction contains substantially more information
+than pairwise proximity, fitted peer weights matter beyond peer selection, and
+full article distributions add a smaller increment beyond centroid
+reconstruction.
+Explicit news co-mentions contribute complementary information, indicating
+that joint representability and direct shared coverage capture distinct
+dimensions of economic relatedness.
 
-Methodologically, the paper provides a bridge from distribution-valued
-representation to spatial econometrics: it converts target-specific joint
-representability in Wasserstein space into an admissible field for spatial
-quasi-likelihood.
-As Section~\ref{sec:identification-estimation} explains, the estimates are
-conditional working-model quantities, not causal peer effects or
-geometry-invariant structural adjustment parameters.
-Spatial econometrics therefore need not begin after the researcher has supplied
-$W$: it can begin one level upstream, by constructing the field from firms'
-distribution-valued information positions.
+This distinction matters wherever economic information is richer than the
+available history of return co-movement.
+Firms accumulate observable information about products, customers, suppliers,
+technologies, and risks that need not conform to a single industry
+classification and can precede a long trading record.
+Our evidence does not establish causal transmission or portfolio gains, nor
+does it test newly listed firms directly.
+It establishes the prior measurement result: a peer structure recovered from
+earlier text contains information about subsequent financial dependence.
+
+More generally, the value of AI for empirical finance need not lie only in
+improving prediction.
+It can lie in making previously latent economic objects measurable and placing
+them back inside interpretable financial models.
+Here, language models provide the representation, optimal transport organizes
+it into economic peers, and spatial asset pricing supplies the financial
+discipline with which that structure is evaluated.
+The result is a measurable map of the information environment in which firms
+are embedded, and a framework for asking how that environment is reflected in
+capital markets.

@@ -16,5 +16,3 @@ issue: '2'
 publisher: Cambridge University Press
 page: 263-274
 ---
-
-# Extra-market components of covariance in security returns

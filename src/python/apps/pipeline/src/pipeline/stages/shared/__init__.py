@@ -1,1 +1,1 @@
-"""Shared typed computation stages."""
+"""Shared computation stages reused across papers."""

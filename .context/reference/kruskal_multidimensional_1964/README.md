@@ -13,5 +13,3 @@ volume: '29'
 issue: '1'
 page: 1-27
 ---
-
-# Multidimensional scaling by optimizing goodness of fit to a nonmetric hypothesis

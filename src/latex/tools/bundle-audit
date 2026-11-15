@@ -18,19 +18,22 @@ staging step, before it is tarred), this tool:
      prerequisites at all, and the check is exact rather than allow-listed.
   2. Reuses `tools/check-log` for unresolved/multiply-defined objects and
      missing glyphs, and additionally gates shell-escape usage, non-portable
-     filenames, missing `\includegraphics` targets, a missing document class,
-     and archive members that would resolve outside the staging root.
+     filenames, missing `\includegraphics` targets, a missing document class
+     or bibliography style, and archive members that would resolve outside
+     the staging root.
   3. Emits a deterministic MANIFEST.json (sorted keys, no timestamps, sha256
      per source file, tool versions) into the staging directory.
   4. Archives the staging directory deterministically, excluding build
-     intermediates, as a deterministic tar.gz.
+     intermediates. Quantitative Finance uses the portal-required ZIP; arXiv
+     and journal targets retain deterministic tar.gz archives.
   5. Extracts that archive into a fresh temporary directory and recompiles
      there under `--only-cached`, proving the archive is self-contained and
      that every support file was already in the pinned bundle cache (a
      stronger claim than "the local TeX tree happened to have it").
+  6. With --pdf, publishes the exact staged compile's PDF beside the archive.
 
 Usage:
-    bundle-audit STAGE_DIR TARGET OUT_ARCHIVE [BUNDLE]
+    bundle-audit STAGE_DIR TARGET OUT_ARCHIVE [BUNDLE] [--pdf OUT_PDF]
 
 BUNDLE pins the Tectonic bundle used for both compiles and is recorded in
 MANIFEST.json with its content digest. Pass the value from the project's
@@ -39,20 +42,28 @@ which is what every project here uses and what `just bundle` resolves for you
 (the compiles run from STAGE_DIR, so a project-relative path would not resolve).
 Omitting it falls back to Tectonic's default bundle, which is NOT the one the
 manuscripts are pinned to.
+The optional --pdf mode publishes the staged PDF only after both compiles and
+every audit succeed. The archive stays source-only.
+PDF byte equality across recompiles is not required; the published bytes are
+chosen from the first, dependency-audited staged compile.
 
 STAGE_DIR must already contain main.tex plus every other source file that
-belongs in the bundle (chapters/, generated/, images/, refs.bib). This script
-does not decide what to stage; the justfile owns that step.
+belongs in the bundle (chapters/, generated/, images/, refs.bib, and the
+publisher class/style for quantitative-finance, gfj, or ejf; arxiv uses
+only bundle-resident class and style). This script does not
+decide what to stage; the justfile owns that step.
 """
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
 import subprocess
 import sys
 import tarfile
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -88,6 +99,93 @@ GRAPHICS_SUFFIXES = {".pdf", ".png", ".jpg", ".jpeg"}
 
 class AuditError(RuntimeError):
     pass
+
+
+def prune_paper6_generated(stage: Path, entry: str) -> list[str]:
+    """Keep only generated inputs and values read by Paper 6's publication."""
+    root = stage.resolve()
+    pending = [root / entry]
+    visited: set[Path] = set()
+    while pending:
+        source = pending.pop().resolve()
+        if not source.is_relative_to(root):
+            raise AuditError(f"LaTeX input escapes the staging root: {source}")
+        if source in visited:
+            continue
+        if not source.is_file():
+            raise AuditError(f"missing reachable LaTeX input: {source}")
+        visited.add(source)
+        text = re.sub(r"(?<!\\)%.*", "", source.read_text(encoding="utf-8"))
+        for name in re.findall(r"\\(?:input|include)\s*\{([^{}]+)\}", text):
+            dependency = Path(name)
+            if not dependency.suffix:
+                dependency = dependency.with_suffix(".tex")
+            pending.append(root / dependency)
+    prune_paper6_values(root, visited)
+    removed = []
+    for path in sorted((root / "generated").rglob("*")):
+        if path.is_file() and path.resolve() not in visited:
+            removed.append(path.relative_to(root).as_posix())
+            path.unlink()
+    return removed
+
+
+def prune_paper6_values(root: Path, sources: set[Path]) -> None:
+    """Project scalar declarations while preserving the governed Lean catalog.
+
+    Lean disclosures are multiline renderer output and remain byte-identical.
+    Their value references still seed the dependency closure below.
+    """
+    calls = re.compile(r"\\pp(?:value|num|nume)(?:\s*\[[^]\r\n]*\])?\s*\{([^{}]+)\}")
+    declarations: dict[str, tuple[Path, int, str]] = {}
+    contents: dict[Path, list[bytes]] = {}
+    used: set[str] = set()
+    for source in sorted(sources):
+        lines = source.read_bytes().splitlines(keepends=True)
+        if (
+            source.is_relative_to(root / "generated")
+            and source != root / "generated/lean_status.tex"
+        ):
+            contents[source] = lines
+        for index, line in enumerate(lines):
+            text = re.sub(r"(?<!\\)%.*", "", line.decode("utf-8")).strip()
+            if source not in contents or r"\ppDeclareValue" not in text:
+                used.update(calls.findall(text))
+                continue
+            match = re.fullmatch(r"\\ppDeclareValue\{([^{}]+)\}\{(.*)\}", text)
+            if match is None:
+                raise AuditError(f"unsupported value declaration: {source}:{index + 1}")
+            key, value = match.groups()
+            depth = 0
+            for char in value:
+                depth += (char == "{") - (char == "}")
+                if depth < 0:
+                    break
+            if depth != 0 or key in declarations:
+                raise AuditError(f"invalid value declaration: {source}:{index + 1}")
+            declarations[key] = source, index, value
+
+    pending = list(used)
+    while pending:
+        key = pending.pop()
+        if key not in declarations:
+            continue
+        for dependency in calls.findall(declarations[key][2]):
+            if dependency not in used:
+                used.add(dependency)
+                pending.append(dependency)
+    omitted: dict[Path, set[int]] = {}
+    for key, (source, index, _) in declarations.items():
+        if key not in used:
+            omitted.setdefault(source, set()).add(index)
+    for source, indices in omitted.items():
+        source.write_bytes(
+            b"".join(
+                line
+                for index, line in enumerate(contents[source])
+                if index not in indices
+            )
+        )
 
 
 def render_process_output(data: bytes) -> str:
@@ -326,13 +424,28 @@ def audit_class_and_bibstyle(stage: Path, main: Path, target: str) -> str:
 
     Unstaged classes and styles need no lookup: the `--only-cached` compile
     above already proved they resolve from the pinned bundle with no network
-    and no ambient TeX tree.
+    and no ambient TeX tree. What that cannot prove is portability to a
+    publisher's own installation, so the journal target must physically carry
+    its class and style — the T&F portal compiles the uploaded sources itself.
     """
     text = main.read_text(encoding="utf-8", errors="replace")
     cls_m = re.search(r"\\documentclass(?:\[[^\]]*\])?\{([^}]+)\}", text)
     if not cls_m:
         raise AuditError(f"{main}: no \\documentclass found")
-    return cls_m.group(1).strip()
+    cls_name = cls_m.group(1).strip()
+    bib_m = re.search(r"\\bibliographystyle\{([^}]+)\}", text)
+    bst_name = bib_m.group(1).strip() if bib_m else None
+
+    if target not in {"quantitative-finance", "gfj", "ejf"}:
+        return cls_name
+    required = [f"{cls_name}.cls"] + ([f"{bst_name}.bst"] if bst_name else [])
+    missing = [name for name in required if not (stage / name).is_file()]
+    if missing:
+        raise AuditError(
+            f"target {target!r} must stage its publisher class and bibliography style; "
+            "missing:\n  " + "\n  ".join(missing)
+        )
+    return cls_name
 
 
 # Tectonic has no lockfile. `Tectonic.toml`'s `[doc]` table takes a bare `bundle`
@@ -414,9 +527,147 @@ def bundle_digest(bundle: str) -> str:
     )
 
 
+def stage_lean_provenance(repo: Path, stage: Path, paper: str) -> bool:
+    """Export a standard DVC lock stage and hash-checked manuscript .dir objects."""
+    scope = repo / "src/lean/tools/claim-manifest"
+    sys.path.insert(0, str(scope))
+    from render import discover_mappings, manifest_path, mapping_owners
+
+    owner = mapping_owners(discover_mappings(scope)).get(paper)
+    if owner is None:
+        return False
+    subprocess.run(
+        ["dvc", "status", "--quiet", "lean_claims", "lean_bindings_check"],
+        cwd=repo,
+        check=True,
+    )
+    destination = stage / "lean" / paper / "manifest.json"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(manifest_path(owner).read_bytes())
+    lock = json.loads(
+        subprocess.check_output(
+            [
+                "yq",
+                "{schema: .schema, stages: {lean_claims: .stages.lean_claims}}",
+                "dvc.lock",
+            ],
+            cwd=repo,
+        )
+    )
+    for dep in lock["stages"]["lean_claims"]["deps"]:
+        digest = dep["md5"]
+        if dep["path"].startswith("src/latex/") and digest.endswith(".dir"):
+            source = repo / dep["path"]
+            # DVC does not cache dependency objects. Export its standard Tree
+            # encoding and accept it only when it matches the native lock hash.
+            entries = [
+                {
+                    "md5": hashlib.md5(path.read_bytes()).hexdigest(),
+                    "relpath": path.relative_to(source).as_posix(),
+                }
+                for path in source.rglob("*")
+                if path.is_file()
+            ]
+            data = json.dumps(
+                sorted(entries, key=lambda item: item["relpath"]), sort_keys=True
+            ).encode()
+            if hashlib.md5(data).hexdigest() + ".dir" != digest:
+                raise AuditError(f"Directory differs from DVC lock: {source}")
+            target = stage / "dvc" / digest
+            target.parent.mkdir(exist_ok=True)
+            target.write_bytes(data)
+    (stage / "dvc.lock").write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n")
+    return True
+
+
+def lean_provenance(stage: Path, target: str) -> dict | None:
+    """Bind staged publication sources to standard DVC lock/.dir records."""
+    manifests = list(stage.glob("lean/*/manifest.json"))
+    lock_path = stage / "dvc.lock"
+    if not manifests and not lock_path.exists():
+        return None
+    try:
+        if len(manifests) != 1:
+            raise ValueError("expected one DVC-bound claim manifest")
+        manifest_path = manifests[0]
+        paper = manifest_path.parent.name
+        if not re.fullmatch(r"[0-9A-Za-z_-]+", paper):
+            raise ValueError("invalid claim-manifest paper slug")
+        manifest = json.loads(manifest_path.read_text())
+        claims = [claim for claim in manifest["claims"] if claim["paper"] == paper]
+        if not claims or any(claim["build_result"] != "checked" for claim in claims):
+            raise ValueError("release requires checked claims for the selected paper")
+        lock = json.loads(lock_path.read_text())
+        if lock["schema"] != "2.0" or set(lock["stages"]) != {"lean_claims"}:
+            raise ValueError("expected DVC lock schema 2.0 and lean_claims stage")
+        record = lock["stages"]["lean_claims"]
+        inputs = {}
+        for entry in [*record["deps"], *record["outs"]]:
+            name, digest = entry["path"], entry["md5"]
+            if not re.fullmatch(r"[0-9a-f]{32}(?:\.dir)?", digest):
+                raise ValueError(f"invalid DVC md5: {digest!r}")
+            if digest.endswith(".dir") and name.startswith("src/latex/"):
+                data = (stage / "dvc" / digest).read_bytes()
+                if hashlib.md5(data).hexdigest() != digest.removesuffix(".dir"):
+                    raise ValueError(f"DVC directory digest mismatch: {name}")
+                for item in json.loads(data):
+                    relative = item["relpath"]
+                    if Path(relative).is_absolute() or ".." in Path(relative).parts:
+                        raise ValueError("invalid DVC directory path")
+                    inputs[name + "/" + relative] = item["md5"]
+            elif not digest.endswith(".dir"):
+                inputs[name] = digest
+        digest = hashlib.md5(manifest_path.read_bytes()).hexdigest()
+        if not any(
+            entry["path"].startswith("src/lean/tools/claim-manifest/generated/")
+            and entry["path"].endswith(".json")
+            and entry["md5"] == digest
+            for entry in record["outs"]
+        ):
+            raise ValueError("DVC output mismatch: claim manifest")
+        prefix = f"src/latex/projects/{paper}/src/"
+        required = {"main.tex", "metadata.tex", "pp-manuscript.sty"}
+        required.update(
+            name for name in ("body.tex", "appendix.tex") if (stage / name).exists()
+        )
+        required.update(
+            path.relative_to(stage).as_posix()
+            for directory in ("chapters", f"targets/{target}")
+            for path in (stage / directory).rglob("*.tex")
+        )
+        expected = {
+            name.removeprefix(prefix)
+            for name in inputs
+            if name.startswith(prefix + "chapters/") and name.endswith(".tex")
+        }
+        expected.update(
+            name.removeprefix(prefix)
+            for name in inputs
+            if name.startswith(prefix + f"targets/{target}/") and name.endswith(".tex")
+        )
+        for relative in required | expected:
+            source = (
+                "src/latex/templates/pp-manuscript.sty"
+                if relative == "pp-manuscript.sty"
+                else prefix
+                + (f"targets/{target}.tex" if relative == "main.tex" else relative)
+            )
+            path = stage / relative
+            if (
+                not path.is_file()
+                or not path.resolve().is_relative_to(stage.resolve())
+                or hashlib.md5(path.read_bytes()).hexdigest() != inputs.get(source)
+            ):
+                raise ValueError(f"DVC staged source mismatch: {relative}")
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise AuditError(f"invalid DVC Lean provenance: {exc}") from exc
+    return lock
+
+
 def build_manifest(
     stage: Path, files: list[Path], target: str, engine: str, bundle: str | None
 ) -> dict:
+    verification = lean_provenance(stage, target)
     tectonic_v = (
         subprocess.run(
             ["tectonic", "--version"], capture_output=True, text=True, check=False
@@ -446,6 +697,8 @@ def build_manifest(
         },
         "files": dict(sorted(file_entries.items())),
     }
+    if verification is not None:
+        manifest["lean_verification"] = verification
     return manifest
 
 
@@ -567,16 +820,20 @@ def recompile_unpacked(out_archive: Path, main: str, bundle: str | None) -> None
 
 
 def main(argv: list[str]) -> int:
-    if len(argv) not in (4, 5):
-        print(
-            "usage: bundle-audit STAGE_DIR TARGET OUT_ARCHIVE [BUNDLE_URL]",
-            file=sys.stderr,
-        )
-        return 2
-    stage = Path(argv[1]).resolve()
-    target = argv[2]
-    out_archive = Path(argv[3]).resolve()
-    bundle = argv[4] if len(argv) == 5 else None
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("stage", type=Path)
+    parser.add_argument("target")
+    parser.add_argument("archive", type=Path)
+    parser.add_argument("bundle", nargs="?")
+    parser.add_argument(
+        "--pdf", type=Path, help="publish the staged PDF beside the archive"
+    )
+    args = parser.parse_args(argv[1:])
+    stage = args.stage.resolve()
+    target = args.target
+    out_archive = args.archive.resolve()
+    bundle = args.bundle
+    out_pdf = args.pdf.resolve() if args.pdf else None
     main_tex = "main.tex"
 
     if not (stage / main_tex).is_file():
@@ -585,10 +842,18 @@ def main(argv: list[str]) -> int:
 
     try:
         kind = archive_kind(out_archive)
-        expected_kind = "tar.gz"
+        expected_kind = "zip" if target == "quantitative-finance" else "tar.gz"
         if kind != expected_kind:
             raise AuditError(
                 f"target {target!r} requires a {expected_kind} archive, got {out_archive.name}"
+            )
+        if out_pdf is not None and (
+            out_pdf.parent != out_archive.parent
+            or out_pdf.suffix != ".pdf"
+            or out_pdf.is_relative_to(stage)
+        ):
+            raise AuditError(
+                "release PDF must be a .pdf beside the archive, outside the stage"
             )
         # Clean any stale build state before the recorded compile so the rules
         # file reflects exactly this run's closure.
@@ -596,13 +861,17 @@ def main(argv: list[str]) -> int:
             for stale in stage.glob(f"*{stale_suffix}"):
                 if stale.name != main_tex:
                     stale.unlink()
+        (stage / "main.pdf").unlink(missing_ok=True)
 
         rules = compile_with_rules(stage, main_tex, bundle)
+        compiled_pdf = stage / "main.pdf"
+        if not compiled_pdf.is_file():
+            raise AuditError("staged compile produced no main.pdf")
         audit_rules_closure(rules, stage)
         # Before check-log: an unstaged publisher style makes BibTeX fail
         # softly, so the log then shows undefined citations. Reporting the
         # missing .bst is the actionable diagnosis; the citations are downstream.
-        audit_class_and_bibstyle(stage, stage / main_tex, target)
+        class_name = audit_class_and_bibstyle(stage, stage / main_tex, target)
         audit_check_log(stage, Path(main_tex).stem)
         audit_image_closure(rules, stage)
 
@@ -611,13 +880,35 @@ def main(argv: list[str]) -> int:
         audit_portable_names(stage, files)
         audit_includegraphics(stage, files)
 
-        engine = "xetex (Tectonic)"
+        if target == "quantitative-finance":
+            engine = f"xetex (Tectonic, {class_name})"
+        elif target == "gfj":
+            engine = "xetex (Tectonic, Elsevier elsarticle)"
+        elif target == "ejf":
+            engine = "xetex (Tectonic, Taylor & Francis interact)"
+        else:
+            engine = "xetex (Tectonic)"
         manifest = build_manifest(stage, files, target, engine, bundle)
         manifest_path = write_manifest(stage, manifest)
 
-        archive_deterministically(stage, files, manifest_path, out_archive)
-        recompile_unpacked(out_archive, main_tex, bundle)
-    except AuditError as exc:
+        # Build and recompile a candidate before replacing any advertised artifact.
+        # Keep the original staged PDF: independent XeTeX runs need not have equal
+        # bytes (timestamps/IDs), and the unpacked compile is a source-closure gate.
+        out_archive.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(
+            prefix=".bundle-release-", dir=out_archive.parent
+        ) as td:
+            temporary = Path(td)
+            candidate_archive = temporary / out_archive.name
+            archive_deterministically(stage, files, manifest_path, candidate_archive)
+            recompile_unpacked(candidate_archive, main_tex, bundle)
+            if out_pdf is not None:
+                candidate_pdf = temporary / out_pdf.name
+                candidate_pdf.write_bytes(compiled_pdf.read_bytes())
+            candidate_archive.replace(out_archive)
+            if out_pdf is not None:
+                candidate_pdf.replace(out_pdf)
+    except (AuditError, OSError) as exc:
         print(f"bundle-audit: FAIL: {exc}", file=sys.stderr)
         return 1
 

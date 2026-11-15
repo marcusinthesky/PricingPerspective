@@ -1,6 +1,6 @@
 ---
-type: article-journal
-title: 'NewsNet--SDF: Stochastic Discount Factor Estimation with Pre-trained Language-Model News Embeddings via Adversarial Networks'
+type: paper-conference
+title: 'NewsNet-SDF: Stochastic Discount Factor Estimation with Pre-trained Language-Model News Embeddings via Adversarial Networks'
 description: Wang, Cheng & Wang (2025), NewsNet-SDF adversarial SDF estimation with NLP embeddings
 author:
 - family: Wang
@@ -24,5 +24,3 @@ cites:
 - ross_arbitrage_1976
 - sharpe_capital_1964
 ---
-
-# NewsNet-SDF

@@ -16,22 +16,23 @@ import hashlib
 import json
 import logging
 import platform
-from pathlib import Path
-from typing import Any, NoReturn, cast
+from typing import TYPE_CHECKING, Any, NoReturn, cast
 
 import numpy as np
 import yaml
 
-from pipeline._kernels.typed_distances import compute_statistical_distance
 from pipeline.io.contracts import write_manifest
+from pipeline.io.semantic_identity import entrypoint_code_identity
 from pipeline.io.typed_analysis import (
     StatisticalDistanceSpec,
     load_typed_analysis,
     typed_analysis_parameter_identity,
 )
-from pipeline.io.typed_providers import load_provider_clouds
 from pipeline.jax_cache import configure_persistent_cache
 from pipeline.stages.shared.typed_artifacts import read_typed_distance_artifact
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 configure_persistent_cache()
 
@@ -169,61 +170,10 @@ def _load_vintage_matrix(
     return _square_rooted_w2(rooted), items, str(sample_window)
 
 
-def compute_pit_matrices_for_provider(
-    params_file: Path,
-    out_path: Path,
-    provider_id: str,
-    representation_id: str,
-) -> None:
-    """Compute uncached PIT W2 matrices for one robustness provider."""
-    with params_file.open(encoding="utf-8") as params_handle:
-        params_all = yaml.safe_load(params_handle)
-    config = load_typed_analysis(params_file)
-    provider = next(
-        candidate
-        for candidate in config.providers.values()
-        if candidate.provider_id == provider_id
-    )
-    representation = next(
-        candidate
-        for candidate in config.representations.values()
-        if candidate.representation_id == representation_id
-    )
-    items = params_all["market_symbols"]
-    matrices: dict[str, np.ndarray] = {}
-    for vintage, distance_id in _vintage_roster(params_all):
-        distance = config.distances.get(distance_id)
-        if not isinstance(distance, StatisticalDistanceSpec):
-            _pit_error(f"{distance_id!r} is not a registered statistical distance")
-        _require_w2(distance)
-        window = config.window_for(distance)
-        if window is None or window.end is None:
-            _pit_error(f"{distance_id!r} declares no closed point-in-time window")
-        if vintage != window.end.isoformat():
-            _pit_error(
-                f"vintage {vintage!r} disagrees with the window end declared by "
-                f"distance {distance_id!r}"
-            )
-        clouds = load_provider_clouds(
-            provider,
-            representation,
-            item_ids=items,
-            sample_size=distance.sample_size,
-            window=window,
-        )
-        result = compute_statistical_distance(
-            clouds, distance, config.ground_distance_for(distance)
-        )
-        matrices[vintage] = _square_rooted_w2(np.asarray(result.values))
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    np.savez(out_path, **cast("dict[str, Any]", matrices))
-    logger.info("wrote uncached PIT W2 matrices for %s to %s", provider_id, out_path)
-
-
 def compute_paper3_pit_distance(
     params_file: Path,
     out_path: Path,
-    distance_root: Path = Path("data/shared/typed_distances_windowed"),
+    distance_root: Path,
 ) -> None:
     """Assemble Paper 3's annual squared-W2 archive from typed artifacts."""
     with params_file.open(encoding="utf-8") as params_handle:
@@ -233,6 +183,7 @@ def compute_paper3_pit_distance(
 
     matrices: dict[str, np.ndarray] = {}
     windows: dict[str, str] = {}
+    vintage_identities: dict[str, dict[str, object]] = {}
     items: tuple[str, ...] | None = None
     for vintage, distance_id in roster:
         distance = config.distances.get(distance_id)
@@ -247,6 +198,24 @@ def compute_paper3_pit_distance(
         items = items_seen
         matrices[vintage] = values
         windows[vintage] = window_id
+        vintage_identities[vintage] = {
+            "provider_id": PIT_PROVIDER_ID,
+            "representation_id": PIT_REPRESENTATION_ID,
+            "distance_id": distance.distance_id,
+            "family": distance.family,
+            "ground_distance": distance.ground_distance,
+            "estimator": distance.estimator,
+            "normalization": distance.normalization,
+            "sample_design": distance.sample_design,
+            "sample_size": distance.sample_size,
+            "sample_window_id": distance.sample_window,
+            "window_start": (
+                window.start.isoformat() if window.start is not None else None
+            ),
+            "window_end": window.end.isoformat(),
+            "source_scale": "rooted_wasserstein_2",
+            "archive_scale": "squared_wasserstein_2_transport_cost",
+        }
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     np.savez(out_path, **cast("dict[str, Any]", dict(matrices)))
@@ -257,8 +226,11 @@ def compute_paper3_pit_distance(
             "stage_key": "p3_pit_w2",
             "lane": "p3",
             "phase": "prepare",
-            "protocol_id": "paper3.pit-w2.v1",
-            "code_identity": {"kind": "sha256", "value": _sha256(Path(__file__))},
+            "protocol_id": "paper3.pit-w2.v2",
+            "code_identity": {
+                "kind": "sha256",
+                "value": entrypoint_code_identity("paper3-pit-w2"),
+            },
             "parameter_identity": {
                 "kind": "scoped-params-sha256",
                 "value": _parameter_identity(params_file, roster),
@@ -273,13 +245,19 @@ def compute_paper3_pit_distance(
                         / PIT_REPRESENTATION_ID
                         / distance_id
                     ),
+                    "vintage": vintage,
+                    "distance_id": distance_id,
+                    "provider_id": PIT_PROVIDER_ID,
+                    "representation_id": PIT_REPRESENTATION_ID,
                 }
-                for _vintage, distance_id in roster
+                for vintage, distance_id in roster
             ],
             "environment": {"python": platform.python_version()},
             "metadata": {
                 "item_ids": list(items or ()),
                 "vintage_windows": windows,
+                "vintage_identity_schema": "pit_vintage_identity.v1",
+                "vintage_identities": vintage_identities,
                 "source_scale": "rooted_wasserstein_2",
                 "archive_scale": "squared_wasserstein_2_transport_cost",
                 "observed_object": "characteristic_law_C",

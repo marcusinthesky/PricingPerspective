@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-  MathJax = {
+  MathJax = { 
     tex: {
 		    inlineMath: [['$','$'], ['\\(','\\)']]
 	} }
@@ -98,6 +98,25 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -121,21 +140,21 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0001.html#def:exposure-law">#</a>
-
-
-
+    
+    
+    
         </div>
   </div>
   <div class="definition_thmcontent">
   <p>  Asset \(i\) carries a random loading \(B_i\sim P_i\in \mathcal P_2(\mathcal H)\) in a real Hilbert space \(\mathcal H\), and the common factor process has covariance operator \(\Gamma \). The risk coordinates and factor-weighted second moments are </p>
-<div class="displaymath" id="a0000000015">
+<div class="displaymath" id="a0000000019">
   \[  Z_i=\Gamma ^{1/2}B_i,\qquad v_i=\mathbb E\lVert Z_i\rVert ^2 .  \]
 </div>
 <p> For a coupling \(\pi \in \Pi (P_i,P_j)\) the systematic covariance is \(\kappa ^\pi _{ij}=\mathbb E_\pi \langle Z_i,Z_j\rangle \), and the factor-weighted quadratic transport cost is </p>
-<div class="displaymath" id="a0000000016">
+<div class="displaymath" id="a0000000020">
   \[  W_{2,\Gamma }^2(P_i,P_j) =\inf _{\pi \in \Pi (P_i,P_j)}\mathbb E_\pi \lVert Z_i-Z_j\rVert ^2 .  \]
 </div>
-<p> Every object above is now formalized at this level, not only interpreted: risk coordinates as a pushforward under \(\Gamma ^{1/2}\), the second moment and systematic covariance as Bochner integrals, and the transport cost as the infimum defining \(W_2\) on \(\mathcal P_2(\mathcal H)\). The finite instance of ??def:finite-exposure-cloud is the estimator of this object rather than a separate model, and the two agree exactly on finitely supported laws. </p>
+<p> Every object above is now formalized at this level, not only interpreted: risk coordinates as a pushforward under \(\Gamma ^{1/2}\), the second moment and systematic covariance as Bochner integrals, and the transport cost as the infimum defining \(W_2\) on \(\mathcal P_2(\mathcal H)\). The finite instance of <a href="sect0001.html#def:finite-exposure-cloud">Definition 2</a> is the estimator of this object rather than a separate model, and the two agree exactly on finitely supported laws. </p>
 <p>One caveat survives and is unchanged: existence of an optimal plan on \(\mathcal P_2(\mathcal H)\) is <em>not</em> proved. It is supplied as a certificate wherever an optimum is needed, so every attainment statement below reads “given such a plan”, never “one exists”. </p>
 
   </div>
@@ -153,8 +172,8 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0001.html#def:finite-exposure-cloud">#</a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -164,18 +183,18 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0001.html#def:exposure-law">Definition 1</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="definition_thmcontent">
@@ -183,27 +202,26 @@
 
   </div>
 </div>
-<div class="lemma_thmwrapper theorem-style-plain" id="lem:polarization">
-  <div class="lemma_thmheading">
-    <span class="lemma_thmcaption">
-    Lemma
+<div class="theorem_thmwrapper theorem-style-plain" id="lem:polarization">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
     </span>
-    <span class="lemma_thmlabel">3</span>
-    <span class="lemma_thmtitle">Polarization</span>
+    <span class="theorem_thmlabel">3</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0001.html#lem:polarization">#</a>
-
-    <a class="icon proof" href="sect0001.html#a0000000017"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    
+    <a class="icon proof" href="sect0001.html#a0000000021"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -212,28 +230,25 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/norm_sub_sq_real" class="lean_decl">norm_sub_sq_real</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
-  <div class="lemma_thmcontent">
-  <p>   For any \(x,y\) in a real inner-product space, </p>
-<div class="displaymath" id="a0000000018">
-  \[  \langle x,y\rangle =\tfrac 12\left(\lVert x\rVert ^2+\lVert y\rVert ^2-\lVert x-y\rVert ^2\right).  \]
-</div>
+  <div class="theorem_thmcontent">
+  <p>  For any \(x,y\) in a real inner product space, \(\langle x,y\rangle = \frac12(\lVert x\rVert ^2+\lVert y\rVert ^2-\lVert x-y\rVert ^2)\). </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000017">
+<div class="proof_wrapper" id="a0000000021">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -241,7 +256,7 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p> Expand the squared norm of the difference. </p>
+  
 
   </div>
 </div>
@@ -258,11 +273,11 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0001.html#lem:transport-polarization">#</a>
-
-    <a class="icon proof" href="sect0001.html#a0000000019"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    
+    <a class="icon proof" href="sect0001.html#a0000000022"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -272,32 +287,32 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0001.html#def:finite-exposure-cloud">Definition 2</a></li>
-
-          <li><a href="sect0001.html#lem:polarization">Lemma 3</a></li>
-
+          
+          <li><a href="sect0001.html#lem:polarization">Theorem 3</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="lemma_thmcontent">
   <p>   For every coupling \(\pi \) of two finite exposure clouds, </p>
-<div class="displaymath" id="a0000000020">
+<div class="displaymath" id="a0000000023">
   \[  \kappa ^\pi _{ij}=\tfrac 12\left(v_i+v_j-C(\pi )\right).  \]
 </div>
 <p> The identity is exact and holds coupling by coupling; no optimality is involved. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000019">
+<div class="proof_wrapper" id="a0000000022">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -305,7 +320,7 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p> Apply ??lem:polarization inside the coupling expectation and use that the marginals reproduce \(v_i\) and \(v_j\). </p>
+  <p> Apply <a href="sect0001.html#lem:polarization">Theorem 3</a> inside the coupling expectation and use that the marginals reproduce \(v_i\) and \(v_j\). </p>
 
   </div>
 </div>

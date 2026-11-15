@@ -21,5 +21,3 @@ page: 830-857
 cites:
 - newey_smith_2004
 ---
-
-# Robust Wasserstein Profile Inference and Applications to Machine Learning

@@ -12,11 +12,12 @@ from typing import TYPE_CHECKING, Any, Literal, NoReturn, cast
 
 import jax.numpy as jnp
 import numpy as np
-from jcor.discrepancy._mmd.components import _compute_energy_components
-from jcor.discrepancy.mmd import BUILTIN_MMD_KERNELS
-from jcor.ground.config import resolve_ground_distance
-from jcor.ground.metrics import cdist
-from jcor.ground.similarities import gram, rbf_kernel
+from statadic.geometry.discrepancy.mmd import BUILTIN_MMD_KERNELS
+from statadic.geometry.discrepancy.mmd.energy import empirical_mean_ground_distances
+from statadic.geometry.ground.config import resolve_ground_distance
+from statadic.geometry.ground.metrics import cdist
+from statadic.geometry.ground.similarities import gram, rbf_kernel
+from statadic.measure.clouds import PackedClouds
 
 GeometryComponentKind = Literal["mean_ground_distance", "kernel_mean"]
 GroundMetric = Literal["euclidean", "cosine", "angular"]
@@ -450,16 +451,15 @@ def compute_mean_ground_distance_component(
     if ground.distance_id != distance.ground_distance:
         _geometry_error("geometry and ground-distance IDs disagree")
     metric = resolve_ground_distance(cast("GroundMetric", ground.metric))
-    # JCOR's public mean_distance_matrix intentionally admits equal-size clouds
-    # only.  The canonical embeddings are ragged, so use its packed component
-    # kernel to preserve the same masked V-statistic semantics without padding.
-    values, _ = _compute_energy_components(
-        jnp.asarray(items[0].values),
-        [jnp.asarray(cloud.values) for cloud in items],
+    estimates = empirical_mean_ground_distances(
+        PackedClouds.from_clouds([jnp.asarray(cloud.values) for cloud in items]),
         metric=metric,
         exponent=distance.exponent,
     )
-    values = np.asarray(values)
+    # All admitted grounds are symmetric; retain the upper reduction and mirror it.
+    values = np.array(estimates.values, copy=True)
+    lower = np.tril_indices_from(values, k=-1)
+    values[lower] = values.T[lower]
     metadata = _component_metadata(items, distance, "mean_ground_distance", values)
     return MeanGroundDistanceMatrix(
         item_ids=metadata.item_ids, values=values, metadata=metadata

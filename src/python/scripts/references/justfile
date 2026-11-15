@@ -1,51 +1,6 @@
 set shell := ["bash", "-uc"]
 set positional-arguments
 
-# Validate reference records/notes through canonical static document schemas.
-structure *paths:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)"
-    files=("$@")
-    if (( ${#files[@]} == 0 )); then
-        files=(.context/reference/*/README.md)
-    fi
-    records=()
-    notes=()
-    for file in "${files[@]}"; do
-        if awk '
-            NR == 1 && /^[[:space:]]*---[[:space:]]*$/ { frontmatter = 1; next }
-            frontmatter {
-                if (/^[[:space:]]*---[[:space:]]*$/) { frontmatter = 0 }
-                next
-            }
-            /^[[:space:]]*<!--[[:space:]]*insitu:begin / { generated = 1; next }
-            generated && /^[[:space:]]*<!--[[:space:]]*insitu:end[[:space:]]*-->/ { generated = 0; next }
-            generated { next }
-            !title && /^#[[:space:]]+/ { title = 1; next }
-            /^[[:space:]]*$/ { next }
-            { authored = 1; exit }
-            END { exit authored ? 0 : 1 }
-        ' "$file"; then
-            notes+=("$file")
-        else
-            records+=("$file")
-        fi
-    done
-    schema_root=infra/schemas/documents
-    status=0
-    if (( ${#records[@]} )); then
-        code=0
-        schematter validate --schema "$schema_root/reference-record.document-schema.yaml" "${records[@]}" || code=$?
-        (( code > status )) && status=$code
-    fi
-    if (( ${#notes[@]} )); then
-        code=0
-        schematter validate --schema "$schema_root/reference-note.document-schema.yaml" "${notes[@]}" || code=$?
-        (( code > status )) && status=$code
-    fi
-    exit "$status"
-
 # Check authored citation/relation targets without producing an intermediate graph.
 graph-check:
     #!/usr/bin/env bash
@@ -142,6 +97,5 @@ export-bib: (_bibliography "false")
 # Validate graph closure and byte-for-byte bibliography freshness.
 bibliography-check: graph-check (_bibliography "true")
 
-# Convert staged PDFs into authoritative Markdown with the configured parser.
-backfill *args:
-    cd "$(git -C '{{ justfile_directory() }}' rev-parse --show-toplevel)" && dotenvx run -- uv run --script src/python/scripts/references/backfill_markdown/script.py "$@"
+# Release entrypoint for the four paper bibliographies.
+publication-bibliography-check: bibliography-check

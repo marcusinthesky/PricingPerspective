@@ -18,5 +18,3 @@ issue: '477'
 publisher: American Statistical Association
 page: 359-378
 ---
-
-# Strictly Proper Scoring Rules

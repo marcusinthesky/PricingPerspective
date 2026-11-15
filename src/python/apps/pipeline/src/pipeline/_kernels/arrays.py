@@ -19,8 +19,8 @@ def project_simplex(weights: np.ndarray) -> np.ndarray:
     """Project a finite vector onto the unit nonnegative simplex.
 
     Duchi et al. (2008), in float64 on purpose. A JAX/optax projection exists
-    (``jcor.optimize`` routes through one) but resolves to float32 unless the
-    caller owns ``jax_enable_x64``, which this repository never sets. Both
+    (``statadic.numerics.optimize`` routes through one) but resolves to float32
+    unless the caller owns ``jax_enable_x64``, which this repository never sets. Both
     callers here -- the anchored Wasserstein target solver and the paper-2
     tightest-cap polish loop -- run float64 precisely to escape that, so they
     share this NumPy implementation rather than the jitted one.

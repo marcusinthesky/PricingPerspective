@@ -1,3 +1,4 @@
+import Architect
 import PricingPerspective.Transmission.Kernel
 
 set_option linter.style.longLine false
@@ -53,9 +54,6 @@ once. This is the same discipline as `WassersteinGeometry.Contraction` and
 
 ## References
 
-* `.context/chat/2026-08-16_random_functions/figures/hilbert_model.md`, final turn,
-  "Heterogeneous slack gives another useful bound".
-* `.context/chat/2026-08-16_random_functions/README.md`, "Transmission is contractive".
 -/
 
 namespace PricingPerspective.Transmission
@@ -264,6 +262,16 @@ omit [MeasurableAdd₂ H] in
 
     Slack enters **additively**, with no support diameter — unlike the finite development in
     `Transmission.Transfer`, whose bound carries `2(τᵢ+τⱼ)D + (τᵢ+τⱼ)²`. -/
+@[blueprint "eq:random-w2-upper-metric"
+  (statement := /--
+    For exposure maps differing from a common $L$-Lipschitz map by a pointwise-bounded slack
+    synchronous with the characteristic draw, the factor-weighted $W_2$ distance between the
+    induced exposure laws is at most $\tau_i$ plus $L$ times the characteristic $W_2$ distance
+    plus $\tau_j$. Slack enters additively and no support diameter appears. Assumptions:
+    characteristic laws in $\mathcal{P}_2$ of a separable complete metric space; a common
+    L-Lipschitz measurable transmission map in risk coordinates; pointwise slack bounds on each
+    firm's exposure map, synchronous with the draw.
+  -/)]
 theorem wassersteinDistance_boundedSlack_le
     {L τi τj : ℝ≥0} {t ui uj : X → H}
     (hL : LipschitzWith L t) (ht : Measurable t)

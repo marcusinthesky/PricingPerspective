@@ -1,0 +1,19 @@
+\section{Introduction}\label{sec:introduction}
+
+This compiling project is the architectural smoke test for the manuscript workspace.
+It exposes \ppvalue{example-count} generated value to verify that empirical
+results enter
+through a narrow, replaceable interface rather than as literals copied into prose; the
+source itself follows the standard LaTeX model described by \citet{lamport1994latex}.
+
+\begin{proposition}\label{prop:separation}
+  A content chapter can compile under a different target adapter without owning its
+  document class or layout.
+\end{proposition}
+
+\begin{proof}
+  The chapter imports only semantic commands supplied by the enclosing target.
+\end{proof}
+
+\Cref{prop:separation} is an architectural invariant rather than a substantive research
+claim.

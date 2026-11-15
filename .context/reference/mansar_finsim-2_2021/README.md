@@ -15,5 +15,3 @@ issued:
 container-title: Companion {Proceedings} of the {Web} {Conference} 2021
 page: 288-292
 ---
-
-# The finsim-2 2021 shared task: {Learning} semantic similarities for the financial domain

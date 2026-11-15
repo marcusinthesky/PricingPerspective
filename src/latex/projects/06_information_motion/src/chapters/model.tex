@@ -1,0 +1,314 @@
+\section{Methodology}\label{sec:model}
+
+\subsection{Competitive Environment}\label{sec:model-payoff}
+
+We adapt the multi-contest framework of
+\citet{xu_zenou_zhou_conflict_2022} to firms allocating capacity
+across activities serving overlapping customer demands.
+Capacity generates appeal at each demand node, and a firm's appeal relative
+to rivals and outside alternatives determines its share of the available
+contribution margin.
+In the static game, each firm chooses capacity to maximize that margin net
+of capacity costs, taking rivals' allocations as given.
+
+Let firm $i=1,\ldots,N$ assign capacity $q_{ia}\geq0$ to activity
+$a=1,\ldots,m$, located at $x_a\in\mathbb R^d$.
+Customer demand arises at $L$ nodes $z_\ell\in\mathbb R^d$.
+These locations describe economic activities and demands, while article-vector
+coordinates will represent their reported profiles in
+Section~\ref{sec:adjustment-design}.
+To distinguish scale from business mix, we represent the allocation by a
+measure $Q_i$ with total mass $S_i$ and normalized composition $P_i$:
+\begin{equation}\label{eq:position}
+  Q_i=\sum_a q_{ia}\delta_{x_a},\qquad
+  S_i=\sum_{a}q_{ia},\qquad
+  P_i=\sum_a p_{ia}\delta_{x_a},\quad p_{ia}=q_{ia}/S_i,
+\end{equation}
+where $\delta_{x_a}$ is a unit point mass at $x_a$ and $P_i$ is defined when
+$S_i>0$.
+The vector $p_i$ records the composition of simultaneous activities, not
+probabilities of selecting a single activity.
+Keeping total capacity $S_i$ separate allows the same disturbance to change
+operating scale and business mix differently.
+Capacities are in common model units, and the joint allocation
+$q=(q_1,\ldots,q_N)$ lies in $\mathcal Q=\mathbb R_+^{Nm}$
+(Appendix~\ref{app:proofs}).
+
+Capacity in one activity can serve several related customer segments.
+The coefficient $K_{\ell a}=\exp\{-\tau_A\|x_a-z_\ell\|^2/d\}$ measures how
+effectively activity $a$ serves demand node $\ell$, declining with the
+distance between them, and a higher $\tau_A$ makes it decline faster and narrows
+the range of demands a given activity serves.
+A firm's appeal at a node is the sum of its activity capacities weighted by
+that effectiveness, $A_i=Kq_i\in\mathbb R_+^L$, and each firm faces the
+combined appeal of its rivals and of an outside alternative, measured in the
+same units:
+\begin{equation}\label{eq:appeal}
+  A_{i\ell}(q_i)=\sum_{a}K_{\ell a}q_{ia},\qquad
+  B_{i\ell}(q_{-i})=b_\ell+\sum_{j\ne i}A_{j\ell}(q_j),\qquad b_\ell>0.
+\end{equation}
+The outside appeal $b_\ell$ represents alternatives beyond the modeled firms
+and keeps the share denominator positive even when no modeled firm
+serves a node.
+Own capacity increases a firm's access to a demand opportunity, while rivals
+divide that opportunity among more participants.
+
+At each demand node, firms compete for a contribution-margin opportunity
+$r_{\ell t}\geq0$ available at date $t$, valued in cash-flow units.
+Exogenous free cash flow shocks change these available contribution margins.
+Firms' initial exposures and subsequent capacity choices determine the
+resulting changes in their cash flows.
+A firm receives the fraction of that opportunity given by its share of total
+appeal, including the outside alternative, so its operating payoff is
+contribution margin less the persistent cost
+$C_i$ of maintaining capacity:
+\begin{equation}\label{eq:firm-problem}
+  \pi_i(q_i,q_{-i};r_t)=
+  \underbrace{\sum_\ell r_{\ell t}
+  \frac{A_{i\ell}(q_i)}{A_{i\ell}(q_i)+B_{i\ell}(q_{-i})}}
+  _{\text{contribution margin from current opportunities}}
+  -\underbrace{C_i(q_i)}_{\text{cost of positioning there}}.
+\end{equation}
+Each firm chooses nonnegative capacity to maximize this stylized unlevered
+operating cash flow, taking its rivals' allocations as given.
+Its contribution-margin component, denoted $\mathcal M_i$
+(Appendix~\ref{app:payoff}), adapts the proportional-share contest of
+\citet{xu_zenou_zhou_conflict_2022}: capacities generate appeal through $K$,
+and $b_\ell$ represents alternatives outside the modeled firms.
+Appendix~\ref{app:contest-inheritance} gives the adaptation and its required
+assumptions.
+Doubling an opportunity weight doubles its contribution to the margin at an
+unchanged profile, whereas doubling every firm's capacity need not double the
+margin because shares approach saturation.
+Summed over firms, the margins at a node never exceed $r_{\ell t}$: firms
+divide a finite pool, and crowding works through forgone contribution margin.
+
+The proportional-appeal share has a discrete-choice interpretation when
+capacity counts varieties or outlets and customers value nearby activities.
+Appendix~\ref{app:logit} derives that interpretation following
+\citet{train_discrete_choice_2009}, with opportunity value
+combining market size and fixed per-sale margin.
+
+\subsection{Costs and Equilibrium}\label{sec:model-equilibrium}
+
+Firms differ in the activities they can expand cheaply.
+A capability center $h_i\in\mathbb R^d$, a location in the activity space,
+makes nearby activities less costly at the margin,
+with the penalty for distance governed by $\gamma\geq0$.
+The persistent capability cost is
+\begin{equation}\label{eq:cost}
+  C_i(q_i)=c_i^\top q_i+\tfrac12q_i^\top Hq_i,
+  \quad c_{ia}=c_0+\gamma\|x_a-h_i\|^2/d,
+  \quad H=\eta K^c+\nu I,
+\end{equation}
+where $c_0,\eta\geq0$, $\nu>0$, and $K^c_{ab}=\exp\{-\tau_c\|x_a-x_b\|^2/d\}$.
+Dividing squared distances by $d$ expresses both distance penalties per
+activity-space coordinate.
+The linear term represents persistent comparative advantage, the Gaussian
+congestion term makes simultaneous expansion in related activities costly,
+and $\nu$ raises the marginal cost of concentrating capacity at any one site.
+Increasing $\gamma$ makes departures from a firm's capability center more
+expensive, so capability centers give firms different costs of responding to
+the same opportunity.
+These are costs of operating the allocation, including when it is unchanged.
+
+Together, the proportional-appeal margin and the cost specification define
+the operating payoff in \eqref{eq:firm-problem}.
+The common Gaussian matrix in \eqref{eq:cost} is the numerical specialization
+used below.
+For the equilibrium argument, we allow a symmetric firm-specific matrix $H_i$
+subject to the following conditions.
+
+\begin{assumption}[Demand access and expansion costs]\label{ass:primitives}
+  Outside appeal satisfies $b_\ell>0$, opportunity values and appeal
+  coefficients
+  satisfy $r_\ell\geq0$ and $K_{\ell a}\geq0$, and linear costs
+  satisfy $c_{ia}\geq0$.
+  Each symmetric cost matrix obeys $H_i\succeq\nu I$ for a common $\nu>0$.
+\end{assumption}
+
+The Gaussian congestion matrix is positive semidefinite, so the numerical
+specification satisfies the curvature condition.
+At equilibrium, marginal contribution equals marginal capacity cost on
+every positive-capacity activity, while entry into an unused activity
+cannot raise payoff.
+To establish that these joint conditions determine a unique allocation,
+Appendix~\ref{app:equilibrium} adapts the contest and variational-inequality
+methods of
+\citet{xu_zenou_zhou_conflict_2022} and
+\citet{parise_ozdaglar_network_games_2019}.
+
+\begin{proposition}[Unique equilibrium and the symmetry
+  boundary]\label{prop:equilibrium}
+  Under Assumption~\ref{ass:primitives}, the proportional-share capacity game
+  has a unique Nash equilibrium on $\mathcal Q$.
+  Identical firm primitives imply identical equilibrium capacity vectors.
+  The independent-firm economy, obtained by setting $B_{i\ell}=b_\ell$,
+  also has a unique equilibrium, consisting of the firms' individual optima.
+\end{proposition}
+
+Positive outside appeal keeps demand shares defined, while strictly curved
+costs discipline scale and ensure uniqueness
+(Appendix~\ref{app:equilibrium}).
+Uniqueness also explains the symmetry boundary: crowding can spread aggregate
+activity across opportunities, but firms with identical primitives spread it
+identically.
+Capability differences supply the heterogeneous incentives that separate
+firms' business mixes in the illustrative economies.
+
+\subsection{Sequential Adjustment and Valuation}\label{sec:model-dynamics}
+
+Starting from the static equilibrium, firms incur additional costs when
+changing their inherited capacity allocations.
+In each period they choose capacities simultaneously, with adjustment costs
+relative to the preceding allocation $q_{i,t-1}$.
+The stage choice is
+\begin{equation}\label{eq:anchored-choice}
+  q_{it}\in\arg\max_{z_i\geq0}\left\{
+  \pi_i(z_i,q_{-i,t};r_t)-\frac{\kappa}{2}\|z_i-q_{i,t-1}\|^2\right\},\qquad\kappa\geq0.
+\end{equation}
+Adjustment costs make operating responses gradual, as in the costly
+repositioning problem studied by \citet{sweeting_positioning_2013}.
+The quadratic form makes every stage a strongly monotone Nash problem
+(Appendix~\ref{app:anchored-stage}).
+Firms maximize current operating payoff net of adjustment expenditure,
+without a continuation-value term.
+Financial prices reflect the resulting choices and do not feed back into
+investment.
+
+At an interior initial equilibrium $\bar q$, let $J$ be the joint Jacobian
+of marginal capacity costs minus marginal contributions, and let $\mathcal G$
+map opportunity changes into changes in marginal incentives.
+A local capacity deviation $x_t$ generated by opportunity deviation
+$s_t v$ obeys
+\begin{equation}\label{eq:anchored-response}
+  (J+\kappa I)x_t=\kappa x_{t-1}+\mathcal G v s_t.
+\end{equation}
+Adjustment costs make earlier investment decisions persist: a firm responds
+to new opportunities from the capacity allocation it has already built.
+Because $J$ includes rivals' effects on marginal returns, competitors'
+simultaneous adjustments also shape that response.
+At a boundary equilibrium, equation~\eqref{eq:anchored-response} applies
+locally while the active set remains unchanged.
+The nonlinear simulation solves the actual level game in
+\eqref{eq:anchored-choice} and checks its departure from this affine
+response.
+
+We value the cash flows generated by this adjustment path using a constant
+discount factor $\delta\in(0,1)$.
+With baseline payout $\bar\pi_i>0$, the ex-payout price is
+$\bar V_i=\delta\bar\pi_i/(1-\delta)$.
+For a unit permanent opportunity innovation, let $x_0=0$ and let $x_h$ for
+$h\geq1$ solve \eqref{eq:anchored-response} with $s_h=1$.
+The unexpected total-return loading is
+\begin{equation}\label{eq:same-path-value}
+  g_i=\frac{1}{\bar V_i}\sum_{h=0}^{\infty}\delta^h
+  \left\{\partial_r\pi_i(\bar q;\bar r)v+D_q\pi_i(\bar q;\bar r)x_h\right\}.
+\end{equation}
+The first term values the opportunity at existing capacities; the second
+values the cash-flow consequences of subsequent operating responses.
+Investors can incorporate this anticipated path when the news arrives,
+before capacity reaches its new allocation.
+Adjustment expenditure has zero first derivative at the unchanged origin,
+so it adds no first-order payout term to this valuation.
+
+The discounted capacity sum solves
+$[J+(1-\delta)\kappa I]\sum_h\delta^h x_h
+=\delta\mathcal Gv/(1-\delta)$, valuing the full response without truncating
+its horizon.
+In the spirit of \citet{berk_green_naik_growth_options_1999}, operating
+opportunities enter firm valuations through the cash flows they generate,
+which here follow the supplied sequence of Nash choices under
+constant discounting.
+
+\subsection{Reporting and the Directional Prediction}\label{sec:model-observation}
+
+Financial news records firms' activities through the coverage they receive.
+Investors seeking to value future cash flows have reason to follow material
+investment, product and technology decisions, while publishers and corporate
+disclosures influence which developments become observable
+\citep{gentzkow_media_bias_2006}.
+To connect this reporting process to operating decisions, we assume that an
+activity's share of news is proportional to its capacity weighted by its
+reporting intensity.
+Capacity measures the activity available to be reported, while reporting intensity
+allows coverage per unit of capacity to differ across activities and time.
+For fixed component probability laws $\nu_a$, this gives
+\begin{equation}\label{eq:reporting-law}
+  C_{i,t}=\sum_a\omega_{ia,t}\nu_a,\qquad
+  \omega_{ia,t}=\frac{\lambda_{ia,t}q_{ia,t}}
+  {\sum_b\lambda_{ib,t}q_{ib,t}},\qquad\lambda_{ia,t}>0.
+\end{equation}
+Common intensity across activities gives $\omega_{ia,t}=p_{ia,t}$, so the
+article law follows the firm's business mix under equal relative attention.
+Changing relative attention changes reported composition even at fixed
+capacities, whereas reciprocal changes in capacity and intensity can
+preserve the same observed law.
+Text-based product measures \citep{hoberg_phillips_2016} provide a precedent
+for studying activities through text, while the reporting weights specify
+the maintained connection to operating capacity here.
+The annual observation pools the dated article laws before evaluating a
+transport distance.
+
+In the restricted two-opportunity economy below, an improvement in one
+opportunity relative to the other locally raises each firm's capacity in the
+improving activity and lowers its capacity in the other.
+Every firm therefore increases its share of the improving opportunity,
+although the joint response includes the capacity choices of its rivals.
+Firms with greater initial exposure to the improving opportunity have larger
+return responses to the shock.
+Under common reporting across activities, a firm locally increasing its share
+of the improving opportunity approaches the origin profiles of firms with
+larger shares of that opportunity and recedes from those with smaller shares.
+
+Consider diversified firms with distinct interior shares $p_i$ in that
+opportunity, common total capacity $Q$ and $\sum_i p_i=N/2$.
+With identity activity loading, common baseline opportunity value $v$ and
+denominator $D=b+NQ/2>2Q$, each node's response Jacobian is
+$J=d_\perp I+u\mathbf1^\top$, where
+$d_\perp=\nu+v/D^2$ and $u_i=v(D-2q_i)/D^3>0$.
+The anchored response has two persistence modes, $\kappa/(d_\perp+\kappa)$
+and $\kappa/(d_A+\kappa)$ with $d_A=d_\perp+\sum_i u_i$.
+
+Valuing the cash flows along this adjustment path gives the return response
+$g(p)=G(2p-1)/[1+(2p-1)^2]$ for $G>0$.
+The return response $g(p)$ increases with the firm's initial exposure $p$.
+
+For the unit-axis component laws
+$\nu_-=(\delta_{e_1}+\delta_{-e_1})/2$ and
+$\nu_+=(\delta_{e_2}+\delta_{-e_2})/2$, every mixture has zero centroid, yet
+\begin{equation}\label{eq:axis-observation}
+  W_2^2(C(p),C(q))=2|p-q|.
+\end{equation}
+The target therefore approaches the initial news distributions of reference
+firms with larger return responses to the shock.
+Under the timing and observation conditions below, this implies a nonnegative
+expected local covariance between approach and relative returns.
+Write $A_{ijy}$ for the local decrease in population Wasserstein squared
+distance of target $i$ toward
+reference $j$ over year $y$, and $R_{ijy}$ for the corresponding article-weighted
+excess-return measure, with observed counterparts defined in
+Section~\ref{sec:adjustment-design}.
+
+\begin{proposition}[Directional movement--return
+  alignment]\label{prop:directional-alignment}
+  Maintain the interior two-opportunity construction of
+  Appendix~\ref{app:canonical-mechanism} and the unit-axis observation laws
+  under common reporting across activities.
+  Hold origin profiles and article timing fixed, with nonnegative source-year
+  timing weights and no earlier-window articles strictly after a current-year
+  source.
+  Suppose primitive source-date innovations are centered, independent across
+  dates and have finite variances, and maintain the zero cross-moment
+  restrictions on financial proxy error, initial gaps and observation error.
+  Then, for each target $i$ and destination year $y$,
+  \[
+    E[\operatorname{Cov}_{j\ne i}(R_{ijy},A_{ijy})]\geq0.
+  \]
+  Fixed nonnegative pooling of these moments preserves the sign.
+\end{proposition}
+
+Appendix~\ref{app:canonical-mechanism} proves the result by deriving the
+ordered share and valuation responses from the same joint operating path.
+News may be shared across firms: independence concerns source dates, while
+firms' different exposures generate their relative responses.

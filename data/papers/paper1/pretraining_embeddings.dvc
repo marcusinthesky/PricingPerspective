@@ -1,0 +1,6 @@
+outs:
+- md5: 2fe222ecdcbd69a1193e4ff73c1ff809.dir
+  size: 483248340
+  nfiles: 404
+  hash: md5
+  path: pretraining_embeddings

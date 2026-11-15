@@ -1,3 +1,4 @@
+import Architect
 import WassersteinGeometry.Hilbert.Polarization
 
 set_option linter.style.longLine false
@@ -19,11 +20,12 @@ transport measuring exactly the residual freedom.
 `frechetClass P Q` is the set of systematic covariances attainable across couplings of `P`
 and `Q`. Its endpoints are the economic content:
 
-* the **ceiling** `κ̄ = (v_P + v_Q − W₂²) / 2`, attained by an optimal plan
+* the **ceiling** `kappa_bar = (v_P + v_Q − W₂²) / 2`, attained by an optimal plan
   (`isGreatest_frechetClass`);
-* the **floor** `κ̲ = (W₂²(P, Q̌) − v_P − v_Q) / 2` for the reflected law `Q̌ = (−I)_#Q`
+* the **floor** `kappa_floor = (W₂²(P, Q_reflect) − v_P − v_Q) / 2` for the reflected law
+  `Q_reflect = (−I)_#Q`
   (`isLeast_frechetClass_of_reflection`);
-* the **excess** `Δ_π = cost_π − W₂²`, with `κ_π = κ̄ − Δ_π/2`
+* the **excess** `Δ_π = cost_π − W₂²`, with `κ_π = kappa_bar − Δ_π/2`
   (`systCov_eq_ceiling_sub_excess`), so a coupling's covariance shortfall from the ceiling
   is exactly half its excess transport cost — an object estimable from paired draws.
 
@@ -88,7 +90,7 @@ private lemma integrable_normSq (P : WassersteinMeasure H) :
     apply (lintegral_ofReal_ne_top_iff_integrable
       (((continuous_norm.pow 2).comp (continuous_id.sub continuous_const)).aestronglyMeasurable)
       (Filter.Eventually.of_forall fun x => sq_nonneg ‖x - default‖)).mp
-    simpa only [Function.comp_apply, id_eq, edist_dist, dist_eq_norm,
+    simpa only [Function.comp_apply, Pi.pow_apply, Pi.sub_apply, id_eq, edist_dist, dist_eq_norm,
       ← ENNReal.ofReal_pow (norm_nonneg _)] using P.second_moment_finite.ne
   have hmajorant :
       Integrable (fun x : H => 2 * ‖x - default‖ ^ 2 + 2 * ‖(default : H)‖ ^ 2)
@@ -149,13 +151,17 @@ noncomputable def mix (π ρ : IntegrableCoupling P Q) (t : ℝ) (ht0 : 0 ≤ t)
   toMeasure := t.toNNReal • π.toMeasure + (1 - t).toNNReal • ρ.toMeasure
   mem := by
     constructor
-    · rw [Measure.map_add _ _ measurable_fst, Measure.map_smul, Measure.map_smul,
+    · rw [Measure.map_add _ _ measurable_fst,
+        Measure.map_smul _ measurable_fst.aemeasurable,
+        Measure.map_smul _ measurable_fst.aemeasurable,
         π.mem.1, ρ.mem.1, ← add_smul]
       have : t.toNNReal + (1 - t).toNNReal = 1 := by
         ext
         simp [Real.toNNReal_of_nonneg ht0, Real.toNNReal_of_nonneg (sub_nonneg.mpr ht1)]
       rw [this, one_smul]
-    · rw [Measure.map_add _ _ measurable_snd, Measure.map_smul, Measure.map_smul,
+    · rw [Measure.map_add _ _ measurable_snd,
+        Measure.map_smul _ measurable_snd.aemeasurable,
+        Measure.map_smul _ measurable_snd.aemeasurable,
         π.mem.2, ρ.mem.2, ← add_smul]
       have : t.toNNReal + (1 - t).toNNReal = 1 := by
         ext
@@ -235,12 +241,21 @@ noncomputable def ceiling {P Q : WassersteinMeasure H} (cert : OptimalTransportC
 
 /-- **The covariance ceiling is attained.**
 
-    `κ̄ = (v_P + v_Q − W₂²)/2` is the greatest element of the Fréchet class: the optimal
+    `kappa_bar = (v_P + v_Q − W₂²)/2` is the greatest element of the Fréchet class: the optimal
     transport plan realizes it, and no coupling exceeds it.
 
     This is what quadratic transport buys over an unoptimized distance. Energy distance can
     bound covariance but cannot exhibit a coupling attaining the bound, because it optimizes
     over nothing. -/
+@[blueprint "thm:random-exposure-envelope"
+  (statement := /--
+    For every coupling of two exposure laws in $\mathcal{P}_2(H)$ whose polarization terms are
+    integrable, the covariance ceiling (one half of the sum of second moments minus the optimal
+    transport cost) is the greatest attainable systematic covariance, and a certified optimal
+    plan attains it. Assumptions: loading laws in $\mathcal{P}_2$ of a separable real Hilbert
+    space; couplings carrying integrability of both second moments and the cross term; a
+    certified optimal transport plan, supplied rather than proved to exist.
+  -/)]
 theorem isGreatest_frechetClass {P Q : WassersteinMeasure H}
     (cert : OptimalTransportCost P Q) :
     IsGreatest (frechetClass P Q) (ceiling cert) := by
@@ -265,16 +280,33 @@ noncomputable def excess {P Q : WassersteinMeasure H}
 
 omit [BorelSpace H] [SecondCountableTopology H] in
 /-- Excess is nonnegative, by minimality of the certificate. -/
+@[blueprint "eq:random-exposure-excess-nonneg"
+  (statement := /--
+    Against a certified optimal transport cost, the excess of any integrable coupling is
+    nonnegative. Stated separately from the gap identity because that identity holds for an
+    arbitrary reference cost and therefore carries no sign information; the sign requires the
+    reference cost to be the certified minimum. Assumptions: loading laws in $\mathcal{P}_2$ of
+    a separable real Hilbert space; a certified optimal transport plan, supplied rather than
+    proved to exist.
+  -/)]
 theorem excess_nonneg {P Q : WassersteinMeasure H}
     (cert : OptimalTransportCost P Q) (π : IntegrableCoupling P Q) :
     0 ≤ excess cert π :=
   sub_nonneg.mpr (cert.minimal π)
 
-/-- **The gap identity.** `κ_π = κ̄ − Δ_π / 2`.
+/-- **The gap identity.** `κ_π = kappa_bar − Δ_π / 2`.
 
     A coupling's shortfall from the covariance ceiling is exactly half its excess transport
     cost. Unlike the ceiling itself, the excess is estimable from paired draws, which is
     what makes the envelope testable rather than merely true. -/
+@[blueprint "eq:random-exposure-gap"
+  (statement := /--
+    For any integrable coupling of two exposure laws in $\mathcal{P}_2(H)$, covariance equals
+    the optimal covariance envelope minus one half of the excess transport cost of that
+    coupling. Assumptions: loading laws in $\mathcal{P}_2$ of a separable real Hilbert space;
+    couplings carrying integrability of both second moments and the cross term; a certified
+    optimal transport plan, supplied rather than proved to exist.
+  -/)]
 theorem systCov_eq_ceiling_sub_excess {P Q : WassersteinMeasure H}
     (cert : OptimalTransportCost P Q) (π : IntegrableCoupling P Q) :
     systCov π.toMeasure = ceiling cert - excess cert π / 2 := by
@@ -285,8 +317,8 @@ theorem systCov_eq_ceiling_sub_excess {P Q : WassersteinMeasure H}
 /-! ### The floor, via the reflected law
 
 The lower endpoint is the upper endpoint of the *reflected* problem. Replacing `Q` by
-`Q̌ = (−I)_#Q` negates every attainable covariance, so the least attainable covariance
-against `Q` is minus the greatest against `Q̌`. Economically: the most negatively two assets
+`Q_reflect = (−I)_#Q` negates every attainable covariance, so the least attainable covariance
+against `Q` is minus the greatest against `Q_reflect`. Economically: the most negatively two assets
 can co-move is governed by how close one loading law is to the *reflection* of the other. -/
 
 section Reflection
@@ -304,7 +336,7 @@ lemma measurable_reflSnd : Measurable (reflSnd : H × H → H × H) :=
   measurable_fst.prodMk measurable_snd.neg
 
 omit [InnerProductSpace ℝ H] [SecondCountableTopology H] in
-/-- Reflecting the second marginal maps `Π(P, Q)` into `Π(P, Q̌)`. -/
+/-- Reflecting the second marginal maps `Π(P, Q)` into `Π(P, Q_reflect)`. -/
 lemma map_reflSnd_mem_couplingSet
     (hQ' : Q'.measure = Q.measure.map (fun y : H => -y))
     {π : Measure (H × H)} (hπ : π ∈ couplingSet P.measure Q.measure) :
@@ -365,12 +397,21 @@ lemma measure_eq_map_neg_of_reflect
 
 /-- **The covariance floor is attained.**
 
-    `κ̲ = −(v_P + v_{Q̌} − W₂²(P, Q̌))/2` is the least element of the Fréchet class, given an
-    optimal plan for the reflected problem.
+    `kappa_floor = −(v_P + v_{Q_reflect} − W₂²(P, Q_reflect))/2` is the least element of the
+    Fréchet class, given an optimal plan for the reflected problem.
 
     Together with `isGreatest_frechetClass` this brackets systematic covariance from both
     sides using only marginal loading laws: quadratic transport against `Q` caps co-movement
-    from above, and quadratic transport against `Q̌` caps it from below. -/
+    from above, and quadratic transport against `Q_reflect` caps it from below. -/
+@[blueprint "thm:random-exposure-lower-endpoint"
+  (statement := /--
+    The reflected law gives the sharp lower endpoint of the Frechet class of attainable
+    systematic covariances: the least attainable covariance equals (optimal reflected transport
+    cost minus the two second moments) divided by two. Assumptions: loading laws in
+    $\mathcal{P}_2$ of a separable real Hilbert space; the reflected second law is the
+    pushforward of the second under negation; a certified optimal transport plan against the
+    reflected law.
+  -/)]
 theorem isLeast_frechetClass_of_reflection
     (hQ' : Q'.measure = Q.measure.map (fun y : H => -y))
     (cert : OptimalTransportCost P Q') :

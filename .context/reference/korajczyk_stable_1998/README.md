@@ -18,5 +18,3 @@ page: 87-144
 cites:
 - bansal_no_1993
 ---
-
-# The Arbitrage Pricing Theory and Multifactor Models of Asset Returns

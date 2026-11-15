@@ -1,3 +1,4 @@
+import Architect
 import PricingPerspective.Transmission.Slack
 import WassersteinGeometry.Multimarginal.Barycenter
 import WassersteinGeometry.Multimarginal.Contraction
@@ -163,6 +164,15 @@ theorem aggregateCarrierFloor_le_of_rms_slack
     (C a) (hu a) htm (hrms a) (P a) (T a) (hP a) (hT a)
 
 /-- Unconditional aggregate carrier floor under synchronous integrated `L²` slack. -/
+@[blueprint "thm:p3-aggregate-transfer"
+  (statement := /--
+    For a measurable antilipschitz carrier and heterogeneous synchronous transmission slack,
+    exposure dispersion is at least the positive part of inverse carrier distortion times
+    characteristic dispersion minus weighted root-mean-square slack. Assumptions: a measurable
+    embedding that is antilipschitz with nonzero constant; common carrier and realized
+    transmission laws are coordinatewise pushforwards; each realized transmission has the stated
+    integrated squared slack radius.
+  -/)]
 theorem aggregateCarrierFloor_le_of_rms_slack_unconditional
     {K : ℝ≥0} (hK : K ≠ 0) {t : X → H} (ht : AntilipschitzWith K t)
     (hme : MeasurableEmbedding t) (q : ProbabilityWeight A)

@@ -8,7 +8,7 @@ manuscript semantics]
 % possible with scalable fonts"). T1 fontenc + Latin Modern provide the scalable
 % Type1 equivalents so accented bibliography names (e.g. Ismaïl)
 % compile under the
-% arXiv pdfLaTeX release path. The same request pulls T1/lmr TFM
+% arXiv pdfLaTeX and QF rQUF2e release paths. The same request pulls T1/lmr TFM
 % metrics (e.g. ec-lmbx8) under Tectonic; `just setup` warms them
 % into the offline
 % --only-cached bundle so the fast cached-smoke matrix stays green (engine-aware
@@ -38,11 +38,48 @@ manuscript semantics]
 \providecommand{\mathdefault}[1]{#1}
 \RequirePackage{tabularx}
 \RequirePackage{etoolbox}
+% longtable only gained formal rollback data in 2020, after rQUF2e's requested
+% 2018 kernel date. Select its earliest preserved implementation for that class
+% and then restore the publisher's rollback date for packages that follow.
+\makeatletter
+\ifcsname ver@rQUF2e.cls\endcsname
+\let\pp@savedrequestedlatexdate\requestedLaTeXdate
+\let\pp@savedrequestedpatchdate\requestedpatchdate
+\def\requestedLaTeXdate{20200107}
+\def\requestedpatchdate{2020-01-07}
 \RequirePackage{longtable}
+\let\requestedLaTeXdate\pp@savedrequestedlatexdate
+\let\requestedpatchdate\pp@savedrequestedpatchdate
+\else
+\RequirePackage{longtable}
+\fi
+\makeatother
 % multi-page listings that must not be
 % floats (e.g. the
 % 53-row Paper 1 ticker universe, which overran the page as a table float and
 % printed the folio through its own body)
+% Both supported Taylor & Francis classes end \fnum@table in a period, while
+% longtable adds a colon after the formatted table number. Patch only longtable
+% captions under those classes so they follow the "Table A1. Caption" convention
+% without producing "Table A1.: Caption"; ordinary table captions and other
+% classes are unchanged.
+\makeatletter
+\newif\ifpp@periodtablecaption
+\ifcsname ver@interact.cls\endcsname
+\pp@periodtablecaptiontrue
+\fi
+\ifcsname ver@rQUF2e.cls\endcsname
+\pp@periodtablecaptiontrue
+\fi
+\ifpp@periodtablecaption
+\patchcmd{\LT@makecaption}{#1{#2: }#3}{#1{#2\space}#3}{}{%
+  \PackageError{pp-manuscript}{Could not patch Taylor & Francis
+longtable caption}{}}
+\patchcmd{\LT@makecaption}{#1{#2: }#3}{#1{#2\space}#3}{}{%
+  \PackageError{pp-manuscript}{Could not patch Taylor & Francis
+longtable caption}{}}
+\fi
+\makeatother
 % longtable sets its caption in a \parbox of \LTcapwidth, 4in by default and so
 % narrower than the text block in both target geometries. Widening it to the
 % line width keeps a longtable caption flush with the table it belongs to.
@@ -55,7 +92,34 @@ manuscript semantics]
 % Match the Typst baseline's float display: round to the requested precision but
 % do NOT pad with trailing zeros (Typst's calc.round drops them, so 0.61 renders
 % as "0.61", not siunitx's default-padded "0.610").
+\ifcsname ver@rQUF2e.cls\endcsname
+% rQUF2e's 2018 rollback selects siunitx v2, whose rounding path always pads.
+% Suppress only that final padding step so the shared no-trailing-zero policy
+% remains identical to siunitx v3's round-pad=false behavior.
+\ExplSyntaxOn
+\cs_set_protected:Npn \__siunitx_number_process_pad:n #1 { }
+\ExplSyntaxOff
+\else
 \sisetup{round-pad=false}
+\fi
+
+% rQUF2e sets \@twosidetrue, which in an article-derived class selects
+% \flushbottom: every page is padded to the full text height. Combined with the
+% [H] figure placements this repository uses to keep exhibits beside their
+% discussion, a figure too tall for the remaining space forces an early break
+% and leaves a short page — and \flushbottom then distributes the entire
+% shortfall into whatever glue on that page can stretch. On a page whose only
+% flexible glue is a display equation's \abovedisplayskip/\belowdisplayskip,
+% that put ~350pt of white space on each side of the W2 definition (eq. 25 of
+% Paper 1), which reads as a typesetting fault rather than a page break.
+%
+% \raggedbottom sends the shortfall to the foot of the page instead, which is
+% what the arXiv target already does (one-sided article defaults to it) and why
+% the same passage sets correctly there. It changes only where slack is
+% absorbed, never the line or display spacing itself.
+\ifcsname ver@rQUF2e.cls\endcsname
+\raggedbottom
+\fi
 
 % Independent per-type counters with flat numbering (Theorem 1,
 % Corollary 1, ...),
@@ -112,6 +176,15 @@ manuscript semantics]
   \num[round-mode=places,round-precision=#1,scientific-notation=true]{\ppvalue{#2}}%
 }
 
+% Appendix section references use the same visible label across the release
+% targets. elsarticle includes "Appendix" in \ref's stored section number,
+% whereas article and Interact do not.
+\makeatletter
+\newcommand{\ppAppendixRef}[1]{%
+  \@ifclassloaded{elsarticle}{\hyperref[#1]{\ref*{#1}}}{Appendix~\ref{#1}}%
+}
+\makeatother
+
 % Include a generated figure. #1 is the width the figure is *authored* at, as a
 % fraction of \linewidth; #2 is its name under images/.
 %
@@ -127,9 +200,18 @@ manuscript semantics]
 % the internal suffix to select a separately authored natural-size variant.
 \newcommand{\ppfiguresuffix}{}
 \newcommand{\ppfigure}[2]{\import{images/}{#2\ppfiguresuffix.pgf}}
-% The `article` class does not define \figalttext. Keep the semantic call
-% portable in shared chapter sources; a target decides whether and how to render
-% it for reviewers.
+% rQUF2e appends punctuation to run-in paragraph headings; article does not.
+% Keep declaration labels grammatical without target-specific chapter prose.
+\newcommand{\ppdeclaration}[1]{%
+  \ifcsname ver@rQUF2e.cls\endcsname
+  \paragraph{#1}%
+  \else
+  \paragraph{#1.}%
+  \fi
+}
+% OUP exposes \figalttext but article and Interact do not. Keep the semantic
+% call portable in shared chapter sources; venue targets decide whether and how
+% to render it for reviewers.
 \providecommand{\figalttext}[2][]{\relax}
 
 \newcommand{\E}{\mathbb{E}}

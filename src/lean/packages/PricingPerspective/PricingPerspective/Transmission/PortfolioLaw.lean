@@ -15,7 +15,7 @@ the matrix at the measure level; `Transmission.Portfolio` does it for finite clo
 ## The gap this closes
 
 Each pairwise Fréchet class has a ceiling, attained by *its own* optimal coupling. Selecting
-the pairwise optimum for every pair independently gives a matrix `[κ̄ᵢⱼ]` that need not be
+the pairwise optimum for every pair independently gives a matrix `[kappa_barᵢⱼ]` that need not be
 positive semidefinite: those couplings can be mutually inconsistent, describing a joint
 dependence structure that no single joint law realizes. The matrix would then be a valid
 entrywise bound and a useless covariance matrix.
@@ -42,7 +42,6 @@ choice is where the economics of cross-asset dependence lives.
 
 ## References
 
-* `.context/chat/2026-08-16_random_functions/README.md`, §2 and "Open boundaries".
 * `Transmission.Portfolio` — the finite counterpart.
 -/
 

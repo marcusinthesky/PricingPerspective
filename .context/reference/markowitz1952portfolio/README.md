@@ -14,5 +14,3 @@ issue: '1'
 publisher: Wiley
 page: 77-91
 ---
-
-# Portfolio Selection

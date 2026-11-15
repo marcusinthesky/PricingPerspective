@@ -7,20 +7,21 @@ from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pandas as pd
-from jcor.model.dyadic import (
-    DyadicBootstrapDesign,
-    DyadicComputationError,
-    DyadicFit,
-    DyadicInference,
-    DyadicModel,
-    bootstrap_dyadic,
-    fit_dyadic_model,
-    node_bootstrap_coefficient,
+from scipy.stats import skew
+from statadic.estimation.least_squares.dyadic import DyadicComputationError
+from statadic.inference.dyadic import DyadicBootstrapDesign
+from statadic.numerics.linalg.dyadic import fwl_residualize, symmetric_dyadic_effects
+
+from pipeline.stages.papers.paper1._dyadic.adapters import (
+    dyadic_regression,
 )
-from jcor.operators.design import symmetric_dyadic_effects
 
 if TYPE_CHECKING:
-    from jcor.model.dyadic import DyadicBootstrapResult, DyadicSample
+    from statadic.inference.dyadic import (
+        DyadicBootstrapResult,
+        DyadicFitRequest,
+        DyadicInference,
+    )
 
 _BootstrapDesign = DyadicBootstrapDesign
 _symmetric_firm_effects = symmetric_dyadic_effects
@@ -30,27 +31,16 @@ _MIN_SKEWNESS_DRAWS = 3
 
 
 def _sample_skewness(draws: np.ndarray) -> float:
-    """Return the Fisher-Pearson moment coefficient of skewness ``g1``.
+    """Return SciPy's bias-uncorrected Fisher-Pearson coefficient on finite draws.
 
-    ``g1 = m3 / m2**1.5`` on population central moments -- the convention
-    ``scipy.stats.skew(bias=True)`` reports, not the bias-corrected ``G1``.
-    At the production draw count the two differ by a factor
-    ``(1 - 1/n)**1.5``, which is 0.9985 at ``n = 1999``; the choice is
-    documented rather than material.
-
-    Returns NaN rather than raising on a degenerate sample: a bootstrap whose
-    draws are constant has no shape to report, and the caller persists this as
-    a diagnostic beside the interval it qualifies.
+    Fewer than three draws, constant samples, and numerically unresolved
+    near-constant samples have no skewness diagnostic and return NaN.
     """
     values = np.asarray(draws, dtype=float)
     values = values[np.isfinite(values)]
-    if values.size < _MIN_SKEWNESS_DRAWS:
+    if values.size < _MIN_SKEWNESS_DRAWS or np.ptp(values) <= 0.0:
         return float("nan")
-    centered = values - values.mean()
-    second = float(np.mean(centered**2))
-    if second <= 0.0:
-        return float("nan")
-    return float(np.mean(centered**3) / second**1.5)
+    return float(skew(values, bias=True))
 
 
 def _fwl_display(
@@ -62,16 +52,10 @@ def _fwl_display(
 ) -> tuple[pd.DataFrame, dict[str, object]]:
     """Return a both-sides residualized FWL display of the focal slope."""
     focal_pos = kept_names.index(focal_name)
-    nuisance = np.delete(x_kept, focal_pos, axis=1)
-    focal = x_kept[:, focal_pos]
-    focal_residual = focal - nuisance @ np.linalg.lstsq(nuisance, focal, rcond=None)[0]
-    outcome_residual = y - nuisance @ np.linalg.lstsq(nuisance, y, rcond=None)[0]
-    denominator = float(focal_residual @ focal_residual)
-    slope = (
-        float((focal_residual @ outcome_residual) / denominator)
-        if denominator > 0.0
-        else float("nan")
-    )
+    residuals = fwl_residualize(x_kept, y, focal_pos)
+    focal_residual = np.asarray(residuals.focal_residual)
+    outcome_residual = np.asarray(residuals.outcome_residual)
+    slope = float(residuals.slope)
     prefix = "energy" if focal_name == "energy_distance" else "w2"
     frame = pd.DataFrame(
         {
@@ -93,7 +77,7 @@ def _fwl_display(
             "primary point design"
         ),
         "omitted_firm_indicator": omitted_firm,
-        "nuisance_columns": int(nuisance.shape[1]),
+        "nuisance_columns": int(x_kept.shape[1] - 1),
         "n_dyads": len(y),
         "focal_residual_sd": float(np.std(focal_residual, ddof=1)),
         "outcome_residual_sd": float(np.std(outcome_residual, ddof=1)),
@@ -179,7 +163,7 @@ def _bootstrap_result_frame(
     *,
     spec_index: int,
 ) -> pd.DataFrame:
-    """Adapt the array-only jcor result to Paper 1's stable artifact schema.
+    """Adapt the array-only statadic result to Paper 1's stable artifact schema.
 
     t65 moved every ``DyadicBootstrapResult`` field to ``jax.Array``; this
     stage owns the host conversion at its artifact edge, so the parquet
@@ -206,48 +190,13 @@ def _bootstrap_result_frame(
     )
 
 
-def _bootstrap_spec_draws(
-    inputs: DyadicBootstrapDesign[str],
-    *,
-    spec_index: int,
-) -> pd.DataFrame:
-    """Return Paper 1's dataframe view of the general dyadic bootstrap."""
-    required = tuple(
-        name
-        for name in (
-            "energy_distance",
-            "w2_distance",
-            "energy_distance_centered_squared",
-        )
-        if name in inputs.column_names
-    )
-    return _bootstrap_result_frame(
-        bootstrap_dyadic(replace(inputs, required_columns=required)),
-        spec_index=spec_index,
-    )
-
-
-def _node_bootstrap_energy(
-    design: np.ndarray,
-    sample: DyadicSample[str],
-    energy_col: int,
-    inference: DyadicInference[str],
-) -> np.ndarray:
-    """Compatibility wrapper returning only focal-coefficient draws.
-
-    ``node_bootstrap_coefficient`` returns a ``jax.Array`` after t65; this
-    stage materializes it so the Paper 1 reporting path stays NumPy.
-    """
-    return np.asarray(node_bootstrap_coefficient(design, sample, energy_col, inference))
-
-
 def _fit_spec(
-    request: DyadicFit[str],
+    request: DyadicFitRequest[str],
     *,
     spec_index: int = -1,
     include_draws: bool = False,
 ) -> dict[str, object]:
-    """Adapt a general jcor dyadic fit to Paper 1's artifact contract."""
+    """Adapt a general statadic dyadic fit to Paper 1's artifact contract."""
     model = request.model
     inference = replace(
         request.inference,
@@ -261,7 +210,10 @@ def _fit_spec(
             if name in model.regressor_names
         ),
     )
-    fit = fit_dyadic_model(DyadicFit(model=model, inference=inference))
+    spec, data = dyadic_regression(model)
+    point = spec.estimate(data)
+    # The facade erases endpoint types; the aligned schedule still uses these strings.
+    fit = point.infer(resampling=cast("DyadicInference", inference)).core
     boot_frame = _bootstrap_result_frame(fit.bootstrap_draws, spec_index=spec_index)
     valid_frame = boot_frame.loc[boot_frame["solve_ok"]]
     focal_name = (
@@ -280,19 +232,17 @@ def _fit_spec(
         )
         raise DyadicComputationError(message)
     coefficient = float(fit.coefficients.get(focal_name, np.nan))
-    standard_error, statistic, p_value, ci_low, ci_high = fit.bootstrap_inference.get(
-        focal_name, (float("nan"),) * 5
-    )
+    uncertainty = fit.bootstrap_inference.get(focal_name)
     result: dict[str, object] = {
         "n_dyads": fit.n_dyads,
         "regressors": model.regressor_names,
         f"coef_{focal_name}": coefficient,
         f"effect_one_sd_{focal_name}": fit.effect_one_sd.get(focal_name, float("nan")),
-        f"se_{focal_name}": standard_error,
-        f"t_{focal_name}": float(statistic),
-        f"pvalue_{focal_name}": float(p_value),
-        f"ci_low_{focal_name}": ci_low,
-        f"ci_high_{focal_name}": ci_high,
+        f"se_{focal_name}": uncertainty.standard_error if uncertainty else float("nan"),
+        f"t_{focal_name}": uncertainty.t_statistic if uncertainty else float("nan"),
+        f"pvalue_{focal_name}": uncertainty.pvalue if uncertainty else float("nan"),
+        f"ci_low_{focal_name}": uncertainty.ci_lower if uncertainty else float("nan"),
+        f"ci_high_{focal_name}": uncertainty.ci_upper if uncertainty else float("nan"),
         "bootstrap_valid_draws": fit.bootstrap_valid_draws,
         "bootstrap_requested_draws": fit.bootstrap_requested_draws,
         "bootstrap_seed": fit.bootstrap_seed,
@@ -304,12 +254,12 @@ def _fit_spec(
         # keeps out of the ratio.
         f"bootstrap_skew_{focal_name}": _sample_skewness(boot),
         "se_type": "multinomial node bootstrap (dyad weight w_i*w_j)",
-        "firm_effects": inference.node_effects,
+        "firm_effects": model.node_effects,
         "overall_r2": fit.overall_r2,
         "within_r2": fit.within_r2,
         "sse_firm_effects_only": fit.sse_node_effects_only,
         "sse_firm_effects_plus_regressors": (
-            fit.sse_full if inference.node_effects else None
+            fit.sse_full if model.node_effects else None
         ),
         "design_rank": fit.design_rank,
         "design_columns": fit.design_columns,
@@ -320,109 +270,14 @@ def _fit_spec(
         "dropped_collinear_columns": list(fit.dropped_collinear_columns),
     }
     if include_draws:
-        # jcor returns JAX arrays; this stage is the reporting boundary, so it
-        # materializes them once here. Leaving them as JAX would silently pull
-        # every downstream NumPy expression (the FWL display residualizes with
-        # `np.linalg.lstsq`) onto JAX's default float32 and cost ~1e-7 in the
-        # slope that must reproduce the reported coefficient exactly.
+        # statadic returns JAX arrays; this stage is the reporting boundary, so it
+        # materializes them once here. The FWL numerical core remains in JAX
+        # under the stage's caller-owned float64 policy, and its display adapter
+        # likewise converts residual arrays before assembling DataFrames.
         result["_bootstrap_draws"] = boot_frame
         result["_point_design"] = np.asarray(fit.point_design)
+        result["_point_parameters"] = np.asarray(point.core.parameters)
         result["_point_design_names"] = list(fit.point_design_names)
         result["_point_fitted"] = np.asarray(fit.point_fitted)
         result["_point_residual"] = np.asarray(fit.point_residual)
     return result
-
-
-def _quadratic_functional_form_sensitivity(
-    energy_distance: np.ndarray,
-    sample: DyadicSample[str],
-    inference: DyadicInference[str],
-) -> tuple[dict[str, object], pd.DataFrame, pd.DataFrame]:
-    """Run the prespecified quadratic sensitivity under symmetric effects."""
-    energy_center = float(np.mean(energy_distance))
-    centered_squared = (energy_distance - energy_center) ** 2
-    local_columns = {
-        "energy_distance": energy_distance,
-        "energy_distance_centered_squared": centered_squared,
-    }
-    fit = _fit_spec(
-        DyadicFit(
-            model=DyadicModel(
-                ["energy_distance", "energy_distance_centered_squared"],
-                local_columns,
-                sample,
-            ),
-            inference=DyadicInference(
-                node_effects=True,
-                effect_name_prefix="firm_fe",
-                bootstrap_iters=inference.bootstrap_iters,
-                bootstrap_seed=inference.bootstrap_seed,
-                node_schedule=inference.node_schedule,
-            ),
-        ),
-        spec_index=9,
-        include_draws=True,
-    )
-    draws = cast("pd.DataFrame", fit["_bootstrap_draws"])
-    valid_squared = draws.loc[draws["solve_ok"], "beta_energy_squared"].dropna()
-    if valid_squared.size < max(100, inference.bootstrap_iters // 2):
-        message = (
-            f"only {valid_squared.size}/{inference.bootstrap_iters} "
-            "valid quadratic draws"
-        )
-        raise DyadicComputationError(message)
-    coefficients = cast("dict[str, dict[str, float]]", fit["coefficients"])
-    linear_coefficient = coefficients["energy_distance"]["coef"]
-    quadratic_coefficient = coefficients["energy_distance_centered_squared"]["coef"]
-
-    effect_columns, _ = symmetric_dyadic_effects(sample.endpoint_i, sample.endpoint_j)
-    effect_design = np.column_stack(
-        [np.ones(len(sample.outcome)), np.asarray(effect_columns)]
-    )
-    outcome_effect_residual = (
-        sample.outcome
-        - effect_design
-        @ np.linalg.lstsq(effect_design, np.asarray(sample.outcome), rcond=None)[0]
-    )
-    energy_effect_residual = (
-        energy_distance
-        - effect_design @ np.linalg.lstsq(effect_design, energy_distance, rcond=None)[0]
-    )
-    nonlinear_terms = np.column_stack([energy_distance, centered_squared])
-    terms_effect_residual = (
-        nonlinear_terms
-        - effect_design @ np.linalg.lstsq(effect_design, nonlinear_terms, rcond=None)[0]
-    )
-    quadratic_partial_fit = terms_effect_residual @ np.array(
-        [linear_coefficient, quadratic_coefficient]
-    )
-    display = pd.DataFrame(
-        {
-            "energy_distance": energy_distance,
-            "energy_fe_residual": energy_effect_residual,
-            "outcome_fe_residual": outcome_effect_residual,
-            "quadratic_fe_partial_fit": quadratic_partial_fit,
-        }
-    )
-    summary: dict[str, object] = {
-        "specification": (
-            "return chord distance on energy distance and centred energy-distance "
-            "squared with symmetric additive firm effects"
-        ),
-        "energy_center": energy_center,
-        "coef_energy_linear": linear_coefficient,
-        "coef_centered_energy_squared": quadratic_coefficient,
-        "coef_centered_energy_squared_ci_low": float(np.percentile(valid_squared, 2.5)),
-        "coef_centered_energy_squared_ci_high": float(
-            np.percentile(valid_squared, 97.5)
-        ),
-        "bootstrap_valid_draws": int(valid_squared.size),
-        "bootstrap_requested_draws": int(inference.bootstrap_iters),
-        "bootstrap_common_node_counts": True,
-        "bootstrap_seed": int(inference.bootstrap_seed),
-        "inference_scope": (
-            "prespecified symmetric-FE functional-form sensitivity with multinomial "
-            "node-bootstrap percentile interval; not an iid RESET test"
-        ),
-    }
-    return summary, draws, display

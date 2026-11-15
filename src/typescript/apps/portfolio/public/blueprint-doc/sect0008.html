@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-  MathJax = {
+  MathJax = { 
     tex: {
 		    inlineMath: [['$','$'], ['\\(','\\)']]
 	} }
@@ -98,6 +98,25 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -114,41 +133,20 @@
     Theorem
     </span>
     <span class="theorem_thmlabel">22</span>
-    <span class="theorem_thmtitle">Certified minimizer</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0008.html#thm:p3-certified-minimizer">#</a>
-
+    
     <a class="icon proof" href="sect0008.html#a0000000038"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0006.html#thm:p3-information-certified-cap">Theorem 20</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -157,21 +155,21 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.exists_minimumInformationCertifiedVariance" class="lean_decl">PricingPerspective.Transmission.Dispersion.exists_minimumInformationCertifiedVariance</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    Every nonempty compact feasible subset of the long-only simplex admits a minimizer of the continuous certified-variance objective. Any pointwise variance certificate on that set is inherited at the minimizer. </p>
+  <p>  Every nonempty compact feasible subset of the long-only simplex has a minimizer of the characteristic-induced certified-variance objective, retaining any pointwise actual-variance certificate imposed on that set. Assumptions: finite asset universe; nonempty compact feasible subset of the long-only simplex; pointwise actual-variance upper certificate on the feasible set. </p>
 
   </div>
 </div>
@@ -183,7 +181,7 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p> Continuity of the objective and compactness of the nonempty feasible set give existence by the extreme-value theorem; the pointwise certificate then holds at the selected feasible point. </p>
+  
 
   </div>
 </div>

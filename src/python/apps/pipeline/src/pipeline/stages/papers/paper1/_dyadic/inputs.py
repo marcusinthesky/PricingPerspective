@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
+import json
 import logging
-from string import Template
 from typing import TYPE_CHECKING
 
 import duckdb
 import numpy as np
 import pandas as pd
-from jcor.model.dyadic import DyadicInputError, DyadicSample
 from scipy.stats import pearsonr, spearmanr
+from statadic.law.dyadic import DyadicInputError, DyadicSample
 
 from pipeline._kernels.arrays import (
     InvalidNormalizationRowsError,
@@ -153,30 +153,18 @@ def embedding_dispersions(
 
 
 def liquidity_size_proxy(
-    market_data_dir: Path,
+    liquidity_proxy_file: Path,
     tickers: list[str],
 ) -> dict[str, float]:
-    """Compute each firm's mean log dollar-volume proxy."""
-    con = duckdb.connect(":memory:")
-    proxy: dict[str, float] = {}
-    for ticker in tickers:
-        path = market_data_dir / f"{ticker}.parquet"
-        if not path.exists():
-            continue
-        close_column = quote_duckdb_identifier(f"('Close', '{ticker}')")
-        volume_column = quote_duckdb_identifier(f"('Volume', '{ticker}')")
-        query = Template(
-            """
-            SELECT avg(ln($close_column * $volume_column)) AS proxy
-            FROM read_parquet(?)
-            WHERE $close_column > 0 AND $volume_column > 0
-            """
-        ).substitute(close_column=close_column, volume_column=volume_column)
-        row = con.execute(query, [str(path)]).fetchone()
-        if row is not None and row[0] is not None:
-            proxy[ticker] = float(row[0])
-    con.close()
-    return proxy
+    """Load the frozen mean log dollar-volume controls without price histories."""
+    values = json.loads(liquidity_proxy_file.read_text(encoding="utf-8"))
+    if not isinstance(values, dict) or any(
+        type(value) not in (int, float) or not np.isfinite(value)
+        for value in values.values()
+    ):
+        message = "liquidity proxies must be finite numeric values"
+        raise ValueError(message)
+    return {ticker: float(values[ticker]) for ticker in tickers if ticker in values}
 
 
 def crisis_indicator(returns_dir: Path, tickers: list[str]) -> dict[str, int]:
@@ -227,7 +215,7 @@ def prepare_dyadic_inputs(config: DyadicConfoundConfig) -> PreparedDyadicInputs:
     tickers = sorted(
         str(ticker) for ticker in set(merged["ticker_i"]) | set(merged["ticker_j"])
     )
-    size_proxy = liquidity_size_proxy(config.market_data_dir, tickers)
+    size_proxy = liquidity_size_proxy(config.liquidity_proxy_file, tickers)
     crisis_flag = crisis_indicator(config.returns_dir, tickers)
     # Dropping a firm here changes the estimation sample, so say so. A firm
     # lacking a proxy usually has no positive Volume in its market-data file --
@@ -284,7 +272,7 @@ def prepare_dyadic_inputs(config: DyadicConfoundConfig) -> PreparedDyadicInputs:
     columns["return_correlation"] = correlation
     columns["return_chord_squared"] = target**2
     dispersions = embedding_dispersions(config.embeddings_dir, tickers)
-    sample = DyadicSample[str](target, firm_i, firm_j)
+    sample = DyadicSample[str](target, firm_i.tolist(), firm_j.tolist())
     if dispersions is None:
         note = (
             f"embeddings_dir={config.embeddings_dir} missing or incomplete for the "

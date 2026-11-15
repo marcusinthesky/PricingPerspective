@@ -1,0 +1,6 @@
+outs:
+- md5: 79dc5178c4690d65993bbc6ecb2b5b82.dir
+  size: 2003948
+  nfiles: 100
+  hash: md5
+  path: article_metadata

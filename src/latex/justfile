@@ -7,7 +7,7 @@ set shell := ["bash", "-uc"]
 upstream_bundle := "https://data1.fullyjustified.net/tlextras-2022.0r0.tar"
 
 # What every project's Tectonic.toml actually points at — the subset of the
-# upstream bundle these manuscripts resolve, ~7 MB, vendored in git-LFS. Each
+# upstream bundle these manuscripts resolve, ~10 MB, vendored in git-LFS. Each
 # real paper requests a distinct set of T1 Latin Modern TFM/pfb metrics by font
 # size (e.g. ec-lmr5 subscripts, ec-lmtt8 typewriter, lmbx8 8pt bold), so the
 # subset is the whole matrix's closure, not one target's. With it in the tree
@@ -29,12 +29,18 @@ bundle-refresh:
     export TECTONIC_CACHE_DIR="$work/cache"
     mkdir -p "$TECTONIC_CACHE_DIR"
     for p in projects/*/; do
+      # Skip leftover build-only directories of retired projects.
+      [[ -f "$p/Tectonic.toml" ]] || continue
       slug="$(basename "$p")"
       just _prepare "$slug"
       cp -R "$p" "$work/$slug"
       rm -rf "$work/$slug/build"
       sed -i 's|^bundle = .*|bundle = "{{ upstream_bundle }}"|' "$work/$slug/Tectonic.toml"
       targets=(draft arxiv)
+      [[ -f "$work/$slug/src/targets/quantitative-finance.tex" ]] && targets+=(quantitative-finance)
+      [[ -f "$work/$slug/src/targets/gfj.tex" ]] && targets+=(gfj)
+      [[ -f "$work/$slug/src/targets/ejf.tex" ]] && targets+=(ejf ejf-anonymous)
+      [[ -f "$work/$slug/src/targets/wfbs.tex" ]] && targets+=(wfbs wfbs-blind)
       for t in "${targets[@]}"; do
         echo "warming $slug/$t"
         # The upstream host rate-limits (HTTP 429), and Tectonic surfaces that as
@@ -79,24 +85,8 @@ _prepare project:
     test -d "$destination"
     install -m 0644 templates/pp-manuscript.sty "$destination/pp-manuscript.sty"
     uv run --script tools/interpretation-contract --root . --project "$destination"
-
-# Create a project from the compiling template; refuses invalid or existing paths.
-new slug:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if [[ ! "{{ slug }}" =~ ^[0-9A-Za-z][0-9A-Za-z_-]*$ ]]; then
-      echo "project slug must contain only letters, digits, underscores, and hyphens" >&2
-      exit 2
-    fi
-    destination="projects/{{ slug }}"
-    if [[ -e "$destination" ]]; then
-      echo "$destination already exists" >&2
-      exit 2
-    fi
-    cp -R projects/_template "$destination"
-    sed -i 's/name = "latex-template"/name = "{{ slug }}"/' "$destination/Tectonic.toml"
-    just _prepare "{{ slug }}"
-    echo "created src/latex/$destination"
+    tandf-template "$destination"
+    elsarticle-template "$destination"
 
 # The one builder — interactive loop, quality gates, and the DVC `render`
 # stage all come through here, so a PDF can only ever be produced one way.
@@ -111,11 +101,15 @@ new slug:
 # a `just bundle-refresh` + commit, not a nix closure change.
 
 # Compile a target to build/<target>/ (offline="1" forbids fetching).
-build project="_template" target="draft" offline="0":
+build project="01_continuous_bounds" target="draft" offline="0":
     #!/usr/bin/env bash
     set -euo pipefail
     root="$(pwd)"
     just _prepare "{{ project }}"
+    if [[ "{{ target }}" == management-science || "{{ target }}" == management-science-companion ]]; then
+      uv run --script tools/management-science build "projects/{{ project }}"
+      exit 0
+    fi
     cached=()
     if [[ "{{ offline }}" == "1" ]]; then cached=(--only-cached); fi
     project_dir="projects/{{ project }}"
@@ -125,7 +119,7 @@ build project="_template" target="draft" offline="0":
     bash "$root/tools/check-log" "build/{{ target }}/{{ target }}.log"
 
 # Rebuild a named target whenever an input changes.
-watch project="_template" target="draft":
+watch project="01_continuous_bounds" target="draft":
     just _prepare {{ project }}
     cd projects/{{ project }} && tectonic -X watch --exec "build --untrusted --keep-logs --target {{ target }}"
 
@@ -140,7 +134,7 @@ watch project="_template" target="draft":
 # negation reaches a nested path).
 
 # Render <target> as a marked-up diff of <rev>..working tree (offline="1" forbids fetching).
-diff project="_template" target="draft" rev="HEAD" offline="0":
+diff project="01_continuous_bounds" target="draft" rev="HEAD" offline="0":
     #!/usr/bin/env bash
     set -euo pipefail
     case "{{ project }}" in
@@ -153,8 +147,8 @@ diff project="_template" target="draft" rev="HEAD" offline="0":
     repo="$(git rev-parse --show-toplevel)"
     prefix="${root#"$repo"/}"
 
-    # Materializes pp-manuscript.sty, which is not committed and
-    # so is absent from the archived baseline; \usepackage is not flattened, so
+    # Materializes interact.cls / pp-manuscript.sty, which are not committed and
+    # so are absent from the archived baseline; \usepackage is not flattened, so
     # only the tree that compiles needs them.
     just _prepare "{{ project }}"
 
@@ -171,6 +165,9 @@ diff project="_template" target="draft" rev="HEAD" offline="0":
     # bundle as the real build; `-X compile` would silently use the default one.
     mkdir -p "$work/new"
     install -m 0644 "$project_dir/Tectonic.toml" "$work/new/Tectonic.toml"
+    # The vendored bundle path is relative to the project dir; re-anchor it, or
+    # Tectonic fails in the temp workspace with a bare "No such file or directory".
+    sed -i "s|^bundle = \"\([^\"/][^\":]*\)\"$|bundle = \"$root/$project_dir/\1\"|" "$work/new/Tectonic.toml"
     cp -R "$project_dir/src" "$work/new/src"
     printf '\n[[output]]\nname = "diff"\ntype = "pdf"\ninputs = ["_diff.tex"]\n' \
       >> "$work/new/Tectonic.toml"
@@ -198,7 +195,7 @@ diff project="_template" target="draft" rev="HEAD" offline="0":
     install -m 0644 "$work/new/build/diff/diff.pdf" "$destination/{{ target }}-diff.pdf"
     echo "wrote $destination/{{ target }}-diff.pdf (${hunks:-0} marked hunks vs {{ rev }})"
 
-# Stage exactly the source files uploaded to arXiv (no compile/audit).
+# Stage exactly the source files uploaded to arXiv, QF, GFJ, or EJF (no compile/audit).
 _stage project target:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -206,13 +203,13 @@ _stage project target:
       ''|*[!0-9A-Za-z_-]*) echo "invalid project slug" >&2; exit 2 ;;
     esac
     case "{{ target }}" in
-      arxiv) ;;
-      *) echo "bundle target must be arxiv" >&2; exit 2 ;;
+      arxiv|quantitative-finance|gfj|ejf) ;;
+      *) echo "bundle target must be arxiv, quantitative-finance, gfj, or ejf" >&2; exit 2 ;;
     esac
     just _prepare "{{ project }}"
     project="projects/{{ project }}"
     # Staged beside the compiled target rather than in a sibling bundles/ tree,
-    # so everything an upload needs lives in one directory.
+    # so everything a submission needs for one venue lives in one directory.
     stage="$project/build/{{ target }}/bundle"
     rm -rf "$stage"
     mkdir -p "$stage"
@@ -225,16 +222,78 @@ _stage project target:
       fi
     done
     cp -R "$project/src/chapters" "$project/src/generated" "$stage/"
+    # Target-owned front-matter fragments (e.g. GFJ highlights) keep their
+    # src-relative path so the staged main.tex resolves the same \input.
+    if [[ -d "$project/src/targets/{{ target }}" ]]; then
+      mkdir -p "$stage/targets"
+      cp -R "$project/src/targets/{{ target }}" "$stage/targets/"
+    fi
     if [[ -f "$project/src/refs.bib" ]]; then install -m 0644 "$project/src/refs.bib" "$stage/refs.bib"; fi
+    if [[ "{{ target }}" == quantitative-finance || "{{ target }}" == gfj || "{{ target }}" == ejf ]]; then
+      class_name="$(rg --pcre2 -o '\\documentclass(?:\[[^]]*\])?\{\K[^}]+' "$stage/main.tex" | head -n 1)"
+      style_name="$(rg --pcre2 -o '\\bibliographystyle\{\K[^}]+' "$stage/main.tex" | head -n 1)"
+      install -m 0644 "$project/src/$class_name.cls" "$stage/$class_name.cls"
+      install -m 0644 "$project/src/$style_name.bst" "$stage/$style_name.bst"
+      if [[ "$class_name" == rQUF2e ]]; then
+        install -m 0644 "$project/src/enumerate.sty" "$stage/enumerate.sty"
+        install -m 0644 "$project/src/latexrelease.sty" "$stage/latexrelease.sty"
+        install -m 0644 \
+          "$project/src/amsmath-2018-12-01.sty" \
+          "$stage/amsmath-2018-12-01.sty"
+        install -m 0644 \
+          "$project/src/graphics-2017-06-25.sty" \
+          "$stage/graphics-2017-06-25.sty"
+        install -m 0644 "$project/src/everyshi.sty" "$stage/everyshi.sty"
+        install -m 0644 \
+          "$project/src/everyshi-2001-05-15.sty" \
+          "$stage/everyshi-2001-05-15.sty"
+        install -m 0644 "$project/src/siunitx-v2.sty" "$stage/siunitx-v2.sty"
+        for config in siunitx-abbreviations.cfg siunitx-binary.cfg siunitx-version-1.cfg; do
+          install -m 0644 "$project/src/$config" "$stage/$config"
+        done
+        for metric in rm-lmss9.tfm rm-lmsso9.tfm; do
+          install -m 0644 "$project/src/$metric" "$stage/$metric"
+        done
+        install -m 0644 "$project/src/ec-lmcsc10.tfm" "$stage/ec-lmcsc10.tfm"
+        install -m 0644 "$project/src/lmcsc10.pfb" "$stage/lmcsc10.pfb"
+        install -m 0644 "$project/src/cmr10.pfb" "$stage/cmr10.pfb"
+        for support in load-unicode-xetex-classes.tex LineBreak.txt EastAsianWidth.txt; do
+          install -m 0644 "$project/src/$support" "$stage/$support"
+        done
+        install -m 0644 "$project/src/xparse.sty" "$stage/xparse.sty"
+        install -m 0644 \
+          "$project/src/array-2016-10-06.sty" \
+          "$stage/array-2016-10-06.sty"
+        install -m 0644 \
+          "$project/src/longtable-2020-01-07.sty" \
+          "$stage/longtable-2020-01-07.sty"
+      fi
+    fi
+    if [[ "{{ project }}" == "06_information_motion" ]]; then
+      uv run python - "$stage" <<'PYGENERATED'
+    import runpy, sys
+    from pathlib import Path
+    runpy.run_path("tools/bundle-audit")["prune_paper6_generated"](Path(sys.argv[1]), "main.tex")
+    PYGENERATED
+    fi
     uv run --script tools/stage-images "$project/src" "$stage" main.tex
 
-# The archive is the arXiv upload artifact, so it is published next to the PDF
-# it corresponds to and tracked in git (LFS).
+# The archive is the upload artifact for arXiv / the journal portal, so it is
+# published next to the PDF it corresponds to and tracked in git (LFS).
 
 # Stage, hostile-audit, deterministically archive, and unpack-recompile a bundle.
-bundle project target:
+# This internal recipe assumes Lean certification and publication-boundary checks
+# already ran in the caller's dependency chain. DVC uses it after lean_claims and
+# lean_bindings_check; the public bundle wrapper below preserves the standalone
+# release contract.
+_bundle project target:
     #!/usr/bin/env bash
     set -euo pipefail
+    if [[ "{{ target }}" == management-science ]]; then
+      just _prepare "{{ project }}"
+      uv run --script tools/management-science bundle "projects/{{ project }}"
+      exit 0
+    fi
     just _stage "{{ project }}" "{{ target }}"
     # Pin the audit's compiles to the same bundle the build uses; without this
     # Tectonic would fall back to its default bundle, which is an older
@@ -246,11 +305,23 @@ bundle project target:
       bundle_ref="$(realpath "projects/{{ project }}/$bundle_ref")"
     fi
     archive_extension=tar.gz
+    if [[ "{{ target }}" == quantitative-finance ]]; then archive_extension=zip; fi
     uv run --script tools/bundle-audit \
       "projects/{{ project }}/build/{{ target }}/bundle" \
       "{{ target }}" \
       "projects/{{ project }}/build/{{ target }}/{{ target }}.$archive_extension" \
-      "$bundle_ref"
+      "$bundle_ref" \
+      --pdf "projects/{{ project }}/build/{{ target }}/{{ target }}.pdf"
+
+# Public release wrapper: certify proofs and publication boundaries before the
+# archive/staging body shared with DVC's already-certified render path.
+bundle project target:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    repository_root="$(git rev-parse --show-toplevel)"
+    just --justfile "$repository_root/justfile" lean::certify "{{ project }}"
+    just --justfile "$repository_root/justfile" lean::claims-publication-check
+    just _bundle "{{ project }}" "{{ target }}"
 
 # Run every submission-parity fixture (hostile + positive + cleveref regression).
 harness-test:
@@ -281,12 +352,20 @@ lint:
       -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0)
     bash tools/lint-boundaries
 
-# Compile every required publishing target from the cached bundle.
+# Compile the four papers and their declared publication targets offline.
 smoke:
-    just build _template draft 1
-    just build _template arxiv 1
+    just build 01_continuous_bounds arxiv 1
+    just build 01_continuous_bounds quantitative-finance 1
+    just build 03_distance_implied_mpt arxiv 1
+    just build 03_distance_implied_mpt ejf 1
+    just build 05_spatial_pricing arxiv 1
+    just build 05_spatial_pricing gfj 1
+    just build 06_information_motion arxiv 1
+    just build 06_information_motion management-science 1
+    just build 06_information_motion wfbs 1
+    just build 06_information_motion wfbs-blind 1
 
-# Full local gate; intentionally uses the cached Tectonic bundle.
+# Full local gate; formatting checks do not rewrite sources.
 check: fmt-check lint smoke
 
 # Replaces the `.pdf` escape hatch `pipeline.figures._common._save` dropped on
@@ -303,6 +382,7 @@ preview pgf out="":
     src="$(realpath "{{ pgf }}")"
     [[ "$src" == *.pgf ]] || { echo "preview: expected a .pgf, got $src" >&2; exit 2; }
     [[ -f "$src" ]] || { echo "preview: no such file: $src" >&2; exit 2; }
+    bundle_ref="$(realpath '{{ vendored_bundle }}')"
     dest="{{ out }}"
     [[ -n "$dest" ]] || dest="${src%.pgf}.preview.pdf"
     dest="$(realpath -m "$dest")"
@@ -310,6 +390,8 @@ preview pgf out="":
     trap 'rm -rf "$work"' EXIT
     cat > "$work/preview.tex" <<TEX
     \documentclass[11pt]{article}
+    \usepackage[T1]{fontenc}
+    \usepackage{lmodern}
     \usepackage{pgf}
     \usepackage{import}
     \def\mathdefault#1{#1}
@@ -320,6 +402,7 @@ preview pgf out="":
     \end{document}
     TEX
     sed -i 's/^    //' "$work/preview.tex"
-    tectonic -X compile --untrusted --outdir "$work" "$work/preview.tex" >/dev/null
+    tectonic -X compile --untrusted --only-cached --bundle "$bundle_ref" \
+      --outdir "$work" "$work/preview.tex" >/dev/null
     mv "$work/preview.pdf" "$dest"
     echo "preview: $dest"

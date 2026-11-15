@@ -11,5 +11,3 @@ issued:
     - 8
 URL: http://arxiv.org/abs/1908.10063
 ---
-
-# {FinBERT}: {Financial} {Sentiment} {Analysis} with {Pre}-trained {Language} {Models}

@@ -12,7 +12,6 @@ import hashlib
 import json
 import re
 from datetime import date  # noqa: TC003
-from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, Annotated, Literal, NoReturn, cast
 
 import yaml
@@ -62,17 +61,9 @@ SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 DVC_SAFE_KEY_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
 
 
-# The DVC graph has explicit parameter and artifact paths only for these
-# provider-level statistical arms. RBF MMD is a full-width comparator extra and
-# is intentionally not part of the shared provider roster.
-TRACKED_PROVIDER_DISTANCE_IDS: frozenset[str] = frozenset(
-    {"energy_v", "wasserstein_w1", "wasserstein_w2", "linear_mmd"}
-)
-REQUIRED_PROVIDER_DISTANCE_IDS: frozenset[str] = frozenset(
-    {"energy_v", "wasserstein_w1", "wasserstein_w2"}
-)
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
 
 
 class TypedAnalysisError(ValueError):
@@ -99,7 +90,6 @@ class ProviderConfig(BaseModel):
     vintage: str | None = Field(default=None, min_length=1)
     dimensions: PositiveInt
     normalization: Normalization
-    artifact_root: Path
     source_hash: str | None = Field(default=None, min_length=1)
     status: ProviderStatus = "canonical"
     caveat: str | None = None
@@ -439,6 +429,17 @@ class BarycentreArm(BaseModel):
         return self
 
 
+def iteration_budget(arm: BarycentreArm) -> tuple[float, int]:
+    """Return an iterative solver's budget; closed-form arms have none.
+
+    Keep consumer helpers outside registry classes: Semflow can then exclude
+    them from commands that only load and validate the shared configuration.
+    """
+    if arm.tol is None or arm.maxiter is None:
+        _invalid(f"{arm.solver} has no iterative solver budget")
+    return arm.tol, arm.maxiter
+
+
 class TypedAnalysisRegistry(BaseModel):
     """Complete validated registry for typed analysis stages."""
 
@@ -656,47 +657,13 @@ class ScientificSelectors(BaseModel):
     typed_distance_id: str = Field(min_length=1)
 
 
-class TypedDistanceProviderSpec(BaseModel):
-    """One provider-level distance roster with DVC-safe registry lookups."""
+class _RosterCell(BaseModel):
+    """Provider and representation identity shared by every DVC roster cell.
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    provider_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
-    provider_id: str = Field(min_length=1)
-    representation_32_key: str | None = Field(
-        default=None, pattern=DVC_SAFE_KEY_PATTERN.pattern
-    )
-    representation_64_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
-    representation_128_key: str | None = Field(
-        default=None, pattern=DVC_SAFE_KEY_PATTERN.pattern
-    )
-    representation_256_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
-    representation_1024_key: str | None = Field(
-        default=None, pattern=DVC_SAFE_KEY_PATTERN.pattern
-    )
-    representation_full_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
-    distance_ids: tuple[str, ...] = ()
-    extra_full_distance_ids: tuple[str, ...] = ()
-
-    @property
-    def representation_keys(self) -> tuple[str, ...]:
-        """Return the ordered registered representation keys for this provider."""
-        return tuple(
-            key
-            for key in (
-                self.representation_32_key,
-                self.representation_64_key,
-                self.representation_128_key,
-                self.representation_256_key,
-                self.representation_1024_key,
-                self.representation_full_key,
-            )
-            if key is not None
-        )
-
-
-class TypedGeometryComponentCell(BaseModel):
-    """One stable full-sample typed-geometry DVC cell."""
+    Keys are DVC dot-path-safe registry keys; the IDs are the external
+    identities that name artifact folders. Both are authored so ``dvc.yaml`` can
+    interpolate either without string rewriting.
+    """
 
     model_config = ConfigDict(extra="forbid", frozen=True)
 
@@ -704,90 +671,77 @@ class TypedGeometryComponentCell(BaseModel):
     provider_id: str = Field(min_length=1)
     representation_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
     representation_id: str = Field(min_length=1)
+
+
+class TypedGeometryComponentCell(_RosterCell):
+    """One full-sample raw energy or MMD geometry component cell."""
+
     geometry_id: str = Field(min_length=1)
 
 
-class TypedWindowedGeometryComponentCell(TypedGeometryComponentCell):
-    """One typed-geometry cell with an exact observation-window dependency."""
+class TypedDistanceCell(_RosterCell):
+    """One full-sample statistical-distance matrix cell."""
 
-    window_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
+    distance_id: str = Field(min_length=1)
 
 
-class TypedWindowedDistanceCell(BaseModel):
+class TypedWindowedDistanceCell(TypedDistanceCell):
     """One final statistical-distance cell with an exact observation window."""
 
-    model_config = ConfigDict(extra="forbid", frozen=True)
-
-    provider_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
-    provider_id: str = Field(min_length=1)
-    representation_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
-    representation_id: str = Field(min_length=1)
-    distance_id: str = Field(min_length=1)
     window_key: str = Field(pattern=DVC_SAFE_KEY_PATTERN.pattern)
 
 
-class TypedBarycentreCell(BaseModel):
-    """One stable barycentre DVC cell."""
-
-    model_config = ConfigDict(extra="forbid", frozen=True)
+class BarycentreCell(_RosterCell):
+    """One barycentre cell: a registry arm at one provider representation."""
 
     arm_id: str = Field(min_length=1)
     geometry_id: str = Field(min_length=1)
 
 
 class DvcScientificConfig(BaseModel):
-    """Cross-registry contract for the scientific portions of ``params.yaml``."""
+    """Cross-registry contract for the scientific portions of ``params.yaml``.
+
+    Each roster lists exactly the cells the DVC graph materializes. Rosters are
+    validated cell by cell against the typed registry; they are not required to
+    cover every registered provider or representation, because the registry is
+    the declared API and the rosters are what is consumed.
+    """
 
     model_config = ConfigDict(extra="ignore", frozen=True)
 
     typed_analysis: TypedAnalysisConfig
     baseline_embedding_models: tuple[str, ...]
     embedding_models: tuple[str, ...]
-    ablation_models: tuple[str, ...]
     symbols: tuple[str, ...]
     market_symbol_exclusions: tuple[str, ...]
     market_symbols: tuple[str, ...]
     scientific_selectors: ScientificSelectors
-    typed_distance_providers: dict[str, TypedDistanceProviderSpec]
-    typed_distance_representation_suffixes: tuple[str, ...]
-    typed_distance_ids: tuple[str, ...]
     typed_geometry_component_specs: dict[str, TypedGeometryComponentCell]
-    typed_geometry_windowed_component_specs: dict[
-        str, TypedWindowedGeometryComponentCell
-    ]
+    typed_distance_specs: dict[str, TypedDistanceCell]
     typed_distance_windowed_specs: dict[str, TypedWindowedDistanceCell] = {}
-    typed_barycentre_specs: dict[str, TypedBarycentreCell]
-    typed_wasserstein_barycentre_specs: dict[str, TypedBarycentreCell] = {}
-    typed_measure_barycentre_specs: dict[str, TypedBarycentreCell] = {}
-    parameter_classification: dict[str, Literal["planned", "documentation_only"]]
+    barycentre_specs: dict[str, BarycentreCell]
 
     @model_validator(mode="after")
     def validate_rosters(self) -> DvcScientificConfig:
-        """Validate roster identities, products, subsets, and references."""
-        models = self._validate_model_and_market_rosters()
-        roster_provider_ids = self._validate_provider_roster(models)
-        statistical_ids = self._validate_distance_roster()
-        self._validate_selectors(roster_provider_ids)
-        self._validate_geometry_rosters(statistical_ids)
-        self._validate_barycentre_roster()
-        required_classifications = {"paper3.estimators", "paper3.sub_periods"}
-        if set(self.parameter_classification) != required_classifications:
-            _invalid("parameter_classification must classify the Paper 3 false SSOTs")
+        """Validate roster identities, references, and selectors."""
+        self._validate_model_and_market_rosters()
+        components = self._validate_component_roster()
+        distances = self._validate_distance_roster(components)
+        self._validate_windowed_distance_roster()
+        self._validate_barycentre_roster(components)
+        self._validate_selectors(distances)
         return self
 
-    def _validate_model_and_market_rosters(self) -> set[str]:
+    def _validate_model_and_market_rosters(self) -> None:
         """Check model partitions and the exact excluded-symbol projection."""
         baseline = set(self.baseline_embedding_models)
         models = set(self.embedding_models)
-        ablations = set(self.ablation_models)
         if len(baseline) != len(self.baseline_embedding_models):
             _invalid("baseline_embedding_models contains duplicates")
         if len(models) != len(self.embedding_models):
             _invalid("embedding_models contains duplicates")
         if baseline - models:
             _invalid("baseline_embedding_models must be a subset of embedding_models")
-        if ablations != models - baseline:
-            _invalid("ablation_models must equal embedding_models minus baselines")
         selectors = self.scientific_selectors
         if selectors.baseline_model not in baseline:
             _invalid("scientific baseline_model is not in baseline_embedding_models")
@@ -804,250 +758,74 @@ class DvcScientificConfig(BaseModel):
             _invalid("symbols contains duplicates")
         if not set(self.market_symbol_exclusions) <= set(self.symbols):
             _invalid("market_symbol_exclusions must be drawn from symbols")
-        return models
 
-    def _validate_provider_roster(self, models: set[str]) -> set[str]:
-        """Resolve every provider cell and its registered representations."""
-        provider_ids = {
-            provider.provider_id for provider in self.typed_analysis.providers.values()
-        }
-        roster_provider_ids = {
-            provider.provider_id for provider in self.typed_distance_providers.values()
-        }
-        if roster_provider_ids != models:
-            _invalid("typed distance providers must equal embedding_models")
-        for key, provider in self.typed_distance_providers.items():
-            if key != provider.provider_key:
-                _invalid(f"typed distance provider key {key!r} disagrees with cell")
-            registry_provider = self.typed_analysis.providers.get(provider.provider_key)
-            if registry_provider is None or registry_provider.provider_id != (
-                provider.provider_id
-            ):
-                _invalid(f"typed distance provider {key!r} does not resolve")
-            for representation_key in provider.representation_keys:
-                representation = self.typed_analysis.representations.get(
-                    representation_key
-                )
-                if representation is None or representation.provider_id != (
-                    provider.provider_id
-                ):
-                    _invalid(
-                        f"typed distance provider {key!r} has invalid representation "
-                        f"{representation_key!r}"
-                    )
-        if not roster_provider_ids <= provider_ids:
-            _invalid("typed distance roster contains an unknown provider")
-        return roster_provider_ids
-
-    def _provider_distance_ids(
-        self, provider: TypedDistanceProviderSpec
-    ) -> tuple[str, ...]:
-        """Return provider-specific distances, falling back to the shared roster."""
-        return provider.distance_ids or self.typed_distance_ids
-
-    def _provider_component_ids(self, provider: TypedDistanceProviderSpec) -> set[str]:
-        """Return components required for every registered representation."""
-        component_ids: set[str] = set()
-        for distance_id in self._provider_distance_ids(provider):
-            distance = self.typed_analysis.distances[distance_id]
-            if isinstance(distance, StatisticalDistanceSpec) and distance.family in {
-                "energy",
-                "mmd",
-            }:
-                component_ids.add(distance_id)
-        return component_ids
-
-    def _validate_provider_distance_ids(
-        self,
-        provider: TypedDistanceProviderSpec,
-        statistical_ids: set[str],
-    ) -> None:
-        """Validate one provider's statistical-distance roster."""
-        provider_ids = set(self._provider_distance_ids(provider))
-        missing_ids = sorted(REQUIRED_PROVIDER_DISTANCE_IDS - provider_ids)
-        if missing_ids:
-            _invalid(
-                f"typed distance provider {provider.provider_key!r} must include "
-                f"{', '.join(missing_ids)}"
-            )
-        if not provider_ids <= TRACKED_PROVIDER_DISTANCE_IDS:
-            _invalid(
-                f"typed distance provider {provider.provider_key!r} contains "
-                "an ID not tracked by the DVC statistical roster"
-            )
-        if not provider_ids <= statistical_ids:
-            _invalid(
-                f"typed distance provider {provider.provider_key!r} contains "
-                "an unknown statistical distance"
-            )
-
-    def _validate_distance_roster(self) -> set[str]:
-        """Return the checked statistical-distance ID set."""
-        statistical_ids = {
-            key
-            for key, distance in self.typed_analysis.distances.items()
-            if isinstance(distance, StatisticalDistanceSpec)
-        }
-        typed_ids = set(self.typed_distance_ids)
-        if not typed_ids <= statistical_ids:
-            _invalid("typed_distance_ids contains an unknown statistical distance")
-        if not typed_ids <= TRACKED_PROVIDER_DISTANCE_IDS:
-            _invalid("typed_distance_ids contains an ID not tracked by the DVC graph")
-        for provider in self.typed_distance_providers.values():
-            self._validate_provider_distance_ids(provider, statistical_ids)
-        extra_ids = {
-            distance_id
-            for provider in self.typed_distance_providers.values()
-            for distance_id in provider.extra_full_distance_ids
-        }
-        if not extra_ids <= statistical_ids:
-            _invalid("typed distance provider extras contain an unknown distance")
-        selectors = self.scientific_selectors
-        baseline = self.typed_distance_providers.get(selectors.baseline_model_key)
-        if baseline is None:
-            _invalid("baseline provider has no typed distance roster")
-        if "linear_mmd" not in self._provider_distance_ids(baseline):
-            _invalid("baseline provider roster must include linear MMD")
-        if set(baseline.extra_full_distance_ids) != {"rbf_mmd"}:
-            _invalid("baseline provider extras must contain only RBF MMD")
-        allowed_extra_provider_keys = {selectors.baseline_model_key}
-        if any(
-            provider.extra_full_distance_ids
-            for key, provider in self.typed_distance_providers.items()
-            if key not in allowed_extra_provider_keys
-        ):
-            _invalid("only the baseline provider may declare extra distance arms")
-        return statistical_ids
-
-    def _validate_selectors(self, roster_provider_ids: set[str]) -> None:
-        """Resolve the canonical selector key/ID pairs."""
-        selectors = self.scientific_selectors
-        if selectors.typed_distance_provider not in roster_provider_ids:
-            _invalid("canonical typed distance provider is not in its roster")
-        selected_provider = self.typed_analysis.providers.get(
-            selectors.typed_distance_provider_key
-        )
-        if selected_provider is None or selected_provider.provider_id != (
-            selectors.typed_distance_provider
-        ):
-            _invalid("canonical typed distance provider key/ID does not resolve")
-        if selectors.typed_distance_provider != selectors.baseline_model:
-            _invalid("canonical typed distance provider must equal the baseline model")
-        representation = self.typed_analysis.representations.get(
-            selectors.typed_distance_representation_key
-        )
-        if representation is None or representation.representation_id != (
-            selectors.typed_distance_representation
-        ):
-            _invalid("canonical typed distance representation is unknown")
-        if representation.provider_id != selectors.typed_distance_provider:
-            _invalid("canonical typed distance representation has the wrong provider")
-        if selectors.typed_distance_id not in self.typed_distance_ids:
-            _invalid("canonical typed distance ID is not in its roster")
-
-    def _validate_component(
-        self,
-        key: str,
-        cell: TypedGeometryComponentCell,
-        statistical_ids: set[str],
-    ) -> tuple[str, str, str]:
-        """Resolve one authored component to its unique external identity."""
+    def _validate_cell(self, roster: str, key: str, cell: _RosterCell) -> None:
+        """Resolve one cell's provider and representation against the registry."""
         if DVC_SAFE_KEY_PATTERN.fullmatch(key) is None:
-            _invalid(f"typed geometry cell key {key!r} is not DVC-safe")
+            _invalid(f"{roster} cell key {key!r} is not DVC-safe")
         provider = self.typed_analysis.providers.get(cell.provider_key)
+        if provider is None or provider.provider_id != cell.provider_id:
+            _invalid(f"{roster} cell {key!r} has invalid provider")
         representation = self.typed_analysis.representations.get(
             cell.representation_key
         )
-        if provider is None or provider.provider_id != cell.provider_id:
-            _invalid(f"typed geometry cell {key!r} has invalid provider")
         if (
             representation is None
             or representation.representation_id != cell.representation_id
             or representation.provider_id != cell.provider_id
         ):
-            _invalid(f"typed geometry cell {key!r} has invalid representation")
-        if cell.geometry_id not in statistical_ids:
-            _invalid(f"typed geometry cell {key!r} has invalid geometry")
-        return (cell.provider_id, cell.representation_id, cell.geometry_id)
+            _invalid(f"{roster} cell {key!r} has invalid representation")
 
-    def _validate_geometry_rosters(self, statistical_ids: set[str]) -> None:
-        """Check full-sample components and both point-in-time cell families."""
-        actual_full = {
-            self._validate_component(key, cell, statistical_ids)
-            for key, cell in self.typed_geometry_component_specs.items()
-        }
-        if len(actual_full) != len(self.typed_geometry_component_specs):
-            _invalid("full-sample typed geometry roster contains duplicate identities")
-        expected_full = {
-            (
-                provider.provider_id,
-                self.typed_analysis.representations[
-                    representation_key
-                ].representation_id,
-                geometry_id,
-            )
-            for provider in self.typed_distance_providers.values()
-            for representation_key in provider.representation_keys
-            for geometry_id in self._provider_component_ids(provider)
-        }
-        expected_full.update(
-            {
-                (
-                    provider.provider_id,
-                    self.typed_analysis.representations[
-                        provider.representation_full_key
-                    ].representation_id,
-                    geometry_id,
+    def _statistical(
+        self, roster: str, key: str, distance_id: str
+    ) -> StatisticalDistanceSpec:
+        """Resolve one cell's statistical geometry."""
+        distance = self.typed_analysis.distances.get(distance_id)
+        if not isinstance(distance, StatisticalDistanceSpec):
+            _invalid(f"{roster} cell {key!r} has invalid geometry")
+        return distance
+
+    def _validate_component_roster(self) -> set[tuple[str, str, str]]:
+        """Check full-sample energy/MMD component cells; return their identities."""
+        roster = "typed_geometry_component_specs"
+        identities: set[tuple[str, str, str]] = set()
+        for key, cell in self.typed_geometry_component_specs.items():
+            self._validate_cell(roster, key, cell)
+            geometry = self._statistical(roster, key, cell.geometry_id)
+            if geometry.family == "wasserstein":
+                _invalid(f"{roster} cell {key!r} has no reusable Wasserstein component")
+            if geometry.sample_window is not None:
+                _invalid(f"{roster} cell {key!r} must be a full-sample geometry")
+            identities.add((cell.provider_id, cell.representation_id, cell.geometry_id))
+        if len(identities) != len(self.typed_geometry_component_specs):
+            _invalid(f"{roster} contains duplicate identities")
+        return identities
+
+    def _validate_distance_roster(
+        self, components: set[tuple[str, str, str]]
+    ) -> set[tuple[str, str, str]]:
+        """Check full-sample distance cells; return their identities.
+
+        An energy or MMD matrix is derived from its cached component, so its
+        component cell must be on the component roster.
+        """
+        roster = "typed_distance_specs"
+        identities: set[tuple[str, str, str]] = set()
+        for key, cell in self.typed_distance_specs.items():
+            self._validate_cell(roster, key, cell)
+            distance = self._statistical(roster, key, cell.distance_id)
+            if distance.sample_window is not None:
+                _invalid(
+                    f"{roster} cell {key!r} is windowed; windowed cells belong to "
+                    "typed_distance_windowed_specs"
                 )
-                for provider in self.typed_distance_providers.values()
-                for geometry_id in provider.extra_full_distance_ids
-            }
-        )
-        if actual_full != expected_full:
-            _invalid(
-                "full-sample typed geometry roster differs from "
-                "provider distance contract"
-            )
-
-        self._validate_windowed_component_roster(statistical_ids)
-        self._validate_windowed_distance_roster()
-
-    def _validate_windowed_component_roster(self, statistical_ids: set[str]) -> None:
-        """Check point-in-time Energy/MMD component cells."""
-        selectors = self.scientific_selectors
-
-        actual_windowed: set[tuple[str, str, str]] = set()
-        for key, cell in self.typed_geometry_windowed_component_specs.items():
-            identity = self._validate_component(key, cell, statistical_ids)
-            geometry = self.typed_analysis.distances[cell.geometry_id]
-            if not isinstance(geometry, StatisticalDistanceSpec):
-                _invalid(f"windowed cell {key!r} geometry is not statistical")
-            if geometry.sample_window != cell.window_key:
-                _invalid(f"windowed cell {key!r} disagrees with geometry window")
-            window = self.typed_analysis.windows[cell.window_key]
-            year_match = re.search(r"_pit_(\d{4})$", cell.geometry_id)
-            if (
-                year_match is None
-                or window.end is None
-                or window.end.year != int(year_match.group(1))
-            ):
-                _invalid(f"windowed cell {key!r} geometry year disagrees with window")
-            actual_windowed.add(identity)
-        if len(actual_windowed) != len(self.typed_geometry_windowed_component_specs):
-            _invalid("windowed typed geometry roster contains duplicate identities")
-        expected_windowed = {
-            (
-                selectors.baseline_model,
-                selectors.typed_distance_representation,
-                key,
-            )
-            for key, distance in self.typed_analysis.distances.items()
-            if isinstance(distance, StatisticalDistanceSpec)
-            and distance.sample_design == "point_in_time"
-            and distance.family in {"energy", "mmd"}
-        }
-        if actual_windowed != expected_windowed:
-            _invalid("windowed typed geometry roster differs from component contract")
+            identity = (cell.provider_id, cell.representation_id, cell.distance_id)
+            if distance.family in {"energy", "mmd"} and identity not in components:
+                _invalid(f"{roster} cell {key!r} has no geometry component cell")
+            identities.add(identity)
+        if len(identities) != len(self.typed_distance_specs):
+            _invalid(f"{roster} contains duplicate identities")
+        return identities
 
     def _validate_windowed_distance_roster(self) -> None:
         """Check point-in-time W2 final-distance cells."""
@@ -1084,23 +862,9 @@ class DvcScientificConfig(BaseModel):
         self, key: str, cell: TypedWindowedDistanceCell
     ) -> tuple[str, str, str]:
         """Resolve one point-in-time W2 cell to its external identity."""
-        if DVC_SAFE_KEY_PATTERN.fullmatch(key) is None:
-            _invalid(f"windowed distance cell key {key!r} is not DVC-safe")
-        provider = self.typed_analysis.providers.get(cell.provider_key)
-        representation = self.typed_analysis.representations.get(
-            cell.representation_key
-        )
-        if provider is None or provider.provider_id != cell.provider_id:
-            _invalid(f"windowed distance cell {key!r} has invalid provider")
-        if (
-            representation is None
-            or representation.representation_id != cell.representation_id
-            or representation.provider_id != cell.provider_id
-        ):
-            _invalid(f"windowed distance cell {key!r} has invalid representation")
-        distance = self.typed_analysis.distances.get(cell.distance_id)
-        if not isinstance(distance, StatisticalDistanceSpec):
-            _invalid(f"windowed distance cell {key!r} is not statistical")
+        roster = "windowed distance"
+        self._validate_cell(roster, key, cell)
+        distance = self._statistical(roster, key, cell.distance_id)
         if distance.family != "wasserstein":
             _invalid(f"windowed distance cell {key!r} is not Wasserstein")
         if distance.sample_window != cell.window_key:
@@ -1117,37 +881,55 @@ class DvcScientificConfig(BaseModel):
             )
         return (cell.provider_id, cell.representation_id, cell.distance_id)
 
-    def _validate_barycentre_roster(self) -> None:
-        """Check DVC barycentre cells against their typed arms.
+    def _validate_barycentre_roster(
+        self, components: set[tuple[str, str, str]]
+    ) -> None:
+        """Check barycentre cells against their registry arms."""
+        roster = "barycentre_specs"
+        identities: set[tuple[str, str, str]] = set()
+        for key, cell in self.barycentre_specs.items():
+            self._validate_cell(roster, key, cell)
+            arm = self.typed_analysis.barycentres.get(cell.arm_id)
+            if arm is None:
+                _invalid(f"{roster} cell {key!r} names no registry arm")
+            if arm.geometry != cell.geometry_id:
+                _invalid(f"{roster} cell {key!r} disagrees with registry arm")
+            geometry = self._statistical(roster, key, cell.geometry_id)
+            identity = (cell.provider_id, cell.representation_id, cell.geometry_id)
+            if geometry.family in {"energy", "mmd"} and identity not in components:
+                _invalid(f"{roster} cell {key!r} has no geometry component cell")
+            identities.add((cell.provider_id, cell.representation_id, cell.arm_id))
+        if len(identities) != len(self.barycentre_specs):
+            _invalid(f"{roster} contains duplicate identities")
 
-        The two cell families map onto two DVC stages with different dependency
-        sets, so each is pinned to the problem its stage can actually run: a
-        projection cell reads a cached geometry component, a measure cell reads
-        the clouds. A cell in the wrong family would ask its stage for an
-        artifact nothing produces.
-        """
-        families = (
-            (self.typed_barycentre_specs, "target_projection"),
-            (self.typed_wasserstein_barycentre_specs, "target_projection"),
-            (self.typed_measure_barycentre_specs, "source_barycentre"),
+    def _validate_selectors(self, distances: set[tuple[str, str, str]]) -> None:
+        """Resolve the canonical selector key/ID pairs."""
+        selectors = self.scientific_selectors
+        selected_provider = self.typed_analysis.providers.get(
+            selectors.typed_distance_provider_key
         )
-        for cells, problem in families:
-            for key, cell in cells.items():
-                arm = self.typed_analysis.barycentres.get(key)
-                if arm is None:
-                    _invalid(f"typed barycentre cell {key!r} names no registry arm")
-                if key != cell.arm_id or arm.geometry != cell.geometry_id:
-                    _invalid(
-                        f"typed barycentre cell {key!r} disagrees with registry arm"
-                    )
-                if arm.problem != problem:
-                    _invalid(f"typed barycentre cell {key!r} must declare {problem}")
-        claimed = set(self.typed_barycentre_specs) | set(
-            self.typed_wasserstein_barycentre_specs
+        if selected_provider is None or selected_provider.provider_id != (
+            selectors.typed_distance_provider
+        ):
+            _invalid("canonical typed distance provider key/ID does not resolve")
+        if selectors.typed_distance_provider != selectors.baseline_model:
+            _invalid("canonical typed distance provider must equal the baseline model")
+        representation = self.typed_analysis.representations.get(
+            selectors.typed_distance_representation_key
         )
-        overlap = claimed & set(self.typed_measure_barycentre_specs)
-        if overlap:
-            _invalid(f"barycentre arm {sorted(overlap)} is claimed by two DVC cells")
+        if representation is None or representation.representation_id != (
+            selectors.typed_distance_representation
+        ):
+            _invalid("canonical typed distance representation is unknown")
+        if representation.provider_id != selectors.typed_distance_provider:
+            _invalid("canonical typed distance representation has the wrong provider")
+        canonical = (
+            selectors.typed_distance_provider,
+            selectors.typed_distance_representation,
+            selectors.typed_distance_id,
+        )
+        if canonical not in distances:
+            _invalid("canonical typed distance cell is not in typed_distance_specs")
 
 
 def load_dvc_scientific_config(path: Path) -> DvcScientificConfig:
@@ -1224,14 +1006,14 @@ def _scoped_typed_analysis(
         providers.add(
             resolved["representations"][representation_key]["provider_id"]  # type: ignore[index]
         )
-    for distance_id in tuple(distances):
-        ground_distance = resolved["distances"][distance_id].get("ground_distance")  # type: ignore[index]
-        if ground_distance is not None:
-            distances.add(ground_distance)
     for arm_id in barycentres:
         arm = resolved["barycentres"][arm_id]  # type: ignore[index]
         distances.add(arm["geometry"])
         feasible_sets.add(arm["feasible_set"])
+    for distance_id in tuple(distances):
+        ground_distance = resolved["distances"][distance_id].get("ground_distance")  # type: ignore[index]
+        if ground_distance is not None:
+            distances.add(ground_distance)
     # Last, so it sees geometries reached directly and via a barycentre arm. A
     # window that fell out of the closure would leave two components with
     # different samples sharing one parameter identity.
@@ -1292,6 +1074,7 @@ def typed_analysis_parameter_identity(
 
 __all__ = [
     "BarycentreArm",
+    "BarycentreCell",
     "DvcScientificConfig",
     "EmbeddingProvider",
     "FeasibleSetSpec",
@@ -1302,7 +1085,11 @@ __all__ = [
     "TypedAnalysisConfig",
     "TypedAnalysisError",
     "TypedAnalysisRegistry",
+    "TypedDistanceCell",
+    "TypedGeometryComponentCell",
+    "TypedWindowedDistanceCell",
     "canonical_typed_analysis",
+    "iteration_budget",
     "load_dvc_scientific_config",
     "load_typed_analysis",
     "typed_analysis_parameter_identity",

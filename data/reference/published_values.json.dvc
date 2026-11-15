@@ -1,0 +1,5 @@
+outs:
+- md5: 76a240cc1c191ee83a9c5e698f75b5b0
+  size: 233814
+  hash: md5
+  path: published_values.json

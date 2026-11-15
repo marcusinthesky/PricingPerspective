@@ -1,6 +1,6 @@
 ---
-type: article-journal
-title: 'C-Pack: Packed Resources For General Chinese Embeddings'
+type: paper-conference
+title: 'C-Pack: Packed Resources for General Chinese Embeddings'
 description: Xiao et al. (2024), C-Pack resources and BGE models for general text embeddings
 author:
 - family: Xiao
@@ -26,5 +26,3 @@ container-title: Proceedings of the 47th International ACM SIGIR Conference on R
 publisher: Association for Computing Machinery
 page: 641-649
 ---
-
-# C-Pack

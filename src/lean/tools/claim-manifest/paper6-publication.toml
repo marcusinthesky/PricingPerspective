@@ -1,0 +1,202 @@
+# Paper 6 publication ownership, assumptions and disclosures.
+# Native Publication.Claims annotations own declaration bindings and summaries.
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "prop:equilibrium"
+assumptions = [
+  "Finite fixed sites, nonnegative opportunities and costs, positive outside appeal and own curvature."
+]
+disclosure = "The capacity equilibrium statement is checked for nonnegative rational-share primitives and symmetric uniformly positive cost curvature; the Gaussian benchmark economy is a specialization. Symmetry and the independent counterfactual are supported by the separate entries below."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "app:independent-proof"
+assumptions = [
+  "Nonnegative one-firm rational-share appeals and positive cost curvature."
+]
+disclosure = "The independent arm is checked as a product of one-firm problems, each facing outside appeal alone."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "app:symmetry-proof"
+assumptions = ["Common firm primitives and a unique Nash equilibrium."]
+disclosure = "The symmetry conclusion concerns firms within one economy, not equality between strategic and independent economies."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:certificate"
+assumptions = [
+  "Feasible profile and strongly monotone rational-share operator."
+]
+disclosure = "The joint residual supplies a distance certificate for the strategic capacity equilibrium."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "app:regret-proof"
+assumptions = ["Own strong concavity, feasibility, and frozen rivals."]
+disclosure = "The residual bounds payoff regret, not only an optimizer stopping criterion."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:normalization-bound"
+assumptions = [
+  "Nonnegative capacities and computed mass exceeding the error-dependent threshold."
+]
+disclosure = "The bound composes joint-to-block error control with normalization and ensures positive exact mass."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "app:independent-distance"
+assumptions = [
+  "Independent one-firm rational-share objectives, feasibility, and positive cost curvature."
+]
+disclosure = "The certificate applies to the Cartesian product of no-rival objectives."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "app:independent-regret"
+assumptions = [
+  "Independent one-firm rational-share objectives, feasibility, and positive cost curvature."
+]
+disclosure = "The certificate applies to the Cartesian product of no-rival objectives."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:response-continuity"
+assumptions = [
+  "Nash equilibria of two rational-share economies that differ only in nonnegative opportunity values, with symmetric uniformly positive cost curvature and nonnegative linear costs."
+]
+disclosure = "The Lipschitz bound is checked for any two equilibria that differ only in opportunity values, with no differentiability, interiority, or active-set condition."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "app:response-jacobian"
+assumptions = ["A profile with positive share denominators and any direction."]
+disclosure = "The Jacobian blocks are checked as the derivative of the field along every line through a profile with positive denominators."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "prop:response"
+assumptions = [
+  "A nonnegative profile, uniformly positive cost curvature, and any set of active coordinates."
+]
+disclosure = "The response is checked as the unique solution of the equilibrium conditions linearized on any fixed active set; its identification with the derivative of the equilibrium map is checked separately under strict complementarity."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:linear-response"
+assumptions = [
+  "A nonnegative profile, uniformly positive cost curvature, and any set of active coordinates."
+]
+disclosure = "The bound uses curvature of the Jacobian at every nonnegative profile, not only at an equilibrium."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:feedback"
+assumptions = ["Full and direct responses on the same active set."]
+disclosure = "The identity is checked in solved-system form; the explicit inverse follows from uniqueness of the linearized response."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:composition-derivative"
+assumptions = ["A capacity block with positive total mass."]
+disclosure = "The normalization derivative is checked coordinatewise at any block with positive mass."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "cor:exposure"
+assumptions = ["Fixed capacities and two opportunity-value vectors."]
+disclosure = "The exposure identity is exact at fixed capacities; it does not include the equilibrium response of capacities."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:exposure-covariance"
+assumptions = [
+  "Square-integrable innovations and a predetermined share matrix."
+]
+disclosure = "The covariance formula is checked for square-integrable innovations passed through a predetermined share matrix."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:rival-cross"
+assumptions = [
+  "A nonnegative profile and a rival whose capacities weakly rise."
+]
+disclosure = "The nonpositive rival cross-effect is checked in finite-difference form."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "app:anchored-stage"
+assumptions = [
+  "Uniformly positive cost curvature, a nonnegative adjustment weight, contemporaneous rivals, and any anchor."
+]
+disclosure = "Existence and uniqueness of the anchored stage equilibrium are checked with no sign restriction on the anchor-shifted linear cost."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:equilibrium-derivative"
+assumptions = [
+  "Assumption 1 primitives, an equilibrium with strict complementarity, the active set of positive capacities, and nonnegative nearby opportunity values."
+]
+disclosure = "The first-order approximation of the equilibrium map by the linear response is checked under strict complementarity, without an implicit-function theorem."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "app:equilibrium-derivative"
+assumptions = ["A profile with positive share denominators."]
+disclosure = "Fréchet differentiability of the field and the identification of its derivative with the Jacobian blocks are checked."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:envelope"
+assumptions = ["Symmetric cost curvature and positive share denominators."]
+disclosure = "The three-term derivative of cash flow along any joint direction is checked."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "rem:envelope"
+assumptions = [
+  "Symmetric cost curvature, positive share denominators, and a field that vanishes wherever the direction moves the firm's capacity."
+]
+disclosure = "The static envelope split is checked at an equilibrium where the own-adjustment term vanishes."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:equilibrium-cash-flow"
+assumptions = [
+  "Assumption 1 primitives and an equilibrium with strict complementarity."
+]
+disclosure = "The equilibrium cash-flow sensitivity is checked as a first-order approximation under strict complementarity; the firm's own adjustment contributes nothing at first order."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:cost-response"
+assumptions = [
+  "Assumption 1 primitives, an equilibrium with strict complementarity, the active set of positive capacities, and nonnegative nearby linear costs."
+]
+disclosure = "The first-order approximation of the equilibrium map in linear costs is checked under strict complementarity, without an implicit-function theorem."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:two-site-transport"
+assumptions = [
+  "Both shares lie in the unit interval; diagonal transport costs zero and cross-site transport costs d squared."
+]
+disclosure = "Machine-checked by a lower bound for every nonnegative finite coupling and construction of an attaining coupling. The result concerns the finite two-site transport problem."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "eq:proportional-feedback"
+assumptions = [
+  "Finite activity set and strictly positive total initial capacity."
+]
+disclosure = "Exact normalization equivalence. Identification with equilibrium derivatives separately requires the manuscript's differentiable fixed-active-set path premises; no implicit-function theorem is claimed here."
+
+[[claims]]
+paper = "06_information_motion"
+claim_id = "prop:composition-feedback"
+assumptions = [
+  "Positive curvature, opportunity value, denominator and cost reduction, strict strategic substitution at the affected activity."
+]
+disclosure = "Supporting sign result for the explicit rank-one response system. The equilibrium-path identification, activity separability and unaffected-activity interpretation remain explicit human-proof premises. This binding does not enlarge coverage to arbitrary multi-activity or active-set-changing equilibria."
