@@ -13,7 +13,7 @@ A MDX-first research website by Marcus Gawronsky and Chun-Sung Huang. Its visual
 - Storybook 10 using the recommended Next.js + Vite framework
 - Lighthouse CI with enforced performance, accessibility, best-practices, and SEO budgets
 - Local MDX for the long-form site and paper copy
-- WebM/MP4 video fallbacks and AVIF/WebP imagery
+- Native YouTube embeds and AVIF/WebP imagery
 
 Direct `@next/mdx` renders the four-paper collection and seven blog posts as static pages. The site has no client-side search or documentation tree.
 
@@ -55,6 +55,10 @@ bun run build-storybook
 ```
 
 Stories cover the paper card, researcher card, video feature, and button variants. The official accessibility addon is enabled and configured to fail on detected violations.
+
+The landing page places four privacy-enhanced YouTube video guides directly after the opening diagram. Their titles,
+links, and start times live in `src/lib/site.ts`; the same records supply the players and JSON-LD.
+Blog audio remains hosted locally.
 
 ## Edit the copy
 
@@ -112,11 +116,11 @@ Canonical arXiv, Hugging Face, SSRN, and ResearchGate links are configured for t
 
 ## Performance and SEO
 
-The site has no analytics, consent manager, external font request, third-party script, client-side search, or JavaScript artwork renderer. The hydrographic atlas is server-rendered SVG with CSS-only motion, a native pause control and a reduced-motion still. Layout dimensions are fixed, the video uses `preload="none"`, and the exported pages are static.
+The site adds no analytics, external font request, client-side search, or JavaScript artwork renderer. The hydrographic atlas is server-rendered SVG with CSS-only motion, a native pause control and a reduced-motion still. YouTube players use native, lazy-loaded iframes with a fixed 16:9 aspect ratio and no autoplay. The privacy page explains YouTube's external data handling. Exported pages remain static.
 
-Structured data includes `WebSite`, `CollectionPage`, `ItemList`, `ScholarlyArticle`, `Person`, `VideoObject`, and `BreadcrumbList`. Scholarly citation meta tags, Open Graph/Twitter metadata, a sitemap, robots directives, BibTeX, CFF, `llms.txt`, descriptive captions, and a transcript are included.
+Structured data includes `WebSite`, `CollectionPage`, `ItemList`, `ScholarlyArticle`, `Person`, four `VideoObject` records, and `BreadcrumbList`. Scholarly citation meta tags, Open Graph/Twitter metadata, a sitemap, robots directives, BibTeX, CFF, `llms.txt`, and descriptive captions are included.
 
-The Lighthouse budget targets 95+ performance and 100 for accessibility, best practices, and SEO, with explicit FCP, LCP, CLS, and blocking-time limits. A perfect remote PageSpeed result cannot be guaranteed before the final domain, CDN headers, and third-party link behaviour are known; the project is designed to keep the static pages within these budgets. See `docs/PERFORMANCE.md`.
+The Lighthouse budget targets 95+ performance and 100 for accessibility and SEO, with explicit FCP, LCP, CLS, and blocking-time limits. Best practices stays at 100 except for a homepage-only allowance of 96 for YouTube's cookie warning; all other scored best-practices audits remain strict. A perfect remote PageSpeed result cannot be guaranteed before the final domain, CDN headers, and third-party link behaviour are known. See `docs/PERFORMANCE.md`.
 
 Exact dependency pins are recorded in `package.json` and the workspace `bun.lock`.
 

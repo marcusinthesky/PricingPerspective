@@ -7,9 +7,9 @@ The collection page emits one JSON-LD graph containing:
 - `WebSite`
 - `Organization`
 - `CollectionPage`
-- `ItemList` with three paper entries
+- `ItemList` with four paper entries
 - two `Person` records
-- `VideoObject` with duration, dimensions, modern media formats, poster images, transcript, and watch action
+- four `VideoObject` records with titles, YouTube embed/watch URLs, thumbnails, and watch actions
 
 ## Paper pages
 

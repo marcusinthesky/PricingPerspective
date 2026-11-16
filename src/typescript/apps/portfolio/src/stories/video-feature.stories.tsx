@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { VideoFeature } from "@/components/video-feature";
 
 const meta = {
-  title: "Research/Video feature",
+  title: "Research/Video guides",
   component: VideoFeature,
   tags: ["autodocs"],
   decorators: [

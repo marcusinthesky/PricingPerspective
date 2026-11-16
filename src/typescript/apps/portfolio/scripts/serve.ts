@@ -15,8 +15,7 @@ const mime = new Map([
   [".png", "image/png"],
   [".webp", "image/webp"],
   [".avif", "image/avif"],
-  [".webm", "video/webm"],
-  [".mp4", "video/mp4"],
+  [".webm", "audio/webm"],
   [".vtt", "text/vtt; charset=utf-8"],
 ]);
 
@@ -46,14 +45,10 @@ Bun.serve({
     if (!(await file.exists())) return new Response("Not found", { status: 404 });
 
     const extension = extname(filePath);
-    const immutable = /\.(?:avif|webp|png|svg|webm|mp4)$/.test(extension);
-    const contentType =
-      extension === ".webm" && filePath.includes("/audio/")
-        ? "audio/webm"
-        : (mime.get(extension) ?? "application/octet-stream");
+    const immutable = /\.(?:avif|webp|png|svg|webm)$/.test(extension);
     return new Response(file, {
       headers: {
-        "Content-Type": contentType,
+        "Content-Type": mime.get(extension) ?? "application/octet-stream",
         "Cache-Control": immutable
           ? "public, max-age=31536000, immutable"
           : "public, max-age=0, must-revalidate",

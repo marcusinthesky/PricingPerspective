@@ -53,8 +53,8 @@ export default function PrivacyPage() {
         <div className="mdx-prose legal-prose">
           <h3>Privacy</h3>
           <p>
-            Pricing Perspective is a static research website. It uses no analytics, advertising,
-            mailing list, or non-essential cookies.
+            Pricing Perspective is a static research website. We do not run our own analytics,
+            advertising, or mailing list.
           </p>
           <p>
             The site is hosted with GitHub Pages. GitHub logs visitor IP addresses for security
@@ -67,6 +67,11 @@ export default function PrivacyPage() {
               privacy statement
             </a>
             .
+          </p>
+          <p>
+            Embedded videos are served by YouTube. Loading or playing a video contacts YouTube,
+            which may collect data or use cookies under{" "}
+            <a href="https://policies.google.com/privacy">Google&apos;s privacy policy</a>.
           </p>
           <p>
             If you email us, your address and message are received by our email provider and used to
@@ -94,12 +99,10 @@ export default function PrivacyPage() {
             advice, an investment recommendation, or an offer of a financial product or service.
           </p>
 
-          <h3>Generated audio and external services</h3>
+          <h3>Generated audio</h3>
           <p>
-            The podcast explainer is AI-generated and may contain inaccuracies or audio errors. It
-            is a convenience summary, not a substitute for the linked research. Any use of
-            NotebookLM or another external service remains subject to that service&apos;s terms and
-            copyright rules.
+            Blog posts include computer-generated audio readings, which may contain pronunciation or
+            audio errors. The written posts and linked research remain the authoritative sources.
           </p>
         </div>
       </section>

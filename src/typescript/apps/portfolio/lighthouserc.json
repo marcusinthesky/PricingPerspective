@@ -5,16 +5,45 @@
       "numberOfRuns": 3
     },
     "assert": {
-      "assertions": {
-        "categories:performance": ["error", { "minScore": 0.95 }],
-        "categories:accessibility": ["error", { "minScore": 1 }],
-        "categories:best-practices": ["error", { "minScore": 1 }],
-        "categories:seo": ["error", { "minScore": 1 }],
-        "first-contentful-paint": ["error", { "maxNumericValue": 1800 }],
-        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
-        "cumulative-layout-shift": ["error", { "maxNumericValue": 0.02 }],
-        "total-blocking-time": ["error", { "maxNumericValue": 250 }]
-      }
+      "assertMatrix": [
+        {
+          "assertions": {
+            "categories:performance": ["error", { "minScore": 0.95 }],
+            "categories:accessibility": ["error", { "minScore": 1 }],
+            "categories:seo": ["error", { "minScore": 1 }],
+            "first-contentful-paint": ["error", { "maxNumericValue": 1800 }],
+            "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+            "cumulative-layout-shift": ["error", { "maxNumericValue": 0.02 }],
+            "total-blocking-time": ["error", { "maxNumericValue": 250 }]
+          }
+        },
+        {
+          "matchingUrlPattern": "^https?://[^/]+/(?:index\\.html)?$",
+          "assertions": {
+            "categories:best-practices": ["error", { "minScore": 0.96 }],
+            "inspector-issues": ["warn", { "minScore": 1 }],
+            "is-on-https": ["error", { "minScore": 1 }],
+            "geolocation-on-start": ["error", { "minScore": 1 }],
+            "notification-on-start": ["error", { "minScore": 1 }],
+            "paste-preventing-inputs": ["error", { "minScore": 1 }],
+            "image-aspect-ratio": ["error", { "minScore": 1 }],
+            "image-size-responsive": ["error", { "minScore": 1 }],
+            "viewport": ["error", { "minScore": 1 }],
+            "font-size": ["error", { "minScore": 1 }],
+            "doctype": ["error", { "minScore": 1 }],
+            "charset": ["error", { "minScore": 1 }],
+            "deprecations": ["error", { "minScore": 1 }],
+            "third-party-cookies": ["error", { "minScore": 1 }],
+            "errors-in-console": ["error", { "minScore": 1 }]
+          }
+        },
+        {
+          "matchingUrlPattern": "^https?://[^/]+/(?!$|index\\.html$)",
+          "assertions": {
+            "categories:best-practices": ["error", { "minScore": 1 }]
+          }
+        }
+      ]
     }
   }
 }

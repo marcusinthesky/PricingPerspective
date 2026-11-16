@@ -124,13 +124,13 @@ export default function MediaKitPage() {
             </article>
             <article className="media-kit-resource">
               <span className="media-kit-resource-index">02</span>
-              <h3>Visual companion</h3>
+              <h3>Research videos</h3>
               <p>
-                A narrated animation of the programme introduces the geometric objects and follows
-                their path into financial restrictions.
+                Four video guides introduce the papers on covariance, portfolio risk, economic
+                peers, and information games.
               </p>
               <a href={sitePath("/#film")}>
-                Watch the video <ArrowUpRight aria-hidden="true" size={15} />
+                Watch the videos <ArrowUpRight aria-hidden="true" size={15} />
               </a>
             </article>
             <article className="media-kit-resource">
