@@ -4,7 +4,7 @@ import { Mark } from "@/components/mark";
 
 const navigation = [
   { href: "/#papers", label: "Papers" },
-  { href: "/#film", label: "Video" },
+  { href: "/#film", label: "Videos" },
   { href: "/blueprint/", label: "Proofs" },
   { href: "/blog/", label: "Blog" },
   { href: "/#researchers", label: "Researchers" },
@@ -26,7 +26,7 @@ export function SiteHeader() {
               <li
                 key={item.href}
                 className={
-                  item.label === "Video" || item.label === "Proofs" ? "nav-hide-small" : undefined
+                  item.label === "Videos" || item.label === "Proofs" ? "nav-hide-small" : undefined
                 }
               >
                 <Link href={item.href}>{item.label}</Link>

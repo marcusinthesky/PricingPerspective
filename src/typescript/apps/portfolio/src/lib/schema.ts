@@ -1,5 +1,5 @@
 import { blogPosts, papers, researchers } from "@/content/data";
-import { absoluteUrl, site } from "@/lib/site";
+import { absoluteUrl, researchVideos, site } from "@/lib/site";
 import type { BlogPost, Paper, Researcher } from "@/lib/types";
 
 export type JsonLdValue = Record<string, unknown> | Array<Record<string, unknown>>;
@@ -268,45 +268,21 @@ export function homeJsonLd(): Record<string, unknown> {
         },
       },
       ...researchers.map(personJsonLd),
-      {
+      ...researchVideos.map((video) => ({
         "@type": "VideoObject",
-        "@id": absoluteUrl("/#film"),
-        name: "Pricing Perspective - a visual guide",
-        description:
-          "A five-minute, 40-second narrated animated guide to distributions, couplings, Wasserstein transport, barycentric reconstruction, and portfolio risk certificates.",
-        thumbnailUrl: [absoluteUrl("/video/poster.avif"), absoluteUrl("/video/poster.webp")],
-        uploadDate: "2026-09-03",
-        duration: "PT5M40S",
-        contentUrl: absoluteUrl("/video/distributional-information-geometry.mp4"),
-        embedUrl: absoluteUrl("/#film"),
-        encodingFormat: ["video/mp4", "video/webm"],
-        width: 1280,
-        height: 720,
-        encoding: [
-          {
-            "@type": "MediaObject",
-            contentUrl: absoluteUrl("/video/distributional-information-geometry.webm"),
-            encodingFormat: "video/webm",
-            width: 960,
-            height: 540,
-          },
-          {
-            "@type": "MediaObject",
-            contentUrl: absoluteUrl("/video/distributional-information-geometry.mp4"),
-            encodingFormat: "video/mp4",
-            width: 1280,
-            height: 720,
-          },
-        ],
+        "@id": absoluteUrl(`/#video-${video.id}`),
+        name: video.title,
+        url: video.href,
+        embedUrl: video.embedUrl,
+        thumbnailUrl: `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`,
         inLanguage: site.language,
-        isFamilyFriendly: true,
         isAccessibleForFree: true,
-        transcript: absoluteUrl("/video/transcript.txt"),
+        isPartOf: { "@id": absoluteUrl("/#collection") },
         potentialAction: {
           "@type": "WatchAction",
-          target: absoluteUrl("/#film"),
+          target: video.href,
         },
-      },
+      })),
     ],
   };
 }

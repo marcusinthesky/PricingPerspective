@@ -5,7 +5,6 @@ import HomeContent from "@/content/home.mdx";
 import { AiResearchLinks } from "@/components/ai-research-links";
 import { EconomicField } from "@/components/economic-field";
 import { AppearingIn } from "@/components/appearing-in";
-import { AudioFeature } from "@/components/audio-feature";
 import { JsonLd } from "@/components/json-ld";
 import { PaperCard } from "@/components/paper-card";
 import { ResearcherCard } from "@/components/researcher-card";
@@ -16,6 +15,7 @@ import { ButtonLink } from "@/components/ui/button";
 import { VideoFeature } from "@/components/video-feature";
 import { papers, researchers } from "@/content/data";
 import { homeJsonLd } from "@/lib/schema";
+import { researchVideos } from "@/lib/site";
 
 export const dynamic = "force-static";
 
@@ -34,7 +34,7 @@ export default function HomePage() {
             <ButtonLink href="#papers">
               Explore the papers <ArrowDown aria-hidden="true" size={17} />
             </ButtonLink>
-            <ButtonLink href="#film" variant="outline">
+            <ButtonLink href={researchVideos[1].href} variant="outline">
               <Play aria-hidden="true" size={16} /> Watch the video
             </ButtonLink>
           </div>
@@ -61,6 +61,16 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="section section-ruled site-shell" id="film" aria-labelledby="film-title">
+        <SectionHeading
+          id="film-title"
+          eyebrow="Research videos"
+          title="Explore the four papers."
+          description="Video guides to covariance, portfolio risk, economic peers, and information games."
+        />
+        <VideoFeature />
+      </section>
+
       <AppearingIn />
 
       <section className="editorial-band">
@@ -76,6 +86,7 @@ export default function HomePage() {
 
       <section className="section site-shell" id="papers" aria-labelledby="papers-title">
         <SectionHeading
+          id="papers-title"
           eyebrow="Research"
           title="Firm relationships as geometry."
           description="Explore how observable firm information gives structure to financial dependence."
@@ -89,31 +100,16 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section section-ruled site-shell" id="film" aria-labelledby="film-title">
-        <SectionHeading
-          eyebrow="Animated companion"
-          title="See the mathematical objects move."
-          description="A narrated animation of the programme."
-        />
-        <Reveal className="video-reveal">
-          <VideoFeature />
-        </Reveal>
-        <SectionHeading
-          eyebrow="Podcast explainer"
-          title="Hear the research in conversation."
-          description="A NotebookLM-generated podcast-style explainer of firms as news and probability distributions."
-        />
-        <Reveal delay={120}>
-          <AudioFeature />
-        </Reveal>
-      </section>
-
       <section
         className="section section-ruled site-shell"
         id="researchers"
         aria-labelledby="researchers-title"
       >
-        <SectionHeading eyebrow="Researchers" title="Marcus Gawronsky and Chun-Sung Huang." />
+        <SectionHeading
+          id="researchers-title"
+          eyebrow="Researchers"
+          title="Marcus Gawronsky and Chun-Sung Huang."
+        />
         <div className="authors-intro mdx-prose">
           <AuthorsContent />
         </div>

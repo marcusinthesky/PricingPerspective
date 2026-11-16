@@ -13,7 +13,7 @@ export function SiteFooter() {
         </div>
         <nav aria-label="Footer navigation">
           <Link href="/#papers">Papers</Link>
-          <Link href="/#film">Video</Link>
+          <Link href="/#film">Videos</Link>
           <Link href="/blueprint/">Proofs</Link>
           <Link href="/blog/">Blog</Link>
           <Link href="/#researchers">Researchers</Link>
@@ -23,7 +23,7 @@ export function SiteFooter() {
           <a href={sitePath("/llms.txt")}>llms.txt</a>
         </nav>
         <p className="footer-note">
-          Explore the papers, the Blog, the video, and the geometry connecting them.
+          Explore the papers, the Blog, the videos, and the geometry connecting them.
           <span className="footer-copyright">© 2026 University of Cape Town</span>
         </p>
       </div>
