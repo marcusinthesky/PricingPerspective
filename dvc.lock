@@ -404,8 +404,8 @@ stages:
       size: 96
     - path: src/lean/justfile
       hash: md5
-      md5: c89395f46a6ef04d9229d4c0621284c0
-      size: 9998
+      md5: 6d918cc39737cebcfb1d6732ed5d30ae
+      size: 10011
     - path: src/lean/lake-manifest.json
       hash: md5
       md5: c2cd3f8dee7ae1c6609a365da8b7f934
@@ -511,8 +511,8 @@ stages:
       size: 4194
     - path: src/latex/projects/03_distance_implied_mpt/src/chapters
       hash: md5
-      md5: 0a48a90127c1e0a6649fc430443fcf73.dir
-      size: 104214
+      md5: 3d932bc1da20336e3d241135f4efa0a5.dir
+      size: 103387
       nfiles: 11
     - path: 
         src/latex/projects/03_distance_implied_mpt/src/generated/lean_status.tex
@@ -552,13 +552,13 @@ stages:
       size: 967
     - path: src/latex/projects/06_information_motion/src/targets
       hash: md5
-      md5: 63a75b7a27bd0373050ace2f45ba2b34.dir
-      size: 8848
-      nfiles: 11
+      md5: f8e8ff8b3c030ec85482310c5591969c.dir
+      size: 1309
+      nfiles: 1
     - path: src/latex/templates/pp-manuscript.sty
       hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
+      md5: a85dfc9aaed159f9283483e37a7133f0
+      size: 6507
     - path: src/lean/blueprint/check.py
       hash: md5
       md5: 199d577b9609fb27e5b87eecd5fa1344
@@ -602,8 +602,8 @@ stages:
       size: 132683
     - path: src/lean/justfile
       hash: md5
-      md5: c89395f46a6ef04d9229d4c0621284c0
-      size: 9998
+      md5: 6d918cc39737cebcfb1d6732ed5d30ae
+      size: 10011
     - path: src/lean/tools/claim-manifest/generated/manifest.json
       hash: md5
       md5: ccb10d7b94cc497fced3c4ca077cb55c
@@ -650,13 +650,13 @@ stages:
       size: 19849
     - path: src/latex/projects/01_continuous_bounds/src/targets
       hash: md5
-      md5: 4bd4deaed77a46172646aa2661d290fa.dir
-      size: 3172
-      nfiles: 3
+      md5: ce07ddba1e1e2681225a25f7cc4db240.dir
+      size: 869
+      nfiles: 1
     - path: src/latex/projects/03_distance_implied_mpt/src/chapters
       hash: md5
-      md5: 0a48a90127c1e0a6649fc430443fcf73.dir
-      size: 104214
+      md5: 3d932bc1da20336e3d241135f4efa0a5.dir
+      size: 103387
       nfiles: 11
     - path: src/latex/projects/03_distance_implied_mpt/src/refs.bib
       hash: md5
@@ -664,9 +664,9 @@ stages:
       size: 8869
     - path: src/latex/projects/03_distance_implied_mpt/src/targets
       hash: md5
-      md5: 4414c6db23c49df12883d1fcd4e47da9.dir
-      size: 3599
-      nfiles: 4
+      md5: 1894222b1ade731f67ba266c7df6c8da.dir
+      size: 707
+      nfiles: 1
     - path: src/latex/projects/05_spatial_pricing/src/chapters
       hash: md5
       md5: 9ed7544c98bc98b445d93568df731376.dir
@@ -678,9 +678,9 @@ stages:
       size: 9316
     - path: src/latex/projects/05_spatial_pricing/src/targets
       hash: md5
-      md5: ebbd9e4252c4f02240b663f731cf5073.dir
-      size: 5797
-      nfiles: 6
+      md5: 1894222b1ade731f67ba266c7df6c8da.dir
+      size: 707
+      nfiles: 1
     - path: src/latex/projects/06_information_motion/src/chapters
       hash: md5
       md5: 543e1ec48ff41820efb57049199d9062.dir
@@ -692,9 +692,9 @@ stages:
       size: 6646
     - path: src/latex/projects/06_information_motion/src/targets
       hash: md5
-      md5: 63a75b7a27bd0373050ace2f45ba2b34.dir
-      size: 8848
-      nfiles: 11
+      md5: f8e8ff8b3c030ec85482310c5591969c.dir
+      size: 1309
+      nfiles: 1
     - path: src/python/scripts/references/justfile
       hash: md5
       md5: 1265a0b8eb03f91b855f9102e4758c29
@@ -716,49 +716,41 @@ stages:
       hash: md5
       md5: d41d8cd98f00b204e9800998ecf8427e
       size: 0
-    - path: infra/nix/pkgs/elsarticle-template.nix
-      hash: md5
-      md5: c783d494d1752c60e61dbd14ee3727f9
-      size: 2279
-    - path: infra/nix/pkgs/tandf-template.nix
-      hash: md5
-      md5: 8e8f27af39560192b299b5251a9dc3bb
-      size: 5968
     - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
       hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
+      md5: 5a519ba5fb1700e6a8cbaf58d819ac81
+      size: 5941193
     - path: src/latex/justfile
       hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
+      md5: f1077b1ad2ceb9fd84a360d4bd047509
+      size: 13813
     - path: src/latex/projects/01_continuous_bounds/Tectonic.toml
       hash: md5
-      md5: 7acdeb0b91bb5bd4a2b1cb7c02eb2bfa
-      size: 345
+      md5: e25a55ac97bf94d624e0a5a9b2802074
+      size: 173
     - path: src/latex/projects/01_continuous_bounds/src
       hash: md5
-      md5: eaa3e778aeaa35bfefc4349bbe2f7092.dir
-      size: 10960494
-      nfiles: 79
+      md5: 20260f101caec659317adc70402cc35a.dir
+      size: 8869483
+      nfiles: 44
     - path: src/latex/templates/pp-manuscript.sty
       hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
+      md5: a85dfc9aaed159f9283483e37a7133f0
+      size: 6507
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
-      size: 38586
+      md5: a717daea7bf09bd6a4ff61baf8f6024b
+      size: 34906
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
+      md5: 8e84771fa93c147d159e97597c020927
+      size: 2504
       isexec: true
     - path: src/latex/tools/stage-images
       hash: md5
-      md5: 4cf1deb995e6d096d7536911cba9afe5
-      size: 6582
+      md5: f97c2ba173bba7bd4fcb9e120d8a9e24
+      size: 5516
       isexec: true
     outs:
     - path: src/latex/projects/01_continuous_bounds/build/arxiv/arxiv.pdf
@@ -767,75 +759,8 @@ stages:
       size: 1136748
     - path: src/latex/projects/01_continuous_bounds/build/arxiv/arxiv.tar.gz
       hash: md5
-      md5: 426316279713e5783242cc7793146401
-      size: 971138
-  render@01_continuous_bounds-quantitative-finance:
-    cmd: just latex::build 01_continuous_bounds quantitative-finance && just 
-      latex::_bundle 01_continuous_bounds quantitative-finance
-    deps:
-    - path: data/publication/certification/lean_bindings_check.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: data/publication/certification/refs_bib_freshness.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: infra/nix/pkgs/elsarticle-template.nix
-      hash: md5
-      md5: c783d494d1752c60e61dbd14ee3727f9
-      size: 2279
-    - path: infra/nix/pkgs/tandf-template.nix
-      hash: md5
-      md5: 8e8f27af39560192b299b5251a9dc3bb
-      size: 5968
-    - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
-      hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
-    - path: src/latex/justfile
-      hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
-    - path: src/latex/projects/01_continuous_bounds/Tectonic.toml
-      hash: md5
-      md5: 7acdeb0b91bb5bd4a2b1cb7c02eb2bfa
-      size: 345
-    - path: src/latex/projects/01_continuous_bounds/src
-      hash: md5
-      md5: eaa3e778aeaa35bfefc4349bbe2f7092.dir
-      size: 10960494
-      nfiles: 79
-    - path: src/latex/templates/pp-manuscript.sty
-      hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
-    - path: src/latex/tools/bundle-audit
-      hash: md5
-      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
-      size: 38586
-      isexec: true
-    - path: src/latex/tools/check-log
-      hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
-      isexec: true
-    - path: src/latex/tools/stage-images
-      hash: md5
-      md5: 4cf1deb995e6d096d7536911cba9afe5
-      size: 6582
-      isexec: true
-    outs:
-    - path: 
-        src/latex/projects/01_continuous_bounds/build/quantitative-finance/quantitative-finance.pdf
-      hash: md5
-      md5: 2d9e6d2a11d9ad8e4c674998c2d9a75b
-      size: 1156893
-    - path: 
-        src/latex/projects/01_continuous_bounds/build/quantitative-finance/quantitative-finance.zip
-      hash: md5
-      md5: 94589524e9148601abec218a394c809e
-      size: 1416158
+      md5: c741d6823b6c99ea110676c09ecc3d6e
+      size: 969279
   p3_numbers:
     cmd: uv run --locked --project src/python pipeline render-paper3-numbers
       --certificate-dir data/papers/paper3/certificate --validation-dir 
@@ -876,49 +801,41 @@ stages:
       hash: md5
       md5: d41d8cd98f00b204e9800998ecf8427e
       size: 0
-    - path: infra/nix/pkgs/elsarticle-template.nix
-      hash: md5
-      md5: c783d494d1752c60e61dbd14ee3727f9
-      size: 2279
-    - path: infra/nix/pkgs/tandf-template.nix
-      hash: md5
-      md5: 8e8f27af39560192b299b5251a9dc3bb
-      size: 5968
     - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
       hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
+      md5: 5a519ba5fb1700e6a8cbaf58d819ac81
+      size: 5941193
     - path: src/latex/justfile
       hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
+      md5: f1077b1ad2ceb9fd84a360d4bd047509
+      size: 13813
     - path: src/latex/projects/03_distance_implied_mpt/Tectonic.toml
       hash: md5
-      md5: 6bc826ce34e961195d75ee201acf585b
-      size: 401
+      md5: 9486fba37b2107256458a21ebbd7664b
+      size: 176
     - path: src/latex/projects/03_distance_implied_mpt/src
       hash: md5
-      md5: b964708ed7183a4305e4bd72b68954ce.dir
-      size: 3014274
-      nfiles: 63
+      md5: fac22784c3ce5aec02dade6363e5f14f.dir
+      size: 921847
+      nfiles: 27
     - path: src/latex/templates/pp-manuscript.sty
       hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
+      md5: a85dfc9aaed159f9283483e37a7133f0
+      size: 6507
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
-      size: 38586
+      md5: a717daea7bf09bd6a4ff61baf8f6024b
+      size: 34906
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
+      md5: 8e84771fa93c147d159e97597c020927
+      size: 2504
       isexec: true
     - path: src/latex/tools/stage-images
       hash: md5
-      md5: 4cf1deb995e6d096d7536911cba9afe5
-      size: 6582
+      md5: f97c2ba173bba7bd4fcb9e120d8a9e24
+      size: 5516
       isexec: true
     outs:
     - path: src/latex/projects/03_distance_implied_mpt/build/arxiv/arxiv.pdf
@@ -927,8 +844,8 @@ stages:
       size: 255009
     - path: src/latex/projects/03_distance_implied_mpt/build/arxiv/arxiv.tar.gz
       hash: md5
-      md5: 6ef1c3714aebc2638132281c22cda35a
-      size: 82608
+      md5: 0f099b5e49671ce842f4cb8543427b11
+      size: 80573
   render@05_spatial_pricing-arxiv:
     cmd: just latex::build 05_spatial_pricing arxiv && just latex::_bundle 
       05_spatial_pricing arxiv
@@ -941,49 +858,41 @@ stages:
       hash: md5
       md5: d41d8cd98f00b204e9800998ecf8427e
       size: 0
-    - path: infra/nix/pkgs/elsarticle-template.nix
-      hash: md5
-      md5: c783d494d1752c60e61dbd14ee3727f9
-      size: 2279
-    - path: infra/nix/pkgs/tandf-template.nix
-      hash: md5
-      md5: 8e8f27af39560192b299b5251a9dc3bb
-      size: 5968
     - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
       hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
+      md5: 5a519ba5fb1700e6a8cbaf58d819ac81
+      size: 5941193
     - path: src/latex/justfile
       hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
+      md5: f1077b1ad2ceb9fd84a360d4bd047509
+      size: 13813
     - path: src/latex/projects/05_spatial_pricing/Tectonic.toml
       hash: md5
-      md5: 31c72cca62e40d2f519736b5d1343261
-      size: 485
+      md5: 45870582c6f1fbaef4d1b0f6e6e7d052
+      size: 171
     - path: src/latex/projects/05_spatial_pricing/src
       hash: md5
-      md5: 28f5593b1f94a244524a300b6c74012a.dir
-      size: 3678223
-      nfiles: 79
+      md5: 7a16ec0ee01b6b00a004f84f2e4c816c.dir
+      size: 1584425
+      nfiles: 41
     - path: src/latex/templates/pp-manuscript.sty
       hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
+      md5: a85dfc9aaed159f9283483e37a7133f0
+      size: 6507
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
-      size: 38586
+      md5: a717daea7bf09bd6a4ff61baf8f6024b
+      size: 34906
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
+      md5: 8e84771fa93c147d159e97597c020927
+      size: 2504
       isexec: true
     - path: src/latex/tools/stage-images
       hash: md5
-      md5: 4cf1deb995e6d096d7536911cba9afe5
-      size: 6582
+      md5: f97c2ba173bba7bd4fcb9e120d8a9e24
+      size: 5516
       isexec: true
     outs:
     - path: src/latex/projects/05_spatial_pricing/build/arxiv/arxiv.pdf
@@ -992,8 +901,8 @@ stages:
       size: 425974
     - path: src/latex/projects/05_spatial_pricing/build/arxiv/arxiv.tar.gz
       hash: md5
-      md5: 195d9fd82a4b7f1187e573e55f4a903c
-      size: 199284
+      md5: e02a83ac6ca415bb30a82b1a25dd5b52
+      size: 197484
   compute_covariance@window0:
     cmd: uv run --locked --project src/python pipeline compute-covariance
       --returns-dir data/shared/returns --output-file
@@ -1050,8 +959,8 @@ stages:
       nfiles: 16
     - path: src/python/apps/pipeline/src
       hash: md5
-      md5: c7e2a79c3b3f6c884b89f370a7ac6b2f.dir
-      size: 2079701
+      md5: 4e814aa053b351726f16b9ee49a1a3b1.dir
+      size: 2075184
       nfiles: 229
     - path: src/python/pyproject.toml
       hash: md5
@@ -1533,8 +1442,8 @@ stages:
       size: 3203
     - path: src/python/apps/pipeline/src
       hash: md5
-      md5: c7e2a79c3b3f6c884b89f370a7ac6b2f.dir
-      size: 2079701
+      md5: 4e814aa053b351726f16b9ee49a1a3b1.dir
+      size: 2075184
       nfiles: 229
     - path: src/python/packages/dotell/pyproject.toml
       hash: md5
@@ -5762,71 +5671,6 @@ stages:
       hash: md5
       md5: e6c32edf897ce312f2205c0a89f9451b
       size: 24340
-  render@05_spatial_pricing-gfj:
-    cmd: just latex::build 05_spatial_pricing gfj && just latex::_bundle 
-      05_spatial_pricing gfj
-    deps:
-    - path: data/publication/certification/lean_bindings_check.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: data/publication/certification/refs_bib_freshness.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: infra/nix/pkgs/elsarticle-template.nix
-      hash: md5
-      md5: c783d494d1752c60e61dbd14ee3727f9
-      size: 2279
-    - path: infra/nix/pkgs/tandf-template.nix
-      hash: md5
-      md5: 8e8f27af39560192b299b5251a9dc3bb
-      size: 5968
-    - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
-      hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
-    - path: src/latex/justfile
-      hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
-    - path: src/latex/projects/05_spatial_pricing/Tectonic.toml
-      hash: md5
-      md5: 31c72cca62e40d2f519736b5d1343261
-      size: 485
-    - path: src/latex/projects/05_spatial_pricing/src
-      hash: md5
-      md5: 28f5593b1f94a244524a300b6c74012a.dir
-      size: 3678223
-      nfiles: 79
-    - path: src/latex/templates/pp-manuscript.sty
-      hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
-    - path: src/latex/tools/bundle-audit
-      hash: md5
-      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
-      size: 38586
-      isexec: true
-    - path: src/latex/tools/check-log
-      hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
-      isexec: true
-    - path: src/latex/tools/stage-images
-      hash: md5
-      md5: 4cf1deb995e6d096d7536911cba9afe5
-      size: 6582
-      isexec: true
-    outs:
-    - path: src/latex/projects/05_spatial_pricing/build/gfj/gfj.pdf
-      hash: md5
-      md5: d18d3ce8b0953afcaf5e13ab5e7aab41
-      size: 440899
-    - path: src/latex/projects/05_spatial_pricing/build/gfj/gfj.tar.gz
-      hash: md5
-      md5: abfa931ee33eaf14b8e04317f1a95dbe
-      size: 216310
   p1_etnic_alignment:
     cmd: uv run --locked --project src/python pipeline paper1-etnic-alignment
       --extract data/raw/hoberg_phillips/etnic_extract.parquet --crosswalk
@@ -5878,71 +5722,6 @@ stages:
       hash: md5
       md5: 85aa40c296c24ff6c4ae95f291ee4c62
       size: 3251
-  render@03_distance_implied_mpt-ejf:
-    cmd: just latex::build 03_distance_implied_mpt ejf && just latex::_bundle 
-      03_distance_implied_mpt ejf
-    deps:
-    - path: data/publication/certification/lean_bindings_check.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: data/publication/certification/refs_bib_freshness.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: infra/nix/pkgs/elsarticle-template.nix
-      hash: md5
-      md5: c783d494d1752c60e61dbd14ee3727f9
-      size: 2279
-    - path: infra/nix/pkgs/tandf-template.nix
-      hash: md5
-      md5: 8e8f27af39560192b299b5251a9dc3bb
-      size: 5968
-    - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
-      hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
-    - path: src/latex/justfile
-      hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
-    - path: src/latex/projects/03_distance_implied_mpt/Tectonic.toml
-      hash: md5
-      md5: 6bc826ce34e961195d75ee201acf585b
-      size: 401
-    - path: src/latex/projects/03_distance_implied_mpt/src
-      hash: md5
-      md5: b964708ed7183a4305e4bd72b68954ce.dir
-      size: 3014274
-      nfiles: 63
-    - path: src/latex/templates/pp-manuscript.sty
-      hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
-    - path: src/latex/tools/bundle-audit
-      hash: md5
-      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
-      size: 38586
-      isexec: true
-    - path: src/latex/tools/check-log
-      hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
-      isexec: true
-    - path: src/latex/tools/stage-images
-      hash: md5
-      md5: 4cf1deb995e6d096d7536911cba9afe5
-      size: 6582
-      isexec: true
-    outs:
-    - path: src/latex/projects/03_distance_implied_mpt/build/ejf/ejf.pdf
-      hash: md5
-      md5: 180ad0ad9cd3a52bd33c42fbdbb3dca1
-      size: 273277
-    - path: src/latex/projects/03_distance_implied_mpt/build/ejf/ejf.tar.gz
-      hash: md5
-      md5: 640db1bfb6d72de344f7b4472aff997f
-      size: 95345
   p5_two_field_qmle_render:
     cmd: uv run --locked --project src/python pipeline
       render-paper5-two-field-qmle --results-dir
@@ -5984,49 +5763,41 @@ stages:
       hash: md5
       md5: d41d8cd98f00b204e9800998ecf8427e
       size: 0
-    - path: infra/nix/pkgs/elsarticle-template.nix
-      hash: md5
-      md5: c783d494d1752c60e61dbd14ee3727f9
-      size: 2279
-    - path: infra/nix/pkgs/tandf-template.nix
-      hash: md5
-      md5: 8e8f27af39560192b299b5251a9dc3bb
-      size: 5968
     - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
       hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
+      md5: 5a519ba5fb1700e6a8cbaf58d819ac81
+      size: 5941193
     - path: src/latex/justfile
       hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
+      md5: f1077b1ad2ceb9fd84a360d4bd047509
+      size: 13813
     - path: src/latex/projects/06_information_motion/Tectonic.toml
       hash: md5
-      md5: 92edd4a63f0c2fe3e3dbc88f46a6b0d6
-      size: 609
+      md5: 0a157a6a033b533f8536091c293e1f39
+      size: 174
     - path: src/latex/projects/06_information_motion/src
       hash: md5
-      md5: 378bd3f5154d8a54b0239f7fd0ba2c5d.dir
-      size: 2426160
-      nfiles: 82
+      md5: ed0f13bd6dcc51d85b5b51b4676c173c.dir
+      size: 329913
+      nfiles: 39
     - path: src/latex/templates/pp-manuscript.sty
       hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
+      md5: a85dfc9aaed159f9283483e37a7133f0
+      size: 6507
     - path: src/latex/tools/bundle-audit
       hash: md5
-      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
-      size: 38586
+      md5: a717daea7bf09bd6a4ff61baf8f6024b
+      size: 34906
       isexec: true
     - path: src/latex/tools/check-log
       hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
+      md5: 8e84771fa93c147d159e97597c020927
+      size: 2504
       isexec: true
     - path: src/latex/tools/stage-images
       hash: md5
-      md5: 4cf1deb995e6d096d7536911cba9afe5
-      size: 6582
+      md5: f97c2ba173bba7bd4fcb9e120d8a9e24
+      size: 5516
       isexec: true
     outs:
     - path: src/latex/projects/06_information_motion/build/arxiv/arxiv.pdf
@@ -6035,146 +5806,8 @@ stages:
       size: 296247
     - path: src/latex/projects/06_information_motion/build/arxiv/arxiv.tar.gz
       hash: md5
-      md5: b80e6af105fd899c13bbd02e7ae77cb4
-      size: 73720
-  render_wfbs:
-    cmd: just latex::build 06_information_motion wfbs && just latex::build 
-      06_information_motion wfbs-blind
-    deps:
-    - path: data/publication/certification/lean_bindings_check.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: data/publication/certification/refs_bib_freshness.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
-      hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
-    - path: src/latex/justfile
-      hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
-    - path: src/latex/projects/06_information_motion/Tectonic.toml
-      hash: md5
-      md5: 92edd4a63f0c2fe3e3dbc88f46a6b0d6
-      size: 609
-    - path: src/latex/projects/06_information_motion/src
-      hash: md5
-      md5: 378bd3f5154d8a54b0239f7fd0ba2c5d.dir
-      size: 2426160
-      nfiles: 82
-    - path: src/latex/templates/pp-manuscript.sty
-      hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
-    - path: src/latex/tools/check-log
-      hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
-      isexec: true
-    outs:
-    - path: 
-        src/latex/projects/06_information_motion/build/wfbs-blind/wfbs-blind.pdf
-      hash: md5
-      md5: 823abba835d9a34b38d0eb7b40fd0a33
-      size: 289298
-    - path: src/latex/projects/06_information_motion/build/wfbs/wfbs.pdf
-      hash: md5
-      md5: 03dd6180d5d51369b8af0b0bb41b7697
-      size: 289750
-  render_management_science:
-    cmd: just latex::_bundle 06_information_motion management-science
-    deps:
-    - path: data/publication/certification/lean_bindings_check.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: data/publication/certification/refs_bib_freshness.stamp
-      hash: md5
-      md5: d41d8cd98f00b204e9800998ecf8427e
-      size: 0
-    - path: src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
-      hash: md5
-      md5: 5c8e15e02dab7b38de6c2fcf098831a8
-      size: 9771277
-    - path: src/latex/justfile
-      hash: md5
-      md5: 7946b936a4ab537195c495b1d16bcbc1
-      size: 22710
-    - path: src/latex/projects/06_information_motion/Tectonic.toml
-      hash: md5
-      md5: 92edd4a63f0c2fe3e3dbc88f46a6b0d6
-      size: 609
-    - path: src/latex/projects/06_information_motion/src
-      hash: md5
-      md5: 378bd3f5154d8a54b0239f7fd0ba2c5d.dir
-      size: 2426160
-      nfiles: 82
-    - path: src/latex/templates/pp-manuscript.sty
-      hash: md5
-      md5: 7326d96f9a1eaf9ea2e469f25c6d4126
-      size: 10882
-    - path: src/latex/tools/bundle-audit
-      hash: md5
-      md5: 626b82b00fb26aaa705b59d0f7d4e0b3
-      size: 38586
-      isexec: true
-    - path: src/latex/tools/check-log
-      hash: md5
-      md5: de59ebd44d702fc8a1b99e9ac6805530
-      size: 2510
-      isexec: true
-    - path: src/latex/tools/management-science
-      hash: md5
-      md5: a070c003f96d49d10531fe5760644b15
-      size: 17029
-      isexec: true
-    - path: src/latex/tools/stage-images
-      hash: md5
-      md5: 4cf1deb995e6d096d7536911cba9afe5
-      size: 6582
-      isexec: true
-    - path: src/lean/Main.lean
-      hash: md5
-      md5: eee7659502dc05fb9070d0bdec3d03fd
-      size: 89
-    - path: src/lean/lake-manifest.json
-      hash: md5
-      md5: c2cd3f8dee7ae1c6609a365da8b7f934
-      size: 4520
-    - path: src/lean/lean-toolchain
-      hash: md5
-      md5: e5eec29c8fde3c9ce64c115f675e21a3
-      size: 25
-    - path: src/lean/packages
-      hash: md5
-      md5: 262ebb722c0e68e5f03400055d3403e9.dir
-      size: 1143904
-      nfiles: 96
-    - path: src/lean/tools/claim-manifest
-      hash: md5
-      md5: 1a8bfa257f1b1ccc68262da8921962be.dir
-      size: 203578
-      nfiles: 12
-    outs:
-    - path: 
-        src/latex/projects/06_information_motion/build/management-science/management-science-companion.pdf
-      hash: md5
-      md5: 20f25d46f8cbc549568da79f0b0fc8a1
-      size: 203063
-    - path: 
-        src/latex/projects/06_information_motion/build/management-science/management-science.pdf
-      hash: md5
-      md5: 026ce56ac413ee04190502302f3a032f
-      size: 128131
-    - path: 
-        src/latex/projects/06_information_motion/build/management-science/management-science.tar.gz
-      hash: md5
-      md5: 5dc45c5567b2df420b9a0e45cbcc3d10
-      size: 93096
+      md5: 7b50244e8b27b66a85badd4191ef4fcb
+      size: 72066
   typed_distances_energy:
     cmd: uv run --locked --project src/python pipeline typed-distance 
       --provider-id qwen3-embedding-8b --representation-id 
@@ -17586,8 +17219,8 @@ stages:
       size: 3203
     - path: src/python/apps/pipeline/src
       hash: md5
-      md5: c7e2a79c3b3f6c884b89f370a7ac6b2f.dir
-      size: 2079701
+      md5: 4e814aa053b351726f16b9ee49a1a3b1.dir
+      size: 2075184
       nfiles: 229
     - path: src/python/packages/dotell/pyproject.toml
       hash: md5

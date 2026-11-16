@@ -41,11 +41,7 @@ BYTE_SOURCE_DEPS = frozenset(
     ]
 )
 
-PUBLICATION_ROOTS = {
-    "render",
-    "render_wfbs",
-    "render_management_science",
-}
+PUBLICATION_ROOTS = {"render"}
 CERTIFICATION = {
     "lean_claims",
     "lean_bindings_check",
@@ -84,6 +80,22 @@ def _command(stage: dict[str, Any]) -> str | None:
 
 def _is_publication_path(path: str) -> bool:
     return path.startswith(("${p1_tex}/", "${p3_tex}/", "${p5_tex}/", "${p6_tex}/"))
+
+
+def test_publication_builds_only_the_four_arxiv_manuscripts() -> None:
+    """The public build exposes one arXiv PDF and source archive per paper."""
+    builds = RAW_STAGES["render"]["foreach"]
+    assert set(builds) == {
+        f"{paper}-arxiv"
+        for paper in (
+            "01_continuous_bounds",
+            "03_distance_implied_mpt",
+            "05_spatial_pricing",
+            "06_information_motion",
+        )
+    }
+    assert all(item["target"] == "arxiv" for item in builds.values())
+    assert all(item["archive"] == "tar.gz" for item in builds.values())
 
 
 def test_public_stages_recompute_from_the_fixed_inputs() -> None:

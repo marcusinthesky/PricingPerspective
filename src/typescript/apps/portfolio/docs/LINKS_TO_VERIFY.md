@@ -10,7 +10,7 @@ The website distinguishes direct publication records from researcher-profile sea
 | Wasserstein-Barycentric Interaction Fields | Canonical | Canonical | Canonical | Canonical |
 | Portfolio Risk Bounds | Canonical | Canonical | Canonical | Canonical |
 
-The 2024 Hugging Face record may retain the original submission title; its arXiv, SSRN, and ResearchGate destinations point to the supplied publication records.
+The 2024 Hugging Face record may retain an earlier paper title; its arXiv, SSRN, and ResearchGate destinations point to the supplied publication records.
 
 ## Researchers
 

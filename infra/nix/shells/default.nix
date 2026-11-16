@@ -26,15 +26,13 @@ let
     }
     {
       name = "papers";
-      description = "Manuscript rendering, publication bundles, and bibliography projection.";
+      description = "arXiv manuscript rendering, source bundles, and bibliography projection.";
       packages = with pkgs; [
         tectonic
         pandoc
         poppler-utils
         imagemagick
-        rsync
         zip
-        unzip
         jq
         yq
         ripgrep
@@ -42,14 +40,15 @@ let
         customPkgs.chktex
         customPkgs.pgf-metrics
         customPkgs.frontmatter-cli
-        customPkgs.tandf-template
-        customPkgs.elsarticle-template
       ];
     }
     {
       name = "site";
       description = "The retained paper website and static export.";
-      packages = [ customPkgs.bun ];
+      packages = [
+        customPkgs.bun
+        pkgs.nodejs
+      ];
     }
     {
       name = "checks";

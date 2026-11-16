@@ -27,5 +27,5 @@ just reproduction-check
 Tests use independent references where available, including exhaustive transport
 assignments, spatial-estimation oracles and analytic fixtures. Final validation
 runs complete suites in separate package processes without Testmon selection.
-See [REPLICATION.md](../../../../REPLICATION.md) for the fixed inputs, historical
+See the root [README](../../../../README.md) for the fixed inputs, historical
 benchmarks and published-precision acceptance check.

@@ -16,10 +16,8 @@ templates, engines, or packages.
   prose; consume values through `\ppvalue{key}`.
 - A project may depend on `templates/`; templates must never depend on a project.
   Manuscript sources must never import from another project.
-- Every article project must keep compiling `arxiv` plus its declared venue
-  targets: Paper 1 `quantitative-finance`, Paper 3 `ejf`, Paper 5 `gfj`, and
-  Paper 6 `wfbs` and `management-science`.
-  Do not make the shared body conditional on its target.
+- Every article project has exactly one target, `arxiv`. Keep its adapter thin
+  and the shared body independent of layout.
 
 ## Manuscript rules
 
@@ -55,29 +53,17 @@ never Lean identifiers, paths, or snippets. Each target
 renders the paper's "Formal verification status" appendix over all checked claims.
 The disclosure is identifier-free by construction; author or change publication ownership/disclosures in
 `src/lean/tools/claim-manifest/`. The corresponding mathematical statement lives in its
-native annotation beside the original Lean proof. Submission bundles run the shared
+native annotation beside the original Lean proof. Source bundles run the shared
 `just lean::certify` path and exact publication checks before staging.
 
 ## Workflow
 
 1. Edit the smallest owning file; do not mix content and template changes.
 2. Run `just latex::fmt`, then `just latex::check`.
-3. For a release candidate, run `just latex::bundle <paper> arxiv` and
-   `just latex::bundle <paper> <venue>`; inspect both PDFs. A
-   successful compile alone is not release evidence — the bundle audit is, and
-   it is what the DVC `render` stage runs. Since there is no longer a second
-   engine to cross-check against, the venue's own recompilation of the upload
-   is the first place an engine-version divergence can appear; keep target
-   packages conservative (see `ARCHITECTURE.md`, residual risk).
-4. To show a co-author or referee *what changed*, run
-   `just latex::diff <paper> <target> [rev=HEAD]` rather than describing the
-   edit or diffing pixels: it renders the manuscript with additions underlined
-   and deletions struck through, into the gitignored
-   `build/<target>/diff/<target>-diff.pdf`. Reach for `diff-pdf` on the built
-   PDFs only when the question is whether the artifact moved at all, or when no
-   source exists (LFS baselines, referee returns, reference PDFs). Both tools
-   and their failure modes: the `visual-document-analysis` skill.
-5. A font that will not load — `Font OT1/lmr/m/n/5=rm-lmr5 at 5.0pt not
+3. For a release candidate, run `just latex::bundle <paper> arxiv` and inspect
+   the PDF. A successful compile alone is not release evidence: the bundle audit
+   checks the complete source closure and recompiles the unpacked archive.
+4. A font that will not load — `Font OT1/lmr/m/n/5=rm-lmr5 at 5.0pt not
    loadable: Metric (TFM) file or installed font not found`, typically from
    a target — is a bundle-subset gap, not a defect in the `.tex`. The
    accompanying `accessing absolute path .../DejaVu*.ttf` warnings are a

@@ -12,4 +12,4 @@ The frozen `fixed_inputs` stage groups the released inputs and their checksums.
 `reference/published_values.json` and `reference/published_results.json` are the
 reviewed baselines for manuscript values, exact counts and figures used by
 `just reproduction-check`. Historical Paper 5 and Paper 6 numerical benchmarks
-remain fixed inputs as described in [REPLICATION.md](../REPLICATION.md).
+remain fixed inputs identified by their DVC hashes.

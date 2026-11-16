@@ -42,11 +42,7 @@ logger = logging.getLogger(__name__)
 # fraction of it — a PGF figure is placed at natural size and there is no width
 # argument to rescale it, which is the whole point: text comes out at the
 # document's own point size instead of whatever a scale factor happened to be.
-#
-# This is the `arxiv`/`draft` measure. The `quantitative-finance` target is 6.1%
-# wider (452.97pt vs 426.79pt), so figures under-fill it by 5.8% — accepted
-# deliberately, since per-target variants would double the figure build and the
-# shared body may not be conditional on its target.
+# This is the shared arXiv manuscript measure.
 TEXTWIDTH_IN = 5.906
 
 
@@ -190,12 +186,9 @@ _FORMATS = {".pgf": "pgf"}
 # Vector marks a single panel may carry. Dyad-level clouds are quadratic in the
 # roster -- 1,326 pairs at 52 firms, 4,950 at 100 -- and PGF emits one path per
 # mark, so a full cloud exhausted TeX's main memory (a 15 MB, 113k-line .pgf).
-# `rasterized=True` fixes the size but makes matplotlib emit
-# `\includegraphics` of a sidecar PNG, which the rQUF2e journal class rejects
-# while the arXiv article class accepts it -- so rasterizing would build one
-# venue and not the other. Thinning keeps every target on the same pure-vector
-# path. The cap is set just above the 1,326 marks the 52-firm figures carried,
-# which TeX handled comfortably.
+# Thinning bounds the TeX input size and keeps the figures entirely vector,
+# without raster sidecars. The cap is set just above the 1,326 marks the
+# 52-firm figures carried, which TeX handled comfortably.
 _MAX_VECTOR_MARKS = 1500
 
 

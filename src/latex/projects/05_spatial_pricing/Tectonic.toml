@@ -3,26 +3,6 @@ name = "05_spatial_pricing"
 bundle = "../../bundle/tlextras-2022.0r0-pricing-perspective.zip"
 
 [[output]]
-name = "draft"
-type = "pdf"
-inputs = ["targets/draft.tex"]
-
-[[output]]
 name = "arxiv"
 type = "pdf"
 inputs = ["targets/arxiv.tex"]
-
-[[output]]
-name = "gfj"
-type = "pdf"
-inputs = ["targets/gfj.tex"]
-
-[[output]]
-name = "gfj-anonymous"
-type = "pdf"
-inputs = ["targets/gfj-anonymous.tex"]
-
-[[output]]
-name = "gfj-title-page"
-type = "pdf"
-inputs = ["targets/gfj-title-page.tex"]

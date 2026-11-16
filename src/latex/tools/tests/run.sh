@@ -2,7 +2,7 @@
 # Fixture suite for the src/latex quality tools:
 #   - tools/check-log        (log policy: glyphs, unresolved objects, overfull)
 #   - tools/interpretation-contract (semantic digest and numeric-binding parity)
-#   - tools/bundle-audit     (submission-parity clean-room gate, t24.5)
+#   - tools/bundle-audit     (source-closure clean-room gate)
 # A "hostile" bundle fixture PASSES when bundle-audit correctly REJECTS it.
 set -uo pipefail
 
@@ -59,36 +59,38 @@ else
 fi
 
 # --- bundle-audit hostile fixtures (must be REJECTED) -----------------------
-expect_reject() {  # stage target label
-  local extension out; out=$(mktemp -d)
+expect_reject() {  # stage target label [expected BibTeX diagnostic]
+  local out; out=$(mktemp -d)
   mkdir "$out/source"
   if ! cp -R "$1/." "$out/source/"; then
     bad "could not copy $3 fixture"
     rm -rf "$out"
     return
   fi
-  extension=tar.gz
-  [[ "$2" == quantitative-finance ]] && extension=zip
-  if uv run --script bundle-audit "$out/source" "$2" "$out/b.$extension" "$bundle_url" >/dev/null 2>&1; then
+  if uv run --script bundle-audit "$out/source" "$2" "$out/b.tar.gz" "$bundle_url" >/dev/null 2>&1; then
     bad "bundle-audit should reject $3"
+  elif [[ -n "${4:-}" ]] && ! rg -qF "$4" "$out/source/main.blg"; then
+    bad "bundle-audit rejected $3 without the expected BibTeX failure"
   else
     pass "bundle-audit rejects $3"
   fi
   rm -rf "$out"
 }
 expect_reject tests/fixtures/hostile-missing-image        arxiv                "omitted \\includegraphics image"
-expect_reject tests/fixtures/hostile-missing-bst          quantitative-finance "omitted bibliography style (tfcad.bst)"
+expect_reject tests/fixtures/hostile-missing-bst          arxiv "omitted bibliography style" "I couldn't open style file missing-bibliography-style.bst"
 
 # A clean target plus a manually injected image must fail the recorder-closure
 # gate even though TeX itself never opens the extra file.
-if ( cd "$latex_root" && just _stage 01_continuous_bounds arxiv >/dev/null 2>&1 ); then
-  unused_stage="$latex_root/projects/01_continuous_bounds/build/arxiv/bundle"
+unused_root=$(mktemp -d)
+unused_stage="$unused_root/source"
+if ( cd "$latex_root" && just _stage 01_continuous_bounds arxiv "$unused_stage" >/dev/null 2>&1 ); then
   mkdir -p "$unused_stage/images"
   printf 'not a referenced PDF\n' > "$unused_stage/images/unreferenced.pdf"
   expect_reject "$unused_stage" arxiv "unreferenced staged image"
 else
   bad "could not stage Paper 1 for unreferenced-image fixture"
 fi
+rm -rf "$unused_root"
 
 # External absolute-path fixture: the recorded dependency closure (the
 # `--makefile-rules` dump) must reject an \input that resolves outside the
@@ -134,10 +136,11 @@ if run_bundle && cp "$archive" "$d1/a.tgz" \
    && run_bundle && cp "$archive" "$d2/b.tgz"; then
   tar -xzf "$d1/a.tgz" -C "$d1" MANIFEST.json 2>/dev/null
   tar -xzf "$d2/b.tgz" -C "$d2" MANIFEST.json 2>/dev/null
-  if cmp -s "$d1/MANIFEST.json" "$d2/MANIFEST.json"; then
-    pass "bundle MANIFEST.json is byte-deterministic across runs"
+  if cmp -s "$d1/a.tgz" "$d2/b.tgz" \
+     && cmp -s "$d1/MANIFEST.json" "$d2/MANIFEST.json"; then
+    pass "arXiv archive and MANIFEST.json are byte-deterministic across runs"
   else
-    bad "bundle MANIFEST.json differs between runs (non-deterministic)"
+    bad "arXiv archive or MANIFEST.json differs between runs (non-deterministic)"
   fi
   if tar tzf "$d1/a.tgz" | grep -qE '\.(aux|log|fls|fdb_latexmk|mk|out|bbl|blg)$|(^|/)main\.pdf$'; then
     bad "bundle archive contains build intermediates or main.pdf"
@@ -148,30 +151,5 @@ else
   bad "determinism check could not build 01_continuous_bounds arxiv bundle twice"
 fi
 rm -rf "$d1" "$d2"
-
-# Quantitative Finance requires a ZIP upload. Exercise its deterministic writer
-# separately from the arXiv tarball path and reject compiled intermediates.
-run_qf_bundle() { ( cd "$latex_root" && just _bundle 01_continuous_bounds quantitative-finance >/dev/null 2>&1 ); }
-qf_archive="$latex_root/projects/01_continuous_bounds/build/quantitative-finance/quantitative-finance.zip"
-q1=$(mktemp -d); q2=$(mktemp -d)
-if run_qf_bundle && cp "$qf_archive" "$q1/a.zip" \
-   && run_qf_bundle && cp "$qf_archive" "$q2/b.zip"; then
-  unzip -p "$q1/a.zip" MANIFEST.json > "$q1/MANIFEST.json" 2>/dev/null
-  unzip -p "$q2/b.zip" MANIFEST.json > "$q2/MANIFEST.json" 2>/dev/null
-  if cmp -s "$q1/a.zip" "$q2/b.zip" \
-     && cmp -s "$q1/MANIFEST.json" "$q2/MANIFEST.json"; then
-    pass "QF ZIP and MANIFEST.json are byte-deterministic across runs"
-  else
-    bad "QF ZIP or MANIFEST.json differs between runs (non-deterministic)"
-  fi
-  if unzip -Z1 "$q1/a.zip" | grep -qE '\.(aux|log|fls|fdb_latexmk|mk|out|bbl|blg)$|(^|/)main\.pdf$'; then
-    bad "QF ZIP contains build intermediates or main.pdf"
-  else
-    pass "QF ZIP contains no build intermediates or compiled PDF"
-  fi
-else
-  bad "QF ZIP determinism check could not build the template bundle twice"
-fi
-rm -rf "$q1" "$q2"
 
 exit "$fail"

@@ -12,10 +12,6 @@ from pipeline.precision import own_float64
 commands = typer.Typer()
 
 
-# FROZEN acquisition command (dvc stage p1_etnic_extract): its options, defaults,
-# and body are kept verbatim; changing them needs a deliberate refresh.
-
-
 @commands.command("paper1-etnic-alignment")
 def cli_paper1_etnic_alignment(
     extract: Annotated[Path, typer.Option(help="Roster-restricted ETNIC extract.")],

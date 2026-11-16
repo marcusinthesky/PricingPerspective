@@ -18,14 +18,16 @@ description: Per-PR record of changes to the four papers, numerical reproduction
 
 ### Changed
 
-- Updated the four LaTeX manuscripts, submission targets, citation metadata and
+- Updated the four arXiv manuscripts, citation metadata and
   companion website to reflect the retained analyses.
+- Restricted manuscript builds and DVC publication outputs to the four arXiv
+  targets, including their PDFs and source archives.
 - Pinned the Nix/devenv environment and Python workspace. Statistical computation
   uses public Statadic; documentation projections use public Insitu.
 - Reduced Lean dependencies to the required proof closure. Statadic resolves
   from its pinned public GitHub revision; EnergyStatistics and
   WassersteinGeometry retain the bridges needed by the papers.
-- Verified 1,668 Python tests and the Lean publication checks for 63 claims with
+- Verified 1,660 Python tests and the Lean publication checks for 63 claims with
   no admissions. Full DVC reproduction and publication comparisons passed:
   922 numeric displays, two numerical identity bounds, 42 fragments and
   21 figures.
@@ -49,8 +51,8 @@ description: Per-PR record of changes to the four papers, numerical reproduction
 - Counted barycentric peers using the solver's existing numerical-support
   threshold. Corrected the remaining-peer labels for AMD (94 to 30) and HON
   (75 to 53); weights, estimates, top-five peers and residual mass are unchanged.
-- Made manuscript PDFs deterministic across preview and certified submission
-  builds, and preserved certified submission archives during preview builds.
+- Made arXiv PDFs deterministic across preview and release builds, and
+  preserved certified source archives during preview builds.
 - Made Paper 6 tests independent of downloaded artifacts and terminal color
   formatting, so the standard CI run works from a clean checkout.
 

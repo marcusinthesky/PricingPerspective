@@ -27,7 +27,7 @@ Edit the long-form notes in `src/content/blog/`. Their titles, dates, summaries,
 
 ## Paper exhibits
 
-The Paper 1 PCoA and Paper 2 peer-basket exhibits in `src/content/papers/` are rasterized web assets derived from the canonical PGF figures in `src/latex/projects/`. Re-render the corresponding PGF with `just --tempdir /tmp latex::preview` before replacing the files under `public/figures/`.
+The Paper 1 metric-MDS and Paper 2 peer-basket exhibits in `src/content/papers/` are rasterized web assets derived from the canonical PGF figures in `src/latex/projects/`. Re-render the corresponding PGF with `just --tempdir /tmp latex::preview` before replacing the files under `public/figures/`.
 
 ## The four paper pages
 

@@ -21,10 +21,11 @@ The repository contains the numerical pipeline, Lean proofs, LaTeX sources,
 website and tests needed to reproduce these papers. Statistical computation uses
 the public [Statadic](https://github.com/marcusinthesky/statadic) package; document
 projections use public [Insitu](https://github.com/marcusinthesky/insitu).
+The manuscript targets, PDFs and source archives are restricted to arXiv.
 
 ## Reproduction
 
-Install Nix, devenv and Git LFS, then follow [REPLICATION.md](REPLICATION.md).
+Install Nix, devenv and Git LFS.
 The pinned environment provides Python 3.13, Lean 4.35 and the manuscript tools.
 
 ```sh
@@ -38,8 +39,9 @@ devenv shell -- just reproduction-check
 
 Reproduction starts from published embeddings, adjusted returns and text-free
 numeric controls. Article text and scraping implementations are not distributed.
-The [replication guide](REPLICATION.md) identifies the fixed historical numeric
-benchmarks and explains the published-precision comparison.
+The [data guide](data/README.md) identifies the fixed historical numeric
+benchmarks and publication comparisons. The [manuscript guide](src/latex/README.md)
+describes the four arXiv builds and source bundles.
 
 Run `just --list` for the maintained commands. The repository uses `prek` for
 formatting and validation; `just check` runs its configured checks.

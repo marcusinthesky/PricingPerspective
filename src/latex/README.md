@@ -1,33 +1,31 @@
 # Reproducing the four papers
 
-The four manuscript projects are `01_continuous_bounds`,
-`03_distance_implied_mpt`, `05_spatial_pricing`, and `06_information_motion`.
-LaTeX is their canonical source. Python produces empirical values, tables and
-figures; Lean produces the formal-verification disclosures.
+The manuscript projects are `01_continuous_bounds`, `03_distance_implied_mpt`,
+`05_spatial_pricing`, and `06_information_motion`. Each has one `arxiv` target.
+LaTeX is their canonical source; Python produces empirical values, tables and
+figures, and Lean produces the formal-verification disclosures.
 
 Run from the repository root:
 
 ```bash
 just latex::check
 just latex::bundle 01_continuous_bounds arxiv
-just latex::bundle 01_continuous_bounds quantitative-finance
-just latex::bundle 03_distance_implied_mpt ejf
-just latex::bundle 05_spatial_pricing gfj
-just latex::bundle 06_information_motion management-science
-just latex::build 06_information_motion wfbs
+just latex::bundle 03_distance_implied_mpt arxiv
+just latex::bundle 05_spatial_pricing arxiv
+just latex::bundle 06_information_motion arxiv
 ```
 
-Each project also has an `arxiv` target. The Management Science helper builds
-both the manuscript and electronic companion. `just latex::build <paper>
-<target> 1` compiles offline. `just latex::preview <figure.pgf>` renders a single
-pipeline figure for inspection. `just latex::fmt` rewrites authored formatting;
-`just latex::check` only checks it and compiles the publication matrix.
+`just latex::build <paper> arxiv 1` compiles offline for inspection, preserving
+an existing certified source archive. `just latex::watch <paper> arxiv` rebuilds
+when authored inputs change. `just latex::preview <figure.pgf>` renders a single
+pipeline figure. `just latex::fmt` rewrites authored formatting;
+`just latex::check` checks formatting and compiles all four papers.
 
-The pinned Tectonic engine reads the versioned bundle in `bundle/`. Publisher
-classes and bibliography styles are materialized from pinned environment assets
-by the build recipes. Build PDFs and source archives are published under each
-project's `build/<target>/` directory. A bundle is audited, unpacked and compiled
-again before publication. No submission correspondence belongs in these archives.
+The pinned Tectonic engine reads the versioned bundle in `bundle/`. Builds do
+not fetch TeX packages. Each project's `build/arxiv/` publishes `arxiv.pdf` and
+`arxiv.tar.gz`. The source archive is audited, unpacked and compiled again
+before publication. Preview and release use the same deterministic `main.tex`
+compile, so unchanged inputs produce the same PDF bytes.
 
 Generated values and images are pipeline-owned. Reproduce them with DVC rather
 than editing their files. Paper 1's reviewed interpretation snapshot binds its

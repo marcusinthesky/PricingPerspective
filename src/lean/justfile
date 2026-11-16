@@ -92,7 +92,7 @@ architect-export:
         PricingPerspective:blueprint PricingPerspective:blueprintJson \
         WassersteinGeometry:blueprint WassersteinGeometry:blueprintJson
 
-# The proof-certification owner for CI, DVC and submission bundles. An optional
+# The proof-certification owner for CI, DVC and arXiv source bundles. An optional
 # project skips papers without approved claims; claimed papers certify the same
 # complete workspace. Prose-only correspondence remains the cheap check below.
 certify project="":
@@ -175,7 +175,7 @@ blueprint-check: checkdecls-build blueprint-prepare
       uv run --project blueprint --locked python blueprint/run_leanblueprint.py web && \
       uv run --project blueprint --locked python blueprint/run_leanblueprint.py checkdecls
 
-# Build the printable proof-development companion (not a submission source).
+# Build the printable proof-development companion, separate from the arXiv manuscripts.
 blueprint-pdf: blueprint-prepare
     #!/usr/bin/env bash
     set -euo pipefail

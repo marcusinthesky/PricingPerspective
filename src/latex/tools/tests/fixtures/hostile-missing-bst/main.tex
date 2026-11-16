@@ -1,7 +1,6 @@
-\documentclass[largeformat]{interact}
+\documentclass[11pt]{article}
 
 \usepackage[round,authoryear]{natbib}
-\usepackage{microtype}
 \usepackage{pp-manuscript}
 \usepackage[hidelinks]{hyperref}
 \usepackage[capitalise,nameinlink,noabbrev]{cleveref}
@@ -11,28 +10,13 @@
 
 \begin{document}
 
-\articletype{ARTICLE}
 \title{\papertitle}
-\author{\name{\paperauthors}\affil{\paperaffiliations}}
-\thanks{\papercontact}
+\author{\paperauthors}
 \maketitle
-
-\begin{abstract}
-  This document verifies the Quantitative Finance target against Taylor \& Francis's
-  Interact manuscript class.
-\end{abstract}
-
-\begin{keywords}
-  \paperkeywords
-\end{keywords}
-
-\begin{jelcode}
-  \paperjel
-\end{jelcode}
 
 \input{chapters/introduction}
 
-\bibliographystyle{tfcad}
+\bibliographystyle{missing-bibliography-style}
 \bibliography{refs}
 
 \end{document}

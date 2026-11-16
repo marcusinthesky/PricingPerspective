@@ -20,5 +20,5 @@ just python::hotelling::test-fresh
 just python::hotelling::test-all
 ```
 
-Use the root [replication guide](../../../../REPLICATION.md) for complete input
+Use the root [README](../../../../README.md) for complete input
 and execution instructions.

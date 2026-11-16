@@ -1,19 +1,20 @@
-"""ETNIC extract integrity and alignment fixtures on synthetic networks."""
+"""ETNIC alignment fixtures on synthetic saved numeric networks."""
 
 from __future__ import annotations
 
-import zipfile
 from itertools import product
 from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 import pytest
+import yaml
 from pipeline.stages.papers.paper1.etnic_alignment import (
     EtnicAlignmentConfig,
     _complete_roster,
     _mantel,
     _sector_partial,
+    run_etnic_alignment,
 )
 from statadic.hypothesis.core import Hypothesis
 from statadic.hypothesis.homogeneity import PermutationPlan
@@ -34,23 +35,6 @@ def _network(years: list[int], gvkeys: list[int], sim: np.ndarray) -> pd.DataFra
         for (i, a), (j, b) in product(enumerate(gvkeys), repeat=2)
     ]
     return pd.DataFrame(rows, columns=["year", "gvkey1", "gvkey2", "score"])
-
-
-def _archives(tmp_path: Path, frame: pd.DataFrame) -> tuple[Path, Path]:
-    """ETNIC-All: one member per year; ETNIC-3: one thresholded, shifted file."""
-    everything = tmp_path / "Etnic_all_data.zip"
-    with zipfile.ZipFile(everything, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        for year, group in frame.groupby("year"):
-            z.writestr(
-                f"Etnic_all_data/tnicall{year}.txt",
-                group.fillna({"score": 1.0}).to_csv(sep="\t", index=False),
-            )
-    etnic3 = tmp_path / "Etnic3_data.zip"
-    linked = frame[(frame.score > _OFFSET) | frame.score.isna()].copy()
-    linked["score"] = (linked.score - _OFFSET).round(4)
-    with zipfile.ZipFile(etnic3, "w", compression=zipfile.ZIP_DEFLATED) as z:
-        z.writestr("ETNIC3_data.txt", linked.to_csv(sep="\t", index=False, na_rep=""))
-    return everything, etnic3
 
 
 def _world(tmp_path: Path) -> tuple[pd.DataFrame, np.ndarray, list[str], list[int]]:
@@ -98,6 +82,46 @@ def test_roster_completion_drops_the_never_co_observed_firm() -> None:
     kept, dropped = _complete_roster(frame, [1, 2, 3])
     assert dropped == [2]
     assert kept == [1, 3]
+
+
+def test_alignment_recovers_planted_geometry(tmp_path: Path) -> None:
+    """A saved numeric comparator preserves planted alignment and the roster."""
+    frame, _dist, _tickers, gvkeys = _world(tmp_path)
+    extract = frame.loc[
+        frame["year"].between(2018, 2019)
+        & frame["gvkey1"].isin(gvkeys)
+        & frame["gvkey2"].isin(gvkeys)
+        & (frame["gvkey1"] != frame["gvkey2"])
+    ].copy()
+    extract["etnic3_link"] = extract["score"] > _OFFSET
+    extract["etnic3_score"] = (
+        (extract["score"] - _OFFSET).round(4).where(extract["etnic3_link"])
+    )
+    extract.to_parquet(tmp_path / "extract.parquet", index=False)
+    cfg = EtnicAlignmentConfig(
+        extract=tmp_path / "extract.parquet",
+        crosswalk=tmp_path / "crosswalk.csv",
+        universe_csv=tmp_path / "universe.csv",
+        distance_root=tmp_path / "distances",
+        geometries=("wasserstein_w2",),
+        primary_geometry="wasserstein_w2",
+        permutations=199,
+        bootstrap_draws=49,
+        seed=1,
+        output_summary=tmp_path / "out/summary.yaml",
+        output_pairs=tmp_path / "out/pairs.parquet",
+    )
+    run_etnic_alignment(cfg)
+    summary = yaml.safe_load(cfg.output_summary.read_text())
+    mantel = summary["mantel"]["wasserstein_w2"]
+    assert mantel["spearman"]["r"] == pytest.approx(1.0)
+    assert mantel["pearson"]["p"] <= 0.01  # noqa: PLR2004
+    assert "p" not in mantel["partial_sector"]
+    assert summary["roster"]["etnic_firms"] == _FIRMS
+    link = summary["etnic3_link_classification"]
+    assert link["auc"]["estimate"] == pytest.approx(1.0)
+    pairs = pd.read_parquet(cfg.output_pairs)
+    assert len(pairs) == _FIRMS * (_FIRMS - 1) // 2
 
 
 def test_stage_mantel_blocks_equal_native_owners(tmp_path: Path) -> None:

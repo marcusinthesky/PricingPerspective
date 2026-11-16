@@ -53,40 +53,28 @@ with tempfile.TemporaryDirectory() as td:
 
     pgf_source = root / "pgf-source"
     base_stage = root / "pgf-base-stage"
-    venue_stage = root / "pgf-venue-stage"
     (pgf_source / "images").mkdir(parents=True)
-    for target_stage in (base_stage, venue_stage):
-        (target_stage / "chapters").mkdir(parents=True)
-        (target_stage / "chapters" / "live.tex").write_text(
-            r"\ppfigure{1}{referenced}", encoding="utf-8"
-        )
-    (base_stage / "main.tex").write_text(r"\input{chapters/live}", encoding="utf-8")
-    (venue_stage / "main.tex").write_text(
-        r"\renewcommand{\ppfiguresuffix}{-venue}\input{chapters/live}",
-        encoding="utf-8",
+    (base_stage / "chapters").mkdir(parents=True)
+    (base_stage / "chapters/live.tex").write_text(
+        r"\ppfigure{1}{referenced}", encoding="utf-8"
     )
+    (base_stage / "main.tex").write_text(r"\input{chapters/live}", encoding="utf-8")
     (pgf_source / "images" / "referenced.pgf").write_text(
         r"\includegraphics{referenced-img0.png}", encoding="utf-8"
     )
     (pgf_source / "images" / "referenced-img0.png").write_bytes(b"base raster")
-    (pgf_source / "images" / "referenced-venue.pgf").write_text(
-        r"\includegraphics{referenced-venue-img0.png}", encoding="utf-8"
-    )
-    (pgf_source / "images" / "referenced-venue-img0.png").write_bytes(b"venue raster")
-
     base_staged = stage_reachable_images(pgf_source, base_stage, "main.tex")
     assert base_staged == [
         Path("images/referenced-img0.png"),
         Path("images/referenced.pgf"),
     ]
-    assert not (base_stage / "images" / "referenced-venue.pgf").exists()
-
-    venue_staged = stage_reachable_images(pgf_source, venue_stage, "main.tex")
-    assert venue_staged == [
-        Path("images/referenced-venue-img0.png"),
-        Path("images/referenced-venue.pgf"),
-    ]
-    assert not (venue_stage / "images" / "referenced.pgf").exists()
-    assert not (venue_stage / "images" / "referenced-img0.png").exists()
+    (pgf_source / "images/referenced-img0.png").unlink()
+    try:
+        stage_reachable_images(pgf_source, base_stage, "main.tex")
+    except StageError as error:
+        assert "missing reachable LaTeX dependency" in str(error)
+        assert "referenced-img0.png" in str(error)
+    else:
+        raise AssertionError("a missing PGF raster sidecar must fail staging")
 
 print("reachable-image staging fixtures passed")

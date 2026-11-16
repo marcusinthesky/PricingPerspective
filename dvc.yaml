@@ -1732,39 +1732,25 @@ stages:
         paper: 01_continuous_bounds
         target: arxiv
         archive: tar.gz
-      01_continuous_bounds-quantitative-finance:
-        paper: 01_continuous_bounds
-        target: quantitative-finance
-        archive: zip
       03_distance_implied_mpt-arxiv:
         paper: 03_distance_implied_mpt
         target: arxiv
         archive: tar.gz
-      03_distance_implied_mpt-ejf:
-        paper: 03_distance_implied_mpt
-        target: ejf
-        archive: tar.gz
       05_spatial_pricing-arxiv:
         paper: 05_spatial_pricing
         target: arxiv
-        archive: tar.gz
-      05_spatial_pricing-gfj:
-        paper: 05_spatial_pricing
-        target: gfj
         archive: tar.gz
       06_information_motion-arxiv:
         paper: 06_information_motion
         target: arxiv
         archive: tar.gz
     do:
-      desc: Compile one manuscript target with Tectonic (check-log gated), then stage, audit and deterministically
-        archive its submission bundle. The bundle step recompiles twice (clean room, then from the archive),
+      desc: Compile one arXiv manuscript with Tectonic (check-log gated), then stage, audit and deterministically
+        archive its source bundle. The bundle step recompiles twice (clean room, then from the archive),
         so a PDF is never published from sources that would not survive upload. Outputs are git (LFS)
         tracked, not pushed to the DVC remote.
       cmd: just latex::build ${item.paper} ${item.target} && just latex::_bundle ${item.paper} ${item.target}
       deps:
-      - infra/nix/pkgs/tandf-template.nix
-      - infra/nix/pkgs/elsarticle-template.nix
       - src/latex/justfile
       - src/latex/templates/pp-manuscript.sty
       - src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
@@ -1780,52 +1766,6 @@ stages:
           cache: false
       - src/latex/projects/${item.paper}/build/${item.target}/${item.target}.${item.archive}:
           cache: false
-  render_wfbs:
-    desc: Named and anonymous World Finance and Banking Symposium PDFs. The symposium takes manuscripts
-      rather than source archives, so these are check-log gated builds without a bundle audit.
-    cmd: just latex::build 06_information_motion wfbs && just latex::build 06_information_motion wfbs-blind
-    deps:
-    - src/latex/justfile
-    - src/latex/templates/pp-manuscript.sty
-    - src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
-    - src/latex/tools/check-log
-    - src/latex/projects/06_information_motion/Tectonic.toml
-    - ${p6_tex}
-    - data/publication/certification/lean_bindings_check.stamp
-    - data/publication/certification/refs_bib_freshness.stamp
-    outs:
-    - src/latex/projects/06_information_motion/build/wfbs/wfbs.pdf:
-        cache: false
-    - src/latex/projects/06_information_motion/build/wfbs-blind/wfbs-blind.pdf:
-        cache: false
-  render_management_science:
-    desc: 'Anonymous Management Science manuscript and electronic companion: the management-science tool
-      compiles both, audits anonymity and archives the source pair.'
-    cmd: just latex::_bundle 06_information_motion management-science
-    deps:
-    - src/latex/justfile
-    - src/latex/templates/pp-manuscript.sty
-    - src/latex/bundle/tlextras-2022.0r0-pricing-perspective.zip
-    - src/latex/tools/check-log
-    - src/latex/tools/stage-images
-    - src/latex/tools/bundle-audit
-    - src/latex/tools/management-science
-    - src/lean/packages
-    - src/lean/tools/claim-manifest
-    - src/lean/Main.lean
-    - src/lean/lean-toolchain
-    - src/lean/lake-manifest.json
-    - src/latex/projects/06_information_motion/Tectonic.toml
-    - ${p6_tex}
-    - data/publication/certification/lean_bindings_check.stamp
-    - data/publication/certification/refs_bib_freshness.stamp
-    outs:
-    - src/latex/projects/06_information_motion/build/management-science/management-science.pdf:
-        cache: false
-    - src/latex/projects/06_information_motion/build/management-science/management-science.tar.gz:
-        cache: false
-    - src/latex/projects/06_information_motion/build/management-science/management-science-companion.pdf:
-        cache: false
   p6_article_redraw_validation:
     desc: Known-law assessment of the corporate stratified article-redraw percentiles at fixed observed
       coverage, with independent generated archives.

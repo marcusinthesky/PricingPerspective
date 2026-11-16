@@ -16,7 +16,7 @@ article-measurement sensitivity, without structural identification or population
 From the repository root:
 
 ```bash
-dvc repro render@06_information_motion-arxiv render_management_science render_wfbs
+dvc repro render@06_information_motion-arxiv
 ```
 
 The historical fixed study retains durable oracle arrays, replicate coefficients, premise checks,
@@ -30,7 +30,7 @@ The campaign's read-only audit checks its frozen inputs, historical source archi
 when present, and checkpoint bytes. Proof certification runs in the separate Lean
 DVC stages; numerical resume compatibility uses the existing Semflow identity.
 
-The completed study is an immutable input owned by `information_recovery.dvc`.
+The completed study is retained as a frozen DVC input.
 `p6_directional_validation` derives its directional diagnostics and runs the
 predeclared stationary-law, reporting-only and bounded shock controls in a new
 namespace. Its saved inference decision separates iid-history candidate
@@ -64,16 +64,10 @@ the complete corporate projection retain their original identities.
 
 ```bash
 just latex::bundle 06_information_motion arxiv
-just latex::bundle 06_information_motion management-science
-just latex::build 06_information_motion wfbs
-just latex::build 06_information_motion wfbs-blind
 ```
 
-The Management Science target creates paired main/companion PDFs and an audited source
-archive. The named and anonymous WFBS targets are checked PDFs. Page ceilings are 42 for
-arXiv and 57 combined for Management Science and its companion.
-Both WFBS targets warn above 50 pages without blocking compilation.
-A successful compile is supplemented by bundle audits and inspection of affected pages.
-Existing approved Lean claim mappings keep their exact scope in the governed
-verification records; the submission manuscript omits the formal-status appendix.
+The arXiv target produces the manuscript PDF and an audited source archive.
+A successful compile is supplemented by source-closure audits and inspection
+of affected pages. Existing approved Lean claim mappings retain their exact
+scope in the formal-verification appendix.
 Empirical sampling and covariance-consistency obligations are not certified by those mappings.

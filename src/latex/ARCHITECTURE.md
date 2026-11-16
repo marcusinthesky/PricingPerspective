@@ -3,31 +3,24 @@
 Python and Lean produce manuscript artifacts. Each paper consumes only its own
 chapters, generated values, figures, references and metadata. The shared
 `templates/pp-manuscript.sty` supplies semantic commands and theorem environments;
-target adapters own layout, packages, front matter and bibliography style.
+each `targets/arxiv.tex` owns layout, packages, front matter and bibliography style.
 
 ## Build and release
 
 Tectonic is the only PDF compiler. Every project points to the versioned
 `tlextras-2022.0r0-pricing-perspective.zip` bundle, which fixes the TeX asset bytes.
-The environment pins the compiler and materializes the required Taylor & Francis
-and Elsevier classes. Compiles do not install TeX packages or require network
-access. `bundle-refresh` is the separate, network-dependent maintenance command
-for updating the resolved bundle after a dependency change.
+Compiles do not install TeX packages or require network access. `bundle-refresh`
+is the separate, network-dependent maintenance command for updating the resolved
+bundle after a dependency change.
 
-`just latex::build` compiles one target and checks its log. `just latex::bundle`
-first certifies Lean claims and publication bindings, stages manuscript inputs,
-audits the compiler-recorded dependency closure, writes a source manifest, and
-unpacks and recompiles the archive. Publication PDFs and archives are tracked
-artifacts; intermediate logs and staging directories are ignored. PDF byte
-identity is not a numerical reproduction criterion because compiler metadata may
-vary. The source manifest fixes every staged input.
-
-The publication matrix consists of arXiv for all four papers, Quantitative
-Finance for Paper 1, European Journal of Finance for Paper 3, Global Finance
-Journal for Paper 5, and Management Science and WFBS for Paper 6. Management
-Science builds a main/companion pair with generated cross-document label and
-counter handoffs. Its source archive includes author metadata for reproduction;
-the main and companion PDFs are checked for anonymous front matter.
+`just latex::build` stages one paper in a temporary directory and checks its
+compile log and recorded source closure. `just latex::bundle` first certifies
+Lean claims and publication bindings, audits the staged sources, writes a
+manifest, and unpacks and recompiles the archive. Both routes compile the same
+`main.tex` with Tectonic's deterministic mode; preview builds preserve certified
+archives and manifests. The four arXiv PDFs and source archives are tracked
+artifacts. Intermediate logs and staging directories are ignored. The source
+manifest records every staged input and the pinned TeX bundle identity.
 
 ## Generated scientific content
 
@@ -45,7 +38,7 @@ neighbour-outcome protocol permits eight binary64 ULPs in raw nonnegative W2
 values while displayed values, ranks, identities, methods, samples and input
 hashes must match. Other protocols and unknown fields remain strict.
 
-## Figures and validation
+## Figure transport
 
 Figures remain pipeline-produced PGF assets. `\ppfigure{fraction}{name}` imports
 an image at its authored size; the fraction records its intended linewidth share
@@ -54,8 +47,7 @@ figure closure. `tools/stage-images` stages reachable figures and rejects missin
 or escaping paths. The bundle audit also rejects unreferenced staged images,
 external absolute inputs, unresolved citations, missing glyphs and shell escape.
 
-`just latex::check` runs formatting and boundary checks and compiles the real
-paper targets offline. `just latex::harness-test` exercises hostile source
-closures, numeric contracts, image staging and deterministic archive manifests.
-The effective TeX assets derive from TeX Live 2022; publisher recompilation may
-use a newer release, so target adapters retain conservative package selections.
+`just latex::check` runs formatting and boundary checks and compiles the four
+papers offline. `just latex::harness-test` exercises hostile source closures,
+numeric contracts, image staging and deterministic PDFs, archives and manifests.
+The effective TeX assets derive from the pinned TeX Live 2022 bundle.

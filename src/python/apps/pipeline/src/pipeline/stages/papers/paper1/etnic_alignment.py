@@ -14,17 +14,12 @@ ETNIC-controlled firm-effects regressions.
 
 from __future__ import annotations
 
-import io
 import json
-import zipfile
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pandas as pd
-import pyarrow as pa
-import pyarrow.compute as pc
-import pyarrow.csv as pcsv
 from scipy.stats import rankdata, spearmanr
 from statadic.hypothesis.core import Hypothesis
 from statadic.hypothesis.homogeneity import PermutationPlan
@@ -36,104 +31,7 @@ if TYPE_CHECKING:
     from statadic.association.mantel import MantelMethod
     from statadic.core.typing import Array
 
-_SCHEMA = {
-    "year": pa.int32(),
-    "gvkey1": pa.int64(),
-    "gvkey2": pa.int64(),
-    "score": pa.float64(),
-}
-_BLOCK = 1 << 24
 _TOP_K = 5
-
-
-# --------------------------------------------------------------------------- #
-# Extract
-# --------------------------------------------------------------------------- #
-
-
-def _filtered_member(
-    archive: zipfile.ZipFile, member: str, gvkeys: pa.Array, years: tuple[int, int]
-) -> pa.Table:
-    """Stream one tab-separated member, keeping pairs inside the roster/window."""
-    with archive.open(member) as raw:
-        reader = pcsv.open_csv(
-            io.BufferedReader(raw, _BLOCK),  # pyrefly: ignore[bad-specialization]
-            read_options=pcsv.ReadOptions(block_size=_BLOCK),
-            parse_options=pcsv.ParseOptions(delimiter="\t"),
-            convert_options=pcsv.ConvertOptions(column_types=_SCHEMA),
-        )
-        kept = []
-        for batch in reader:
-            table = pa.Table.from_batches([batch])
-            mask = (
-                pc.field("gvkey1").isin(gvkeys)
-                & pc.field("gvkey2").isin(gvkeys)
-                & (pc.field("year") >= years[0])
-                & (pc.field("year") <= years[1])
-            )
-            kept.append(table.filter(mask))
-    return (
-        pa.concat_tables(kept)
-        if kept
-        else pa.table({k: pa.array([], t) for k, t in _SCHEMA.items()})
-    )
-
-
-def _members(archive: zipfile.ZipFile, years: tuple[int, int]) -> list[str]:
-    """ETNIC-All ships one member per year; ETNIC-3 ships a single file."""
-    names = [n for n in archive.namelist() if n.lower().endswith(".txt")]
-    yearly = [
-        n for n in names if n[-8:-4].isdigit() and years[0] <= int(n[-8:-4]) <= years[1]
-    ]
-    return yearly or names
-
-
-def extract_etnic(
-    etnic_all_zip: Path,
-    etnic3_zip: Path,
-    crosswalk: Path,
-    years: tuple[int, int],
-    output: Path,
-) -> dict[str, object]:
-    """Write roster-restricted ETNIC-All scores with exact ETNIC-3 membership."""
-    link = pd.read_csv(crosswalk, dtype={"cik": str})
-    gvkeys = pa.array(sorted(set(link.gvkey.astype(int))), pa.int64())
-    tables = {}
-    for name, path in (("all", etnic_all_zip), ("etnic3", etnic3_zip)):
-        # zipfile handles Zip64; Info-ZIP unzip on the 8.7 GB archive does not.
-        with zipfile.ZipFile(path) as archive:
-            tables[name] = pa.concat_tables(
-                _filtered_member(archive, m, gvkeys, years)
-                for m in _members(archive, years)
-            ).to_pandas()
-    # Self-pairs mark firm presence; ETNIC-3 leaves their score null.
-    everything, etnic3 = (
-        frame[frame.gvkey1 != frame.gvkey2].reset_index(drop=True)
-        for frame in (tables["all"], tables["etnic3"])
-    )
-    keys = ["year", "gvkey1", "gvkey2"]
-    if everything.duplicated(keys).any() or etnic3.duplicated(keys).any():
-        message = "duplicate ETNIC pair-year rows"
-        raise ValueError(message)
-    merged = everything.merge(
-        etnic3.rename(columns={"score": "etnic3_score"}).assign(etnic3_link=True),
-        on=keys,
-        how="left",
-    )
-    merged["etnic3_link"] = merged.etnic3_link.notna()
-    if merged.etnic3_link.sum() != len(etnic3):
-        message = "ETNIC-3 pairs missing from ETNIC-All"
-        raise ValueError(message)
-    offset = (merged.score - merged.etnic3_score).dropna()
-    output.parent.mkdir(parents=True, exist_ok=True)
-    merged.to_parquet(output, index=False)
-    return {
-        "rows": len(merged),
-        "etnic3_rows": len(etnic3),
-        "years": sorted(int(y) for y in merged.year.unique()),
-        "etnic3_offset_min": float(offset.min()),
-        "etnic3_offset_max": float(offset.max()),
-    }
 
 
 # --------------------------------------------------------------------------- #

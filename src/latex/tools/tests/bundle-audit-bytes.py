@@ -127,3 +127,19 @@ with tempfile.TemporaryDirectory() as temporary:
     assert (output / "arxiv.log").read_bytes() == changed_log
     assert archive.read_bytes() == certified_archive
     assert (stages[2] / "MANIFEST.json").read_bytes() == certified_manifest
+
+    # The public interface accepts only the single arXiv target and tar archive.
+    unsupported = arguments(stages[2])
+    unsupported[2] = "unsupported"
+    try:
+        main(unsupported)
+    except SystemExit as error:
+        assert error.code == 2
+    else:
+        raise AssertionError("an unsupported publication target must fail")
+    wrong_archive = arguments(stages[2])
+    wrong_archive[3] = str(output / "source.zip")
+    assert main(wrong_archive) == 1
+    assert not (output / "source.zip").exists()
+    assert pdf.read_bytes() == changed_pdf
+    assert archive.read_bytes() == certified_archive

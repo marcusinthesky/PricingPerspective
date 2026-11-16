@@ -1,10 +1,7 @@
 # Nested prek gates scoped to src/latex/. Dependencies come from infra/nix.
 #
-# Vendor policy: `interact.cls`, `tf*.bst`, and the per-project copy of
-# `pp-manuscript.sty` under `projects/*/src/` are pinned, publisher-owned
-# upstream artifacts (materialized by `just _prepare`). They are excluded
-# from first-party formatting/linting below; their correctness is gated by
-# the compile and `tools/check-log`, not by tex-fmt/chktex.
+# The per-project copy of pp-manuscript.sty is materialized by _prepare.
+# Its canonical source lives in templates/ and is checked there.
 #
 # Generated policy: `projects/*/src/generated/` is pipeline-owned (the Python
 # `pipeline.io.values` renderer emits `numbers.tex` from the renderer-neutral

@@ -26,7 +26,7 @@ just python::test-fresh
 `test-fresh` runs each package in its own pytest process without Testmon selection.
 Fast suites exclude tests marked `slow` or `gpu`; `just python::test-all` includes
 all tiers. Paper-stage execution and data retrieval are described in the root
-README and `REPLICATION.md`.
+[README](../../README.md).
 
 After reproduction, `just reproduction-check` compares the actual manuscript
 number formats, exact counts and cohorts, and the scientific geometry or pixels

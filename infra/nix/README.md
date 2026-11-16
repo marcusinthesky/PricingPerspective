@@ -3,6 +3,7 @@
 Enter the default environment with `devenv shell`, or use
 `nix develop ./infra/nix`. The `lean`, `prek`, and `replication` profiles provide
 smaller closures for proof checks, root Python hooks, and paper reproduction.
+Manuscript tools support the four arXiv targets and their source archives.
 Python dependencies are installed separately with `just python::setup`.
 
 Use the default environment for `prek run --all-files`: its nested hooks also

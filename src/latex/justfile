@@ -36,12 +36,7 @@ bundle-refresh:
       cp -R "$p" "$work/$slug"
       rm -rf "$work/$slug/build"
       sed -i 's|^bundle = .*|bundle = "{{ upstream_bundle }}"|' "$work/$slug/Tectonic.toml"
-      targets=(draft arxiv)
-      [[ -f "$work/$slug/src/targets/quantitative-finance.tex" ]] && targets+=(quantitative-finance)
-      [[ -f "$work/$slug/src/targets/gfj.tex" ]] && targets+=(gfj)
-      [[ -f "$work/$slug/src/targets/ejf.tex" ]] && targets+=(ejf ejf-anonymous)
-      [[ -f "$work/$slug/src/targets/wfbs.tex" ]] && targets+=(wfbs wfbs-blind)
-      for t in "${targets[@]}"; do
+      for t in arxiv; do
         echo "warming $slug/$t"
         # The upstream host rate-limits (HTTP 429), and Tectonic surfaces that as
         # a bare fetch failure — the same failure mode that made this bundle
@@ -77,7 +72,7 @@ bundle-refresh:
     manifest | (cd "$stage" && zip -q -X -D -@ "$root/{{ vendored_bundle }}")
     echo "wrote {{ vendored_bundle }} ($(du -h "$root/{{ vendored_bundle }}" | cut -f1), $(manifest | wc -l) files)"
 
-# Materialize pinned shared and publisher dependencies into a project workspace.
+# Materialize the shared semantic style in a project workspace.
 _prepare project:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -85,8 +80,6 @@ _prepare project:
     test -d "$destination"
     install -m 0644 templates/pp-manuscript.sty "$destination/pp-manuscript.sty"
     uv run --script tools/interpretation-contract --root . --project "$destination"
-    tandf-template "$destination"
-    elsarticle-template "$destination"
 
 # The one builder — interactive loop, quality gates, and the DVC `render`
 # stage all come through here, so a PDF can only ever be produced one way.
@@ -94,52 +87,33 @@ _prepare project:
 # previews stage in a temporary directory and preserve certified archives.
 # Outputs retain the V2 layout:
 # projects/<project>/build/<target>/ as <target>.{pdf,log,blg,aux,bbl}, with
-# the submission archive written alongside them by `just bundle`.
+# the source archive written alongside them by `just bundle`.
 #
-# Every build resolves against the vendored bundle in the tree, so no build
-# reaches the network whatever `offline` says. offline="1" keeps `--only-cached`
-# on the gates (`smoke`/CI) as a belt-and-braces assertion: it fails closed if a
-# project is ever repointed at a URL. A \usepackage the vendored subset lacks is
+# Every build resolves against the vendored bundle with `--only-cached`,
+# independent of the compatibility `offline` argument. A URL without a warmed
+# cache therefore fails closed. A \usepackage the vendored subset lacks is
 # a `just bundle-refresh` + commit, not a nix closure change.
 
 # Compile a target to build/<target>/ (offline="1" forbids fetching).
-build project="01_continuous_bounds" target="draft" offline="0":
+build project="01_continuous_bounds" target="arxiv" offline="0":
     #!/usr/bin/env bash
     set -euo pipefail
     root="$(pwd)"
-    just _prepare "{{ project }}"
-    if [[ "{{ target }}" == management-science || "{{ target }}" == management-science-companion ]]; then
-      uv run --script tools/management-science build "projects/{{ project }}"
-      exit 0
+    [[ "{{ target }}" == arxiv ]] || { echo "target must be arxiv" >&2; exit 2; }
+    work="$(mktemp -d)"
+    trap 'rm -rf "$work"' EXIT
+    just _stage "{{ project }}" arxiv "$work/source"
+    bundle_ref="$(rg -o '^bundle = "([^"]+)"' -r '$1' "projects/{{ project }}/Tectonic.toml")"
+    if [[ "$bundle_ref" != *://* ]]; then
+      bundle_ref="$(realpath "projects/{{ project }}/$bundle_ref")"
     fi
-    case "{{ target }}" in
-      arxiv|quantitative-finance|gfj|ejf)
-        work="$(mktemp -d)"
-        trap 'rm -rf "$work"' EXIT
-        just _stage "{{ project }}" "{{ target }}" "$work/source"
-        bundle_ref="$(rg -o '^bundle = "([^"]+)"' -r '$1' "projects/{{ project }}/Tectonic.toml")"
-        if [[ "$bundle_ref" != *://* ]]; then
-          bundle_ref="$(realpath "projects/{{ project }}/$bundle_ref")"
-        fi
-        extension=tar.gz
-        [[ "{{ target }}" != quantitative-finance ]] || extension=zip
-        uv run --script tools/bundle-audit "$work/source" "{{ target }}" \
-          "$root/projects/{{ project }}/build/{{ target }}/{{ target }}.$extension" \
-          "$bundle_ref" --preview \
-          --pdf "$root/projects/{{ project }}/build/{{ target }}/{{ target }}.pdf"
-        exit 0
-        ;;
-    esac
-    cached=()
-    if [[ "{{ offline }}" == "1" ]]; then cached=(--only-cached); fi
-    project_dir="projects/{{ project }}"
-    cd "$project_dir"
-    tectonic -X build --untrusted --keep-logs --keep-intermediates \
-      "${cached[@]}" --target "{{ target }}"
-    bash "$root/tools/check-log" "build/{{ target }}/{{ target }}.log"
+    uv run --script tools/bundle-audit "$work/source" arxiv \
+      "$root/projects/{{ project }}/build/arxiv/arxiv.tar.gz" \
+      "$bundle_ref" --preview \
+      --pdf "$root/projects/{{ project }}/build/arxiv/arxiv.pdf"
 
 # Rebuild a named target whenever an input changes.
-watch project="01_continuous_bounds" target="draft":
+watch project="01_continuous_bounds" target="arxiv":
     #!/usr/bin/env bash
     set -euo pipefail
     python3 - "{{ project }}" "{{ target }}" <<'PYWATCH'
@@ -175,93 +149,17 @@ watch project="01_continuous_bounds" target="draft":
         pass
     PYWATCH
 
-# A change-tracked PDF: what a referee or co-author reads to see what moved.
-# `diff-pdf` (groups/documents.nix) answers the complementary question — did the
-# built artifact shift at all — and is the only option when no source exists.
-#
-# Both trees are disposable copies under $(mktemp -d), never the working tree:
-# the diff is a review aid, not a publication artifact, and `_diff.tex` must
-# never reach `fmt`, `lint`, or a bundle. The PDF lands in
-# build/<target>/diff/, which src/latex/.gitignore already excludes (no
-# negation reaches a nested path).
-
-# Render <target> as a marked-up diff of <rev>..working tree (offline="1" forbids fetching).
-diff project="01_continuous_bounds" target="draft" rev="HEAD" offline="0":
-    #!/usr/bin/env bash
-    set -euo pipefail
-    case "{{ project }}" in
-      ''|*[!0-9A-Za-z_-]*) echo "invalid project slug" >&2; exit 2 ;;
-    esac
-    project_dir="projects/{{ project }}"
-    target_tex="$project_dir/src/targets/{{ target }}.tex"
-    test -f "$target_tex" || { echo "no such target: $target_tex" >&2; exit 2; }
-    root="$(pwd)"
-    repo="$(git rev-parse --show-toplevel)"
-    prefix="${root#"$repo"/}"
-
-    # Materializes interact.cls / pp-manuscript.sty, which are not committed and
-    # so are absent from the archived baseline; \usepackage is not flattened, so
-    # only the tree that compiles needs them.
-    just _prepare "{{ project }}"
-
-    work="$(mktemp -d)"
-    trap 'rm -rf "$work"' EXIT
-    mkdir -p "$work/old"
-    git -C "$repo" archive "{{ rev }}" "$prefix/$project_dir/src" | tar -x -C "$work/old" \
-      || { echo "cannot read $project_dir/src at {{ rev }}" >&2; exit 2; }
-    old="$work/old/$prefix/$project_dir/src"
-    test -f "$old/targets/{{ target }}.tex" \
-      || { echo "target {{ target }} does not exist at {{ rev }}" >&2; exit 2; }
-
-    # A Tectonic V2 workspace, so the diff compiles against the SAME pinned
-    # bundle as the real build; `-X compile` would silently use the default one.
-    mkdir -p "$work/new"
-    install -m 0644 "$project_dir/Tectonic.toml" "$work/new/Tectonic.toml"
-    # The vendored bundle path is relative to the project dir; re-anchor it, or
-    # Tectonic fails in the temp workspace with a bare "No such file or directory".
-    sed -i "s|^bundle = \"\([^\"/][^\":]*\)\"$|bundle = \"$root/$project_dir/\1\"|" "$work/new/Tectonic.toml"
-    cp -R "$project_dir/src" "$work/new/src"
-    printf '\n[[output]]\nname = "diff"\ntype = "pdf"\ninputs = ["_diff.tex"]\n' \
-      >> "$work/new/Tectonic.toml"
-
-    # GOTCHA: latexdiff --flatten resolves \input relative to the MAIN FILE's
-    # directory, but targets/*.tex use paths relative to the src root (where
-    # Tectonic sets cwd). Without staging the target at the src root, latexdiff
-    # still exits 0 and still writes a diff — of the preamble alone.
-    install -m 0644 "$old/targets/{{ target }}.tex" "$old/_main.tex"
-    install -m 0644 "$work/new/src/targets/{{ target }}.tex" "$work/new/src/_main.tex"
-    latexdiff --flatten "$old/_main.tex" "$work/new/src/_main.tex" > "$work/new/src/_diff.tex"
-    hunks="$(rg -c 'DIFadd|DIFdel' "$work/new/src/_diff.tex" || true)"
-
-    cached=()
-    if [[ "{{ offline }}" == "1" ]]; then cached=(--only-cached); fi
-    (cd "$work/new" && tectonic -X build --untrusted --keep-logs "${cached[@]}" --target diff)
-
-    # check-log is advisory here, not a gate: a diff document legitimately
-    # carries markup artifacts (struck-through labels, duplicated refs) that
-    # would fail the publication policy without indicating a manuscript defect.
-    bash "$root/tools/check-log" "$work/new/build/diff/diff.log" || true
-
-    destination="$project_dir/build/{{ target }}/diff"
-    mkdir -p "$destination"
-    install -m 0644 "$work/new/build/diff/diff.pdf" "$destination/{{ target }}-diff.pdf"
-    echo "wrote $destination/{{ target }}-diff.pdf (${hunks:-0} marked hunks vs {{ rev }})"
-
-# Stage exactly the source files uploaded to arXiv, QF, GFJ, or EJF (no compile/audit).
+# Stage exactly the arXiv source files (no compile/audit).
 _stage project target destination="":
     #!/usr/bin/env bash
     set -euo pipefail
     case "{{ project }}" in
       ''|*[!0-9A-Za-z_-]*) echo "invalid project slug" >&2; exit 2 ;;
     esac
-    case "{{ target }}" in
-      arxiv|quantitative-finance|gfj|ejf) ;;
-      *) echo "bundle target must be arxiv, quantitative-finance, gfj, or ejf" >&2; exit 2 ;;
-    esac
+    [[ "{{ target }}" == arxiv ]] || { echo "target must be arxiv" >&2; exit 2; }
     just _prepare "{{ project }}"
     project="projects/{{ project }}"
-    # Staged beside the compiled target rather than in a sibling bundles/ tree,
-    # so everything a submission needs for one venue lives in one directory.
+    # Stage beside the compiled paper; temporary previews provide a destination.
     stage="{{ destination }}"
     [[ -n "$stage" ]] || stage="$project/build/{{ target }}/bundle"
     rm -rf "$stage"
@@ -275,53 +173,7 @@ _stage project target destination="":
       fi
     done
     cp -R "$project/src/chapters" "$project/src/generated" "$stage/"
-    # Target-owned front-matter fragments (e.g. GFJ highlights) keep their
-    # src-relative path so the staged main.tex resolves the same \input.
-    if [[ -d "$project/src/targets/{{ target }}" ]]; then
-      mkdir -p "$stage/targets"
-      cp -R "$project/src/targets/{{ target }}" "$stage/targets/"
-    fi
     if [[ -f "$project/src/refs.bib" ]]; then install -m 0644 "$project/src/refs.bib" "$stage/refs.bib"; fi
-    if [[ "{{ target }}" == quantitative-finance || "{{ target }}" == gfj || "{{ target }}" == ejf ]]; then
-      class_name="$(rg --pcre2 -o '\\documentclass(?:\[[^]]*\])?\{\K[^}]+' "$stage/main.tex" | head -n 1)"
-      style_name="$(rg --pcre2 -o '\\bibliographystyle\{\K[^}]+' "$stage/main.tex" | head -n 1)"
-      install -m 0644 "$project/src/$class_name.cls" "$stage/$class_name.cls"
-      install -m 0644 "$project/src/$style_name.bst" "$stage/$style_name.bst"
-      if [[ "$class_name" == rQUF2e ]]; then
-        install -m 0644 "$project/src/enumerate.sty" "$stage/enumerate.sty"
-        install -m 0644 "$project/src/latexrelease.sty" "$stage/latexrelease.sty"
-        install -m 0644 \
-          "$project/src/amsmath-2018-12-01.sty" \
-          "$stage/amsmath-2018-12-01.sty"
-        install -m 0644 \
-          "$project/src/graphics-2017-06-25.sty" \
-          "$stage/graphics-2017-06-25.sty"
-        install -m 0644 "$project/src/everyshi.sty" "$stage/everyshi.sty"
-        install -m 0644 \
-          "$project/src/everyshi-2001-05-15.sty" \
-          "$stage/everyshi-2001-05-15.sty"
-        install -m 0644 "$project/src/siunitx-v2.sty" "$stage/siunitx-v2.sty"
-        for config in siunitx-abbreviations.cfg siunitx-binary.cfg siunitx-version-1.cfg; do
-          install -m 0644 "$project/src/$config" "$stage/$config"
-        done
-        for metric in rm-lmss9.tfm rm-lmsso9.tfm; do
-          install -m 0644 "$project/src/$metric" "$stage/$metric"
-        done
-        install -m 0644 "$project/src/ec-lmcsc10.tfm" "$stage/ec-lmcsc10.tfm"
-        install -m 0644 "$project/src/lmcsc10.pfb" "$stage/lmcsc10.pfb"
-        install -m 0644 "$project/src/cmr10.pfb" "$stage/cmr10.pfb"
-        for support in load-unicode-xetex-classes.tex LineBreak.txt EastAsianWidth.txt; do
-          install -m 0644 "$project/src/$support" "$stage/$support"
-        done
-        install -m 0644 "$project/src/xparse.sty" "$stage/xparse.sty"
-        install -m 0644 \
-          "$project/src/array-2016-10-06.sty" \
-          "$stage/array-2016-10-06.sty"
-        install -m 0644 \
-          "$project/src/longtable-2020-01-07.sty" \
-          "$stage/longtable-2020-01-07.sty"
-      fi
-    fi
     if [[ "{{ project }}" == "06_information_motion" ]]; then
       uv run python - "$stage" <<'PYGENERATED'
     import runpy, sys
@@ -331,7 +183,7 @@ _stage project target destination="":
     fi
     uv run --script tools/stage-images "$project/src" "$stage" main.tex
 
-# The archive is the upload artifact for arXiv / the journal portal, so it is
+# The archive is the source artifact for arXiv, so it is
 # published next to the PDF it corresponds to and tracked in git (LFS).
 
 # Stage, hostile-audit, deterministically archive, and unpack-recompile a bundle.
@@ -342,11 +194,6 @@ _stage project target destination="":
 _bundle project target:
     #!/usr/bin/env bash
     set -euo pipefail
-    if [[ "{{ target }}" == management-science ]]; then
-      just _prepare "{{ project }}"
-      uv run --script tools/management-science bundle "projects/{{ project }}"
-      exit 0
-    fi
     just _stage "{{ project }}" "{{ target }}"
     # Pin the audit's compiles to the same bundle the build uses; without this
     # Tectonic would fall back to its default bundle, which is an older
@@ -357,12 +204,10 @@ _bundle project target:
     if [[ "$bundle_ref" != *://* ]]; then
       bundle_ref="$(realpath "projects/{{ project }}/$bundle_ref")"
     fi
-    archive_extension=tar.gz
-    if [[ "{{ target }}" == quantitative-finance ]]; then archive_extension=zip; fi
     uv run --script tools/bundle-audit \
       "projects/{{ project }}/build/{{ target }}/bundle" \
       "{{ target }}" \
-      "projects/{{ project }}/build/{{ target }}/{{ target }}.$archive_extension" \
+      "projects/{{ project }}/build/{{ target }}/{{ target }}.tar.gz" \
       "$bundle_ref" \
       --pdf "projects/{{ project }}/build/{{ target }}/{{ target }}.pdf"
 
@@ -376,18 +221,18 @@ bundle project target:
     just --justfile "$repository_root/justfile" lean::claims-publication-check
     just _bundle "{{ project }}" "{{ target }}"
 
-# Run every submission-parity fixture (hostile + positive + cleveref regression).
+# Run the source-closure fixtures (hostile + positive + cleveref regression).
 harness-test:
     bash tools/tests/run.sh
 
 # Format all hand-authored TeX sources. Formatting policy (wraplen/tabsize) lives
 # once in src/latex/tex-fmt.toml, auto-discovered from this recipe's cwd (t24.16.4 F10).
 fmt:
-    rg --files -g '*.tex' -g '*.sty' -g '*.cls' -g '!projects/*/src/*.sty' -g '!projects/*/src/*.cls' -g '!projects/*/src/*.bst' -g '!projects/*/src/load-unicode-xetex-classes.tex' -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0 | xargs -0 -r tex-fmt
+    rg --files -g '*.tex' -g '*.sty' -g '*.cls' -g '!projects/*/src/pp-manuscript.sty' -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0 | xargs -0 -r tex-fmt
 
 # Verify formatting without changing files.
 fmt-check:
-    rg --files -g '*.tex' -g '*.sty' -g '*.cls' -g '!projects/*/src/*.sty' -g '!projects/*/src/*.cls' -g '!projects/*/src/*.bst' -g '!projects/*/src/load-unicode-xetex-classes.tex' -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0 | xargs -0 -r tex-fmt --check
+    rg --files -g '*.tex' -g '*.sty' -g '*.cls' -g '!projects/*/src/pp-manuscript.sty' -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0 | xargs -0 -r tex-fmt --check
 
 # Run prose-aware TeX linting and architectural boundary checks.
 lint:
@@ -400,23 +245,16 @@ lint:
       # the prek chktex hook (t24.16.4 F10).
       chktex -q -I0 -l .chktexrc "$file"
     done < <(rg --files -g '*.tex' -g '*.sty' -g '*.cls' \
-      -g '!projects/*/src/*.sty' -g '!projects/*/src/*.cls' -g '!projects/*/src/*.bst' \
-      -g '!projects/*/src/load-unicode-xetex-classes.tex' \
+      -g '!projects/*/src/pp-manuscript.sty' \
       -g '!projects/*/src/generated/**' -g '!tools/tests/**' -0)
     bash tools/lint-boundaries
 
-# Compile the four papers and their declared publication targets offline.
+# Compile the four arXiv papers offline.
 smoke:
     just build 01_continuous_bounds arxiv 1
-    just build 01_continuous_bounds quantitative-finance 1
     just build 03_distance_implied_mpt arxiv 1
-    just build 03_distance_implied_mpt ejf 1
     just build 05_spatial_pricing arxiv 1
-    just build 05_spatial_pricing gfj 1
     just build 06_information_motion arxiv 1
-    just build 06_information_motion management-science 1
-    just build 06_information_motion wfbs 1
-    just build 06_information_motion wfbs-blind 1
 
 # Full local gate; formatting checks do not rewrite sources.
 check: fmt-check lint smoke

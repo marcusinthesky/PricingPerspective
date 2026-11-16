@@ -26,6 +26,9 @@ manifest contains only workspace metadata and Turbo.
 
 ## Commands
 
+Next.js build workers require Node.js 20.9 or newer on `PATH`; Bun remains the
+package manager and script runner. The default Nix shell supplies both.
+
 Run these from `src/typescript/`:
 
 ```bash

@@ -6,11 +6,11 @@ For fixed latent exposure laws, quadratic Wasserstein geometry gives sharp covar
 
 ## Reading the map
 
-Figure 1 places the same 100 firms in two principal coordinates computed from the exact pairwise Wasserstein-2 distances between their capped 128-article representations. Principal coordinates analysis (PCoA) reconstructs coordinates from this distance table. The axes are unitless, ticker labels identify firms, and colors identify sectors.
+The map below places the same 100 firms in a two-dimensional metric multidimensional scaling (MDS) fit to the exact pairwise Wasserstein-2 distances between their capped 128-article Qwen3-Embedding-8B representations. The axes are unitless, ticker labels identify firms, and colors identify sectors.
 
-Two coordinates retain only 6.45% of the canonical news geometry's positive inertia. For comparison, the first two principal components of the same firms' in-sample returns retain 47.92% of total return variance, using the unstandardized covariance matrix. The appendix compares the full spectra across the encoder and embedding-width ladder. These percentages describe concentration in different objects; they do not measure return variance explained by news. Negative inertia in the news-distance geometry is reported separately.
+The map's Stress-1 is 0.396, and the Pearson and Spearman correlations between original and projected distances are both 0.553. It retains 27% of each firm's five nearest neighbours on average and the exact nearest neighbour for 9 of the 100 firms. These diagnostics describe projection fidelity, not return variance explained by news. The original Wasserstein-2 distances remain authoritative for the paper's statistics and pair selections. The axes have no assigned economic meaning and can reflect without changing the represented distances.
 
-The map also preserves the exact nearest neighbour for only 14 of the 100 firms. Visible proximity therefore supplies descriptive orientation rather than a peer-selection rule. The original Wasserstein-2 distances remain authoritative for the paper's statistics and pair selections. The axes have no assigned economic meaning and can reflect without changing the represented distances.
+Principal coordinates analysis (PCoA) provides a separate spectral diagnostic. Two principal coordinates retain 6.45% of the canonical news geometry's positive inertia. For comparison, the first two principal components of the same firms' in-sample returns retain 47.92% of total return variance, using the unstandardized covariance matrix. The appendix compares the full spectra across the encoder and embedding-width ladder and reports negative inertia separately. These percentages concern different objects and do not describe the metric-MDS coordinates.
 
 <Callout title="Interpretation">
 Sector colors help readers locate firms, while projection-fidelity diagnostics show how much of the original geometry the map retains. Economic comparisons and pair selections use the original distance matrix.
@@ -18,10 +18,10 @@ Sector colors help readers locate firms, while projection-fidelity diagnostics s
 
 <PaperFigure
   src="/figures/paper-1-pcoa.webp"
-  alt="Sector-colored, ticker-labeled scatter plot of 100 firms in two principal coordinates derived from their exact Wasserstein-2 article distances."
+  alt="Sector-colored, ticker-labeled metric MDS map of 100 firms fitted to their exact Wasserstein-2 article distances."
   width={1050}
-  height={885}
-  caption="Paper 1: Principal coordinates analysis (PCoA) of exact Wasserstein-2 distances between 128-article firm representations. The axes are unitless and colors identify sectors. This two-axis map is a descriptive approximation; all statistics and pair selections use the original distance matrix."
+  height={1209}
+  caption="Paper 1: Descriptive two-dimensional metric MDS of exact Wasserstein-2 distances between 128-article firm representations. The axes are unitless and colors identify sectors. All statistics and pair selections use the original distance matrix."
   />
 
 ## Mathematical sequence

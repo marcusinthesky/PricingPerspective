@@ -3,31 +3,6 @@ name = "06_information_motion"
 bundle = "../../bundle/tlextras-2022.0r0-pricing-perspective.zip"
 
 [[output]]
-name = "draft"
-type = "pdf"
-inputs = ["targets/draft.tex"]
-
-[[output]]
 name = "arxiv"
 type = "pdf"
 inputs = ["targets/arxiv.tex"]
-
-[[output]]
-name = "management-science"
-type = "pdf"
-inputs = ["targets/management-science.tex"]
-
-[[output]]
-name = "management-science-companion"
-type = "pdf"
-inputs = ["targets/management-science-companion.tex"]
-
-[[output]]
-name = "wfbs"
-type = "pdf"
-inputs = ["targets/wfbs.tex"]
-
-[[output]]
-name = "wfbs-blind"
-type = "pdf"
-inputs = ["targets/wfbs-blind.tex"]

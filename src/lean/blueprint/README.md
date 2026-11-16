@@ -1,6 +1,6 @@
 # Native LeanArchitect and LeanBlueprint companion
 
-This proof-development companion is separate from the canonical journal/arXiv
+This proof-development companion is separate from the canonical arXiv
 manuscripts. Project statements live in `@[blueprint]` annotations at their original
 Lean declarations beside the proofs. The `Publication` assembly library retains only
 the external mathlib annotation; it does not duplicate project statements or proofs.
@@ -39,7 +39,7 @@ manuscript labels and boundaries, and compares each status file exactly with the
 including its owning manifest hash. It needs neither Lake nor generated native exports.
 `claims-check` also runs the checker regressions and checks every retained manuscript.
 The DVC `lean_claims` and `lean_bindings_check` stages preserve this proof/prose separation.
-Submission bundles run shared proof certification and publication checks before staging;
+arXiv source bundles run shared proof certification and publication checks before staging;
 interactive LaTeX build/watch remain independent of a Lean build.
 
 ## Provisioning and scope

@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # ///
-r"""bundle-audit — hostile clean-room gate for arXiv / journal bundles.
+r"""bundle-audit — hostile clean-room gate for arXiv source bundles.
 
 Given a staged, source-only bundle directory (as produced by `just bundle`'s
 staging step, before it is tarred), this tool:
@@ -24,8 +24,7 @@ staging step, before it is tarred), this tool:
   3. Emits a deterministic MANIFEST.json (sorted keys, no timestamps, sha256
      per source file, tool versions) into the staging directory.
   4. Archives the staging directory deterministically, excluding build
-     intermediates. Quantitative Finance uses the portal-required ZIP; arXiv
-     and journal targets retain deterministic tar.gz archives.
+     intermediates, as a deterministic tar.gz archive.
   5. Extracts that archive into a fresh temporary directory and recompiles
      there under `--only-cached`, proving the archive is self-contained and
      that every support file was already in the pinned bundle cache (a
@@ -33,7 +32,7 @@ staging step, before it is tarred), this tool:
   6. With --pdf, publishes the exact staged compile's PDF beside the archive.
 
 Usage:
-    bundle-audit STAGE_DIR TARGET OUT_ARCHIVE [BUNDLE] [--pdf OUT_PDF]
+    bundle-audit STAGE_DIR arxiv OUT_ARCHIVE [BUNDLE] [--pdf OUT_PDF]
 
 BUNDLE pins the Tectonic bundle used for both compiles and is recorded in
 MANIFEST.json with its content digest. Pass the value from the project's
@@ -48,9 +47,9 @@ deterministic main.tex compile and source audits, publishing only the PDF and
 target-named log; it preserves existing release archives and manifests.
 
 STAGE_DIR must already contain main.tex plus every other source file that
-belongs in the bundle (chapters/, generated/, images/, refs.bib, and the
-publisher class/style for quantitative-finance, gfj, or ejf; arxiv uses
-only bundle-resident class and style). This script does not
+belongs in the bundle (chapters/, generated/, images/, refs.bib, and the shared
+semantic style). The article class and bibliography style resolve from the pinned
+TeX bundle. This script does not
 decide what to stage; the justfile owns that step.
 """
 
@@ -64,14 +63,13 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-import zipfile
 from pathlib import Path
 
 TOOLS_DIR = Path(__file__).resolve().parent
 
-# Build intermediates that must never appear in a submitted archive.
+# Build intermediates that must never appear in a source archive.
 # NOTE: `.pdf` is deliberately NOT excluded by suffix — figure PDFs
-# (images/*.pdf) are legitimate arXiv/QF source members. Only the compiled
+# (images/*.pdf) are legitimate arXiv source members. Only the compiled
 # main output (main.pdf) is excluded, by name, below.
 # `.fls`/`.fdb_latexmk` are retained even though Tectonic never emits them:
 # the policy is about what may not ship, and a stray latexmk artifact from an
@@ -382,7 +380,7 @@ def audit_shell_escape(files: list[Path]) -> None:
             offenders.append(str(f))
     if offenders:
         raise AuditError(
-            "shell-escape usage forbidden in a submission bundle:\n  "
+            "shell-escape usage forbidden in a source bundle:\n  "
             + "\n  ".join(offenders)
         )
 
@@ -432,33 +430,11 @@ def audit_includegraphics(stage: Path, files: list[Path]) -> None:
         )
 
 
-def audit_class_and_bibstyle(stage: Path, main: Path, target: str) -> str:
-    """Require a document class, and require publisher assets to be staged.
-
-    Unstaged classes and styles need no lookup: the `--only-cached` compile
-    above already proved they resolve from the pinned bundle with no network
-    and no ambient TeX tree. What that cannot prove is portability to a
-    publisher's own installation, so the journal target must physically carry
-    its class and style — the T&F portal compiles the uploaded sources itself.
-    """
+def audit_document_class(main: Path) -> None:
+    """Require an explicit class; the offline compile checks TeX asset resolution."""
     text = main.read_text(encoding="utf-8", errors="replace")
-    cls_m = re.search(r"\\documentclass(?:\[[^\]]*\])?\{([^}]+)\}", text)
-    if not cls_m:
+    if not re.search(r"\\documentclass(?:\[[^\]]*\])?\{([^}]+)\}", text):
         raise AuditError(f"{main}: no \\documentclass found")
-    cls_name = cls_m.group(1).strip()
-    bib_m = re.search(r"\\bibliographystyle\{([^}]+)\}", text)
-    bst_name = bib_m.group(1).strip() if bib_m else None
-
-    if target not in {"quantitative-finance", "gfj", "ejf"}:
-        return cls_name
-    required = [f"{cls_name}.cls"] + ([f"{bst_name}.bst"] if bst_name else [])
-    missing = [name for name in required if not (stage / name).is_file()]
-    if missing:
-        raise AuditError(
-            f"target {target!r} must stage its publisher class and bibliography style; "
-            "missing:\n  " + "\n  ".join(missing)
-        )
-    return cls_name
 
 
 # Tectonic has no lockfile. `Tectonic.toml`'s `[doc]` table takes a bare `bundle`
@@ -645,7 +621,7 @@ def lean_provenance(stage: Path, target: str) -> dict | None:
         )
         required.update(
             path.relative_to(stage).as_posix()
-            for directory in ("chapters", f"targets/{target}")
+            for directory in ("chapters",)
             for path in (stage / directory).rglob("*.tex")
         )
         expected = {
@@ -653,11 +629,6 @@ def lean_provenance(stage: Path, target: str) -> dict | None:
             for name in inputs
             if name.startswith(prefix + "chapters/") and name.endswith(".tex")
         }
-        expected.update(
-            name.removeprefix(prefix)
-            for name in inputs
-            if name.startswith(prefix + f"targets/{target}/") and name.endswith(".tex")
-        )
         for relative in required | expected:
             source = (
                 "src/latex/templates/pp-manuscript.sty"
@@ -700,7 +671,7 @@ def build_manifest(
         # it, so this triple is where it is written down: the reference names the
         # bundle asked for, the digest fixes its bytes, and the engine version
         # fixes how they were consumed. A local bundle is recorded by basename,
-        # not by the absolute path the compile needed — an archive a venue keeps
+        # not by the absolute path the compile needed — a published archive
         # must not carry one machine's checkout layout, and basename + digest is
         # already a complete identity.
         "bundle": (bundle if "://" in bundle else Path(bundle).name) if bundle else "",
@@ -723,15 +694,6 @@ def write_manifest(stage: Path, manifest: dict) -> Path:
     return out
 
 
-def archive_kind(path: Path) -> str:
-    """Return the supported archive kind encoded by ``path``."""
-    if path.name.endswith(".tar.gz"):
-        return "tar.gz"
-    if path.suffix == ".zip":
-        return "zip"
-    raise AuditError(f"archive must end in .tar.gz or .zip, got {path}")
-
-
 def archive_deterministically(
     stage: Path,
     files: list[Path],
@@ -746,60 +708,31 @@ def archive_deterministically(
     if out_archive.exists():
         out_archive.unlink()
 
-    if archive_kind(out_archive) == "tar.gz":
-        cmd = [
-            "tar",
-            "--sort=name",
-            "--mtime=1970-01-01 00:00:00 UTC",
-            "--owner=0",
-            "--group=0",
-            "--numeric-owner",
-            "-C",
-            str(stage_real),
-            "-czf",
-            str(out_archive),
-            *members,
-        ]
-        proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
-        if proc.returncode != 0:
-            raise AuditError(f"tar failed: {proc.stdout}{proc.stderr}")
-    else:
-        with zipfile.ZipFile(
-            out_archive,
-            mode="w",
-            compression=zipfile.ZIP_DEFLATED,
-            compresslevel=9,
-        ) as archive:
-            for member in members:
-                info = zipfile.ZipInfo(member, date_time=(1980, 1, 1, 0, 0, 0))
-                info.compress_type = zipfile.ZIP_DEFLATED
-                info.create_system = 3
-                info.external_attr = 0o100644 << 16
-                archive.writestr(
-                    info,
-                    (stage_real / member).read_bytes(),
-                    compress_type=zipfile.ZIP_DEFLATED,
-                    compresslevel=9,
-                )
+    cmd = [
+        "tar",
+        "--sort=name",
+        "--mtime=1970-01-01 00:00:00 UTC",
+        "--owner=0",
+        "--group=0",
+        "--numeric-owner",
+        "-C",
+        str(stage_real),
+        "-czf",
+        str(out_archive),
+        *members,
+    ]
+    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    if proc.returncode != 0:
+        raise AuditError(f"tar failed: {proc.stdout}{proc.stderr}")
     audit_archive_containment(out_archive)
 
 
 def audit_archive_containment(out_archive: Path) -> None:
-    if archive_kind(out_archive) == "tar.gz":
-        with tarfile.open(out_archive, "r:gz") as archive:
-            members = [
-                (member.name, member.issym() or member.islnk())
-                for member in archive.getmembers()
-            ]
-    else:
-        with zipfile.ZipFile(out_archive) as archive:
-            members = [
-                (
-                    member.filename,
-                    ((member.external_attr >> 16) & 0o170000) == 0o120000,
-                )
-                for member in archive.infolist()
-            ]
+    with tarfile.open(out_archive, "r:gz") as archive:
+        members = [
+            (member.name, member.issym() or member.islnk())
+            for member in archive.getmembers()
+        ]
 
     for name, is_link in members:
         if name.startswith("/") or ".." in Path(name).parts:
@@ -813,12 +746,8 @@ def recompile_unpacked(out_archive: Path, main: str, bundle: str | None) -> None
 
     with tempfile.TemporaryDirectory(prefix="bundle-unpack-") as td:
         tmp = Path(td)
-        if archive_kind(out_archive) == "tar.gz":
-            with tarfile.open(out_archive, "r:gz") as archive:
-                archive.extractall(tmp, filter="data")
-        else:
-            with zipfile.ZipFile(out_archive) as archive:
-                archive.extractall(tmp)
+        with tarfile.open(out_archive, "r:gz") as archive:
+            archive.extractall(tmp, filter="data")
         try:
             tectonic_compile(tmp, main, bundle, outdir=tmp)
         except AuditError as exc:
@@ -835,7 +764,7 @@ def recompile_unpacked(out_archive: Path, main: str, bundle: str | None) -> None
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("stage", type=Path)
-    parser.add_argument("target")
+    parser.add_argument("target", choices=("arxiv",))
     parser.add_argument("archive", type=Path)
     parser.add_argument("bundle", nargs="?")
     parser.add_argument(
@@ -859,11 +788,9 @@ def main(argv: list[str]) -> int:
         return 2
 
     try:
-        kind = archive_kind(out_archive)
-        expected_kind = "zip" if target == "quantitative-finance" else "tar.gz"
-        if kind != expected_kind:
+        if not out_archive.name.endswith(".tar.gz"):
             raise AuditError(
-                f"target {target!r} requires a {expected_kind} archive, got {out_archive.name}"
+                f"arXiv source archive must end in .tar.gz: {out_archive.name}"
             )
         if out_pdf is not None and (
             out_pdf.parent != out_archive.parent
@@ -888,10 +815,7 @@ def main(argv: list[str]) -> int:
         if not compiled_pdf.is_file():
             raise AuditError("staged compile produced no main.pdf")
         audit_rules_closure(rules, stage)
-        # Before check-log: an unstaged publisher style makes BibTeX fail
-        # softly, so the log then shows undefined citations. Reporting the
-        # missing .bst is the actionable diagnosis; the citations are downstream.
-        class_name = audit_class_and_bibstyle(stage, stage / main_tex, target)
+        audit_document_class(stage / main_tex)
         audit_check_log(stage, Path(main_tex).stem)
         audit_image_closure(rules, stage)
 
@@ -915,15 +839,7 @@ def main(argv: list[str]) -> int:
             print(f"bundle-audit: preview PASS: {out_pdf}")
             return 0
 
-        if target == "quantitative-finance":
-            engine = f"xetex (Tectonic, {class_name})"
-        elif target == "gfj":
-            engine = "xetex (Tectonic, Elsevier elsarticle)"
-        elif target == "ejf":
-            engine = "xetex (Tectonic, Taylor & Francis interact)"
-        else:
-            engine = "xetex (Tectonic)"
-        manifest = build_manifest(stage, files, target, engine, bundle)
+        manifest = build_manifest(stage, files, target, "xetex (Tectonic)", bundle)
         manifest_path = write_manifest(stage, manifest)
 
         # Build and recompile a candidate before replacing any advertised artifact.
