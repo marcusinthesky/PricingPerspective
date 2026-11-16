@@ -32,5 +32,3 @@ cites:
 - sejdinovic_equivalence_2013
 - wolak_1991
 ---
-
-# Portfolio Risk Bounds without Cross-Asset Return Covariances: Distributional Fields from Language-Model Representations

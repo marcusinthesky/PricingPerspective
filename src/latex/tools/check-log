@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-log — publisher-parity TeX log policy.
+# check-log — manuscript TeX log policy.
 #
 # Policy (see t24.13-review-gate-remediation):
 #   exit 1  <=>  the log contains unresolved/multiply-defined manuscript

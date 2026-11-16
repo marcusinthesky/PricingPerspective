@@ -13,5 +13,3 @@ volume: '62'
 issue: '3'
 page: 1139-1168
 ---
-
-# Giving {Content} to {Investor} {Sentiment}: {The} {Role} of {Media} in the {Stock} {Market}

@@ -1,9 +1,8 @@
 \section{Literature review}\label{sec:literature}
 
-In this review, we aim to connect three literatures in sequence: textual
-analysis in finance, the
-geometry of probability measures through optimal transport, and
-characteristic-based and spatial representations of systematic risk.
+Three literatures connect firm information to systematic covariance:
+textual analysis in finance, optimal transport, and characteristic-based and
+spatial representations of systematic risk.
 Together, these strands provide the measurement object, the distance used to
 compare it, and the economic second moment that the paper seeks to restrict.
 
@@ -16,9 +15,25 @@ language-model outputs and embeddings to forecast returns and study how
 markets process news \citep{chen_expected_2026,lopezlira_chatgpt_2026}.
 These applications largely map individual documents into classifications,
 scores, or expected-return predictions.
-This paper addresses that measurement limit by retaining each firm's
-collection of representations and relating distributional separation to
-systematic covariance rather than another document-level prediction.
+Text-based network industries instead measure firm similarity from 10-K
+product descriptions \citep{hoberg_phillips_2016}; their embedding-based
+successor supplies the product-market comparison used in our classification
+tests \citep{hoberg2025scope}.
+
+Textual similarity also carries information about financial dependence.
+\citet{box2018qualitative} shows that similarity in firm-specific newswire
+content predicts subsequent return correlation beyond historical
+comovement and conventional firm characteristics, and evaluates its use
+in minimum-variance portfolios.
+\citet{dyer2024disclosure} document a corresponding relation for mandatory
+financial disclosures, provide evidence consistent with disclosure
+similarity influencing subsequent comovement, and connect pairwise
+similarity to future market beta.
+These findings motivate examining how heterogeneous firm information
+relates to shared risk.
+We retain each firm's collection of article representations as a distribution
+and relate separation between these distributions to systematic covariance
+under explicit transmission conditions.
 
 Optimal transport supplies the geometry for that comparison.
 Word Mover's Distance treats word embeddings as empirical distributions and
@@ -27,35 +42,25 @@ space \citep{kusner_word_embeddings_2015}.
 This construction shows how a collection of language-model representations
 can become a probability measure whose geometry reflects distances in the
 underlying representation space.
-Word Mover's Distance does not by itself link distributional separation to a
-restriction on financial second moments; this paper develops that link for
-systematic covariance.
+We extend this distributional comparison to the systematic covariance
+supported by firms' factor exposures.
 
-The relevant geometric foundation is Wasserstein optimal transport, which
-connects to but does not require the broader machinery of information geometry.
-Classical information geometry studies families of probability distributions
-as points on geometric manifolds and commonly measures their separation
-through divergences such as Kullback--Leibler.
-Wasserstein information geometry instead builds on the cost of moving
-probability mass through the underlying sample space
-\citep{amari_information_wasserstein_2018,khan_optimal_transport_information_2022}.
-Unlike classical information geometry, which is invariant to
-reparametrization, the Wasserstein metric retains the cost structure of that
-sample space: transport between nearby regions is cheap, whereas transport
-between distant regions is expensive.
-Through Kantorovich duality, this cost has a direct economic reading as the
-maximum valuation difference between two configurations of mass over price
-functions that are free of spatial arbitrage.
-Recent work develops Wasserstein statistical manifolds, transport-induced
-natural gradients, and Wasserstein information matrices to connect
-information geometry and optimal transport
-\citep{li_natural_gradient_2018,panaretos_invitation_2020,li_wasserstein_information_2023}.
-Those tools primarily address statistical efficiency and estimation on
-probability models, whereas the present paper uses the underlying Wasserstein
-transport geometry to study an economic second moment.
-Our covariance argument therefore does not invoke the broader
-information-geometric machinery; it asks what the optimal-transport distance
-between two probability laws can imply about their feasible covariance.
+The economic foundation is Kantorovich's allocation problem: distribute a
+given supply across destinations to meet their requirements at minimum cost
+\citep{kantorovich_translocation_1958}.
+Its dual expresses the same optimum through supporting shadow valuations,
+connecting feasible allocations to the prices that support them
+\citep{panaretos_invitation_2020}.
+For proportional distance costs, the valuation restriction has a familiar
+spatial-arbitrage interpretation: a price difference cannot exceed the cost
+of moving the good between locations.
+Quadratic costs instead connect to the rising marginal costs of adjustment
+used in neoclassical investment theory \citep{hayashi_marginal_q_1982}.
+These interpretations give the distributional comparison economic structure:
+both the amount of mass reassigned and the cost of each reassignment matter.
+Our application aligns distributions of reported firm characteristics;
+in exposure space, quadratic cost also links that alignment exactly to
+common-shock covariance through polarization.
 
 The factor-model literature supplies the financial object to which that
 geometry is applied: systematic covariance generated by exposure to common shocks.
@@ -68,6 +73,9 @@ firm descriptors
 \citep{rosenberg1974extra,connor2007semiparametric,connor2012efficient}, and
 the time-varying-beta literature allows those loadings to change
 \citep{ghysels_stable_1998}.
+Instrumented principal components use observed characteristics to model
+dynamic loadings jointly with latent factors
+\citep{kelly_characteristics_2019}.
 Proxy-selection results further caution that proxy factors inherit
 approximate pricing relations only under maintained factor structure and
 additional rank conditions
@@ -107,7 +115,13 @@ Maintained restrictions on a common characteristic-to-exposure map transfer
 bounds on that distance to latent exposure space.
 There, polarization converts the minimum expected squared distance between
 exposure laws into the attainable ceiling on pairwise systematic covariance.
-Article-embedding geometry serves only as a proxy for the latent characteristic
-laws and does not identify the exposure map or its restrictions.
+Industry classifications summarize economic activity through discrete labels,
+whereas estimated factor loadings summarize return sensitivity to a selected
+set of shocks.
+The distributional representation instead retains heterogeneous reported
+information within each firm and permits a conditional covariance restriction
+to be stated before selecting its realized dependence with another firm.
+The empirical comparisons assess the distance association conditional on
+sector and finer industry matching and on 10-K product-market similarity.
 The next section formalizes this bridge and derives the resulting one-sided
 envelope for the covariance ceiling.

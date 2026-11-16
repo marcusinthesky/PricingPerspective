@@ -18,5 +18,3 @@ issue: '1'
 publisher: American Institute of Physics
 page: 15-26
 ---
-
-# The Basics of Information Geometry

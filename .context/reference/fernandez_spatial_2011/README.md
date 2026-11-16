@@ -20,5 +20,3 @@ page: 237-245
 cites:
 - anselin_1988
 ---
-
-# Spatial Linkages in International Financial Markets

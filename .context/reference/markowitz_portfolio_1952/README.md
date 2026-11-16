@@ -13,5 +13,3 @@ volume: '7'
 issue: '1'
 page: 77-91
 ---
-
-# Portfolio Selection

@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, cast
 
+from pipeline.figures.shared_tables import _render_longtable
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -51,7 +53,7 @@ def _result_row(label: str, dimension: str, matrix_id: str, result: object) -> s
 
 def _cell_label(cell: dict[str, object]) -> str:
     label = str(cell["label"])
-    if str(cell.get("provider_id", "")).startswith("ettax-"):
+    if cell.get("contrast_role") == "encoder_vintage":
         return label
     dimension = cell.get("effective_dimension")
     native = cell.get("native_dimension")
@@ -188,73 +190,71 @@ def render_paper5_representation_ablation_table(
         "\n".join(
             [
                 "% AUTO-GENERATED -- do not edit by hand.",
-                r"\begin{table}[H]",
-                r"\centering",
-                r"\scriptsize",
-                r"\setlength{\tabcolsep}{3.3pt}",
-                r"\begin{tabular}{lllrrr}",
-                r"\toprule",
-                (
-                    r"Encoder & Dim. & Interaction matrix & $\hat\rho$ [95\% CI] "
-                    r"& $\hat\lambda$ & Log-likelihood \\"
+                _render_longtable(
+                    rows,
+                    columns=r"@{}p{0.35\linewidth}llrrr@{}",
+                    header=(
+                        r"Encoder & Dim. & Interaction matrix & $\hat\rho$ [95\% CI] "
+                        r"& $\hat\lambda$ & Log-likelihood \\"
+                    ),
+                    caption=(
+                        r"Pooled 2023--2026 representation sensitivity of "
+                        r"the single-field spatial horse race across seven base "
+                        r"representations and eight published annual "
+                        r"ChronoBERT vintages. "
+                        r"Each encoder row compares "
+                        r"the barycentric interaction field $W^\flat$, obtained by "
+                        r"target-anchored Wasserstein-barycentric reconstruction, "
+                        r"with the "
+                        r"median-bandwidth RBF transform of its matching squared-W$_2$ "
+                        r"matrix. Intervals use the same 2,000 joint-date "
+                        rf"stationary bootstrap on {schedule}. "
+                        r"$\hat\lambda=\hat\rho/(1-\hat\rho)$ is the implied "
+                        r"adjustment "
+                        r"index; log-likelihood is descriptive. Persistent news "
+                        r"co-mentions are "
+                        r"embedding-free; equal active support is shown once for the "
+                        r"primary barycentric interaction field. These are paired "
+                        r"conditional-fit "
+                        r"sensitivity comparisons across the registered representation "
+                        r"cells. Published cumulative-training checkpoints are not a "
+                        r"matched-compute causal leakage test."
+                    ),
+                    label="tab:p5-representation-ablation",
+                    font_size="scriptsize",
+                    tabcolsep="3.3pt",
                 ),
-                r"\midrule",
-                *rows,
-                r"\bottomrule",
-                r"\end{tabular}",
-                (
-                    r"\caption{Pooled 2023--2026 representation sensitivity of "
-                    r"the single-field spatial horse race across seven base "
-                    r"representations and three matched EttaX encoder vintages. "
-                    r"Each encoder row compares "
-                    r"the barycentric interaction field $W^\flat$, obtained by "
-                    r"target-anchored Wasserstein-barycentric reconstruction, with the "
-                    r"median-bandwidth RBF transform of its matching squared-W$_2$ "
-                    r"matrix. Intervals use the same 2,000 joint-date "
-                    rf"stationary bootstrap on {schedule}. "
-                    r"$\hat\lambda=\hat\rho/(1-\hat\rho)$ is the implied adjustment "
-                    r"index; log-likelihood is descriptive. Persistent news "
-                    r"co-mentions are "
-                    r"embedding-free; equal active support is shown once for the "
-                    r"primary barycentric interaction field. These are paired "
-                    r"conditional-fit "
-                    r"sensitivities, not a representation-selection test.}"
+                _render_longtable(
+                    contrast_rows,
+                    columns=r"@{}p{0.35\linewidth}rrrrrr@{}",
+                    header=(
+                        r"Contrast ($c-r$) & Estimate & 95\% CI & $p$ & "
+                        r"$p_H$ & Bound & Eq. \\"
+                    ),
+                    caption=(
+                        r"Paired common-schedule QMLE contrasts. Panel A estimates "
+                        r"$\rho^\flat_c-\rho^\flat_r$; Panel B estimates "
+                        r"$(\rho^\flat_c-\rho^h_c)-(\rho^\flat_r-\rho^h_r)$. "
+                        r"$p$ denotes two-sided add-one sign-tail probabilities; "
+                        r"$p_H$ denotes Holm adjustment separately within "
+                        r"each metric's "
+                        r"seven base and 28 vintage contrasts. "
+                        r"Estimates and intervals retain five decimal places "
+                        r"so endpoints "
+                        r"near zero remain visible. "
+                        r"Vintage equivalence requires both intervals to lie strictly "
+                        r"inside "
+                        r"their respective BGE-large-minus-Qwen3-8B@1024 "
+                        r"benchmark-calibrated, post-specified bounds; Eq. "
+                        r"is this joint two-metric decision. Intervals are "
+                        r"marginal, not simultaneous. "
+                        r"The contrasts compare conditional fit on a common "
+                        r"return schedule."
+                    ),
+                    label="tab:p5-representation-contrasts",
+                    font_size="scriptsize",
+                    tabcolsep="3.0pt",
                 ),
-                r"\label{tab:p5-representation-ablation}",
-                r"\end{table}",
-                r"\medskip",
-                r"\begin{table}[H]",
-                r"\centering",
-                r"\scriptsize",
-                r"\setlength{\tabcolsep}{3.0pt}",
-                r"\begin{tabularx}{\linewidth}{Xrrrrrr}",
-                r"\toprule",
-                (
-                    r"Contrast ($c-r$) & Estimate & 95\% CI & Raw $p$ & "
-                    r"Holm $p$ & Bound & Joint equiv. \\"
-                ),
-                r"\midrule",
-                *contrast_rows,
-                r"\bottomrule",
-                r"\end{tabularx}",
-                (
-                    r"\caption{Paired common-schedule QMLE contrasts. Panel A "
-                    r"estimates "
-                    r"$\rho^\flat_c-\rho^\flat_r$; Panel B estimates "
-                    r"$(\rho^\flat_c-\rho^h_c)-(\rho^\flat_r-\rho^h_r)$. Raw "
-                    r"$p$-values are two-sided add-one sign-tail probabilities, and "
-                    r"Holm adjustment is applied separately within each metric's seven "
-                    r"base and three vintage contrasts. "
-                    r"Estimates and intervals retain five decimal places so endpoints "
-                    r"near zero remain visible. "
-                    r"Vintage equivalence requires both intervals to lie strictly "
-                    r"inside "
-                    r"their respective BGE-large-minus-Qwen3-8B@1024 "
-                    r"benchmark-calibrated, post-specified bounds; the decision shown "
-                    r"is joint. No contrast is causal or an encoder-superiority claim.}"
-                ),
-                r"\label{tab:p5-representation-contrasts}",
-                r"\end{table}",
                 "",
             ]
         ),

@@ -15,5 +15,3 @@ issue: '1'
 publisher: Elsevier
 page: 110-119
 ---
-
-# Equilibrium in economies with incomplete financial markets

@@ -2,25 +2,33 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING, Never, cast
 
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-import yaml
-from jcor.inference.block_length import optimal_block_length_numpy
+from statadic.estimation.covariance.estimators import sample_covariance_kernel
+from statadic.inference.resampling.block_length import optimal_block_length_numpy
+from statadic.inference.resampling.schedule import (
+    ReplicateStatus,
+    ReplicateValue,
+    evaluate_replicates,
+    row_resample_schedule,
+)
+from statadic.numerics.optimize.simplex import simplex_qp_result
 
-from pipeline.io.paper3_certificate import sha256_path
+from pipeline._kernels.multiplicity import holm_adjust
 from pipeline.io.params import load_params
 from pipeline.stages.papers.paper3.certificate import (
     _MIN_REFERENCE_DRAWS,
     _news_only_benchmark,
     _reference_designs,
-    _standardize_returns,
 )
-from pipeline.stages.papers.paper3.certificate_validation import _gmv
-from pipeline.stages.papers.paper5._gate.bootstrap import stationary_bootstrap_indices
+from pipeline.stages.papers.paper3.certificate_artifacts import sha256_path
+from pipeline.stages.papers.paper5.bootstrap import stationary_bootstrap_indices
 from pipeline.stages.shared.representation_ablation import (
     load_extended_representation_ablation_specs,
     load_representation_contrast_specs,
@@ -32,6 +40,8 @@ from pipeline.stages.substrate.panel import (
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    import jax
 
     from pipeline.stages.papers.paper3.certificate import _ReferenceDesign
     from pipeline.stages.shared.representation_ablation import (
@@ -68,13 +78,12 @@ class Paper3RepresentationAblationPaths:
 
 @dataclass(frozen=True, slots=True)
 class Paper3RepresentationMergePaths:
-    """Inputs and output for the ten-cell Paper 3 merge."""
+    """Inputs and output for the fifteen-cell Paper 3 merge."""
 
     params_file: Path
     cells_dir: Path
     canonical_certificate_summary: Path
     output_summary: Path
-    returns_dir: Path | None = None
     contrast_draws_dir: Path | None = None
 
 
@@ -140,29 +149,62 @@ def _return_bootstrap_draws(
     weights: np.ndarray,
     indices: np.ndarray,
 ) -> tuple[np.ndarray, int]:
-    """Re-standardize and recompute the sample-GMV benchmark per draw."""
+    """Re-standardize and recompute the sample-GMV benchmark per supplied draw.
 
-    def _draw_value(date_indices: np.ndarray) -> float:
-        sampled, _ = _standardize_returns(returns[date_indices])
-        covariance = np.cov(sampled, rowvar=False, ddof=1)
-        gmv_weights = _gmv(covariance)
-        news_variance = float(np.var(sampled @ weights, ddof=1))
-        gmv_variance = float(np.var(sampled @ gmv_weights, ddof=1))
-        if (
-            not np.isfinite(news_variance)
-            or not np.isfinite(gmv_variance)
-            or gmv_variance <= 0.0
-        ):
-            return float("nan")
-        return 100.0 * news_variance / gmv_variance
+    Preserve draw order and supplied indices, including failed positions as
+    NaNs. Nonpositive sample volatility is unavailable; a repeated constant
+    panel is not made valid by a host summation's tiny positive roundoff.
+    """
+    if len(indices) == 0:
+        return np.empty(0, dtype=np.float64), 0
+    panel = jnp.asarray(returns)
+    news_weights = jnp.asarray(weights)
+    schedule = row_resample_schedule(indices, n_observations=len(returns))
 
-    draws = np.full(len(indices), np.nan, dtype=np.float64)
-    for draw_id, date_indices in enumerate(indices):
-        try:
-            draws[draw_id] = _draw_value(date_indices)
-        except (ValueError, FloatingPointError):
-            continue
-    return draws, int(np.isfinite(draws).sum())
+    def draw_value(date_indices: jax.Array) -> ReplicateValue[jax.Array]:
+        """Refit one supplied draw while retaining numerical failure evidence."""
+        sampled = panel[date_indices]
+        volatility = jnp.std(sampled, axis=0, ddof=1)
+        valid_sample = jnp.all(jnp.isfinite(sampled)) & jnp.all(
+            jnp.isfinite(volatility) & (volatility > 0.0)
+        )
+        standardized = sampled / volatility
+        valid_sample &= jnp.all(jnp.isfinite(standardized))
+        covariance = sample_covariance_kernel(standardized, ddof=1)
+        fit = simplex_qp_result(
+            2.0 * covariance,
+            jnp.zeros(covariance.shape[0], dtype=covariance.dtype),
+            tolerance=1e-7,
+            max_steps=2000,
+        )
+        news_variance = jnp.var(standardized @ news_weights, ddof=1)
+        gmv_variance = jnp.var(standardized @ fit.solver.value, ddof=1)
+        value = 100.0 * news_variance / gmv_variance
+        valid = (
+            valid_sample
+            & fit.solver.converged
+            & jnp.isfinite(news_variance)
+            & jnp.isfinite(gmv_variance)
+            & (gmv_variance > 0.0)
+        )
+        status = jnp.where(
+            valid_sample,
+            jnp.where(
+                fit.solver.converged,
+                ReplicateStatus.NONFINITE_VALUE,
+                ReplicateStatus.SOLVER_FAILURE,
+            ),
+            ReplicateStatus.INVALID_REFIT,
+        )
+        return ReplicateValue(
+            value,
+            valid,
+            jnp.where(valid, ReplicateStatus.VALID, status).astype(jnp.int32),
+        )
+
+    result = evaluate_replicates(schedule, draw_value)
+    draws = np.asarray(jnp.where(result.valid, result.values, jnp.nan))
+    return draws, int(result.valid_count)
 
 
 def run_paper3_representation_ablation(
@@ -256,14 +298,34 @@ def run_paper3_representation_ablation(
             "solve_ok": np.isfinite(relative_draws),
         }
     ).to_parquet(paths.output_dir / "return_bootstrap.parquet", index=False)
-    (paths.output_dir / "summary.yaml").write_text(
-        yaml.safe_dump(summary, sort_keys=False), encoding="utf-8"
+    (paths.output_dir / "results.json").write_text(
+        json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     provenance = {
         "schema_version": 1,
         "cell_id": cell_id,
+        "parameter_identity": {
+            "kind": "scoped-params-sha256",
+            "value": hashlib.sha256(
+                json.dumps(
+                    {
+                        "cell": asdict(spec),
+                        "news_reference": {
+                            "designs": [asdict(design) for design in designs],
+                            "draws": draws,
+                            "seed": seed,
+                        },
+                        "return_bootstrap": {
+                            "replications": return_draws,
+                            "seed": return_seed,
+                        },
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest(),
+        },
         "inputs": {
-            "params_file": sha256_path(paths.params_file),
             "returns_dir": sha256_path(paths.returns_dir),
             "distance_artifact_dir": sha256_path(paths.distance_artifact_dir),
         },
@@ -274,28 +336,15 @@ def run_paper3_representation_ablation(
     return summary
 
 
-def _load_yaml(path: Path) -> dict[str, object]:
+def _load_json(path: Path) -> dict[str, object]:
     if not path.exists():
         message = f"required Paper 3 representation artifact is missing: {path}"
         raise FileNotFoundError(message)
-    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         message = f"Paper 3 representation artifact must be a mapping: {path}"
         _type_error(message)
     return cast("dict[str, object]", payload)
-
-
-def _holm(pvalues: list[float | None]) -> list[float | None]:
-    available = sorted(
-        ((index, value) for index, value in enumerate(pvalues) if value is not None),
-        key=lambda pair: pair[1],
-    )
-    result: list[float | None] = [None] * len(pvalues)
-    running = 0.0
-    for rank, (index, value) in enumerate(available):
-        running = max(running, min(1.0, (len(available) - rank) * value))
-        result[index] = running
-    return result
 
 
 def _paired_contrasts(
@@ -410,7 +459,7 @@ def _paired_contrasts(
         ]
         for index, value in zip(
             indexes,
-            _holm(
+            holm_adjust(
                 [
                     cast("float | None", results[index].get("pvalue"))
                     if results[index].get("status") == "computed"
@@ -428,10 +477,10 @@ def _paired_contrasts(
 def merge_paper3_representation_ablation(
     paths: Paper3RepresentationMergePaths,
 ) -> dict[str, object]:
-    """Validate and merge the ten Paper 3 cells plus paired return contrasts."""
+    """Validate and merge the fifteen Paper 3 cells plus paired return contrasts."""
     specs = load_extended_representation_ablation_specs(paths.params_file)
     rows = [
-        _load_yaml(paths.cells_dir / spec.cell_id / "summary.yaml") for spec in specs
+        _load_json(paths.cells_dir / spec.cell_id / "results.json") for spec in specs
     ]
     expected_ids = [spec.cell_id for spec in specs]
     observed_ids = [
@@ -449,7 +498,7 @@ def merge_paper3_representation_ablation(
     canonical = next(
         row for row in rows if cast("dict[str, object]", row["cell"])["canonical"]
     )
-    publication = _load_yaml(paths.canonical_certificate_summary)
+    publication = _load_json(paths.canonical_certificate_summary)
     if canonical["news_only_benchmark"] != publication.get("news_only_benchmark"):
         _value_error(
             "canonical Paper 3 representation cell does not reproduce the "
@@ -516,7 +565,7 @@ def merge_paper3_representation_ablation(
     }
     paths.output_summary.parent.mkdir(parents=True, exist_ok=True)
     paths.output_summary.write_text(
-        yaml.safe_dump(merged, sort_keys=False), encoding="utf-8"
+        json.dumps(merged, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     return merged
 

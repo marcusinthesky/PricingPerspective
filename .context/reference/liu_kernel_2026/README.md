@@ -16,5 +16,3 @@ publisher: arXiv
 cites:
 - berger_intersection_1996
 ---
-
-# Kernel Tests of Equivalence

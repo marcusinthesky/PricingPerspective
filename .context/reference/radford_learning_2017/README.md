@@ -17,5 +17,3 @@ URL: http://arxiv.org/abs/1704.01444
 publisher: arXiv
 note: arXiv:1704.01444 [cs]
 ---
-
-# Learning to {Generate} {Reviews} and {Discovering} {Sentiment}

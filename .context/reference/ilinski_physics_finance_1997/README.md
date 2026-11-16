@@ -12,5 +12,3 @@ DOI: 10.48550/arXiv.hep-th/9710148
 publisher: arXiv
 note: Preprint, hep-th/9710148
 ---
-
-# Physics of Finance

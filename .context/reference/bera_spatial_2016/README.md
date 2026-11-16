@@ -17,5 +17,3 @@ volume: '15'
 issue: '2'
 page: 29-42
 ---
-
-# Spatial {Dependence} in {Financial} {Data}: {Importance} of the {Weights} {Matrix}

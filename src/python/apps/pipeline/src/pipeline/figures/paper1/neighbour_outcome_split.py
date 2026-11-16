@@ -27,8 +27,12 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from pipeline.figures._common import _C, _save, _style, figsize, fit_to_width
+from pipeline.figures._common import _C, _save, figsize, fit_to_width
+from pipeline.figures.paper1._typography import MIN_PT, paper1_style
 from pipeline.io.values import Comment, PublicationValue, format_float
+from pipeline.stages.papers.paper1.neighbour_outcome_split import (
+    _canonical_json_bytes,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -38,6 +42,9 @@ if TYPE_CHECKING:
 CONTRACT_ID = "paper1-neighbour-outcome-split-v2"
 MANUSCRIPT_ANCHOR = "sec:exploratory-geometry-outcomes"
 MANUSCRIPT_FRACTION = 0.78
+# Share of each panel's plotted return range added below the paths, so the
+# four-line 9 pt inset occupies empty space rather than covering the series.
+_INSET_HEADROOM = 1.15
 # Sector -> LaTeX macro slug. Deliberately a registry rather than a derived
 # lowercasing: each entry mints publication macro names, so a sector entering
 # the partition should be a conscious act, not a silent side effect of a roster
@@ -63,7 +70,7 @@ DECLARE_VALUE_RE = re.compile(r"\\ppDeclareValue\{([^{}]+)\}\{([^{}]*)\}")
 class NeighbourOutcomeSplitRenderPaths:
     """Artifacts consumed and produced by the neighbour outcome-split renderer."""
 
-    summary_file: Path
+    results_file: Path
     provenance_file: Path
     selection_file: Path
     pair_paths_file: Path
@@ -78,16 +85,6 @@ def _load_json(path: Path) -> dict[str, Any]:
         message = f"{path}: expected a JSON object"
         raise TypeError(message)
     return value
-
-
-def _canonical_json_bytes(value: object) -> bytes:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        allow_nan=False,
-        sort_keys=True,
-        separators=(",", ":"),
-    ).encode("utf-8")
 
 
 def _sector_slug(sector: str) -> str:
@@ -262,7 +259,7 @@ def _assert_number_bindings(
 def _render_figure(
     pair_paths: pd.DataFrame, summary: dict[str, Any], path: Path
 ) -> None:
-    _style()
+    paper1_style()
     pairs = summary["selected_pairs"]
     expected_pairs = int(summary["n_selected_pairs"])
     sectors = [str(pair["sector"]) for pair in pairs]
@@ -274,14 +271,17 @@ def _render_figure(
         raise ValueError(message)
     # Two columns, as many rows as the partition needs. The grid was fixed at
     # 3x2 for the retired six-sector partition, so a seventh sector overran it.
-    # Height scales with the row count to hold the per-panel aspect ratio.
+    # Height scales with the row count to hold the per-panel aspect ratio; rows are
+    # taller than the panels' width alone would need, because the lower part of
+    # each panel is reserved for its 9 pt inset (see `_INSET_HEADROOM`).
     columns = 2
     rows = math.ceil(len(pairs) / columns)
     fig, axes = plt.subplots(
         rows,
         columns,
-        figsize=figsize(MANUSCRIPT_FRACTION, (7.0 / 7.1) * rows / 3.0),
+        figsize=figsize(MANUSCRIPT_FRACTION, 0.43 * rows),
         sharex=True,
+        layout="constrained",
         squeeze=False,
     )
     # An odd sector count leaves a trailing empty cell; blank it rather than
@@ -311,20 +311,29 @@ def _render_figure(
             ls="--",
             label=symbol2,
         )
+        # The inset sits below the paths rather than over them: the axis is
+        # extended downward by a fixed share of the plotted range.
+        low = float(
+            panel[["cumulative_log_return1", "cumulative_log_return2"]].min().min()
+        )
+        high = float(
+            panel[["cumulative_log_return1", "cumulative_log_return2"]].max().max()
+        )
+        span = (high - low) or 1.0
+        ax.set_ylim(low - _INSET_HEADROOM * span, high + 0.08 * span)
         percentile = pair["within_sector_rms_gap_percentile"]
         comparator = (
             "rank n/a (one sector pair)"
             if percentile is None
             else f"RMS percentile={format_float(float(percentile), 1)}"
         )
-        # Three short lines at 7pt, not two long ones at 8pt: at the printed panel
-        # width (2.95in, down from 3.55in) the old second line ran past the axes
-        # into the neighbouring column's tick labels.
+        # One statistic per line: at 9 pt and the printed panel width, any two on
+        # one line run past the axes into the neighbouring column.
         ax.text(
-            0.02,
+            0.04,
             0.04,
             (
-                f"W2={format_float(float(pair['w2_distance']), 3)}; "
+                f"W2={format_float(float(pair['w2_distance']), 3)}\n"
                 f"RMS gap={format_float(float(pair['rms_cumulative_log_gap']), 3)}\n"
                 "terminal gap="
                 f"{format_float(float(pair['terminal_absolute_log_gap']), 3)}\n"
@@ -333,29 +342,26 @@ def _render_figure(
             transform=ax.transAxes,
             ha="left",
             va="bottom",
-            fontsize=7.0,
-            linespacing=1.15,
-            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.84, "pad": 1.2},
+            fontsize=MIN_PT,
+            linespacing=1.1,
         )
         ax.set_title(
             f"{sector}\n{symbol1} (solid), {symbol2} (dashed)",
-            fontsize=8.5,
+            fontsize=MIN_PT,
         )
         ax.axhline(0.0, color=_C["gray"], lw=0.45, alpha=0.65)
         ax.grid(visible=True, linestyle=":", linewidth=0.38, alpha=0.4)
         ax.xaxis.set_major_locator(mdates.YearLocator())
         ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-        ax.tick_params(labelsize=8.0)
-    for ax in axes[:, 0]:
-        ax.set_ylabel("Cumulative log return", fontsize=8.5)
-    for ax in axes[-1, :]:
-        ax.set_xlabel("Evaluation date", fontsize=8.5)
+        ax.tick_params(labelsize=MIN_PT)
+    # One label per axis for the whole grid: per-row y-labels cost each
+    # left-column panel the width its 9 pt inset needs.
+    fig.supylabel("Cumulative log return", fontsize=MIN_PT)
+    fig.supxlabel("Evaluation date", fontsize=MIN_PT)
     fig.suptitle(
         "Later-window outcomes for text-nearest within-sector pairs",
         fontsize=10.0,
-        y=0.995,
     )
-    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.975), h_pad=1.2, w_pad=1.0)
     fit_to_width(fig, MANUSCRIPT_FRACTION)
     _save(fig, path)
 
@@ -364,7 +370,7 @@ def render_paper1_neighbour_outcome_split(
     paths: NeighbourOutcomeSplitRenderPaths,
 ) -> dict[str, Any]:
     """Render the sector-panel exhibit and registered semantic contract."""
-    summary_file = paths.summary_file
+    results_file = paths.results_file
     provenance_file = paths.provenance_file
     selection_file = paths.selection_file
     pair_paths_file = paths.pair_paths_file
@@ -372,7 +378,7 @@ def render_paper1_neighbour_outcome_split(
     figure_path = paths.figure_path
     contract_path = paths.contract_path
 
-    summary = _load_json(summary_file)
+    summary = _load_json(results_file)
     provenance = _load_json(provenance_file)
     selection = _load_json(selection_file)
     pair_paths = pd.read_parquet(pair_paths_file)

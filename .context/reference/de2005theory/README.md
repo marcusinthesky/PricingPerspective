@@ -18,5 +18,3 @@ issue: '4'
 publisher: Institute of Mathematical Statistics
 page: 2773-2791
 ---
-
-# A theory of stochastic integration for bond markets

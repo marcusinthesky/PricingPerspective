@@ -1,3 +1,4 @@
+import Architect
 import PricingPerspective.Transmission.Dispersion.PortfolioVariance
 import WassersteinGeometry.Multimarginal.TwoMarginal
 
@@ -221,6 +222,15 @@ theorem jointPortfolioVariance_le_optimalEnvelope
 
 omit [SecondCountableTopology H] in
 /-- The certified envelope is the greatest attainable systematic portfolio variance. -/
+@[blueprint "thm:p3-envelope-exactness"
+  (statement := /--
+    Given a coherent joint law attaining the multi-marginal dispersion minimum, the weighted
+    marginal second moments minus that minimum is the greatest systematic portfolio variance
+    attainable across all coherent joint laws with integrable pairwise inner products.
+    Assumptions: finite asset universe and normalized risk weights; a supplied certificate that
+    some coherent joint law attains the dispersion minimum; integrability of every pairwise
+    inner product under that attaining law.
+  -/)]
 theorem isGreatest_attainableJointPortfolioVariances
     (q : ProbabilityWeight A) (P : A → WassersteinMeasure H)
     (cert : OptimalJointDispersion q P)
@@ -237,6 +247,14 @@ theorem isGreatest_attainableJointPortfolioVariances
 
 /-- **Two-asset Paper 1 bridge.** The optimal coherent two-asset portfolio variance subtracts
 `q₀q₁ W₂²(P₀,P₁)`, exactly the two-marginal covariance-envelope correction. -/
+@[blueprint "thm:p3-pairwise-bridge"
+  (statement := /--
+    For two assets, the optimal coherent portfolio variance is the weighted marginal second
+    moments minus the product of the two weights and the squared quadratic Wasserstein distance
+    between the exposure laws. Assumptions: exactly two assets with normalized risk weights; a
+    supplied certificate that some coherent joint law attains the dispersion minimum;
+    integrability of every pairwise inner product under that attaining law.
+  -/)]
 theorem optimalTwoAssetPortfolioVariance_eq_paperOne
     (q : ProbabilityWeight (Fin 2)) (P : Fin 2 → WassersteinMeasure H)
     (cert : OptimalJointDispersion q P)

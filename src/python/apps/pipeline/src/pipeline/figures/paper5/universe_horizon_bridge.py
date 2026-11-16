@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import date
 from typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
@@ -32,6 +33,20 @@ def _number(mapping: dict[str, object], key: str, context: str) -> float:
     return float(value)
 
 
+def _iso_date(cell: dict[str, object], key: str, cell_id: str) -> date:
+    """Read one ISO calendar date used in the rendered table."""
+    value = cell.get(key)
+    if not isinstance(value, str):
+        message = f"{cell_id} requires ISO date field {key!r}"
+        raise TypeError(message)
+    return date.fromisoformat(value)
+
+
+def _short_date(value: date) -> str:
+    """Format a date compactly enough to sit on one table line."""
+    return f"{value.day} {value:%b} {value.year}"
+
+
 def _cell_row(
     label: str,
     cell: dict[str, object],
@@ -49,36 +64,26 @@ def _cell_row(
     if isinstance(trading_days, bool) or not isinstance(trading_days, int):
         message = f"{cell_id} trading_days must be an integer"
         raise TypeError(message)
-    horizon = str(cell.get("horizon", ""))
-    window = f"{cell.get('window_start')}--{cell.get('window_end')}"
+    end = _iso_date(cell, "window_end", cell_id)
     rho = _number(cell, "rho_hat", cell_id)
     rho_lower = _number(cell, "rho_ci_lower", cell_id)
     rho_upper = _number(cell, "rho_ci_upper", cell_id)
-    intensity = _number(cell, "lambda_hat", cell_id)
-    intensity_lower = _number(cell, "lambda_ci_lower", cell_id)
-    intensity_upper = _number(cell, "lambda_ci_upper", cell_id)
     return (
         " & ".join(
             [
                 label,
                 str(universe_size),
-                f"{horizon.title()} ({window})",
+                _short_date(end),
                 str(trading_days),
                 f"{rho:.3f} [{rho_lower:.3f}, {rho_upper:.3f}]",
-                f"{intensity:.2f} [{intensity_lower:.2f}, {intensity_upper:.2f}]",
             ]
         )
         + r" \\"
     )
 
 
-def _contrast_row(
-    label: str,
-    held_fixed: str,
-    comparison: str,
-    contrast: dict[str, object],
-) -> str:
-    """Render one explicitly descriptive step contrast."""
+def _require_descriptive(contrast: dict[str, object], label: str) -> None:
+    """Reject step contrasts that claim more than an arithmetic difference."""
     contrast_id = str(contrast.get("contrast_id", label))
     if contrast.get("status") != "descriptive_only":
         message = f"{contrast_id} must be marked descriptive_only"
@@ -86,19 +91,15 @@ def _contrast_row(
     if contrast.get("inference") != "none":
         message = f"{contrast_id} must not claim contrast inference"
         raise ValueError(message)
-    return (
-        " & ".join(
-            [
-                label,
-                held_fixed,
-                comparison,
-                r"\textemdash",
-                f"{_number(contrast, 'rho_difference', contrast_id):.3f}",
-                f"{_number(contrast, 'lambda_difference', contrast_id):.3f}",
-            ]
-        )
-        + r" \\"
-    )
+
+
+def _common_start(cells: list[dict[str, object]]) -> date:
+    """Return the start date shared by every specification, or fail."""
+    starts = {_iso_date(cell, "window_start", "bridge cell") for cell in cells}
+    if len(starts) != 1:
+        message = "bridge specifications must share one window_start"
+        raise ValueError(message)
+    return starts.pop()
 
 
 def render_paper5_universe_horizon_bridge_table(
@@ -146,27 +147,13 @@ def render_paper5_universe_horizon_bridge_table(
         contrasts.get(_UNIVERSE_CONTRAST),
         _UNIVERSE_CONTRAST,
     )
+    _require_descriptive(horizon_contrast, _HORIZON_CONTRAST)
+    _require_descriptive(universe_contrast, _UNIVERSE_CONTRAST)
+    start = _common_start([reference_long, reference_short, current_short])
     rows = [
-        r"\multicolumn{6}{l}{\textit{Panel A: sequential specifications}} \\",
-        r"\addlinespace[1.5pt]",
         _cell_row("Historical reference", reference_long),
         _cell_row("Horizon-matched", reference_short),
-        _cell_row("Current governed", current_short),
-        r"\midrule",
-        r"\multicolumn{6}{l}{\textit{Panel B: descriptive step contrasts}} \\",
-        r"\addlinespace[1.5pt]",
-        _contrast_row(
-            "Horizon",
-            "52 firms",
-            r"Long $-$ short",
-            horizon_contrast,
-        ),
-        _contrast_row(
-            "Universe",
-            "Short horizon",
-            r"100 $-$ 52 firms",
-            universe_contrast,
-        ),
+        _cell_row("Current universe", current_short),
     ]
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
@@ -176,33 +163,33 @@ def render_paper5_universe_horizon_bridge_table(
                 r"\begin{table}[H]",
                 r"\centering",
                 r"\small",
-                r"\setlength{\tabcolsep}{3.2pt}",
-                r"\begin{tabularx}{\linewidth}{llXrll}",
+                r"\begin{tabular}{lrrrl}",
                 r"\toprule",
                 (
-                    r"Specification / step & Universe / fixed axis & Horizon / "
-                    r"comparison & $T$ & $\hat\rho$ [95\% CI] & "
-                    r"$\hat\lambda$ [95\% CI] \\"
+                    r"Specification & Firms & End date & Trading days & "
+                    r"$\hat\rho$ [95\% CI] \\"
                 ),
                 r"\midrule",
                 *rows,
                 r"\bottomrule",
-                r"\end{tabularx}",
+                r"\end{tabular}",
                 (
                     r"\caption{Sequential universe-and-horizon bridge for the "
-                    r"barycentric $W^\flat$ SAR QMLE. The historical first row uses "
-                    r"the recovered 52-firm operator and long return window. The "
-                    r"second "
-                    r"row holds that operator and universe fixed while shortening the "
-                    r"return endpoint to 6 April 2026; its interval is newly estimated "
-                    r"with the joint-date stationary bootstrap. The third row expands "
-                    r"to the governed current 100-firm operator at the same endpoint; "
-                    r"the first and third intervals come from their verified governed "
-                    r"results. Complete-case date counts can differ across universes. "
-                    r"Panel B reports arithmetic differences only: they are "
-                    r"descriptive, "
-                    r"noncausal, and carry no contrast-level inference. "
-                    r"$\hat\lambda=\hat\rho/(1-\hat\rho)$.}"
+                    r"barycentric $W^\flat$ single-field SAR QMLE in the "
+                    r"raw-return, common-intercept specification "
+                    r"(\ppAppendixRef{sec:app-unadjusted}); it is not the primary "
+                    r"factor-conditioned estimate. Every row starts on "
+                    rf"{start.day} {start:%B} {start.year}. "
+                    r"The historical row uses the recovered 52-firm operator and "
+                    r"the long return window. The horizon-matched row holds that "
+                    r"operator and universe fixed while shortening the return "
+                    r"endpoint; its interval is newly estimated with the "
+                    r"joint-date stationary bootstrap. The current-universe row "
+                    r"expands to the 100-firm operator at the same endpoint, so "
+                    r"it changes both the roster and the operator; the first and "
+                    r"third intervals come from the reported source results. "
+                    r"Complete-case trading-day counts can differ across "
+                    r"universes.}"
                 ),
                 r"\label{tab:p5-universe-horizon-bridge}",
                 r"\end{table}",

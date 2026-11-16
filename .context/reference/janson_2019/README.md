@@ -16,5 +16,3 @@ cites:
 - lyons_distance_2013
 - sejdinovic_equivalence_2013
 ---
-
-# On Distance Covariance in Metric and Hilbert Spaces

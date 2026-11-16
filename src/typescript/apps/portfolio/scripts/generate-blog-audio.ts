@@ -21,21 +21,26 @@ const requestedSlug = Bun.argv
   ?.slice("--slug=".length);
 
 // With --slug, only that post is read, so unfinished drafts elsewhere do not block it.
-const postsToRender = await Promise.all(
-  (await readdir(contentRoot, { withFileTypes: true }))
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".mdx"))
-    .filter((entry) => !requestedSlug || basename(entry.name, ".mdx") === requestedSlug)
-    .map(async (entry) => {
-      const source = await readFile(join(contentRoot, entry.name), "utf8");
-      const title = (matter(source).data as Record<string, unknown>).title;
-      if (typeof title !== "string" || title.trim() === "") {
-        throw new Error(`${entry.name}: frontmatter field 'title' is required for audio.`);
-      }
-      return { slug: basename(entry.name, ".mdx"), title };
-    }),
-);
+const postsToRender = (
+  await Promise.all(
+    (
+      await readdir(contentRoot, { withFileTypes: true })
+    )
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".mdx"))
+      .filter((entry) => !requestedSlug || basename(entry.name, ".mdx") === requestedSlug)
+      .map(async (entry) => {
+        const source = await readFile(join(contentRoot, entry.name), "utf8");
+        const metadata = matter(source).data as Record<string, unknown>;
+        const title = metadata.title;
+        if (typeof title !== "string" || title.trim() === "") {
+          throw new Error(`${entry.name}: frontmatter field 'title' is required for audio.`);
+        }
+        return { slug: basename(entry.name, ".mdx"), title, audio: metadata.audio !== false };
+      }),
+  )
+).filter((post) => post.audio);
 if (requestedSlug && postsToRender.length === 0) {
-  throw new Error(`Unknown blog slug: ${requestedSlug}.`);
+  throw new Error(`No audio-enabled blog matches: ${requestedSlug}.`);
 }
 
 async function runFfmpeg(args: string[]): Promise<void> {
@@ -99,7 +104,10 @@ function narrationChunks(narration: string): string[] {
   return chunks;
 }
 
-async function writeTranscript(post: (typeof postsToRender)[number], narration: string): Promise<void> {
+async function writeTranscript(
+  post: (typeof postsToRender)[number],
+  narration: string,
+): Promise<void> {
   const audioPath = join(audioRoot, `${post.slug}.webm`);
   const duration = await audioDuration(audioPath);
   const vtt = [

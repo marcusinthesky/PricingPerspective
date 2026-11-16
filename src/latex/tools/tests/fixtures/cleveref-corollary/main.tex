@@ -1,0 +1,26 @@
+% cleveref theorem-name regression guard.
+% Independent per-type flat theorem counters (pp-manuscript.sty) must make a
+% \cref to a corollary render as "Corollary N", NOT "Theorem N" — the
+% shared-counter mislabel the Paper-1 canary fixed. run.sh compiles this,
+% runs pdftotext, and asserts the reference line says Corollary.
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=30mm]{geometry}
+\usepackage{microtype}
+\usepackage{pp-manuscript}
+\usepackage[hidelinks]{hyperref}
+\usepackage[capitalise,nameinlink,noabbrev]{cleveref}
+
+\begin{document}
+
+\begin{theorem}\label{thm:base}
+  A base theorem.
+\end{theorem}
+
+\begin{corollary}\label{cor:derived}
+  A derived corollary.
+\end{corollary}
+
+CREFCHECK: \cref{cor:derived}.
+
+\end{document}

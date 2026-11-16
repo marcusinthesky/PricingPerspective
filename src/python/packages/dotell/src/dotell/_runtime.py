@@ -53,8 +53,8 @@ class _Sampler(threading.Thread):
         # that same object*, so a freshly constructed Process always reports
         # 0.0.  Children must therefore persist across samples or every
         # spawn-pool worker contributes nothing for its whole lifetime --
-        # ``simulation.harness.parallel.parallel_map`` runs the Monte-Carlo
-        # stages entirely in spawned children, which read as ~2% of one core
+        # spawn-pool workloads run entirely in spawned children, which read as
+        # ~2% of one core
         # instead of the ~200-400% they actually burn.  Keyed by identity
         # (pid, create_time) rather than pid alone so a recycled pid starts a
         # fresh baseline instead of inheriting the dead process's.

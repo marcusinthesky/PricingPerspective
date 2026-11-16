@@ -1,0 +1,19 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}Xrrrrrrr}
+\toprule
+Controls/sample & Firms & Dyads & $\hat\beta_{W_2}$ & 95\% CI & $\Delta D$/1 SD & $\Delta\rho$ & Partial $R^2$ \\
+\midrule
+FE + same sector & 100 & 4950 & 1.721 & [1.338, 2.129] & 0.063 & -0.072 & 0.227 \\
+FE + same sector + same industry & 100 & 4950 & 1.555 & [1.167, 1.967] & 0.057 & -0.065 & 0.184 \\
+Within industry, FE & 86 & 182 & 1.444 & [0.530, 2.442] & 0.054 & -0.050 & 0.309 \\
+\midrule
+ETNIC firms: FE + same sector & 81 & 3240 & 1.765 & [1.297, 2.280] & 0.063 & -0.070 & 0.228 \\
+\quad + ETNIC similarity & 81 & 3240 & 1.314 & [0.858, 1.880] & 0.047 & -0.052 & 0.112 \\
+\bottomrule
+\end{tabularx}
+\caption{Classification controls in the primary symmetric-firm-effects design, 2018--2022 returns. FE denotes symmetric additive firm effects. The first two rows add pair-level matching indicators to the full panel; the third retains only pairs sharing an industry. Labels come from the undated sample-roster snapshot, so these are retrospective controls. Intervals are 95\% multinomial node-bootstrap percentile intervals. Full-panel rows reuse the main schedule; the within-industry row resamples its incident firms, retaining only within-industry edges. $\Delta D$/1 SD uses each row's distance standard deviation; $\Delta\rho$ translates that effect at the row's median chord distance using $\rho=1-D^2/2$ and is a fitted contrast. Partial $R^2$ is $1-\mathrm{SSE}_{\mathrm{full}}/\mathrm{SSE}_{\mathrm{restricted}}$, where the restricted model removes only $W_2$, retaining all controls. The within-industry row changes the sample and has a distinct baseline. The last two rows restrict the panel to firms covered by the Hoberg--Phillips ETNIC network and share one resampling schedule; ETNIC is the mean 10-K business-description similarity over the fiscal years of the return window.}
+\label{tab:classification-controls}
+\end{table}

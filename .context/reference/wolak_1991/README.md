@@ -15,5 +15,3 @@ issue: '4'
 publisher: The Econometric Society
 page: 981-995
 ---
-
-# Local Nature of Inequality-Constraint Tests

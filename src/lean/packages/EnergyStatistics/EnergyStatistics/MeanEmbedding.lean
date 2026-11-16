@@ -1,58 +1,28 @@
 import EnergyStatistics.EnergyDistance
-import EnergyStatistics.NegativeType
+import StatadicFormal.Geometry.NegativeType.Basic
 
 set_option linter.style.longLine false
 
 /-!
-# Mean embedding of probability measures into an energy L² space (§4.6 keystone)
+# Mean embedding of probability measures into an energy L² space
 
-This module builds the explicit RKHS-free realization needed to discharge the
-`EnergyKernelEmbedding.identity` axiom used by Paper 3 (`Continuous/Energy.lean`). Stages s1--s3
-are implemented here; the remaining s4 connection-layer wiring will expose the ROADMAP §4.6 keystone
-`energy_sq_eq_energyDistanceSq` (Sejdinovic et al. 2013, Thm 22):
+This module builds an explicit realization of the energy kernel using signed interval
+indicators and Gaussian projections. The Hilbert space is
+`Lp ℝ 2 ((stdGaussian E).prod volume)`. Statadic's negative-type development supplies the
+Gaussian integration lemmas without depending on energy-statistics definitions.
 
-`‖energyEmbed P − energyEmbed Q‖²_H = energyDistanceSq P Q`.
+The signed interval indicator `signedIoc a` realizes the one-dimensional kernel
+`(|a| + |b| - |a - b|) / 2`. Scaling by `√(2/c)`, where `c` is the positive absolute
+first moment of a standard real Gaussian, gives `energyPointEmbed` with
+`‖Φ x - Φ y‖² = 2 * dist x y`.
 
-Mathlib has no RKHS, so the target Hilbert space is built explicitly as
-`Lp ℝ 2 ((stdGaussian E).prod volume)`, reusing the Gaussian-projection machinery already
-proven for `distNegativeType_of_innerProductSpace` (`NegativeType.lean`).
+The Bochner mean `energyEmbed P` then satisfies
+`‖energyEmbed P - energyEmbed Q‖² = energyDistanceSq P Q` under the stated first-moment
+hypotheses. The connection layer in `PricingPerspective.Exposure.EnergyEmbedding` uses
+polarization and makes the papers' normalization conventions explicit.
 
-## Construction (staged; this file lands the stages bottom-up)
-
-* **s1 (this file, PROVEN): the slice lemma.** For the *signed interval indicator*
-  `signedIoc a := 𝟙_{(0,a]} − 𝟙_{(a,0]}` on `ℝ`,
-  `∫ u, signedIoc a u · signedIoc b u = (|a| + |b| − |a − b|) / 2`.
-  This is the one-dimensional kernel `k(a,b) = ½(|a|+|b|−|a−b|)` written as an honest L²
-  inner product `⟪signedIoc a, signedIoc b⟫_{L²(volume)}`, so `k` is positive semidefinite by
-  construction and `signedIoc` is the point embedding on `ℝ`.
-
-* **s2 (PROVEN).** `energyPointEmbed` packages the point embedding
-  `Φ : E → Lp ℝ 2 ((stdGaussian E).prod volume)`,
-  `Φ x := fun (g, u) ↦ √(2/c) · signedIoc ⟪x, g⟫ u` (`c = gaussAbsMoment = ∫|t| dN(0,1) > 0`), as a
-  genuine `MemLp.toLp` element (reusing `integral_gaussianEnergyKernel`'s Gaussian-average kernel
-  identity and `integrable_abs_inner`/`integral_abs_inner_stdGaussian`, `NegativeType.lean`).
-  `inner_energyPointEmbed` proves `⟪Φ x, Φ y⟫ = ‖x‖ + ‖y‖ − dist x y` and
-  `norm_sub_energyPointEmbed_sq` the companion norm form `‖Φ x − Φ y‖² = 2·dist x y`.
-
-* **s3 (PROVEN).** `energyEmbed P := ∫ energyPointEmbed dP` is the Bochner mean in `Lp`, and
-  `norm_sub_energyEmbed_sq` proves
-  `‖energyEmbed P − energyEmbed Q‖² = energyDistanceSq P Q` under `Integrable (‖·‖)`. The
-  `‖x‖`/`‖y‖` terms cancel because `P − Q` carries total mass 0, leaving exactly
-  `2∫∫dist dP dQ − ∫∫dist dP dP − ∫∫dist dQ dQ`.
-
-* **s4 (only pending stage).** Canonical `EnergyKernelEmbedding E` instance (`sys_var := ‖energyEmbed·‖²`,
-  `sys_cov := ⟪energyEmbed·, energyEmbed·⟫`, `energy_sq := energyDistanceSq`, `identity` by
-  polarization `mean_embedding_polarization`) + the named keystone
-  `energy_sq_eq_energyDistanceSq`, wired into `Connections/EnergyStatistics.lean`.
-
-Constants (`c`, the `½`, the `√(2/c)` rescale) are absorbed into `Φ` by construction, which also
-settles the ½κ² bookkeeping recorded in ROADMAP Appendix C.
-
-## References
-
-* Sejdinovic, Sriperumbudur, Gretton, Fukumizu (2013). Equivalence of distance-based and
-  RKHS-based statistics. Ann. Statist. 41(5), Thm 22.
-* Székely & Rizzo (2023), §3.2; Schoenberg (1938); Lyons (2013), §3.
+References: Sejdinovic, Sriperumbudur, Gretton and Fukumizu (2013), Theorem 22;
+Székely and Rizzo (2023), §3.2; Schoenberg (1938); Lyons (2013), §3.
 -/
 
 namespace EnergyStatistics
@@ -178,36 +148,25 @@ the constant `c = ∫|t| dN(0,1)`:
 
 This is the mathematical core of the point embedding (s2): it turns the abstract requirement
 `⟪Φ x, Φ y⟫ = ‖x‖+‖y‖−dist x y` into a computed Gaussian integral, applying
-`integral_abs_inner_stdGaussian` to each of `x`, `y`, and `x − y` (using
+`StatadicFormal.Geometry.integral_abs_inner_stdGaussian` to each of `x`, `y`, and `x − y` (using
 `⟪x,g⟫ − ⟪y,g⟫ = ⟪x−y,g⟫`, `inner_sub_left`). The Lp packaging that makes `Φ x` a genuine element
 of `Lp ℝ 2 (γ.prod volume)` is completed by `energyPointEmbed` in s2. -/
 lemma integral_gaussianEnergyKernel (x y : E) :
     ∫ g, (|⟪x, g⟫| + |⟪y, g⟫| - |⟪x, g⟫ - ⟪y, g⟫|) / 2 ∂(stdGaussian E)
       = (∫ t, |t| ∂(gaussianReal (0 : ℝ) 1)) / 2 * (‖x‖ + ‖y‖ - dist x y) := by
-  have hx := integrable_abs_inner x
-  have hy := integrable_abs_inner y
-  have hxy := integrable_abs_inner (x - y)
+  have hx := StatadicFormal.Geometry.integrable_abs_inner x
+  have hy := StatadicFormal.Geometry.integrable_abs_inner y
+  have hxy := StatadicFormal.Geometry.integrable_abs_inner (x - y)
   have hadd : Integrable (fun g => |⟪x, g⟫| + |⟪y, g⟫|) (stdGaussian E) := hx.add hy
   simp_rw [← inner_sub_left]
   rw [integral_div, integral_sub hadd hxy, integral_add hx hy,
-    integral_abs_inner_stdGaussian x, integral_abs_inner_stdGaussian y,
-    integral_abs_inner_stdGaussian (x - y), dist_eq_norm]
+    StatadicFormal.Geometry.integral_abs_inner_stdGaussian x, StatadicFormal.Geometry.integral_abs_inner_stdGaussian y,
+    StatadicFormal.Geometry.integral_abs_inner_stdGaussian (x - y), dist_eq_norm]
   ring
 
 /-- The absolute first moment of the standard real Gaussian, `c = ∫|t| dN(0,1) = √(2/π)` — only
 positivity is ever used (never the closed form), so this is kept as an internal constant. -/
 private noncomputable def gaussAbsMoment : ℝ := ∫ t, |t| ∂(gaussianReal (0 : ℝ) 1)
-
-private lemma gaussAbsMoment_pos : 0 < gaussAbsMoment := by
-  unfold gaussAbsMoment
-  have hint : Integrable (fun t : ℝ => |t|) (gaussianReal 0 1) :=
-    (memLp_one_iff_integrable.mp (memLp_id_gaussianReal 1)).abs
-  rw [integral_pos_iff_support_of_nonneg (fun t => abs_nonneg t) hint]
-  have hsupp : Function.support (fun t : ℝ => |t|) = {(0 : ℝ)}ᶜ := by
-    ext t; simp [Function.mem_support]
-  haveI : NoAtoms (gaussianReal (0 : ℝ) 1) := noAtoms_gaussianReal one_ne_zero
-  rw [hsupp, measure_compl (measurableSet_singleton 0) (measure_ne_top _ _), measure_singleton]
-  simp
 
 /-- `signedIoc a` squared self-integrates to `|a|` (s1 at `b := a`, with the `|a-a|=0` term
 dropped). Feeds the L² norm computation for the point embedding. -/
@@ -274,7 +233,7 @@ private lemma measurable_signedIoc_inner (x : E) :
 
 /-- **Helper C.** `p ↦ signedIoc ⟪x, p.1⟫ p.2` lies in `L²(γ.prod volume)`: the slice integral
 over `u` is `|⟪x, g⟫|` (`integral_signedIoc_sq`) and `g ↦ |⟪x, g⟫|` is `γ`-integrable
-(`integrable_abs_inner`), so Fubini (`integrable_prod_iff`) gives the square integrable. -/
+(`StatadicFormal.Geometry.integrable_abs_inner`), so Fubini (`integrable_prod_iff`) gives the square integrable. -/
 private lemma memLp_signedIoc_inner (x : E) :
     MemLp (fun p : E × ℝ => signedIoc ⟪x, p.1⟫ p.2) 2
       ((stdGaussian E).prod (volume : Measure ℝ)) := by
@@ -298,7 +257,7 @@ private lemma memLp_signedIoc_inner (x : E) :
       simp_rw [h1]
       exact integral_signedIoc_sq ⟪x, g⟫
     rw [heq]
-    exact integrable_abs_inner x
+    exact StatadicFormal.Geometry.integrable_abs_inner x
 
 /-- **Point embedding (s2, fully packaged).** `Φ x := √(2/c) · signedIoc ⟪x, ·⟫` as a genuine
 element of `Lp ℝ 2 (γ.prod volume)`, `γ = stdGaussian E`, `c = gaussAbsMoment > 0`. This is the
@@ -353,10 +312,11 @@ lemma inner_energyPointEmbed (x y : E) :
   have step5 : (∫ g, (|⟪x, g⟫| + |⟪y, g⟫| - |⟪x, g⟫ - ⟪y, g⟫|) / 2 ∂(stdGaussian E)) =
       gaussAbsMoment / 2 * (‖x‖ + ‖y‖ - dist x y) :=
     integral_gaussianEnergyKernel x y
+  have hpos : 0 < gaussAbsMoment := StatadicFormal.Geometry.integral_abs_gaussianReal_one_pos
   have hcc : c * c = 2 / gaussAbsMoment :=
-    Real.mul_self_sqrt (div_nonneg (by norm_num) gaussAbsMoment_pos.le)
+    Real.mul_self_sqrt (div_nonneg (by norm_num) hpos.le)
   rw [step1, step2, step3, step4, step5, hcc]
-  field_simp [gaussAbsMoment_pos.ne']
+  field_simp [hpos.ne']
 
 /-- **s2, norm form.** The companion identity `‖Φ x − Φ y‖² = 2·dist x y`, obtained from
 `inner_energyPointEmbed` via the real Hilbert-space expansion `norm_sub_sq_real` (the `‖x‖`, `‖y‖`

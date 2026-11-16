@@ -1,0 +1,27 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p5.transport_dimension_ladder:cli_render_paper5_transport_dimension_ladder",
+  "digest": "sha256:73d47f5e9424887494b0de2fa0bba271f10774dc3eab79c7e96e46d7fd22b704",
+  "entrypoint": "pipeline render-paper5-transport-dimension-ladder",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:23d076ea9d1ab419b82159266bcf23ef0cd76a98fb45b8ee03c205ec383bde47","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/transport_dimension_ladder.py","symbol":"pipeline.cli.commands.p5.transport_dimension_ladder:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/transport_dimension_ladder.py","symbol":"pipeline.cli.commands.p5.transport_dimension_ladder:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/transport_dimension_ladder.py","symbol":"pipeline.cli.commands.p5.transport_dimension_ladder:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/transport_dimension_ladder.py","symbol":"pipeline.cli.commands.p5.transport_dimension_ladder:<binding:typer=typer>"},
+    {"digest":"sha256:25a216d6d040ec958b5a5e833518d6a4fce1b105a24745dfcab986dc5d2416f3","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/transport_dimension_ladder.py","symbol":"pipeline.cli.commands.p5.transport_dimension_ladder:cli_render_paper5_transport_dimension_ladder"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/transport_dimension_ladder.py","symbol":"pipeline.cli.commands.p5.transport_dimension_ladder:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:f5b270e78401abfa55a4047c331b1199b42df2ba4065a6f1882f58a0a906008b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:<binding:cast=typing:cast>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:<binding:json=json>"},
+    {"digest":"sha256:c0d6b3a4992b21ef0ab4c2774c957949bf85ab5b44fe02b09282e55844b5ffb0","kind":"class","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:Paper5TransportDimensionTableError"},
+    {"digest":"sha256:31a6988d4ed1f10680c2450f5fdb16385d46b2d60e6019a6a17d7746a4853d8a","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:_EXPECTED_DIMENSIONS"},
+    {"digest":"sha256:7b2f50e839b60321100ffe3ede3fdbccaaf1e67f08af904d1a1e5caddbfdbb35","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:_number"},
+    {"digest":"sha256:134b572336aa7d991befe63a51fd64b22515ab52066c2add4f930dbff9f3f477","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:_table_row"},
+    {"digest":"sha256:82255ab5bca78207520f2d7c8541aa26e297dbd50f6231eca9bf687905924727","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:_validated_cells"},
+    {"digest":"sha256:3fdeca6713247bcbe69f27af040988a7849ceccd40c486d6538ce563b5c448e2","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/transport_dimension.py","symbol":"pipeline.figures.paper5.transport_dimension:render_paper5_transport_dimension_table"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

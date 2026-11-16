@@ -101,7 +101,7 @@ export const papers: Paper[] = [
     abstract:
       "We study how distances between distributions of firm characteristics restrict systematic covariance. For fixed latent exposure laws, quadratic Wasserstein geometry yields sharp covariance endpoints over admissible couplings. Under a common randomized bi-Lipschitz characteristic-to-exposure map, bounded risk-coordinate slack, and a maintained return-covariance bridge, characteristic-side distance yields a conditional interval for the covariance ceiling.",
     datePublished: "2024-10-30",
-    dateModified: "2026-08-30",
+    dateModified: "2026-11-15",
     year: 2024,
     arxivId: "2410.23447",
     arxivClass: "q-fin.CP",
@@ -138,7 +138,7 @@ export const papers: Paper[] = [
     abstract:
       "Spatial return models take the interaction matrix as given and leave feedback uninterpreted. We construct a bandwidth-free field from firms' language-model article-embedding distributions using target-anchored Wasserstein barycentric reconstruction. A quadratic exposure-adjustment problem maps feedback into a peer-misalignment penalty ratio.",
     datePublished: "2026-08-30",
-    dateModified: "2026-08-30",
+    dateModified: "2026-11-15",
     year: 2026,
     arxivId: "2608.29669",
     arxivClass: "q-fin.ST",
@@ -175,7 +175,7 @@ export const papers: Paper[] = [
     abstract:
       "Portfolio risk assessment ordinarily relies on reliable estimates of cross-asset return covariances, which are difficult to obtain in short, high-dimensional panels. We show that firm-level distribution-valued characteristics can instead provide one-sided certificates of portfolio risk. Under maintained links from characteristics to systematic exposures and from exposures to returns, multi-firm Wasserstein-2 dispersion yields a sharp upper bound on systematic portfolio variance.",
     datePublished: "2026-08-30",
-    dateModified: "2026-08-30",
+    dateModified: "2026-11-15",
     year: 2026,
     arxivId: "2608.29692",
     arxivClass: "q-fin.ST",
@@ -207,11 +207,11 @@ export const papers: Paper[] = [
     title: "Information Games: Strategic Crowding and Firm Repositioning in Language-Model Space",
     shortTitle: "Information Games",
     summary:
-      "A rational-share game separates opportunity effects from strategic crowding, while corpus-scale evidence shows that peer structure can persist as firms' absolute positions move.",
+      "Competition and gradual operating adjustment link changes in firms' information distributions to dated financial responses under explicit reporting and economic assumptions.",
     abstract:
-      "Strategic competition changes how firms reposition when economic opportunities shift. The paper introduces ESCAPE, a rational-share game over distribution-valued positions with heterogeneous capability costs, establishes a unique equilibrium, and separates opportunity from crowding effects. In a benchmark many-firm economy, relative responses account for 90.5% of the weighted composition-response contrast between strategic and independent firms; that component is numerically zero with identical capabilities. In corporate-news distributions, optimized peer reconstructions retain 86.5% of their aggregate validation advantage a year later, despite increasing absolute distances.",
+      "The paper models how competition and adjustment costs shape firms' changing economic positions and financial responses. Under restricted two-opportunity, reporting and timing assumptions, the mechanism implies a nonnegative local association between financial returns and movement toward competitors in information space. A directional estimator relates changes in Wasserstein distances to excess returns weighted by article timing. Corporate-news evidence shows a small positive historical association, with conditional article sensitivity rather than calibrated population inference.",
     datePublished: "2026-09-29",
-    dateModified: "2026-09-29",
+    dateModified: "2026-11-15",
     year: 2026,
     arxivId: "2609.37820",
     arxivClass: "q-fin.CP",

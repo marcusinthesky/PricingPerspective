@@ -1,5 +1,7 @@
+import Architect
 import PricingPerspective.Transmission.Frechet
 import Mathlib.MeasureTheory.Integral.Prod
+import Mathlib.Probability.Moments.Variance
 
 set_option linter.style.longLine false
 
@@ -288,5 +290,266 @@ theorem totalReturnCrossMoment_mem_Icc_of_residual_bound
     π F ε η hff hfη hεf hεη]
   have hrem := abs_le.mp hδ
   constructor <;> linarith
+
+/-! ### Squared return distance and residual variance -/
+
+/-- Expected squared distance between the two systematic returns on the product law.
+
+    The factor draw is independent of the coupled loading pair by construction. Under
+    isotropy this observable return-space distance is exactly the coupling's quadratic
+    transport cost; see `factorReturnSquaredDistance_eq_transportCost`. -/
+noncomputable def factorReturnSquaredDistance
+    (π : Measure (H × H)) (F : IsotropicFactorLaw H) : ℝ :=
+  ∫ z, (factorReturn z.1.1 z.2 - factorReturn z.1.2 z.2) ^ 2 ∂(π.prod F.law)
+
+/-- Expected squared distance between total returns after adding residuals `ε` and `η`. -/
+noncomputable def totalReturnSquaredDistance
+    (π : Measure (H × H)) (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ) : ℝ :=
+  ∫ z, ((factorReturn z.1.1 z.2 + ε z) -
+    (factorReturn z.1.2 z.2 + η z)) ^ 2 ∂(π.prod F.law)
+
+/-- Sum of the two residual variances under the coupled loading-factor product law.
+
+    This is the nonnegative correction omitted when total-return squared distance is used
+    as though it were systematic squared distance. -/
+noncomputable def residualVarianceSum
+    (π : Measure (H × H)) (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ) : ℝ :=
+  ProbabilityTheory.variance ε (π.prod F.law) +
+    ProbabilityTheory.variance η (π.prod F.law)
+
+/-- The empirical total-return diagnostic relative to a proposed optimal transport cost. -/
+noncomputable def totalReturnDiagnostic
+    (π : Measure (H × H)) (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ) (optimalCost : ℝ) : ℝ :=
+  totalReturnSquaredDistance π F ε η - optimalCost
+
+omit [BorelSpace H] [Inhabited H] in
+/-- **Isotropy identifies systematic return distance with loading transport cost.**
+
+    Integrating over the independent factor draw sends
+    `(⟪Zᵢ,F⟫ - ⟪Zⱼ,F⟫)²` to `‖Zᵢ-Zⱼ‖²`; integrating the loading pair then gives
+    `transportCost π`. The stated integrability premise is exactly what Fubini requires. -/
+theorem factorReturnSquaredDistance_eq_transportCost
+    (π : Measure (H × H)) [SFinite π] (F : IsotropicFactorLaw H)
+    (hint : Integrable
+      (fun z : (H × H) × H =>
+        (factorReturn z.1.1 z.2 - factorReturn z.1.2 z.2) ^ 2)
+      (π.prod F.law)) :
+    factorReturnSquaredDistance π F = transportCost π := by
+  unfold factorReturnSquaredDistance transportCost
+  rw [integral_prod _ hint]
+  apply integral_congr_ae
+  filter_upwards with p
+  simpa [factorReturn, inner_sub_left, real_inner_self_eq_norm_sq, pow_two] using
+    F.isotropic (p.1 - p.2) (p.1 - p.2)
+
+omit [BorelSpace H] [SecondCountableTopology H] [Inhabited H] in
+/-- The residual variance correction is nonnegative, without distributional assumptions. -/
+theorem residualVarianceSum_nonneg
+    (π : Measure (H × H)) (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ) :
+    0 ≤ residualVarianceSum π F ε η := by
+  unfold residualVarianceSum
+  exact add_nonneg (ProbabilityTheory.variance_nonneg _ _)
+    (ProbabilityTheory.variance_nonneg _ _)
+
+omit [BorelSpace H] [Inhabited H] in
+/-- **Total squared return distance includes both residual variances.**
+
+    Let `Sᵢ = ⟪Zᵢ,F⟫` and `Sⱼ = ⟪Zⱼ,F⟫`. For centered square-integrable residuals,
+    expanding `((Sᵢ+ε)-(Sⱼ+η))²` gives systematic squared distance plus the two residual
+    variances when all four factor-to-residual cross moments and the residual cross moment
+    vanish. Isotropy then identifies the systematic term with `transportCost π`.
+
+    The four factor-residual conditions are stated separately: own-return orthogonality
+    alone is insufficient because squared *differences* also contain the two cross-asset
+    factor-residual products. -/
+theorem totalReturnSquaredDistance_eq_transportCost_add_residualVarianceSum
+    (π : Measure (H × H)) [IsProbabilityMeasure π] (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ)
+    (hsi : MemLp (fun z : (H × H) × H => factorReturn z.1.1 z.2) 2 (π.prod F.law))
+    (hsj : MemLp (fun z : (H × H) × H => factorReturn z.1.2 z.2) 2 (π.prod F.law))
+    (hε : MemLp ε 2 (π.prod F.law)) (hη : MemLp η 2 (π.prod F.law))
+    (hεmean : ∫ z, ε z ∂(π.prod F.law) = 0)
+    (hηmean : ∫ z, η z ∂(π.prod F.law) = 0)
+    (hsiε : ∫ z, factorReturn z.1.1 z.2 * ε z ∂(π.prod F.law) = 0)
+    (hsiη : ∫ z, factorReturn z.1.1 z.2 * η z ∂(π.prod F.law) = 0)
+    (hsjε : ∫ z, factorReturn z.1.2 z.2 * ε z ∂(π.prod F.law) = 0)
+    (hsjη : ∫ z, factorReturn z.1.2 z.2 * η z ∂(π.prod F.law) = 0)
+    (hεη : ∫ z, ε z * η z ∂(π.prod F.law) = 0) :
+    totalReturnSquaredDistance π F ε η =
+      transportCost π + residualVarianceSum π F ε η := by
+  let si : (H × H) × H → ℝ := fun z => factorReturn z.1.1 z.2
+  let sj : (H × H) × H → ℝ := fun z => factorReturn z.1.2 z.2
+  let μ : Measure ((H × H) × H) := π.prod F.law
+  have hsys : MemLp (fun z => si z - sj z) 2 μ := hsi.sub hsj
+  have hsysε : Integrable (fun z => (si z - sj z) * ε z) μ :=
+    hsys.integrable_mul hε
+  have hsysη : Integrable (fun z => (si z - sj z) * η z) μ :=
+    hsys.integrable_mul hη
+  have hεηint : Integrable (fun z => ε z * η z) μ := hε.integrable_mul hη
+  have hsysεzero : ∫ z, (si z - sj z) * ε z ∂μ = 0 := by
+    change ∫ z, (factorReturn z.1.1 z.2 - factorReturn z.1.2 z.2) * ε z
+      ∂(π.prod F.law) = 0
+    calc
+      _ = ∫ z, factorReturn z.1.1 z.2 * ε z -
+          factorReturn z.1.2 z.2 * ε z ∂(π.prod F.law) := by
+        congr with z
+        ring
+      _ = (∫ z, factorReturn z.1.1 z.2 * ε z ∂(π.prod F.law)) -
+          (∫ z, factorReturn z.1.2 z.2 * ε z ∂(π.prod F.law)) :=
+        integral_sub (hsi.integrable_mul hε) (hsj.integrable_mul hε)
+      _ = 0 := by rw [hsiε, hsjε]; ring
+  have hsysηzero : ∫ z, (si z - sj z) * η z ∂μ = 0 := by
+    change ∫ z, (factorReturn z.1.1 z.2 - factorReturn z.1.2 z.2) * η z
+      ∂(π.prod F.law) = 0
+    calc
+      _ = ∫ z, factorReturn z.1.1 z.2 * η z -
+          factorReturn z.1.2 z.2 * η z ∂(π.prod F.law) := by
+        congr with z
+        ring
+      _ = (∫ z, factorReturn z.1.1 z.2 * η z ∂(π.prod F.law)) -
+          (∫ z, factorReturn z.1.2 z.2 * η z ∂(π.prod F.law)) :=
+        integral_sub (hsi.integrable_mul hη) (hsj.integrable_mul hη)
+      _ = 0 := by rw [hsiη, hsjη]; ring
+  have hexp : (fun z => ((si z + ε z) - (sj z + η z)) ^ 2) =
+      fun z => (si z - sj z) ^ 2 + ε z ^ 2 + η z ^ 2 +
+        2 * ((si z - sj z) * ε z) - 2 * ((si z - sj z) * η z) -
+        2 * (ε z * η z) := by
+    funext z
+    ring
+  have hsys2 : Integrable (fun z => (si z - sj z) ^ 2) μ := hsys.integrable_sq
+  have hε2 : Integrable (fun z => ε z ^ 2) μ := hε.integrable_sq
+  have hη2 : Integrable (fun z => η z ^ 2) μ := hη.integrable_sq
+  have hsyscost : ∫ z, (si z - sj z) ^ 2 ∂μ = transportCost π := by
+    change factorReturnSquaredDistance π F = transportCost π
+    exact factorReturnSquaredDistance_eq_transportCost π F hsys2
+  have hεηzero : ∫ z, ε z * η z ∂μ = 0 := hεη
+  have hsum2 : Integrable (fun z => (si z - sj z) ^ 2 + ε z ^ 2) μ := hsys2.add hε2
+  have hsum3 : Integrable
+      (fun z => (si z - sj z) ^ 2 + ε z ^ 2 + η z ^ 2) μ := hsum2.add hη2
+  have hsysε2 : Integrable (fun z => 2 * ((si z - sj z) * ε z)) μ :=
+    hsysε.const_mul 2
+  have hsysη2 : Integrable (fun z => 2 * ((si z - sj z) * η z)) μ :=
+    hsysη.const_mul 2
+  have hεη2 : Integrable (fun z => 2 * (ε z * η z)) μ := hεηint.const_mul 2
+  have hsum4 : Integrable
+      (fun z => (si z - sj z) ^ 2 + ε z ^ 2 + η z ^ 2 +
+        2 * ((si z - sj z) * ε z)) μ := hsum3.add hsysε2
+  have hsum5 : Integrable
+      (fun z => (si z - sj z) ^ 2 + ε z ^ 2 + η z ^ 2 +
+        2 * ((si z - sj z) * ε z) - 2 * ((si z - sj z) * η z)) μ :=
+    hsum4.sub hsysη2
+  unfold totalReturnSquaredDistance
+  change (∫ z, ((si z + ε z) - (sj z + η z)) ^ 2 ∂μ) = _
+  rw [hexp]
+  rw [integral_sub hsum5 hεη2, integral_sub hsum4 hsysη2,
+    integral_add hsum3 hsysε2, integral_add hsum2 hη2, integral_add hsys2 hε2,
+    integral_const_mul, integral_const_mul, integral_const_mul,
+    hsyscost, hsysεzero, hsysηzero, hεηzero]
+  unfold residualVarianceSum
+  rw [ProbabilityTheory.variance_of_integral_eq_zero hε.aemeasurable hεmean,
+    ProbabilityTheory.variance_of_integral_eq_zero hη.aemeasurable hηmean]
+  ring
+
+omit [BorelSpace H] [SecondCountableTopology H] in
+/-- **The total-return diagnostic equals systematic excess plus residual variance.**
+
+    Once the return-distance decomposition has been discharged from the explicit moment
+    conditions above, subtracting the certified optimal cost gives
+    `H = Δ + q`, where `Δ` is systematic excess transport cost and `q` is the residual
+    variance sum. This is the precise correction to the unadjusted diagnostic. -/
+theorem totalReturnDiagnostic_eq_excess_add_residualVarianceSum_of_decomposition
+    {P Q : WassersteinMeasure H} (cert : OptimalTransportCost P Q)
+    (π : IntegrableCoupling P Q) (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ)
+    (hdecomp : totalReturnSquaredDistance π.toMeasure F ε η =
+      transportCost π.toMeasure + residualVarianceSum π.toMeasure F ε η) :
+    totalReturnDiagnostic π.toMeasure F ε η cert.value =
+      excess cert π + residualVarianceSum π.toMeasure F ε η := by
+  unfold totalReturnDiagnostic excess
+  rw [hdecomp]
+  ring
+
+omit [BorelSpace H] in
+/-- **Exact total-return diagnostic correction from the return model.**
+
+    Under square integrability, centered residuals, orthogonality of each residual to both
+    systematic returns, and zero residual cross moment, the observed total-return diagnostic
+    is `H = Δ + q`: systematic excess transport cost plus the two residual variances.
+
+    The coupling itself is a probability measure because its marginals are probability laws;
+    no separate probability premise is imposed on the caller. -/
+@[blueprint "eq:total-return-excess-correction"
+  (statement := /--
+    Under an independent centered isotropic factor law, square-integrable systematic returns and
+    centered residuals, and zero systematic-residual and cross-residual moments, total-return
+    squared distance minus certified optimal exposure cost equals systematic transport excess
+    plus the two residual variances. Assumptions: an integrable coupling of exposure laws and a
+    certified optimal transport plan; a centered isotropic factor law independent of the joint
+    exposure draw; square-integrable systematic returns and centered square-integrable
+    residuals; all four systematic-residual cross moments and the cross-residual moment are
+    zero.
+  -/)]
+theorem totalReturnDiagnostic_eq_excess_add_residualVarianceSum
+    {P Q : WassersteinMeasure H} (cert : OptimalTransportCost P Q)
+    (π : IntegrableCoupling P Q) (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ)
+    (hsi : MemLp (fun z : (H × H) × H => factorReturn z.1.1 z.2) 2
+      (π.toMeasure.prod F.law))
+    (hsj : MemLp (fun z : (H × H) × H => factorReturn z.1.2 z.2) 2
+      (π.toMeasure.prod F.law))
+    (hε : MemLp ε 2 (π.toMeasure.prod F.law))
+    (hη : MemLp η 2 (π.toMeasure.prod F.law))
+    (hεmean : ∫ z, ε z ∂(π.toMeasure.prod F.law) = 0)
+    (hηmean : ∫ z, η z ∂(π.toMeasure.prod F.law) = 0)
+    (hsiε : ∫ z, factorReturn z.1.1 z.2 * ε z ∂(π.toMeasure.prod F.law) = 0)
+    (hsiη : ∫ z, factorReturn z.1.1 z.2 * η z ∂(π.toMeasure.prod F.law) = 0)
+    (hsjε : ∫ z, factorReturn z.1.2 z.2 * ε z ∂(π.toMeasure.prod F.law) = 0)
+    (hsjη : ∫ z, factorReturn z.1.2 z.2 * η z ∂(π.toMeasure.prod F.law) = 0)
+    (hεη : ∫ z, ε z * η z ∂(π.toMeasure.prod F.law) = 0) :
+    totalReturnDiagnostic π.toMeasure F ε η cert.value =
+      excess cert π + residualVarianceSum π.toMeasure F ε η := by
+  letI : IsProbabilityMeasure π.toMeasure :=
+    coupling_isProbabilityMeasure P.is_probability π.mem
+  apply totalReturnDiagnostic_eq_excess_add_residualVarianceSum_of_decomposition
+  exact totalReturnSquaredDistance_eq_transportCost_add_residualVarianceSum
+    π.toMeasure F ε η hsi hsj hε hη hεmean hηmean hsiε hsiη hsjε hsjη hεη
+
+omit [BorelSpace H] [SecondCountableTopology H] in
+/-- The unadjusted total-return diagnostic is an upper bound on systematic excess.
+
+    The gap is exactly the nonnegative residual variance sum, so total-return distance can
+    make the systematic excess look too large but cannot make it too small under the stated
+    return-distance decomposition. -/
+theorem excess_le_totalReturnDiagnostic
+    {P Q : WassersteinMeasure H} (cert : OptimalTransportCost P Q)
+    (π : IntegrableCoupling P Q) (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ)
+    (hdecomp : totalReturnSquaredDistance π.toMeasure F ε η =
+      transportCost π.toMeasure + residualVarianceSum π.toMeasure F ε η) :
+    excess cert π ≤ totalReturnDiagnostic π.toMeasure F ε η cert.value := by
+  rw [totalReturnDiagnostic_eq_excess_add_residualVarianceSum_of_decomposition
+    cert π F ε η hdecomp]
+  exact le_add_of_nonneg_right (residualVarianceSum_nonneg π.toMeasure F ε η)
+
+omit [BorelSpace H] [SecondCountableTopology H] in
+/-- A negative total-return diagnostic forces the systematic excess to be negative.
+
+    Certified optimality also gives `0 ≤ excess cert π`. Hence a negative observed
+    diagnostic contradicts at least one maintained bridge condition or the supplied
+    optimal-cost calibration; residual variance cannot explain the negative sign. -/
+theorem excess_neg_of_totalReturnDiagnostic_neg
+    {P Q : WassersteinMeasure H} (cert : OptimalTransportCost P Q)
+    (π : IntegrableCoupling P Q) (F : IsotropicFactorLaw H)
+    (ε η : (H × H) × H → ℝ)
+    (hdecomp : totalReturnSquaredDistance π.toMeasure F ε η =
+      transportCost π.toMeasure + residualVarianceSum π.toMeasure F ε η)
+    (hneg : totalReturnDiagnostic π.toMeasure F ε η cert.value < 0) :
+    excess cert π < 0 :=
+  lt_of_le_of_lt (excess_le_totalReturnDiagnostic cert π F ε η hdecomp) hneg
+
 
 end PricingPerspective.Transmission

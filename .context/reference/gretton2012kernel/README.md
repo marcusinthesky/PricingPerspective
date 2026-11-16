@@ -22,5 +22,3 @@ issue: '1'
 publisher: JMLR. org
 page: 723-773
 ---
-
-# A kernel two-sample test

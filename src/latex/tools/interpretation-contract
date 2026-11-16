@@ -20,6 +20,9 @@ JSON documents use sorted keys, compact separators, UTF-8, and one terminal LF.
 ``semantic_sha256`` is the SHA256 of the same canonical payload with that field
 removed (and without the document's terminal LF). Displayed formatted values
 must exactly match their ``\ppDeclareValue`` bindings in generated/numbers.tex.
+Reviewed snapshots in ``interpretation_reviews/<contract-id>.json`` retain the
+acknowledged payload. A protocol-specific comparison can accept bounded roundoff
+without changing its exact provenance digest or the manuscript acknowledgment.
 """
 
 from __future__ import annotations
@@ -34,7 +37,6 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 from typing import Any
-
 
 CONTRACT_GLOB = "*.interpretation.json"
 HASH_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -72,6 +74,11 @@ REQUIRED_FIELDS = {
     "output_array_sha256s",
     "semantic_sha256",
 }
+NEIGHBOUR_CONTRACT_ID = "paper1-neighbour-outcome-split-v2"
+# This descriptive W2 quantity has no inference threshold. Eight binary64 steps
+# accommodate last-bit reduction differences, not float32 error or a changed
+# scientific specification. Pair identities/ranks and displayed text stay exact.
+W2_REVIEW_ULPS = 8
 
 
 class ContractError(ValueError):
@@ -114,6 +121,78 @@ def semantic_digest(value: dict[str, Any]) -> str:
     payload = dict(value)
     payload.pop("semantic_sha256", None)
     return hashlib.sha256(canonical_json_bytes(payload)).hexdigest()
+
+
+def _field_path(parts: tuple[str | int, ...]) -> str:
+    return "".join(
+        f"[{part}]" if isinstance(part, int) else ("." if index else "") + part
+        for index, part in enumerate(parts)
+    )
+
+
+def review_differences(
+    reviewed: dict[str, Any], current: dict[str, Any], roundoff: list[str] | None = None
+) -> list[str]:
+    """Compare interpretation-bearing fields, keeping unknown fields strict."""
+    differences: list[str] = []
+    neighbour_policy = reviewed.get("contract_id") == NEIGHBOUR_CONTRACT_ID
+
+    def compare(old: Any, new: Any, path: tuple[str | int, ...]) -> None:
+        if path == ("semantic_sha256",):
+            return
+        # This digest covers all pairwise metrics, including raw W2 bits. The
+        # contract explicitly retains the selected pairs, ranks, percentiles and
+        # displayed metrics that support its interpretation. Return/path digests
+        # remain strict because their full plotted arrays are not in the payload.
+        if neighbour_policy and path == ("output_array_sha256s", "pair_metrics"):
+            return
+        if type(old) is not type(new):
+            differences.append(f"{_field_path(path)}: {old!r} -> {new!r}")
+        elif isinstance(old, dict):
+            for key in sorted(old.keys() | new.keys()):
+                if key not in old or key not in new:
+                    differences.append(
+                        f"{_field_path((*path, key))}: field added/removed"
+                    )
+                else:
+                    compare(old[key], new[key], (*path, key))
+        elif isinstance(old, list):
+            if len(old) != len(new):
+                differences.append(
+                    f"{_field_path(path)}: length {len(old)} -> {len(new)}"
+                )
+            for index, (left, right) in enumerate(zip(old, new)):
+                compare(left, right, (*path, index))
+        elif old != new:
+            w2_value = (
+                len(path) == 3
+                and path[0] == "selected_pairs"
+                and path[2] == "w2_distance"
+            ) or (
+                len(path) == 3
+                and path[0] == "displayed_values"
+                and path[2] == "raw_value"
+                and current["displayed_values"][path[1]]["binding_key"].endswith("-w2")
+            )
+            if (
+                neighbour_policy
+                and w2_value
+                and isinstance(old, float)
+                and math.isfinite(old)
+                and math.isfinite(new)
+                and min(old, new) >= 0
+                and abs(old - new) <= W2_REVIEW_ULPS * max(math.ulp(old), math.ulp(new))
+            ):
+                if roundoff is not None:
+                    roundoff.append(
+                        f"{_field_path(path)}: {old!r} -> {new!r} "
+                        f"(absolute difference {abs(old - new):.3g})"
+                    )
+                return
+            differences.append(f"{_field_path(path)}: {old!r} -> {new!r}")
+
+    compare(reviewed, current, ())
+    return differences
 
 
 def _reject_constant(value: str) -> None:
@@ -181,9 +260,8 @@ def _validate_window(path: Path, field: str, value: Any) -> list[str]:
             continue
         if parsed[endpoint].isoformat() != raw:
             errors.append(f"{path}: {field}.{endpoint} is not canonical YYYY-MM-DD")
-    if parsed.get("start") and parsed.get("end"):
-        if parsed["start"] > parsed["end"]:
-            errors.append(f"{path}: {field}.start is after {field}.end")
+    if parsed.get("start") and parsed.get("end") and parsed["start"] > parsed["end"]:
+        errors.append(f"{path}: {field}.start is after {field}.end")
     return errors
 
 
@@ -410,40 +488,115 @@ def validate_adjacency(
 
     if len(anchors) != 1:
         return [
-            f"{registration.path}: manuscript_anchor {registration.manuscript_anchor!r} "
-            f"must resolve to exactly one hand-authored TeX label; found {len(anchors)}"
+            (
+                f"{registration.path}: manuscript_anchor {registration.manuscript_anchor!r} "
+                f"must resolve to exactly one hand-authored TeX label; found {len(anchors)}"
+            )
         ]
 
     anchor_path, anchor_line = anchors[0]
     if declaration.path != anchor_path or declaration.line <= anchor_line:
         return [
-            f"{declaration.path}:{declaration.line}: declaration for "
-            f"{registration.contract_id!r} is not structurally adjacent to "
-            f"manuscript_anchor {registration.manuscript_anchor!r} at "
-            f"{anchor_path}:{anchor_line}"
+            (
+                f"{declaration.path}:{declaration.line}: declaration for "
+                f"{registration.contract_id!r} is not structurally adjacent to "
+                f"manuscript_anchor {registration.manuscript_anchor!r} at "
+                f"{anchor_path}:{anchor_line}"
+            )
         ]
 
     lines = source_lines[anchor_path]
     between = lines[anchor_line : declaration.line - 1]
     if any(SECTIONING_RE.search(line) for line in between):
         return [
-            f"{declaration.path}:{declaration.line}: declaration for "
-            f"{registration.contract_id!r} crosses a sectioning boundary after "
-            f"manuscript_anchor {registration.manuscript_anchor!r}"
+            (
+                f"{declaration.path}:{declaration.line}: declaration for "
+                f"{registration.contract_id!r} crosses a sectioning boundary after "
+                f"manuscript_anchor {registration.manuscript_anchor!r}"
+            )
         ]
 
     preceding = lines[declaration.line - 2].strip()
     if not preceding or preceding.startswith("%"):
         return [
-            f"{declaration.path}:{declaration.line}: declaration for "
-            f"{registration.contract_id!r} must immediately follow interpretation prose"
+            (
+                f"{declaration.path}:{declaration.line}: declaration for "
+                f"{registration.contract_id!r} must immediately follow interpretation prose"
+            )
         ]
     return []
 
 
-def check_project(src: Path) -> tuple[int, list[str]]:
+def check_review(
+    src: Path,
+    registration: Registration,
+    declaration: Declaration,
+    current: dict[str, Any],
+    notices: list[str],
+) -> list[str]:
+    """Bind any roundoff allowance to the exact manuscript-reviewed baseline."""
+    baseline_path = src / "interpretation_reviews" / f"{registration.contract_id}.json"
+    if not baseline_path.exists():
+        if declaration.digest == registration.declared_digest:
+            return []
+        return [
+            (
+                f"{declaration.path}:{declaration.line}: declaration digest mismatch for "
+                f"{registration.contract_id!r}: declared {declaration.digest}, "
+                f"contract has {registration.declared_digest}; no reviewed snapshot at "
+                f"{baseline_path}. Review the change before updating the acknowledgment."
+            )
+        ]
+    reviewed, errors = parse_contract(baseline_path)
+    if reviewed is None:
+        return errors
+    records = reviewed.get("displayed_values", [])
+    baseline_bindings = (
+        {
+            item["binding_key"]: item["formatted_value"]
+            for item in records
+            if isinstance(item, dict)
+            and isinstance(item.get("binding_key"), str)
+            and isinstance(item.get("formatted_value"), str)
+        }
+        if isinstance(records, list)
+        else {}
+    )
+    _, validation_errors = validate_contract(baseline_path, reviewed, baseline_bindings)
+    errors.extend(validation_errors)
+    if reviewed.get("contract_id") != registration.contract_id:
+        errors.append(
+            f"{baseline_path}: reviewed contract_id does not match registration"
+        )
+    if reviewed.get("semantic_sha256") != declaration.digest:
+        errors.append(
+            f"{baseline_path}: reviewed snapshot does not match manuscript acknowledgment"
+        )
+    if errors:
+        return errors
+    roundoff: list[str] = []
+    differences = review_differences(reviewed, current, roundoff)
+    if differences:
+        return [
+            f"{declaration.path}:{declaration.line}: interpretation review required for "
+            f"{registration.contract_id!r}: {difference}"
+            for difference in differences[:10]
+        ]
+    if declaration.digest != registration.declared_digest:
+        notices.append(
+            f"{registration.contract_id}: exact provenance changed; interpretation "
+            f"matches reviewed snapshot (W2 allowance {W2_REVIEW_ULPS} binary64 ULPs). "
+            + "; ".join(roundoff[:4])
+        )
+    return []
+
+
+def check_project(src: Path, notices: list[str] | None = None) -> tuple[int, list[str]]:
     errors: list[str] = []
     registrations: dict[str, list[Registration]] = {}
+    payloads: dict[Path, dict[str, Any]] = {}
+    if notices is None:
+        notices = []
     contract_paths = sorted((src / "generated").glob(CONTRACT_GLOB))
     bindings: dict[str, str] = {}
     if contract_paths:
@@ -454,6 +607,7 @@ def check_project(src: Path) -> tuple[int, list[str]]:
         errors.extend(parse_errors)
         if value is None:
             continue
+        payloads[path] = value
         registration, validation_errors = validate_contract(path, value, bindings)
         errors.extend(validation_errors)
         if registration:
@@ -485,13 +639,12 @@ def check_project(src: Path) -> tuple[int, list[str]]:
                 f"{src}: registered contract {contract_id!r} has duplicate TeX declarations: "
                 f"{locations}"
             )
-        expected = matches[0].declared_digest
         for declaration in related:
-            if declaration.digest != expected:
-                errors.append(
-                    f"{declaration.path}:{declaration.line}: declaration digest mismatch for "
-                    f"{contract_id!r}: declared {declaration.digest}, contract has {expected}"
+            errors.extend(
+                check_review(
+                    src, matches[0], declaration, payloads[matches[0].path], notices
                 )
+            )
             errors.extend(validate_adjacency(src, matches[0], declaration))
 
     registered_ids = set(registrations)
@@ -535,14 +688,17 @@ def main(argv: list[str] | None = None) -> int:
 
     total = 0
     errors: list[str] = []
+    notices: list[str] = []
     for project in projects:
-        count, project_errors = check_project(project)
+        count, project_errors = check_project(project, notices)
         total += count
         errors.extend(project_errors)
     if errors:
         for error in errors:
             print(f"interpretation-contract: FAIL: {error}", file=sys.stderr)
         return 1
+    for notice in notices:
+        print(f"interpretation-contract: NOTE: {notice}")
     print(
         f"interpretation-contract: checked {total} registered contract(s) "
         f"across {len(projects)} project(s)"

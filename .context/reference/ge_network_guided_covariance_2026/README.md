@@ -16,6 +16,7 @@ author:
 issued:
   date-parts:
   - - 2026
+    - 3
+    - 19
+note: Working paper, March 19, 2026.
 ---
-
-# Should We Augment Large Covariance Matrix Estimation with Auxiliary Network Information?

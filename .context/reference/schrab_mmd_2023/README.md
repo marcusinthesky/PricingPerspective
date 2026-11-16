@@ -27,5 +27,3 @@ page: 1-68
 cites:
 - fithian_optimal_2014
 ---
-
-# MMD Aggregated Two-Sample Test

@@ -1,3 +1,4 @@
+import StatadicFormal.Geometry.NegativeType.Defs
 import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
 import Mathlib.MeasureTheory.Integral.Prod
 import Mathlib.Topology.MetricSpace.Basic
@@ -123,25 +124,6 @@ structure JointFiniteMoments {α β : Type*}
     (fun z : (α × β) × (α × β) => dist z.1.1 z.2.1 * dist z.1.2 z.2.2)
     (π.measure.prod π.measure)
 
-/-- The metric `dist` is **conditionally negative definite** (the space has
-    *negative type*): for every finite family of points `x : Fin k → α` and
-    weights `w : Fin k → ℝ` summing to zero,
-
-      `∑ i, ∑ j, w i * w j * dist (x i) (x j) ≤ 0`.
-
-    Euclidean and Hilbert spaces have negative type (Schoenberg's theorem;
-    Székely & Rizzo 2023 §3.2, §10; Lyons 2013 §3), while e.g. the circle with
-    geodesic distance does not — so energy-statistics nonnegativity is *false*
-    over a bare `PseudoMetricSpace`. This predicate makes the required
-    condition an explicit hypothesis (HYPOTHESIS-CONDITIONAL in the roadmap's
-    tagging) until a Euclidean/Hilbert instance is formalized.
-
-    Reference: Székely & Rizzo (2023), §3.2; Lyons (2013), "Distance
-    covariance in metric spaces", Definition 3.1. -/
-def DistNegativeType (α : Type*) [PseudoMetricSpace α] : Prop :=
-  ∀ (k : ℕ) (x : Fin k → α) (w : Fin k → ℝ), (∑ i, w i) = 0 →
-    ∑ i, ∑ j, w i * w j * dist (x i) (x j) ≤ 0
-
 /-- **Strict negative type.** A space has strict negative type when the negative-type inequality
     is strict for every nonzero zero-sum weighting of pairwise-distinct points. This is a
     finite-support property; it must not be confused with *strong* negative type, which requires
@@ -153,7 +135,7 @@ def DistNegativeType (α : Type*) [PseudoMetricSpace α] : Prop :=
     Reference: Lyons (2013), "Distance covariance in metric spaces", Definition 3.1 and
     Remark 3.3; Székely & Rizzo (2023), §3.1. -/
 def StrictDistNegativeType (α : Type*) [PseudoMetricSpace α] : Prop :=
-  DistNegativeType α ∧
+  StatadicFormal.Geometry.DistNegativeType α ∧
     ∀ (k : ℕ) (x : Fin k → α) (w : Fin k → ℝ), Function.Injective x →
       (∑ i, w i) = 0 → (∃ i, w i ≠ 0) →
         ∑ i, ∑ j, w i * w j * dist (x i) (x j) < 0

@@ -17,5 +17,3 @@ page: 13-31
 cites:
 - sharpe_capital_1964
 ---
-
-# A Unified Beta Pricing Theory

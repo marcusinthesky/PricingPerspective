@@ -16,5 +16,3 @@ issued:
   - - 2019
 URL: https://ssrn.com/abstract=3002339
 ---
-
-# Information Consumption and Asset Pricing

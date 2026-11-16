@@ -15,5 +15,3 @@ cites:
 - ilinski_physics_finance_1997
 - ross_arbitrage_1976
 ---
-
-# Virtual Arbitrage Pricing Theory

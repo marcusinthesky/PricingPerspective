@@ -1,10 +1,7 @@
 # Nested prek gates scoped to src/latex/. Dependencies come from infra/nix.
 #
-# Vendor policy: `interact.cls`, `tf*.bst`, and the per-project copy of
-# `pp-manuscript.sty` under `projects/*/src/` are pinned, publisher-owned
-# upstream artifacts (materialized by `just _prepare`). They are excluded
-# from first-party formatting/linting below; their correctness is gated by
-# the compile and `tools/check-log`, not by tex-fmt/chktex.
+# The per-project copy of pp-manuscript.sty is materialized by _prepare.
+# Its canonical source lives in templates/ and is checked there.
 #
 # Generated policy: `projects/*/src/generated/` is pipeline-owned (the Python
 # `pipeline.io.values` renderer emits `numbers.tex` from the renderer-neutral
@@ -34,7 +31,7 @@ repos:
         #
         # `-l` adds to ChkTeX's configuration; it does not replace the global
         # chktexrc, whose macro tables this gate's warning set depends on (see
-        # the `chktex` derivation comment in infra/nix/flake.nix). Keep ChkTeX
+        # the `chktex` derivation in infra/nix/pkgs/chktex.nix). Keep ChkTeX
         # provisioned with a texmf tree, or Warning 37 fires on display math.
         entry: bash -euc 'exec chktex -q -I0 -l "$(git rev-parse --show-toplevel)/src/latex/.chktexrc" "$@"' --
         files: \.(tex|sty|cls)$
@@ -56,3 +53,10 @@ repos:
         entry: bash -euc 'cd "$(git rev-parse --show-toplevel)/src/latex" && exec bash tools/lint-boundaries'
         pass_filenames: false
         files: (src/latex/)?(projects|templates|tools)/
+
+      - id: latex-smoke-build
+        name: LaTeX cached smoke build
+        language: system
+        entry: bash -euc 'cd "$(git rev-parse --show-toplevel)/src/latex" && exec just smoke'
+        pass_filenames: false
+        files: (src/latex/)?(projects/_template|templates)/.*\.(tex|sty|cls|toml)$

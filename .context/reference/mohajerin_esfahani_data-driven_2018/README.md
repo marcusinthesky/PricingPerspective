@@ -17,5 +17,3 @@ issue: '1'
 publisher: Springer
 page: 115-166
 ---
-
-# Data-Driven Distributionally Robust Optimization Using the Wasserstein Metric: Performance Guarantees and Tractable Reformulations

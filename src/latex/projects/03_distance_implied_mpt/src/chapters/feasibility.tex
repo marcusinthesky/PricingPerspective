@@ -22,8 +22,8 @@ Returns assess the news-only allocation only after the decision has been made.
 \label{sec:p3-reference-populations}
 
 The directional hypothesis is that the news-only allocation lies in
-the lower tail of conventional variance among feasible portfolios with
-comparable concentration.
+the lower tail of conventional variance under the four declared capped
+reference populations.
 The theory motivates this direction under the maintained return bridge, but it
 does not determine a percentile or imply out-of-sample performance.
 The news-only allocation is
@@ -105,7 +105,6 @@ familiar scale.
 \subsection{Returns, news, and Wasserstein construction}
 \label{sec:p3-data-construction}
 
-The analytical sample follows source, restriction, and final-sample order.
 Daily simple returns are Yahoo Finance adjusted-close ratios minus one.
 These are raw rather than excess returns; no risk-free series is subtracted.
 Exact date alignment supplies \ppnum[0]{n-obs} common observations from
@@ -210,18 +209,115 @@ architecture effect
 \citep{xiao_cpack_2023}.
 BGE-large-en-v1.5 is also obtained through OpenRouter.
 
-The final margin is encoder vintage.
-The authors' locally trained, 320-coordinate EttaX V0, V1, and V3 encoders hold
-architecture, optimization recipe, compute, tokenizer, and token budget fixed
-while varying only the Wikipedia training snapshot.
-V0 uses 20 December 2017, V1 uses 20 December 2020, and V3 uses 1 August 2026.
-Because V3 postdates both the article and return sample, it is a post-sample
-negative control rather than a valid point-in-time encoder.
-The EttaX encoders also differ materially in capacity from the production Qwen
-models, so the vintage contrasts remain descriptive sensitivities rather than
-identified vintage effects.
-Their benchmark-calibrated equivalence threshold is post-specified, making the
+The final margin is the encoder's reported training-information cutoff.
+We use the published ModernBERT-based ChronoBERT checkpoints for each year-end
+from 2017 through 2024 \citep{he_chronobert_2025}.
+The same 128 articles per firm are represented by 768-coordinate means of the
+final-layer token states, including special tokens but excluding padding.
+Inference is fixed across checkpoints: at most 8,000 characters and 1,024
+tokens per article, bfloat16 autocast, and float32 model parameters and
+token-mean pooling.
+We apply row-L2 normalization once before constructing distances.
+Later checkpoints continue training their predecessors, so cumulative
+training exposure changes alongside the information cutoff; token budget
+and compute are not matched.
+The 2017 cutoff precedes the 2018--2022 article sample, the 2018--2022 cutoffs
+fall within it, and 2023--2024 follow construction but overlap the full
+2023--2026 return-evaluation period.
+The checkpoints were published later, so this is not evidence of historical
+deployment availability or a post-evaluation negative control.
+The vintage ladder compares in-sample allocations, not held-out trading
+performance or an identified causal effect of information vintage.
+Its benchmark-calibrated equivalence threshold is post-specified, making the
 equivalence assessment exploratory.
+
+\subsection{Chronological covariance benchmark}
+\label{sec:p3-covariance-benchmark-design}
+
+The in-sample reference-population ranking evaluates the canonical allocation
+within the standardized return sample.
+The chronological benchmark instead specifies a comparison of capital-weight
+portfolios on 2023--2026 returns, with every data-dependent weight fixed at
+31 December 2022 using 2018--2022 formation data.
+
+The W2 geometry determines the normalized certificate budget
+$q^{\mathrm{news}}$. Calibration volatility enters only when converting it to
+capital weights. Let
+$s_i:=\widehat\sigma_{i,\mathrm{cal}}$ and define the rescaled budget
+\[
+  \widetilde q_i^{\mathrm{news}}
+  :=
+  \frac{q_i^{\mathrm{news}}}{s_i}.
+\]
+Set
+\[
+  x_i^{\mathrm{news}}
+  =
+  \frac{\widetilde q_i^{\mathrm{news}}}
+  {\sum_j \widetilde q_j^{\mathrm{news}}}.
+\]
+This is the capital implementation of the normalized certificate allocation;
+it is not the solution of the general raw-capital certificate objective in
+\eqref{eq:p3-certified-objective}. If the mapping exceeds the common 15\%
+capital cap, the allocation is retained and marked infeasible rather than
+silently clipped or renormalized.
+
+For the new chronological comparison, all return panels are factor-complete
+excess returns. Write the reduced-form factor model as
+\[
+  r_t^e = a + B f_t + u_t,
+  \qquad
+  B_m=(I-\widehat\rho_m W_m)^{-1}\widehat C_{f,m},
+\]
+where $\widehat C_{f,m}$ is the fitted factor-coefficient block before spatial
+propagation. Under the working factor--residual orthogonality assumption, the
+total covariance used by the primary GMV candidates is
+\[
+  \widehat\Sigma_{\mathrm{total},m}
+  =
+  \underbrace{B_m\widehat\Sigma_f
+  B_m^\top}_{\widehat\Sigma_{\mathrm{systematic},m}}
+  +
+  \underbrace{\widehat\Sigma_{u,m}}_{\widehat\Sigma_{\mathrm{residual},m}},
+  \qquad
+  \widehat\Sigma_f=\operatorname{Cov}_{T-1}(f_t),
+\]
+with the intercept excluded from $\widehat\Sigma_f$. The residual estimator
+is formed from factor-residualized spatial innovations and mapped as
+$(I-\widehat\rho_m W_m)^{-1}D_m(I-\widehat\rho_m W_m)^{-\top}$ using stable
+linear solves. The factor-only control sets $\widehat\rho=0$ and applies the
+same constant-correlation residual-shrinkage construction; the recognizable
+direct Ledoit--Wolf benchmark instead uses its scaled-identity target on
+excess returns. The unrestricted specification requires the systematic
+component to agree across the factor-only, W1, and W2 fits up to numerical
+tolerance, so the matched comparison differs through residual restrictions and
+shrinkage rather than a model-dependent factor-risk component.
+
+The comparison includes equal-weight, inverse-volatility, sample-GMV,
+conventional Ledoit--Wolf-GMV, the matched factor-only controls, and
+minimum-variance portfolios formed from the total W1 and W2 barycentric
+covariances. Residual-covariance GMV portfolios are retained as explicitly
+labeled diagnostics. Every covariance-based portfolio uses the same 100-firm
+roster, long-only fully invested constraints, and 15\% single-name weight cap;
+the cap is rejected as infeasible when the capped simplex cannot contain unit
+mass. The data-dependent weights use only the factor-complete calibration
+panel, the dated PIT W2 certificate, and dated calibration covariance
+artifacts. Holdout returns enter only realized excess-return variance.
+The realized calculation is the variance of a constant-weight mixture, which
+corresponds to costless rebalancing under a trading interpretation rather than
+buy-and-hold holdings.
+
+The spatial covariance alternatives use the target-anchored barycentric fields
+from the companion spatial study \citep{gawronsky_spatial_2027}. W1 and W2
+vary the transport geometry used to construct the field, while QMLE and
+constant-correlation Ledoit--Wolf distinguish the fitted residual-covariance
+estimates used to form the corresponding total-risk portfolio. Spherical and
+diagonal innovation specifications are retained as variance-model sensitivity
+comparisons. The PIT certificate archive stores squared W2 transport costs,
+so the selected matrix enters the zero-slack objective as
+$\frac12q^\top Mq$ without a second squaring. The resulting benchmark measures
+chronological excess-return risk performance while keeping residual-risk
+diagnostics separate from the primary total-risk ranking.
 
 With the allocation, reference-population estimand, anatomy and cutoff
 diagnostics, return evaluation, and four measurement margins defined, the next
@@ -372,11 +468,9 @@ the equal-risk benchmark.
 It nevertheless remains
 \ppnum[1]{news-only-gmv-excess-variance-pct}\% above the ex post long-only
 sample GMV.
-The empirical claim is therefore not that information geometry solves the
-conventional GMV problem without a covariance matrix.
-Rather, the news-only allocation lands unusually low in the variance
-distribution generated by the declared feasible laws while remaining short of
-the covariance-informed in-sample optimum.
+Together, these comparisons place the information-certified allocation on a
+common scale with both the declared feasible-population laws and the
+covariance-informed in-sample optimum.
 
 The concentration diagnostics describe the decision object behind that rank.
 Its largest holding is \ppnum[1]{news-only-maximum-weight-pct}\%, and its
@@ -384,13 +478,10 @@ effective number of names is
 \ppnum[2]{news-only-effective-number-assets}.
 The candidate therefore differs from equal risk weighting and is not reduced to
 a one-name solution.
-Together with the concentration-adjusted reference comparisons, these
-diagnostics show that the low rank survives laws that place more mass on
-concentrated portfolios.
-Because none matches the candidate's realized effective number of names, they
-do not eliminate scalar concentration as a confound.
-They do not establish stability of the individual holdings or performance
-outside this sample.
+The low rank persists under reference laws that place more mass on concentrated
+portfolios, but none matches the candidate's realized effective number of names.
+These comparisons therefore assess sensitivity to concentration without
+eliminating scalar concentration as a confound.
 
 \subsection{Anatomy of the news-only allocation}
 \label{sec:p3-portfolio-anatomy}
@@ -521,11 +612,13 @@ fixed across cutoffs.
 \label{sec:p3-representation-results}
 
 The expanding-cutoff sequence changes the information set while holding the
-representation fixed.
-The final empirical question changes the representation itself.
-\Cref{tab:p3-representation-main} shows the four measurement margins;
-\Cref{sec:p3-representation-ablation} reports the full ladder and paired
-bootstrap contrasts.
+representation fixed, whereas the representation comparisons change the
+measurement of that information.
+\Cref{tab:p3-representation-main} shows the four measurement margins, with the
+full ladder and paired bootstrap contrasts in
+\Cref{sec:p3-representation-ablation}.
+An allocation that violates the reference law's unchanged cap receives a dash
+in the percentile column, while its relative-GMV index remains defined.
 
 \input{generated/representation_ablation_main}
 
@@ -549,14 +642,16 @@ the geometry and selected allocation, in this case in a direction that
 improves the in-sample variance benchmark without an adjusted rejection of
 zero difference against the 256-coordinate cell.
 
-The matched EttaX vintages supply a separate sensitivity.
-Their point outcomes vary across the three training snapshots, but none of the
-three contrasts survives Holm adjustment.
-The post-specified equivalence criterion is met only for V3--V1; the intervals
-comparing V0 with V1 or V3 are too wide to establish equivalence.
-Because V3 postdates the sample and the equivalence threshold is exploratory,
-these comparisons neither identify a causal vintage effect nor establish broad
-representation invariance.
+The ChronoBERT annual ladder supplies a separate sensitivity.
+The 2018-minus-2017 contrast raises the relative-GMV index, whereas the
+2024-minus-2017 contrast lowers it; both remain distinguishable from zero
+after vintage-family Holm adjustment.
+Neither interval lies wholly inside the post-specified equivalence bound
+(\Cref{tab:p3-representation-contrasts}).
+Other annual pairs meet that bound, but the ladder does not establish
+broad invariance or a monotone improvement with later training cutoffs.
+These are differences in in-sample allocation risk, not prospective
+performance gains or causal effects of later information alone.
 Taken together, the ladder does not support a monotone ``larger model is
 better'' account.
 It shows instead that the primary result is empirically strong within the
@@ -632,27 +727,12 @@ fallback, so their future-variance difference is mechanically zero.  The
 sample-GMV and Ledoit--Wolf rows remain governed secondary comparisons, but
 cannot rescue decision value for a certificate that calibration did not admit.
 
-\Cref{fig:certificate-validation} plots certified diversification against
-subsequently realized diversification for 500 fixed-seed capped random
-portfolio identities, averaging each identity across the 40 holdout formations.
-The horizontal axis is the certified deduction from perfect dependence; the
-vertical axis is the realized deduction computed with the same formation-time
-volatility budget.  Points on or above the dashed 45-degree line satisfy the
-bound.  Under the frozen fallback all points have zero certified deduction,
-making the figure a transparent display of the failed informativeness gate
-rather than an ex post refit.
-
-\begin{figure}
-  \centering
-  \ppfigure{0.72}{certificate_validation}
-  \caption{Certified versus subsequently realized diversification.  Each point
-    is the chronological mean for one of 500 seed-42 random portfolio
-    identities across 40 monthly holdout formations.  The dashed 45-degree line
-    is the bound benchmark.  The vertical pile at zero reflects the
-    preregistered zero-credit fallback after no calibration cell passed; it is
-  not evidence that text geometry explains realized risk.}
-  \label{fig:certificate-validation}
-\end{figure}
+The 500 fixed-seed capped random portfolio identities are evaluated across the
+40 holdout formations using the same formation-time volatility budget.
+Under the frozen fallback, every certified deduction from perfect dependence
+is zero, regardless of the subsequently realized diversification.
+These comparisons therefore retain the failed informativeness gate rather
+than supplying an ex post refit.
 
 \subsection{What the declared grid could test}\label{sec:calibration-boundary}
 
@@ -663,7 +743,7 @@ The two calibration conditions do not fail together.  Of the
 bound is conservative on average across most of the grid and still misses the
 required share of calibration formations.
 
-\Cref{fig:calibration-coverage} shows where that leaves the design.  Coverage
+The calibration grid locates this limitation. Coverage
 increases monotonically in both $L$ and $\tau$, so the best-covering cell is the
 most conservative one the grid contains, at
 $L=\ppnum[1]{calibration-best-coverage-scale}$ and
@@ -680,22 +760,12 @@ the declared coverage standard, not that no transmission region could.  Because
 coverage is still rising at the grid boundary, a more conservative region
 outside the declared range may satisfy the rule; the credit it could carry would
 be correspondingly smaller, since credit falls as $L$ and $\tau$ rise
-(\Cref{fig:certificate-surface}).  We do not estimate where that crossing lies.
+(\ppAppendixRef{sec:nonvacuity-appendix}). We do not estimate where
+that crossing lies.
 Extending the grid after observing this outcome would convert a preregistered
 design into a tuned one, which is the specific failure the protocol exists to
 prevent.  Locating the crossing requires a fresh preregistration, and the
 paper's conclusions are stated for the region actually declared.
-
-\begin{figure}[H]
-  \centering
-  \ppfigure{0.72}{calibration_coverage}
-  \caption{Calibration coverage lower endpoint across the declared
-    transmission grid.  Each line fixes $\tau$ and varies $L$; the dashed line
-    is the 90\% calibration rule.  Coverage rises with conservatism and is
-    highest at the grid corner, so the rule is never reached inside the declared
-  range rather than being approached and rejected.}
-  \label{fig:calibration-coverage}
-\end{figure}
 
 Ticker, within-sector, stale-2018-geometry, and 1,000 label-permutation placebos
 are retained in the governed results.  Under the zero-credit fallback they are

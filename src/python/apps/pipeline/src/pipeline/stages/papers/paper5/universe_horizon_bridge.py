@@ -16,8 +16,8 @@ import numpy as np
 import pandas as pd
 
 from pipeline.stages.papers.paper5 import estimate as est
-from pipeline.stages.papers.paper5._gate.bootstrap import stationary_bootstrap_indices
-from pipeline.stages.papers.paper5._gate.driver import _load_gate_operator
+from pipeline.stages.papers.paper5.bootstrap import stationary_bootstrap_indices
+from pipeline.stages.papers.paper5.operators import load_operator
 from pipeline.stages.papers.paper5.post_corpus import _bootstrap_rho
 from pipeline.stages.substrate.panel import load_aligned_return_panel
 
@@ -472,11 +472,11 @@ def run_paper5_universe_horizon_bridge(
 ) -> dict[str, object]:
     """Estimate the three observed bridge cells and persist deterministic outputs."""
     config.validate()
-    current_tickers, current_weights, _current_summary = _load_gate_operator(
+    current_tickers, current_weights, _current_summary = load_operator(
         paths.current_barycentre_dir,
         config,
     )
-    reference_tickers, reference_weights, _reference_summary = _load_gate_operator(
+    reference_tickers, reference_weights, _reference_summary = load_operator(
         paths.reference_barycentre_dir,
         config,
     )
@@ -675,7 +675,7 @@ def run_paper5_universe_horizon_bridge(
     }
 
     paths.output_dir.mkdir(parents=True, exist_ok=True)
-    (paths.output_dir / "summary.json").write_text(
+    (paths.output_dir / "results.json").write_text(
         json.dumps(_plain(payload), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )

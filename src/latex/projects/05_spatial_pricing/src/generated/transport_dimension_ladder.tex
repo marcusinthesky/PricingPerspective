@@ -1,0 +1,18 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{rrrrrr}
+\toprule
+Dim. & Chord-distance CV & Assignment overlap & Weight corr. & Spatial-lag corr. & $\Delta$ held-out score \\
+\midrule
+4,096 & 5.75\% & 90.1\% & 0.9979 & 0.9998 & -0.000109 \\
+1,024 & 5.97\% & 89.5\% & 0.9978 & 0.9998 & -0.000339 \\
+256 & 7.16\% & 87.4\% & 0.9977 & 0.9998 & -0.000354 \\
+64 & 10.33\% & 82.4\% & 0.9975 & 0.9997 & -0.000443 \\
+\bottomrule
+\end{tabular}
+\caption{Matryoshka dimension ladder for target-anchored W1 and W2 transport. At each dimension, leading coordinates are truncated and then row-wise L2-normalized; the ground cost is unscaled Euclidean chord distance. Chord-distance CV uses all 81,100,800 article-pair costs across 4,950 unordered firm pairs. Assignment overlap is the share of the 633,600 matched target atoms receiving the same peer atom under minimum-sum $d$ and $d^2$ assignments. Weight correlation uses off-diagonal target-operator entries; spatial-lag correlation uses the common 2023--2026 excess-return panel. The final column is W2 minus W1 mean Gaussian quasi-log score per firm-day after fitting the FF5-plus-momentum model on 2018--2022; positive values favour W2.}
+\label{tab:transport-dimension-ladder}
+\end{table}

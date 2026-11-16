@@ -32,5 +32,3 @@ page: 6769-6781
 cites:
 - khattab_colbert_2020
 ---
-
-# Dense Passage Retrieval

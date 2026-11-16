@@ -24,5 +24,3 @@ cites:
 - ross_arbitrage_1976
 - sharpe_capital_1964
 ---
-
-# High-Dimensional Spatial Arbitrage Pricing Theory with Heterogeneous Interactions

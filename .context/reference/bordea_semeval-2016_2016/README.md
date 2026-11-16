@@ -15,5 +15,3 @@ issued:
 URL: http://sites.nationalacademies.org/PGA/
 page: 1081-1091
 ---
-
-# {SemEval}-2016 {Task} 13: {Taxonomy} {Extraction} {Evaluation} ({TExEval}-2)

@@ -1,9 +1,9 @@
-"""Label adapter over ``jcor``'s entity-neutral neighbour-stability core.
+"""Label adapter over ``statadic``'s entity-neutral neighbour-stability core.
 
-t46.9 promoted the method to :mod:`jcor.geometry.neighbour` and left this file
+t46.9 promoted the method to :mod:`statadic.geometry.graph.neighbour` and left this file
 a pure re-export. t48.3 re-signed that core on **integer object ids**, because
 its determinism device — a ``lexsort`` tie-break — was reaching for
-``dtype=object`` string arrays and so made jcor know what a ticker is. This
+``dtype=object`` string arrays and so made statadic know what a ticker is. This
 module is where that knowledge now lives: it owns the ticker↔index mapping, the
 comparator-model names, and the two label-bearing row schemas the Paper 1 stage
 writes to CSV and parquet. The public signature is unchanged, so
@@ -26,14 +26,14 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, TypedDict
 
-# numpy kind: host boundary — id vectors handed to the jcor NumPy core.
+# numpy kind: host boundary — id vectors handed to the statadic NumPy core.
 import numpy as np
-from jcor.geometry.neighbour import (
+from statadic.geometry.graph.neighbour import (
     NEIGHBOUR_INPUT_AXIOMS,
     FloatMatrix,
     neighbour_order,
 )
-from jcor.geometry.neighbour import (
+from statadic.geometry.graph.neighbour import (
     cross_encoder_neighbour_stability as _neighbour_stability_by_id,
 )
 
@@ -58,8 +58,8 @@ class NeighbourStabilitySummary(TypedDict):
     """One comparator's aggregate neighbour-persistence diagnostics.
 
     The label-bearing counterpart of
-    :class:`jcor.geometry.neighbour.NeighbourStabilitySummary`; the field order
-    is the column order of ``encoder_neighbour_stability/summary.csv``.
+    :class:`statadic.geometry.graph.neighbour.NeighbourStabilitySummary`; the field
+    order is the column order of ``encoder_neighbour_stability/summary.csv``.
     """
 
     baseline_model: str
@@ -123,7 +123,7 @@ def cross_encoder_neighbour_stability(
     comparison_distances: Mapping[str, ArrayLike],
     top_k: int = 5,
 ) -> tuple[list[NeighbourStabilitySummary], list[NeighbourStabilityEdge]]:
-    """Name the objects and models around the integer-id jcor core.
+    """Name the objects and models around the integer-id statadic core.
 
     Args:
         baseline_model: Name of the reference model.

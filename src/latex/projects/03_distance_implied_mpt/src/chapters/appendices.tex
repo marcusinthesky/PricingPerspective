@@ -110,22 +110,12 @@ equal-weight and inverse-volatility portfolios fixed on the complete
 does not calibrate $(L,\tau)$, establish historical coverage, or explain
 realized risk.
 
-\Cref{fig:certificate-surface} plots $100\mathcal C(q)$ against common slack.
+The full-sample calculation evaluates $100\mathcal C(q)$ across common slack.
 Increasing either $L$ or $\tau$ weakens the pairwise floor and lowers credit.
 The floor-activation rate is the share of ordered firm pairs for which
 $[W_{2,ij}/L-2\tau]_+$ is positive; positive-floor quantiles summarize its
 squared magnitude conditional on activation. These quantities diagnose why a
 surface becomes vacuous, but they are not sampling probabilities.
-
-\begin{figure}[H]
-  \centering
-  \ppfigure{0.95}{certificate_surface}
-  \caption{Full-sample certificate sensitivity. Each line reports
-    $100\mathcal C(q)$ as common slack $\tau$ increases for one $L$. The
-    calculation is descriptive numerical non-vacuity only and is not the
-  frozen chronological validation.}
-  \label{fig:certificate-surface}
-\end{figure}
 
 At $L=1$ and $\tau=0$, the deductions are
 \ppnum[1]{certificate-equal-weight-least-conservative-pct}\% for equal weight
@@ -175,5 +165,10 @@ does not reject zero difference in relative variance.
 At fixed 1,024 width, the Qwen3-4B comparison and the 64-coordinate
 Qwen3-8B stress-cell comparison with 256 coordinates do not survive Holm
 adjustment.
-Among the EttaX vintages, only the V3--V1 interval satisfies the stated
-post-specified equivalence bound; neither comparison involving V0 does.
+Several ChronoBERT annual differences remain distinguishable from zero after
+vintage-family Holm adjustment, including both the first annual step and the
+2017-to-2024 endpoint.
+Only a subset of annual pairs satisfy the benchmark-calibrated,
+post-specified equivalence bound.
+The annual point indices are nonmonotone, so neither a null vintage effect nor
+broad invariance follows from using a common encoder architecture.

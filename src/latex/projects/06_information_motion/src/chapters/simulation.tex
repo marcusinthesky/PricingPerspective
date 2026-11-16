@@ -1,0 +1,173 @@
+\section{Application}\label{sec:application}\label{sec:simulation}
+
+To assess how reliably finite samples of financial news recover the positive association
+predicted by the model, we develop a multi-agent simulation of the economy in
+Section~\ref{sec:model}, whose population coefficients are known.
+We examine the effects of article coverage and changes in reporting on these
+estimates, then apply the estimator to corporate news in
+Section~\ref{sec:data}.
+
+\subsection{Experimental Design}\label{sec:simulation-design}
+
+The experiment follows competitive adjustment after small exogenous free
+cash flow shocks,
+keeping operating movements close to the local setting of the directional
+prediction.
+Sampling articles along these paths reveals how well the estimator detects
+small reallocations at the coverage observed in the corporate data.
+
+The competitive economy has 100 firms with canonical interior baseline
+shares $p_i=i/101$, total
+capacity one, two activities and two opportunities.
+Outside appeal and baseline opportunity levels equal one, with cost curvature
+$\nu=1/(4D^2)$, where $D=51$, linear costs supporting the interior origin,
+and adjustment weight $\kappa=d_\perp=\nu+1/D^2$.
+
+The 60 monthly ticks begin from stationary conditions, which we label 2018 for
+comparison with the corporate sample, followed by independent
+permanent innovations of $\pm0.001$ at ticks 18, 30, 42 and 54 that raise one
+opportunity and lower the other.
+We evaluate all sixteen sign histories and assign each equal weight.
+At monthly discounting $\delta=0.95^{1/12}$, we compute return responses using
+the infinite permanent-response resolvent in \eqref{eq:same-path-value}, while the
+operating engine solves every contemporaneous joint Nash stage at the actual
+positive opportunity levels.
+
+In the first responding month after the first innovation, absolute changes
+in normalized operating shares range from
+\ppnum[4]{ir-redraw-signal-first-response-min-pct} to
+\ppnum[4]{ir-redraw-signal-first-response-max-pct}
+percentage points across firms and histories, with the largest absolute departure
+from an origin share over the complete paths reaching
+\ppnum[3]{ir-redraw-signal-maximum-origin-change-pct} percentage points.
+These small movements specify the local signal tested in this economy.
+
+The baseline article budget uses the firm-year article counts and frozen
+empirical monthly date distributions of the primary corporate sample
+described in Section~\ref{sec:data}.
+The next budgets multiply every count by four and sixteen.
+For each history, \ppnum[0]{ir-validation-redraws} independent article panels
+use nested count increments
+across budgets and shared sampled monthly counts across reporting regimes.
+The same dated counts determine annual article laws and article-timing
+weights, and each sampled origin law is reused wherever it serves as a
+reference.
+Because multinomial month and atom counts can leave unequal masses on antipodal
+atoms, we compute transport exactly on the axis support, which retains that
+asymmetry.
+Reusing each solved operating path across redraws isolates article
+measurement variation around the same economic response.
+
+For each history $h$, we distinguish approximation of the operating response
+from its measurement through articles.
+Comparing the affine-share coefficient with the finite-capacity
+common-reporting coefficient $\beta_h^0$ assesses the local economic
+approximation.
+The population reporting-law coefficient $\beta_h^\lambda$ incorporates
+changing attention, while the sampled estimate
+$\widehat\beta_{h,r,s}^\lambda$ adds finite-article variation at budget $s$.
+Table~\ref{tab:directional-validation-controls} reports absolute error
+against each history's population-law target and the frequency of numerically
+resolved positive estimates, averaging histories equally.
+Because every common-reporting population coefficient is positive, its
+positive-estimate frequency also measures correct-sign recovery.
+The fixed draw count targets a stratified aggregate rate standard error below
+one percentage point.
+Appendix~\ref{app:recovery-diagnostics} specifies the arithmetic sign allowance
+and retains the full directional and magnitude diagnostics.
+
+\subsection{Estimator Recovery and Reporting Effects}\label{sec:simulation-recovery}
+
+\input{generated/information_recovery_validation_table}
+
+Under common reporting, correct-sign recovery rises from
+\ppnum[1]{ir-validation-common-1-correct-pct}\% at observed coverage to
+\ppnum[1]{ir-validation-common-4-correct-pct}\% at fourfold coverage and
+\ppnum[1]{ir-validation-common-16-correct-pct}\% at sixteenfold coverage.
+Even the largest article samples therefore often fail to recover a
+numerically resolved positive sign, despite a normalized difference of only
+\ppnume[2]{ir-finite-affine} between the finite-capacity and affine-share
+population coefficients.
+
+The small operating-share changes shift population article weights only
+slightly, so finite-article variation can obscure the corresponding movement
+toward reference profiles.
+Coefficient error also falls with article coverage, but remains large
+relative to the population target.
+Normalized RMSE under common reporting is
+\ppnum[2]{ir-validation-common-1-normalized-rmse},
+\ppnum[2]{ir-validation-common-4-normalized-rmse} and
+\ppnum[2]{ir-validation-common-16-normalized-rmse} across the same ladder.
+Even at sixteenfold coverage, error remains several times the root-mean-square
+magnitude of the population coefficients.
+
+Reporting intensity can also respond to the opportunity itself.
+We set $\lambda_{\pm,t}=\exp(\pm0.005u_t)$, where $u_t$ is cumulative
+news divided by $0.004$, its maximum possible magnitude, so attention shifts
+toward the activity whose contribution-margin opportunity has increased.
+At sixteenfold coverage, correct-sign recovery relative to the operating-law
+target rises to
+\ppnum[1]{ir-validation-changing-16-correct-pct}\%
+(Appendix~\ref{app:recovery-diagnostics}).
+At fixed capacities, reporting changes alone generate a positive population
+coefficient in all
+\ppnum[0]{ir-reporting-only-positive-histories} histories.
+The reporting-only row in Table~\ref{tab:directional-validation-controls}
+measures this reported-law target, while its operating-law target is zero.
+The counterfactual retains return responses from the modeled operating
+path and changes only the observation law, without solving a separate
+fixed-capacity economy.
+
+Holding the reported population laws stationary under common reporting
+isolates article noise around a zero-alignment target.
+We retain the dated financial process, so population approach is exactly zero
+while the financial denominator remains positive.
+Finite articles nevertheless yield coefficients of both signs, with positive
+frequencies near one half across the coverage ladder.
+Because a zero target supplies neither a correct positive sign nor a scale
+for normalized RMSE, we assess this measurement control through absolute
+errors and sign frequencies.
+The control holds reporting laws fixed rather than solving a new competitive
+equilibrium.
+
+\subsection{Measurement Uncertainty and Inference}\label{sec:simulation-uncertainty}
+
+The spread of finite-article estimates provides a benchmark for assessing
+whether redrawing articles from an observed archive represents that
+measurement uncertainty.
+We generate independent archives from the common-reporting, stationary and
+reporting-only laws, retaining 100 firms and observed article coverage, then
+apply the corporate article-redraw procedure within each archive.
+Across \ppnum[0]{ir-redraw-outer-replications} archives per history, each
+with \ppnum[0]{ir-redraw-inner-redraws} inner redraws, the broad redraw
+ranges give near-nominal containment of the population coefficients.
+Containment and detection answer different questions.
+Under the positive-target common-reporting and reporting-only laws, the fifth
+percentile exceeds zero in
+\ppnum[1]{ir-redraw-mechanism-positive-q05-pct}\% and
+\ppnum[1]{ir-redraw-reporting-positive-q05-pct}\% of attempts, respectively.
+Thus, intervals that broadly capture measurement uncertainty rarely distinguish
+these small positive population coefficients from zero.
+Under stationary reporting, the target is zero, so the corresponding
+\ppnum[1]{ir-redraw-stationary-positive-q05-pct}\% is instead a null-control
+rejection frequency.
+
+Uncertainty across independently sampled firms concerns a different target
+from article selection around fixed operating paths.
+For each target coefficient, we generate
+\ppnum[0]{ir-inference-n100-replications} independent panels, each consisting
+of iid firm histories.
+Increasing the number of firms from 16 to 100 raises coverage of the
+candidate one-sided 95\% lower bound from
+\ppnum[1]{ir-inference-audit-n16-coverage-pct}\% to
+\ppnum[1]{ir-inference-n100-coverage-pct}\%.
+Zero-null rejection falls from
+\ppnum[1]{ir-inference-audit-n16-null-rejection-pct}\% to
+\ppnum[1]{ir-inference-n100-null-rejection-pct}\%
+(Monte Carlo SE \ppnum[2]{ir-inference-n100-null-rejection-se-pct}
+percentage points at 100 firms).
+These generated-history panels preserve dependence across years and
+comparison roles under the specified iid sampling law, although they are not
+jointly solved competitive economies.
+Appendix~\ref{app:annual-gmm} gives the sampling designs, target containment
+and Monte Carlo errors.

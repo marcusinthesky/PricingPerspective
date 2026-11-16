@@ -1,0 +1,18 @@
+set shell := ["bash", "-uc"]
+set positional-arguments
+
+# Run cached fast tests in this project's own process and pytest configuration.
+test *args:
+    env -u VIRTUAL_ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 JAX_ENABLE_X64=1 uv run --locked pytest -q -p no:monitor -p no:tach -n auto --maxprocesses=2 -m "not slow and not gpu" --testmon-forceselect "$@"
+
+# Run the complete fast suite without Testmon selection.
+test-fresh *args:
+    env -u VIRTUAL_ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 JAX_ENABLE_X64=1 uv run --locked pytest -q -p no:monitor -p no:tach -n auto --maxprocesses=2 -m "not slow and not gpu" --no-testmon "$@"
+
+# Run every test independently of the affected-test cache.
+test-all *args:
+    env -u VIRTUAL_ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 JAX_ENABLE_X64=1 uv run --locked pytest -q -p no:monitor -p no:tach -n auto --maxprocesses=2 -m "" --no-testmon "$@"
+
+# Report serial fast-test durations without profiling-plugin setup.
+test-durations *args:
+    env -u VIRTUAL_ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 JAX_ENABLE_X64=1 uv run --locked pytest -q -p no:monitor -p no:tach -n auto --maxprocesses=2 -m "not slow and not gpu" --no-testmon -n 0 --durations=20 "$@"

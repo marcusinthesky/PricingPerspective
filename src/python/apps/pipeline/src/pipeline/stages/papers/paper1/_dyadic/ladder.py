@@ -5,12 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
-from jcor.model.dyadic import (
-    DyadicComputationError,
-    DyadicFit,
-    DyadicInference,
-    DyadicModel,
-)
+from statadic.estimation.least_squares.dyadic import DyadicComputationError
+from statadic.inference.dyadic import DyadicFitRequest, DyadicInference
+from statadic.law.dyadic import DyadicModel
 
 from pipeline.stages.papers.paper1._dyadic.adapters import (
     draw_legacy_node_counts,
@@ -25,7 +22,7 @@ from pipeline.stages.papers.paper1._dyadic.estimation import _fit_spec
 
 if TYPE_CHECKING:
     import pandas as pd
-    from jcor.model.dyadic import DyadicSample
+    from statadic.law.dyadic import DyadicSample
 
     from pipeline.stages.papers.paper1._dyadic.contracts import (
         DyadicConfoundConfig,
@@ -45,11 +42,15 @@ def fit_model_ladder(
     selected: dict[int, dict[str, object]] = {}
     for spec_index, label, regressor_names in specs:
         fit = _fit_spec(
-            DyadicFit(
-                model=DyadicModel(regressor_names, columns, sample),
-                inference=DyadicInference(
+            DyadicFitRequest(
+                model=DyadicModel(
+                    regressor_names,
+                    columns,
+                    sample,
                     node_effects=spec_index == PRIMARY_SPEC_INDEX,
                     effect_name_prefix="firm_fe",
+                ),
+                inference=DyadicInference(
                     bootstrap_iters=inference.bootstrap_iters,
                     bootstrap_seed=inference.bootstrap_seed,
                     node_schedule=inference.node_schedule,
@@ -94,8 +95,7 @@ def configured_ladder(
     node_counts = draw_legacy_node_counts(
         len(prepared.tickers), config.bootstrap_iters, config.bootstrap_seed
     )
-    inference = DyadicInference(
-        effect_name_prefix="firm_fe",
+    inference = DyadicInference[str](
         bootstrap_iters=config.bootstrap_iters,
         bootstrap_seed=config.bootstrap_seed,
         node_schedule=legacy_node_count_schedule(prepared.sample, node_counts),

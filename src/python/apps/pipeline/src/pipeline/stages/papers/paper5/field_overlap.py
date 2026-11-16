@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from scipy.stats import spearmanr
 
-from pipeline.stages.papers.paper5._gate.metrics import (
+from pipeline.stages.papers.paper5.baskets import (
     random_matched_sparsity_weights,
     validate_weight_matrix,
 )

@@ -17,5 +17,3 @@ issue: '2'
 publisher: Society for Industrial and Applied Mathematics
 page: 360-385
 ---
-
-# A Quadratically Convergent {Newton} Method for Computing the Nearest Correlation Matrix

@@ -2,18 +2,21 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pandas as pd
-from jcor.model.dyadic import (
-    DyadicFit,
-    DyadicModel,
-)
-from jcor.operators.design import symmetric_dyadic_effects
+from statadic.inference.dyadic import DyadicFitRequest
+from statadic.law.dyadic import DyadicModel, DyadicSample
 
+from pipeline.stages.papers.paper1._dyadic.adapters import (
+    dyadic_regression,
+    node_effect_projection,
+)
 from pipeline.stages.papers.paper1._dyadic.artifacts import write_dyadic_artifacts
+from pipeline.stages.papers.paper1._dyadic.classification import (
+    fit_classification_controls,
+)
 from pipeline.stages.papers.paper1._dyadic.contracts import (
     PRIMARY_SPEC_INDEX,
     DyadicArtifacts,
@@ -53,15 +56,24 @@ def _w2_curvature_display(
     firm_j: np.ndarray,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
     """Return a descriptive quadratic check after symmetric-FE residualization."""
-    effects, _ = symmetric_dyadic_effects(firm_i, firm_j)
-    nuisance = np.column_stack([np.ones(len(outcome)), np.asarray(effects)])
-    outcome_residual = (
-        outcome - nuisance @ np.linalg.lstsq(nuisance, outcome, rcond=None)[0]
-    )
     centered = w2 - float(np.mean(w2))
-    terms = np.column_stack([w2, centered**2])
-    residual_terms = terms - nuisance @ np.linalg.lstsq(nuisance, terms, rcond=None)[0]
-    coefficients = np.linalg.lstsq(residual_terms, outcome_residual, rcond=None)[0]
+    projections = node_effect_projection(
+        {"outcome": outcome, "w2": w2, "centered": centered**2}, firm_i, firm_j
+    )
+    outcome_residual = projections["outcome"][1]
+    residual_terms = np.column_stack([projections["w2"][1], projections["centered"][1]])
+    # By Frisch-Waugh-Lovell the two partial slopes are the statadic dyadic fit's.
+    spec, data = dyadic_regression(
+        DyadicModel(
+            ["w2_distance", "w2_centered_squared"],
+            {"w2_distance": w2, "w2_centered_squared": centered**2},
+            DyadicSample[str](outcome, firm_i.tolist(), firm_j.tolist()),
+            node_effects=True,
+            effect_name_prefix="firm_fe",
+        )
+    )
+    fit = spec.estimate(data).core.coefficients
+    coefficients = np.array([fit["w2_distance"], fit["w2_centered_squared"]])
     return (
         pd.DataFrame(
             {
@@ -114,7 +126,7 @@ def run_dyadic_confound(
     )
 
     primary_design = cast("np.ndarray", primary_fit["_point_design"])
-    # jcor's dyadic carriers are backend-neutral (`ArrayView`); the
+    # statadic's dyadic carriers are backend-neutral (`ArrayView`); the
     # reporting helpers below are NumPy, so materialize at this boundary.
     primary_fit_frame, fwl_diagnostics = _assemble_primary_fit_frame(
         primary_fit,
@@ -139,23 +151,14 @@ def run_dyadic_confound(
         primary_fit_frame, leave_one_out, primary_design.shape[1]
     )
 
-    firm_effect_columns, _ = symmetric_dyadic_effects(
-        sample.endpoint_i, sample.endpoint_j
-    )
-    firm_effect_design = np.column_stack(
-        [np.ones(len(sample.outcome)), firm_effect_columns]
-    )
     w2_metric = prepared.columns["w2_distance"]
-    fitted_outcome = (
-        firm_effect_design
-        @ np.linalg.lstsq(firm_effect_design, np.asarray(sample.outcome), rcond=None)[0]
+    margins = node_effect_projection(
+        {"outcome": np.asarray(sample.outcome), "w2": w2_metric},
+        np.asarray(sample.endpoint_i),
+        np.asarray(sample.endpoint_j),
     )
-    fitted_w2 = (
-        firm_effect_design
-        @ np.linalg.lstsq(firm_effect_design, w2_metric, rcond=None)[0]
-    )
-    residual_outcome = sample.outcome - fitted_outcome
-    residual_w2 = w2_metric - fitted_w2
+    fitted_outcome, residual_outcome = margins["outcome"]
+    fitted_w2, residual_w2 = margins["w2"]
 
     def variance_share(observed: np.ndarray, residual: np.ndarray) -> float:
         total = float(np.sum((observed - observed.mean()) ** 2))
@@ -188,14 +191,29 @@ def run_dyadic_confound(
         )
     )
     energy_fit = _fit_spec(
-        DyadicFit(
-            model=DyadicModel(["energy_distance"], prepared.columns, sample),
-            inference=replace(inference, node_effects=True),
+        DyadicFitRequest(
+            model=DyadicModel(
+                ["energy_distance"],
+                prepared.columns,
+                sample,
+                node_effects=True,
+                effect_name_prefix="firm_fe",
+            ),
+            inference=inference,
         ),
         spec_index=7,
         include_draws=True,
     )
     ladder.bootstrap_frames.append(cast("pd.DataFrame", energy_fit["_bootstrap_draws"]))
+    classification, classification_draws = fit_classification_controls(
+        config.universe_csv,
+        DyadicModel(
+            ["w2_distance"], prepared.columns, sample, effect_name_prefix="firm_fe"
+        ),
+        inference,
+        config.etnic_alignment_dir,
+    )
+    ladder.bootstrap_frames.extend(classification_draws)
     energy_comparator = {
         "regressor": "energy_v",
         "role": "single theory-aligned lower-cost comparison row",
@@ -225,6 +243,7 @@ def run_dyadic_confound(
         "overall_r2": primary_fit["overall_r2"],
         "within_r2": primary_fit["within_r2"],
         "energy_dyadic_comparator": energy_comparator,
+        "classification_robustness": classification,
         "coef_same_sector": coefficients["same_sector"]["coef"],
         "coef_size_gap": coefficients["size_gap"]["coef"],
         "coef_crisis": coefficients["crisis"]["coef"],

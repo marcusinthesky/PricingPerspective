@@ -65,13 +65,12 @@ private lemma list_sum_eq_fin_sum {α : Type*} (Xs : List α) (f : α → ℝ) :
 
     E_{n,m}(X, Y) ≥ 0
 
-    The negative-type hypothesis `DistNegativeType α` is necessary: over a bare
+    The negative-type hypothesis `StatadicFormal.Geometry.DistNegativeType α` is necessary: over a bare
     `PseudoMetricSpace` the statement is false (circle with geodesic distance,
-    Székely & Rizzo 2023 §3.2). Restated 2026-07-08 per ROADMAP §3.2 #6 — the
-    hypothesis is discharged for Euclidean/Hilbert spaces by Schoenberg's
+    Székely & Rizzo 2023 §3.2). The hypothesis is discharged for Euclidean/Hilbert spaces by Schoenberg's
     theorem (future work).
 
-    Proof: instantiate `DistNegativeType` with the `n + m` sample points and
+    Proof: instantiate `StatadicFormal.Geometry.DistNegativeType` with the `n + m` sample points and
     weights `1/n` on the `Xs`-block and `-1/m` on the `Ys`-block (which sum to
     zero); the double sum expands to
     `selfX/n² + selfY/m² − 2·cross/(nm) ≤ 0`.
@@ -79,7 +78,7 @@ private lemma list_sum_eq_fin_sum {α : Type*} (Xs : List α) (f : α → ℝ) :
     Reference: Székely & Rizzo (2023), Section 3.3, Proposition 3.1. -/
 theorem v_statistic_nonneg
     {α : Type*} [MeasurableSpace α] [PseudoMetricSpace α]
-    (h_neg : DistNegativeType α)
+    (h_neg : StatadicFormal.Geometry.DistNegativeType α)
     (Xs Ys : List α) :
     0 ≤ vStatistic Xs Ys := by
   simp only [vStatistic]
@@ -137,19 +136,5 @@ theorem v_statistic_nonneg
       rw [h_expand] at h_ineq
       linarith
     simpa [h_cross, h_selfX, h_selfY] using h_goal
-
-/-- The V-statistic is a consistent estimator of energy distance.
-
-    As n, m → ∞, E_{n,m}(X, Y) → D_E²(μ, ν) almost surely.
-
-    This follows from the law of large numbers for V-statistics
-    with kernel h(x, y, x', y') = 2|x - y| - |x - x'| - |y - y'|.
-
-    Reference: Székely & Rizzo (2023), Chapter 2 (V-statistics). -/
-theorem v_statistic_consistent
-    {α : Type*} [MeasurableSpace α] [PseudoMetricSpace α]
-    (μ ν : ProbabilityMeasure α) :
-    True := by
-  trivial
 
 end EnergyStatistics

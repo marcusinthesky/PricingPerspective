@@ -8,14 +8,14 @@ from typing import TYPE_CHECKING, cast
 
 import numpy as np
 import pandas as pd
-import yaml
-from jcor.model.dyadic import DyadicFit, DyadicInference, DyadicModel, DyadicSample
 from scipy.stats import spearmanr
+from statadic.inference.dyadic import DyadicFitRequest, DyadicInference
+from statadic.law.dyadic import DyadicModel, DyadicSample
 
+from pipeline._kernels.multiplicity import holm_adjust
 from pipeline.stages.papers.paper1._dyadic.adapters import legacy_node_count_schedule
 from pipeline.stages.papers.paper1._dyadic.estimation import _fit_spec
 from pipeline.stages.shared.representation_ablation import (
-    RepresentationContrastSpec,
     load_encoder_vintage_specs,
     load_representation_ablation_specs,
     load_representation_contrast_specs,
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
     from pipeline.stages.shared.representation_ablation import (
         RepresentationAblationSpec,
+        RepresentationContrastSpec,
     )
 
 _CANONICAL_MODEL = "qwen3-embedding-8b"
@@ -218,7 +219,7 @@ def _append_registered_cells(
 ) -> pd.DataFrame:
     """Append typed W2 cells after resolving each artifact to the shared roster.
 
-    Both non-native Qwen representations and EttaX vintages use this path. The
+    Both non-native Qwen representations and ChronoBERT vintages use this path. The
     identity in the artifact, rather than its directory spelling, determines
     which governed cell receives the matrix.
     """
@@ -250,20 +251,6 @@ def _append_registered_cells(
             expected_representation=representation_id,
         )
     return pairs
-
-
-def _holm_adjust(pvalues: list[float | None]) -> list[float | None]:
-    """Apply Holm's step-down adjustment while preserving input order."""
-    available = sorted(
-        ((index, value) for index, value in enumerate(pvalues) if value is not None),
-        key=lambda pair: pair[1],
-    )
-    adjusted: list[float | None] = [None] * len(pvalues)
-    running = 0.0
-    for rank, (index, value) in enumerate(available):
-        running = max(running, min(1.0, (len(available) - rank) * value))
-        adjusted[index] = running
-    return adjusted
 
 
 def _paired_contrasts(
@@ -388,7 +375,7 @@ def _paired_contrasts(
         indexes = [
             index for index, row in enumerate(results) if row.get("family") == family
         ]
-        adjusted = _holm_adjust(
+        adjusted = holm_adjust(
             [
                 cast("float | None", results[index].get("pvalue"))
                 if results[index].get("status") == "computed"
@@ -400,36 +387,6 @@ def _paired_contrasts(
             if value is not None:
                 results[index]["holm_pvalue"] = float(value)
     return results
-
-
-def _paired_vintage_contrasts(
-    cells: list[dict[str, object]],
-    draws: pd.DataFrame,
-    roster: tuple[RepresentationAblationSpec, ...],
-    *,
-    equivalence_bound: float,
-    confidence_level: float,
-) -> list[dict[str, object]]:
-    """Backward-compatible wrapper for the vintage-only paired analysis."""
-    pair_indexes = ((1, 0), (2, 0), (2, 1))
-    vintage_contrasts = tuple(
-        RepresentationContrastSpec(
-            contrast_id=f"{roster[candidate].cell_id}_minus_{roster[reference].cell_id}",
-            candidate_cell_id=roster[candidate].cell_id,
-            reference_cell_id=roster[reference].cell_id,
-            family="vintage",
-            display_order=order,
-        )
-        for order, (candidate, reference) in enumerate(pair_indexes, start=1)
-        if candidate < len(roster) and reference < len(roster)
-    )
-    return _paired_contrasts(
-        cells,
-        draws,
-        vintage_contrasts,
-        equivalence_bound=equivalence_bound,
-        confidence_level=confidence_level,
-    )
 
 
 def _write_representation_outputs(
@@ -473,7 +430,7 @@ def _write_representation_outputs(
     }
     config.output_summary.parent.mkdir(parents=True, exist_ok=True)
     config.output_summary.write_text(
-        yaml.safe_dump(summary, sort_keys=False), encoding="utf-8"
+        json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
     bootstrap_draws.to_parquet(config.output_draws, index=False)
     return summary
@@ -562,10 +519,8 @@ def run_representation_sensitivity(
         candidate = aligned["candidate_distance"].to_numpy(dtype=np.float64)
         firm_i = aligned["ticker_i"].to_numpy(dtype=str)
         firm_j = aligned["ticker_j"].to_numpy(dtype=str)
-        sample = DyadicSample[str](outcome, firm_i, firm_j)
+        sample = DyadicSample[str](outcome, firm_i.tolist(), firm_j.tolist())
         inference = DyadicInference[str](
-            node_effects=True,
-            effect_name_prefix="firm_fe",
             bootstrap_iters=counts.shape[0],
             bootstrap_seed=config.bootstrap_seed,
             node_schedule=legacy_node_count_schedule(sample, counts),
@@ -574,8 +529,14 @@ def run_representation_sensitivity(
             "w2_distance" if distance == "wasserstein_w2" else "energy_distance"
         )
         fit = _fit_spec(
-            DyadicFit(
-                model=DyadicModel([focal_name], {focal_name: candidate}, sample),
+            DyadicFitRequest(
+                model=DyadicModel(
+                    [focal_name],
+                    {focal_name: candidate},
+                    sample,
+                    node_effects=True,
+                    effect_name_prefix="firm_fe",
+                ),
                 inference=inference,
             ),
             spec_index=cell_id,

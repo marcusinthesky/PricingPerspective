@@ -38,5 +38,3 @@ number: '2506.05176'
 cites:
 - karpukhin_dpr_2020
 ---
-
-# Qwen3 Embedding

@@ -23,16 +23,15 @@ Edit `src/content/home.mdx` for the programme description and `src/content/autho
 
 ## Blog copy
 
-Edit the long-form notes in `src/content/blog/`. Their titles, dates, summaries, categories, and keywords live in `src/content/data.ts`; word counts and reading times are computed from the MDX source at build time. Route wiring lives in `src/app/blog/[slug]/page.tsx`. The Blog collection is intentionally static and currently contains seven entries. Display equations are written in LaTeX (`$$…$$`, rendered by remark-math and rehype-katex) inside a captioned `<figure className="blog-equation">` so the audio narration can read the caption; add `blog-equation-boxed` to the figure for a box rather than `\boxed`, which renders tight against the content; inline maths uses `$…$`, so write currency as `\$24`. Use `{/* … */}` for comments, not `<!-- … -->`.
+Edit the long-form notes in `src/content/blog/`. Their titles, dates, summaries, categories, ordering and keywords live in each file's YAML frontmatter; word counts and reading times are computed from the MDX source at build time. Route wiring lives in `src/app/blog/[slug]/page.tsx`. The Blog collection is intentionally static and currently contains seven entries. Display equations are written in LaTeX (`$$…$$`, rendered by remark-math and rehype-katex) inside a captioned `<figure className="blog-equation">` so the audio narration can read the caption; add `blog-equation-boxed` to the figure for a box rather than `\boxed`, which renders tight against the content; inline maths uses `$…$`, so write currency as `\$24`. Use `{/* … */}` for comments, not `<!-- … -->`.
 
 ## Paper exhibits
 
-The Paper 1 MDS and Paper 2 barycentric-weight exhibits in `src/content/papers/` are rasterized web assets derived from the canonical PGF figures in `src/latex/projects/`. Re-render the corresponding PGF with `just --tempdir /tmp latex::preview` before replacing the files under `public/figures/`.
+The Paper 1 metric-MDS and Paper 2 peer-basket exhibits in `src/content/papers/` are rasterized web assets derived from the canonical PGF figures in `src/latex/projects/`. Re-render the corresponding PGF with `just --tempdir /tmp latex::preview` before replacing the files under `public/figures/`.
 
-## Adding a fourth paper
+## The four paper pages
 
-1. Add a `Paper` entry to `src/content/data.ts`.
-2. Create an MDX file under `src/content/papers/`.
-3. Import it and add it to `contentBySlug` in `src/app/papers/[slug]/page.tsx`.
-4. Add the citation to `public/citations.bib` and `CITATION.cff`.
-5. Rebuild and run the structured-data audit.
+All four papers are registered in `src/content/data.ts` and
+`src/app/papers/[slug]/page.tsx`. Keep summaries, source MDX, citation records and
+machine-readable discovery text consistent with the current manuscripts.
+Update numerical examples and companion figures from the saved pipeline outputs.

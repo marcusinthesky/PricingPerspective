@@ -19,5 +19,3 @@ cites:
 - connor_unified_1984
 - ross_arbitrage_1976
 ---
-
-# Reference Variables, Factor Structure, and the Approximate Multibeta Representation

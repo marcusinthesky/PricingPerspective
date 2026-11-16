@@ -18,5 +18,3 @@ cites:
 - kennedy_term_1994
 - ross_arbitrage_1976
 ---
-
-# The Term Structure of Interest Rates as a Random Field

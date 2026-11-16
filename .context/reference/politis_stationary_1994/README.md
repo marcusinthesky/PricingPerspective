@@ -17,5 +17,3 @@ issue: '428'
 publisher: American Statistical Association
 page: 1303-1313
 ---
-
-# The Stationary Bootstrap

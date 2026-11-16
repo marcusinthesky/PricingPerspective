@@ -22,5 +22,3 @@ page: 535-574
 cites:
 - loughran_mcdonald_2011
 ---
-
-# Text as Data

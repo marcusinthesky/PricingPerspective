@@ -34,9 +34,7 @@ def _bootstrap(ctx: typer.Context) -> None:
 ```
 
 `ctx.invoked_subcommand` is the DVC stage name; `ctx.call_on_close` fires the
-finalizer when the command tears down. EttaX registers the same lifecycle at
-its root callback and at the nested `vintage` callback, so `vintage.train`
-and `vintage.run` remain distinct stages.
+finalizer when the command tears down.
 
 Every Loguru record emitted inside a stage carries the active `trace_id` and
 `span_id` in console/file output and in the OTel log record. Set
@@ -44,7 +42,7 @@ Every Loguru record emitted inside a stage carries the active `trace_id` and
 standard OTLP/HTTP exporter; local JSONL export remains enabled.
 
 > Coverage note: callbacks live inside the Python apps, so they cover the
-> Python DVC stages in `pipeline`, `simulation`, and `ettax`. The LaTeX build
+> Python DVC stages in `pipeline`. The LaTeX build
 > (`tectonic` / `uv run --script`) stages are not instrumented.
 
 ## Querying runs
@@ -71,7 +69,7 @@ object* — so it returned `0.0` for every child, on every sample, forever. Only
 the parent, primed once at startup, was ever counted.
 
 Any stage doing its work in child processes therefore logged near-idle CPU while
-saturating cores. That is every `simulation` stage using
+saturating cores. Historical examples included `simulation` stages using
 `harness.parallel.parallel_map`, plus `compute-long-short` via
 `pipeline.stages.papers.paper2._hedge.tasks` — measured at **8.3 % against a
 known 4-core burn, versus 380.7 % once the objects are held across samples**.
@@ -99,10 +97,9 @@ stays joinable across the change.
 Every DVC stage is a cold `uv run` process and the numerical stages fan out to
 `spawn` workers that cold-import their stage module, so without a shared on-disk
 cache each jitted kernel is recompiled per stage *and* per worker (t05.7 measured
-`simulate-size-power` at 1029 s → 496 s from this alone). Both apps configure it
-through the single site here — `pipeline.jax_cache` and `simulation.backend` are
-thin adapters (t63); before that they were separate implementations that could
-drift apart.
+the retired `simulate-size-power` command at 1029 s → 496 s from this alone).
+Pipeline configures it through the single site here; `pipeline.jax_cache` is
+its thin adapter (t63).
 
 ```python
 from dotell import configure_jax_compilation_cache
@@ -115,8 +112,9 @@ Call it before the first jit, and again inside every `spawn` worker — a spawne
 interpreter inherits none of the parent's process-global JAX flags. The resolved
 absolute path is republished in `PP_JAX_CACHE_DIR_RESOLVED`, an internal variable
 a child prefers over its own default, so a parent and its workers share one
-directory even though the two apps resolve it differently (pipeline through
-pydantic settings, which also read `.env`; simulation from the environment only).
+directory even when their configuration is resolved differently. Pipeline passes
+the parent path through typed settings, which also read `.env`; a child can use
+the exported resolved path directly.
 Writing back to `PP_JAX_CACHE_DIR` itself would invert the process-env-beats-
 `.env` precedence `pipeline/ARCHITECTURE.md` guarantees.
 
@@ -213,15 +211,15 @@ from dotell import jax_diagnostics
 
 diagnostics = jax_diagnostics()
 with diagnostics.compile(
-    "jcor.energy", x, static={"n_permutations": n_perm}, cache="miss"
+    "statadic.energy", x, static={"n_permutations": n_perm}, cache="miss"
 ):
     compiled = jitted_energy.lower(x).compile()
-with diagnostics.execution("jcor.energy", x, static={"n_permutations": n_perm}):
+with diagnostics.execution("statadic.energy", x, static={"n_permutations": n_perm}):
     result = compiled(x)
-with diagnostics.sync("jcor.energy", result):
+with diagnostics.sync("statadic.energy", result):
     result.block_until_ready()
 if irregular_groups:
-    diagnostics.fallback("jcor.energy.irregular", x)
+    diagnostics.fallback("statadic.energy.irregular", x)
 ```
 
 `compile` also records a raised compilation attempt as a failure. Record a cache
@@ -243,29 +241,21 @@ JAX.
 
 ## Diagnosing a slow stage
 
-1. Find regressed stages with the telemetry regression query in the `src/python/apps/harnessme`
-   harness (compares `wall_s`/`peak_rss_gb` across `git_sha`s in `runs.jsonl`).
-2. Rerun just that stage directly (bypassing `dvc repro`) with profiling on, e.g.
-   for the `permutation_tests` stage (see `dvc.yaml`):
+1. Compare the stage's `wall_s` and `peak_rss_gb` records in
+   `data/telemetry/runs.jsonl`.
+2. Rerun the declared stage with profiling enabled. For example, after restoring
+   the reproduction inputs, profile the Paper 5 peer definitions:
 
    ```bash
-   PP_TELEMETRY_PROFILE=1 uv run --project src/python pipeline compute-permutation-tests
+   PP_TELEMETRY_PROFILE=1 dvc repro --single-item --force p5_peer_definitions
    ```
 
-3. Render the resulting `.pstats` file:
+3. Inspect the resulting `.pstats` file with Python's standard profiler tools:
 
    ```bash
-   uvx gprof2dot -f pstats data/telemetry/profiles/pipeline__compute-permutation-tests__<ts>.pstats | dot -Tsvg -o profile.svg
-   # or, text summary:
-   uv run --project src/python python -m pstats data/telemetry/profiles/pipeline__compute-permutation-tests__<ts>.pstats
+   uv run --locked --project src/python python -m pstats data/telemetry/profiles/<profile>.pstats
    ```
 
 `cProfile` only captures the main process — the sampler thread's own overhead
 is negligible but unprofiled, and any joblib/process-pool child processes are
-**not** captured (profiling is inherently per-process). For whole-process-tree
-sampling of a live run, use `py-spy` instead:
-
-```bash
-py-spy dump --pid <pid>                          # one-shot stack dump
-py-spy record -s -o flame.svg --pid <pid>        # flamegraph over time
-```
+**not** captured (profiling is inherently per-process).

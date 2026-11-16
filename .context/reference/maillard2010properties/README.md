@@ -18,5 +18,3 @@ issue: '4'
 publisher: Institutional Investor Journals
 page: 60-70
 ---
-
-# The Properties of Equally Weighted Risk Contribution Portfolios

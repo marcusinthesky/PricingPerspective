@@ -1,7 +1,7 @@
 ---
 type: article-journal
-title: Common risk factors in the returns on stocks and bonds
-description: Fama (1993), cited bibliography record
+title: Common Risk Factors in the Returns on Stocks and Bonds
+description: Fama & French (1993), stock- and bond-return factor construction
 author:
 - family: Fama
   given: Eugene F
@@ -15,6 +15,10 @@ volume: '33'
 issue: '1'
 publisher: Elsevier
 page: 3-56
+URL: https://doi.org/10.1016/0304-405X(93)90023-5
+DOI: 10.1016/0304-405X(93)90023-5
+tags:
+- asset-pricing
+- factor-models
+- systematic-risk
 ---
-
-# Common risk factors in the returns on stocks and bonds

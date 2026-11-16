@@ -5,25 +5,30 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Literal, Never, cast
+from typing import TYPE_CHECKING, Literal, Never, cast
 
 import numpy as np
 import pandas as pd
 
-from pipeline._kernels.paper3_certificate import (
+from pipeline._kernels.paper3.certificate import (
     certificate_surface,
     equal_weights,
     inverse_volatility_weights,
 )
-from pipeline._kernels.paper3_validation import solve_certificate
-from pipeline.io.paper3_certificate import sha256_path, write_certificate_artifacts
+from pipeline._kernels.paper3.validation import solve_certificate
 from pipeline.io.params import load_params
+from pipeline.io.semantic_identity import entrypoint_code_identity
+from pipeline.stages.papers.paper3.certificate_artifacts import (
+    write_certificate_artifacts,
+)
 from pipeline.stages.papers.paper3.certificate_validation import _gmv
 from pipeline.stages.substrate.panel import (
     load_aligned_return_panel,
     load_priced_distance_universe,
 )
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 _MIN_STANDARDIZATION_OBSERVATIONS = 2
 _MATRIX_NDIM = 2
@@ -61,16 +66,7 @@ def _number_grid(value: object, field: str) -> tuple[float, ...]:
 
 
 def _code_identity() -> str:
-    sources = (
-        Path(__file__),
-        Path(__file__).parents[3] / "_kernels" / "paper3_certificate.py",
-        Path(__file__).parents[3] / "_kernels" / "paper3_validation.py",
-        Path(__file__).parents[3] / "io" / "paper3_certificate.py",
-    )
-    payload = [(path.name, sha256_path(path)) for path in sources]
-    return hashlib.sha256(
-        json.dumps(payload, sort_keys=True).encode("utf-8")
-    ).hexdigest()
+    return entrypoint_code_identity("paper3-certificate")
 
 
 def _standardize_returns(returns: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -480,7 +476,6 @@ def run_paper3_certificate(paths: Paper3CertificatePaths) -> None:
     }
     write_certificate_artifacts(
         paths.output_dir,
-        cells,
         summary,
         news_weights=news_weights,
         code_identity=_code_identity(),

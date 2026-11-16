@@ -14,12 +14,13 @@ from typing import TYPE_CHECKING, Any, NoReturn
 import jax
 import jax.numpy as jnp
 import numpy as np
-from jcor.discrepancy.energy import energy_functional_matrix
-from jcor.discrepancy.exact import (
+from statadic.geometry.discrepancy.mmd import mmd_matrix_values, mmd_squared_matrix
+from statadic.geometry.discrepancy.mmd.energy.matrix import energy_functional_matrix
+from statadic.geometry.discrepancy.transport.exact import (
     balanced_wasserstein_from_cost_jax,
     exact_balanced_wasserstein_jax,
 )
-from jcor.discrepancy.mmd import mmd_matrix_values, mmd_squared_matrix
+from statadic.measure.clouds import PackedClouds
 
 from pipeline._kernels.typed_geometry import (
     EmbeddingCloud,
@@ -43,7 +44,11 @@ def _exact_wasserstein_pair_jax(
     p: float,
 ) -> jax.Array:
     """Run the fixed-shape sphere-chord Hungarian core without a host round trip."""
-    return exact_balanced_wasserstein_jax(left, right, p)
+    return exact_balanced_wasserstein_jax(
+        PackedClouds(left, jnp.asarray(left.shape[0])),
+        PackedClouds(right, jnp.asarray(right.shape[0])),
+        p,
+    )
 
 
 if TYPE_CHECKING:
@@ -212,8 +217,10 @@ def compute_statistical_distance(  # noqa: C901, PLR0912, PLR0915
             f"{distance.distance_id!r} declares ground distance "
             f"{distance.ground_distance!r}, received {ground.distance_id!r}"
         )
-    arrays = [jnp.asarray(cloud.values) for cloud in items]
     if distance.family == "energy":
+        arrays = PackedClouds.from_clouds(
+            [jnp.asarray(cloud.values) for cloud in items]
+        )
         if distance.estimator != "v_statistic":
             _distance_error("matrix energy requires the V-statistic")
         values = np.asarray(
@@ -261,6 +268,9 @@ def compute_statistical_distance(  # noqa: C901, PLR0912, PLR0915
                 values[np.diag_indices_from(values)] = 0.0
         else:
             kernel, _ = resolve_mmd_kernel(distance, ground)
+            arrays = PackedClouds.from_clouds(
+                [jnp.asarray(cloud.values) for cloud in items]
+            )
             if distance.normalization == "rooted":
                 values = np.asarray(mmd_matrix_values(arrays, kernel=kernel))
             else:

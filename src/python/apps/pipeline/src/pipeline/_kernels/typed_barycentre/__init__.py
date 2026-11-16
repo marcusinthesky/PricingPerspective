@@ -1,7 +1,7 @@
 """Typed barycentre solvers used by the shared artifact stage.
 
-One module per geometry family, mirroring ``jcor.geometry._barycentre`` so both
-halves of a computation carry the same name: what ``jcor`` implements as pure
+One module per geometry family, mirroring ``statadic.geometry.barycentre`` so both
+halves of a computation carry the same name: what ``statadic`` implements as pure
 array geometry, this package wraps in the typed registry's vocabulary --
 declared-arm validation, cloud IDs, certificates, artifact semantics.
 
@@ -28,6 +28,7 @@ from pipeline._kernels.typed_barycentre.wasserstein import (
     solve_wasserstein_free_support_barycentre,
     solve_wasserstein_measure_barycentre,
     solve_wasserstein_target_projections,
+    solve_wasserstein_target_projections_with_supports,
 )
 
 __all__ = [
@@ -40,4 +41,5 @@ __all__ = [
     "solve_wasserstein_free_support_barycentre",
     "solve_wasserstein_measure_barycentre",
     "solve_wasserstein_target_projections",
+    "solve_wasserstein_target_projections_with_supports",
 ]

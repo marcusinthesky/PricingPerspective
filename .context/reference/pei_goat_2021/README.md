@@ -17,5 +17,3 @@ container-title: The {Web} {Conference} 2021 - {Companion} of the {World} {Wide}
 publisher: Association for Computing Machinery, Inc
 page: 307-310
 ---
-
-# {GOAT} at the {FinSim}-2 task: {Learning} {Word} {Representations} of {Financial} {Data} with {Customized} {Corpus}

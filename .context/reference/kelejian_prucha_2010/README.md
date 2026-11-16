@@ -21,5 +21,3 @@ page: 53-67
 cites:
 - anselin_1988
 ---
-
-# Specification and Estimation of Spatial Autoregressive Models with Autoregressive and Heteroskedastic Disturbances

@@ -2,18 +2,8 @@
 \ProvidesPackage{pp-manuscript}[2026/07/22 Pricing Perspective
 manuscript semantics]
 
-% Scalable-font closure: the minimal TeX Live set ships accented glyphs only via
-% the bitmap EC fonts, which microtype cannot font-expand ("auto
-% expansion is only
-% possible with scalable fonts"). T1 fontenc + Latin Modern provide the scalable
-% Type1 equivalents so accented bibliography names (e.g. Ismaïl)
-% compile under the
-% arXiv pdfLaTeX release path. The same request pulls T1/lmr TFM
-% metrics (e.g. ec-lmbx8) under Tectonic; `just setup` warms them
-% into the offline
-% --only-cached bundle so the fast cached-smoke matrix stays green (engine-aware
-% fontspec was rejected: it still needs fontspec.sty + LM OTF warmed,
-% for no gain).
+% T1 Latin Modern supplies scalable fonts and accented bibliography names.
+% Its metrics and Type1 outlines are part of the pinned offline TeX bundle.
 \RequirePackage[T1]{fontenc}
 \RequirePackage{lmodern}
 
@@ -32,17 +22,13 @@ manuscript semantics]
 % next to main.tex, and \mathdefault, which matplotlib emits around every math
 % label and leaves for the document to define.
 % These sit here beside graphicx rather than in targets/ because the figure
-% transport is a repository-wide semantic, not a per-venue layout choice.
+% transport is a shared manuscript semantic.
 \RequirePackage{pgf}
 \RequirePackage{import}
 \providecommand{\mathdefault}[1]{#1}
 \RequirePackage{tabularx}
-\RequirePackage{etoolbox}
+% Multi-page appendix listings remain outside floats.
 \RequirePackage{longtable}
-% multi-page listings that must not be
-% floats (e.g. the
-% 53-row Paper 1 ticker universe, which overran the page as a table float and
-% printed the folio through its own body)
 % longtable sets its caption in a \parbox of \LTcapwidth, 4in by default and so
 % narrower than the text block in both target geometries. Widening it to the
 % line width keeps a longtable caption flush with the table it belongs to.
@@ -52,9 +38,7 @@ manuscript semantics]
 \RequirePackage{xfp} % \fpeval for display-time scaling, e.g.
 % \num{\fpeval{\ppvalue{k}*100}}
 
-% Match the Typst baseline's float display: round to the requested precision but
-% do NOT pad with trailing zeros (Typst's calc.round drops them, so 0.61 renders
-% as "0.61", not siunitx's default-padded "0.610").
+% Round to the requested precision without padding trailing zeros.
 \sisetup{round-pad=false}
 
 % Independent per-type counters with flat numbering (Theorem 1,
@@ -112,6 +96,9 @@ manuscript semantics]
   \num[round-mode=places,round-precision=#1,scientific-notation=true]{\ppvalue{#2}}%
 }
 
+% Appendix references include their visible section label.
+\newcommand{\ppAppendixRef}[1]{Appendix~\ref{#1}}
+
 % Include a generated figure. #1 is the width the figure is *authored* at, as a
 % fraction of \linewidth; #2 is its name under images/.
 %
@@ -123,13 +110,10 @@ manuscript semantics]
 % source of it:
 % tests/figures/test_print_size.py parses these call sites and compares each
 % fraction against the width the renderer actually produced. Without it the
-% guard could only compare the renderer against itself. Target adapters may set
-% the internal suffix to select a separately authored natural-size variant.
-\newcommand{\ppfiguresuffix}{}
-\newcommand{\ppfigure}[2]{\import{images/}{#2\ppfiguresuffix.pgf}}
-% The `article` class does not define \figalttext. Keep the semantic call
-% portable in shared chapter sources; a target decides whether and how to render
-% it for reviewers.
+% guard could only compare the renderer against itself.
+\newcommand{\ppfigure}[2]{\import{images/}{#2.pgf}}
+\newcommand{\ppdeclaration}[1]{\paragraph{#1.}}
+% Keep figure descriptions semantic when the document class has no alt-text API.
 \providecommand{\figalttext}[2][]{\relax}
 
 \newcommand{\E}{\mathbb{E}}

@@ -59,104 +59,12 @@ _MATRIX_DIMENSIONS = 2
 
 
 @dataclass(frozen=True, slots=True)
-class MisspecificationSeries:
-    """Bias in the SAR autocorrelation against W-misspecification magnitude."""
-
-    magnitude: Sequence[float]
-    bias_mean: Sequence[float]
-    bias_se: Sequence[float]
-
-
-@dataclass(frozen=True, slots=True)
-class SizePowerSeries:
-    """Rejection rate against the true mean alpha, with the empirical size."""
-
-    alpha_true: Sequence[float]
-    power: Sequence[float]
-    empirical_size: float
-    nominal_alpha: float
-    #: Cross-section size the study was run at. Carried rather than written into
-    #: the title, which previously stated a fixed n=52 and would have mislabelled
-    #: the figure the moment the panel changed.
-    n_assets: int
-
-    def __post_init__(self) -> None:
-        """Reject malformed size-power metadata before publication rendering."""
-        if (
-            isinstance(self.n_assets, bool)
-            or not isinstance(self.n_assets, int)
-            or self.n_assets < 1
-        ):
-            message = (
-                "size-power artifact metadata 'n' must be a positive integer; "
-                f"got {self.n_assets!r}"
-            )
-            raise ValueError(message)
-        if len(self.alpha_true) != len(self.power):
-            message = (
-                "size-power artifact is inconsistent: alpha_true and power "
-                f"contain {len(self.alpha_true)} and {len(self.power)} values"
-            )
-            raise ValueError(message)
-
-
-@dataclass(frozen=True, slots=True)
 class BarycentricMixturePaths:
     """Governed inputs and output for the empirical W-flat mixture map."""
 
     barycentre_dir: Path
     universe_csv: Path
     output_file: Path
-
-
-def render_w_misspecification(series: MisspecificationSeries, out: Path) -> None:
-    r"""Plot bias in :math:`\hat{\rho}` as the weight matrix is perturbed."""
-    _style()
-    fig, ax = plt.subplots(figsize=figsize(0.8, 3.2 / 4.5))
-    ax.errorbar(
-        series.magnitude,
-        series.bias_mean,
-        yerr=series.bias_se,
-        marker="o",
-        color=_C["blue"],
-        capsize=3,
-    )
-    ax.axhline(0.0, color=_C["gray"], linewidth=0.7, linestyle="--")
-    ax.set_xlabel("W misspecification magnitude")
-    ax.set_ylabel(r"Bias in $\hat{\rho}$")
-    ax.set_title(r"SAR $\rho$ recovery under W misspecification")
-    fig.tight_layout()
-    fit_to_width(fig, 0.8)
-    _save(fig, out)
-
-
-def render_size_power(series: SizePowerSeries, out: Path) -> None:
-    r"""Plot the power curve of the :math:`\bar{\alpha}=0` test against its size."""
-    _style()
-    fig, ax = plt.subplots(figsize=figsize(0.8, 3.2 / 4.5))
-    ax.plot(
-        series.alpha_true, series.power, marker="o", color=_C["blue"], label="power"
-    )
-    ax.axhline(
-        series.empirical_size,
-        color=_C["vermilion"],
-        linestyle="--",
-        label=f"size={series.empirical_size:.3f}",
-    )
-    ax.axhline(
-        series.nominal_alpha,
-        color=_C["gray"],
-        linewidth=0.7,
-        linestyle=":",
-        label=f"nominal {series.nominal_alpha:g}",
-    )
-    ax.set_xlabel(r"True $\bar{\alpha}$")
-    ax.set_ylabel("Rejection rate")
-    ax.set_title(rf"Size/power of the $\bar{{\alpha}}=0$ test, $n={series.n_assets}$")
-    ax.legend()
-    fig.tight_layout()
-    fit_to_width(fig, 0.8)
-    _save(fig, out)
 
 
 @dataclass(frozen=True, slots=True)
@@ -223,7 +131,7 @@ def _draw_two_field_panel(
             [],
             color=_C["black"],
             linewidth=0.8,
-            label="quasi-log-likelihood contour (drop 2.9957)",
+            label="quasi-log-likelihood\ncontour (drop 2.9957)",
         )
         ax.plot(
             [region.joint_rho_b],
@@ -233,7 +141,7 @@ def _draw_two_field_panel(
             linestyle="none",
             color=_C["vermilion"],
         )
-        ax.set_xlabel(r"Distributional channel $\rho_B$")
+        ax.set_xlabel(r"Barycentric channel $\rho^\flat$")
         return filled
 
     ax.plot(
@@ -262,7 +170,7 @@ def _draw_two_field_panel(
         color=_C["vermilion"],
         label="joint estimate",
     )
-    ax.set_xlabel(r"Distributional channel $\rho_B$")
+    ax.set_xlabel(r"Barycentric channel $\rho^\flat$")
     return filled
 
 
@@ -295,7 +203,7 @@ def render_two_field_region(region: TwoFieldRegion, out: Path) -> None:
     _draw_two_field_panel(axes[0], region, floor=_CONTEXT_FLOOR, zoomed=False)
     axes[0].set_xlim(0.0, 1.0)
     axes[0].set_ylim(0.0, 1.0)
-    axes[0].set_ylabel(r"News-link channel $\rho_N$")
+    axes[0].set_ylabel(r"News-link channel $\rho^{\mathrm{news}}$")
     axes[0].set_title("Admissible region")
     axes[0].legend(loc="upper right", fontsize="small")
 

@@ -1,6 +1,6 @@
 ---
 type: article-journal
-title: Economic {Linkages} {Inferred} from {News} {Stories} and the {Predictability} of {Stock} {Returns}
+title: Economic Linkages Inferred from News Stories and the Predictability of Stock Returns
 description: Scherbina (2013), cited bibliography record
 author:
 - family: Scherbina
@@ -15,5 +15,3 @@ DOI: 10.2139/ssrn.2363436
 ISSN: 1556-5068
 container-title: SSRN Electronic Journal
 ---
-
-# Economic {Linkages} {Inferred} from {News} {Stories} and the {Predictability} of {Stock} {Returns}

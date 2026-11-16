@@ -5,7 +5,7 @@
 # ///
 """Lean claim manifest extractor.
 
-Reads `mapping.toml` (human-authored, see t24.1 blocker B1), runs
+Joins authored publication disclosures to fresh native LeanArchitect metadata, runs
 `lake env lean` on a generated snippet per entry to check the declaration and
 its axiom set, and emits a schema-conformant `generated/manifest.json`.
 
@@ -20,7 +20,8 @@ visible: weakening a mapped theorem in place otherwise leaves the name
 resolvable and the axiom set clean, so nothing downstream would move.
 
 Exit code is nonzero if any mapping entry fails validation (missing
-declaration, `sorryAx`, an axiom outside the allowlist, or an unparsable
+declaration, duplicate/missing/native claim labels, a True contract, `sorryAx`,
+an axiom outside the allowlist, or an unparsable
 statement type). A manifest is
 still written in that case with `build_result: "failed"` for the offending
 claims, so callers can inspect *why* — but no renderer binding may treat a
@@ -32,16 +33,20 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
-import tomllib
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
+
+import tomllib
 
 TOOL_DIR = Path(__file__).resolve().parent
 LEAN_DIR = TOOL_DIR.parents[1]  # src/lean
 SCHEMA_VERSION = "1.0"
+NATIVE_LIBRARIES = ("Publication", "PricingPerspective", "WassersteinGeometry")
 
 # Mathlib's standard trust base. Anything else blocks generation.
 ALLOWED_AXIOMS = {"propext", "Classical.choice", "Quot.sound"}
@@ -75,9 +80,15 @@ def module_of(file_rel: str) -> str:
     return ".".join(module_parts)
 
 
-def run_lean_snippet(snippet: str, *, workdir: Path = LEAN_DIR, label: str = "snippet") -> tuple[int, str, str]:
+def run_lean_snippet(
+    snippet: str, *, workdir: Path = LEAN_DIR, label: str = "snippet"
+) -> tuple[int, str, str]:
     """Write `snippet` to a scratch file under src/lean and run `lake env lean` on it."""
-    scratch = workdir / f"_claim_manifest_{label}.lean"
+    descriptor, name = tempfile.mkstemp(
+        prefix=f"_claim_manifest_{label}_", suffix=".lean", dir=workdir
+    )
+    os.close(descriptor)
+    scratch = Path(name)
     scratch.write_text(snippet)
     try:
         proc = subprocess.run(
@@ -85,6 +96,7 @@ def run_lean_snippet(snippet: str, *, workdir: Path = LEAN_DIR, label: str = "sn
             cwd=workdir,
             capture_output=True,
             text=True,
+            check=False,
             # Dominated by reading mathlib's .oleans, not by elaboration, so it is
             # cold-page-cache I/O that sets the ceiling: measured 2026-08-02, one
             # claim took 352 s cold and 10 s warm, while a sibling claim in the same
@@ -121,8 +133,7 @@ def parse_statement_type(stdout: str, declaration: str) -> str:
     resolves, the axiom set is still clean, and `content_hash` never moves
     because it is computed over fields that all stayed the same. Recording the
     elaborated type makes a statement edit a visible manifest diff, which is
-    what forces the paired disclosure to be re-reviewed (AGENTS.md 2.6,
-    "statements are the API").
+    what forces the paired disclosure to be re-reviewed.
 
     The snippet prints `@<decl> : <type>` — wrapped across lines by the
     pretty-printer, at a width that depends on the declaration name's length —
@@ -151,20 +162,38 @@ def parse_statement_type(stdout: str, declaration: str) -> str:
     return ""
 
 
-def check_declaration(declaration: str, import_module: str, *, label: str) -> CheckResult:
-    snippet = f"import {import_module}\n#check @{declaration}\n#print axioms {declaration}\n"
+def checked_snippet(source: str, declaration: str) -> str:
+    """Inspect mapped contracts with the same compiled classifier as the global gate."""
+    audit = (LEAN_DIR / "tools/sorry-audit/Audit.lean").read_text()
+    # Audit imports must precede fixture declarations.
+    return (
+        audit
+        + "\n"
+        + source
+        + f"\n#check @{declaration}\n#print axioms {declaration}\n"
+        + "run_cmd liftTermElabM do\n"
+        + "  let env ← Lean.getEnv\n"
+        + f"  let name := `{declaration}\n"
+        + '  let some ci := env.find? name | throwError "missing mapped declaration"\n'
+        + "  let (flags, premises) ← SorryAudit.classify name ci\n"
+        + '  logInfo m!"CLAIM_CONTRACT_JSON {(Lean.Json.mkObj [("flags", Lean.toJson flags), ("premises", Lean.toJson premises)]).compress}"\n'
+    )
+
+
+def check_declaration(
+    declaration: str, import_module: str, *, label: str
+) -> CheckResult:
+    source = f"import {import_module}\n"
+    # Imports cannot follow Audit declarations.
+    snippet = source + checked_snippet("", declaration)
     code, out, err = run_lean_snippet(snippet, label=label)
     return classify(code, out, err, declaration=declaration)
 
 
-def check_declaration_from_snippet_fixture(decl_source: str, declaration: str, *, label: str) -> CheckResult:
-    """Test-only entry point: compile an inline declaration (no package import)
-    and immediately `#check`/`#print axioms` it. Used to exercise the same
-    classification logic against throwaway fixtures (e.g. a `sorry` proof or
-    a fixture using a disallowed axiom) without needing them to be part of an
-    importable Lake package.
-    """
-    snippet = f"{decl_source}\n#check @{declaration}\n#print axioms {declaration}\n"
+def check_declaration_from_snippet_fixture(
+    decl_source: str, declaration: str, *, label: str
+) -> CheckResult:
+    snippet = checked_snippet(decl_source, declaration)
     code, out, err = run_lean_snippet(snippet, label=label)
     return classify(code, out, err, declaration=declaration)
 
@@ -215,6 +244,26 @@ def classify(code: int, out: str, err: str, *, declaration: str) -> CheckResult:
             raw_stdout=out,
             raw_stderr=err,
         )
+    contract = re.search(r"CLAIM_CONTRACT_JSON (\{[^\n]*\})", out)
+    if contract is None:
+        return CheckResult(
+            "failed",
+            axioms,
+            statement_type,
+            "missing compiled contract classification",
+            out,
+            err,
+        )
+    contract_data = json.loads(contract.group(1))
+    if contract_data["flags"] or contract_data["premises"]:
+        return CheckResult(
+            "failed",
+            axioms,
+            statement_type,
+            f"mapped True contract rejected: {contract_data}",
+            out,
+            err,
+        )
     return CheckResult(
         build_result="checked",
         axioms=axioms,
@@ -230,26 +279,121 @@ def canonical_claims_json(claims: list[dict]) -> bytes:
     return json.dumps(claims, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
-def build_manifest(mapping_path: Path, *, verbose: bool = False) -> tuple[dict, bool]:
-    if not mapping_path.exists():
-        raise FileNotFoundError(mapping_path)
-    with mapping_path.open("rb") as fh:
-        mapping = tomllib.load(fh)
-    entries = mapping.get("claims", [])
+def load_native_claims(
+    *, rebuild: bool = True, native_dir: Path | None = None
+) -> dict[str, dict]:
+    """Read freshly exported LeanArchitect metadata, never its leanOk safety flag."""
+    if rebuild:
+        subprocess.run(
+            [
+                "lake",
+                "build",
+                *(f"{library}:blueprintJson" for library in NATIVE_LIBRARIES),
+            ],
+            cwd=LEAN_DIR,
+            check=True,
+        )
+    base = native_dir if native_dir is not None else LEAN_DIR / ".lake/build/blueprint"
+    modules = [
+        module
+        for library in NATIVE_LIBRARIES
+        for module in json.loads((base / "library" / f"{library}.json").read_text())[
+            "modules"
+        ]
+    ]
+    nodes: dict[str, dict] = {}
+    for module in modules:
+        annotation_module = ".".join(
+            Path(module).relative_to("module").with_suffix("").parts
+        )
+        for item in json.loads((base / module).read_text()):
+            if item.get("type") != "node":
+                continue
+            node = item["data"]
+            label = node["latexLabel"]
+            if label in nodes:
+                raise ValueError(f"duplicate native claim label: {label}")
+            if not node.get("name") or not node.get("statement", {}).get("text"):
+                raise ValueError(f"incomplete native claim metadata: {label}")
+            if node.get("notReady") is not False or node.get("hasLean") is not True:
+                raise ValueError(
+                    f"native claim is not explicitly ready and linked to Lean: {label}"
+                )
+            defining_module = node.get("location", {}).get("module")
+            inline = defining_module == annotation_module
+            external_mathlib = (
+                isinstance(defining_module, str)
+                and defining_module.startswith("Mathlib.")
+                and annotation_module == "Publication.Claims"
+            )
+            if not inline and not external_mathlib:
+                raise ValueError(
+                    f"native claim annotation must be inline with its project declaration: {label}; "
+                    f"annotation={annotation_module}, declaration={defining_module}"
+                )
+            nodes[label] = node
+    return nodes
 
-    claim_ids = [entry["claim_id"] for entry in entries]
-    duplicate_ids = sorted({claim_id for claim_id in claim_ids if claim_ids.count(claim_id) > 1})
-    if duplicate_ids:
-        raise ValueError(f"duplicate claim_id value(s): {duplicate_ids}")
 
+def read_entries(mapping: Path) -> list[dict]:
+    with mapping.open("rb") as handle:
+        entries = tomllib.load(handle).get("claims", [])
+    forbidden = {"declaration", "statement_summary", "package", "file"}
+    for entry in entries:
+        if overlap := forbidden.intersection(entry):
+            raise ValueError(
+                f"{mapping}: duplicate native metadata fields: {sorted(overlap)}"
+            )
+    return entries
+
+
+def validate_native_join(mappings: list[Path], native: dict[str, dict]) -> None:
+    ids = [entry["claim_id"] for mapping in mappings for entry in read_entries(mapping)]
+    duplicates = sorted({key for key in ids if ids.count(key) > 1})
+    if duplicates:
+        raise ValueError(f"duplicate claim_id value(s): {duplicates}")
+    missing = sorted(set(ids) - native.keys())
+    unclaimed = sorted(native.keys() - set(ids))
+    if missing or unclaimed:
+        raise ValueError(
+            f"native publication claim mismatch: missing={missing}; unclaimed={unclaimed}"
+        )
+
+
+def native_source(node: dict) -> tuple[str, str]:
+    """Resolve original defining module into its source package, including mathlib."""
+    relative = Path(*node["location"]["module"].split(".")).with_suffix(".lean")
+    candidates = [
+        *LEAN_DIR.glob(f"packages/*/{relative}"),
+        *LEAN_DIR.glob(f".lake/packages/*/{relative}"),
+    ]
+    if len(candidates) != 1:
+        raise ValueError(
+            f"cannot uniquely resolve native source module {relative}: {candidates}"
+        )
+    source = candidates[0]
+    package = source.relative_to(LEAN_DIR).parts[
+        1 if "packages" == source.relative_to(LEAN_DIR).parts[0] else 2
+    ]
+    return package, str(source.relative_to(LEAN_DIR))
+
+
+def build_manifest(
+    mapping_path: Path, *, verbose: bool = False, native: dict[str, dict] | None = None
+) -> tuple[dict, bool]:
+    if native is None:
+        native = load_native_claims()
+        validate_native_join([mapping_path], native)
+    entries = read_entries(mapping_path)
     claims: list[dict] = []
     all_ok = True
     for entry in entries:
-        declaration = entry["declaration"]
-        file_rel = entry["file"]
+        node = native[entry["claim_id"]]
+        declaration = node["name"]
+        package, file_rel = native_source(node)
         label = re.sub(r"[^A-Za-z0-9_]", "_", declaration)
         try:
-            import_module = module_of(file_rel)
+            import_module = node["location"]["module"]
             result = check_declaration(declaration, import_module, label=label)
         except Exception as exc:  # noqa: BLE001 - surfaced as a failed claim, not a crash
             result = CheckResult(build_result="failed", reason=str(exc))
@@ -267,17 +411,17 @@ def build_manifest(mapping_path: Path, *, verbose: bool = False) -> tuple[dict, 
             {
                 "paper": entry["paper"],
                 "claim_id": entry["claim_id"],
-                "statement_summary": entry["statement_summary"],
+                "statement_summary": " ".join(node["statement"]["text"].split()),
                 "declaration": declaration,
-                "package": entry["package"],
+                "package": package,
                 "file": file_rel,
                 "build_result": result.build_result,
                 "assumptions": entry.get("assumptions", []),
                 "axioms": result.axioms,
                 "statement_type": result.statement_type,
-                "disclosure": entry["disclosure"] if result.build_result == "checked" else (
-                    f"NOT verified — {result.reason}"
-                ),
+                "disclosure": entry["disclosure"]
+                if result.build_result == "checked"
+                else (f"NOT verified — {result.reason}"),
             }
         )
 
@@ -292,19 +436,33 @@ def build_manifest(mapping_path: Path, *, verbose: bool = False) -> tuple[dict, 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mapping", type=Path, default=TOOL_DIR / "mapping.toml")
-    parser.add_argument("--out", type=Path, default=TOOL_DIR / "generated" / "manifest.json")
+    parser.add_argument("--mapping", type=Path)
+    parser.add_argument("--out", type=Path)
     parser.add_argument("-v", "--verbose", action="store_true")
     args = parser.parse_args()
 
-    manifest, ok = build_manifest(args.mapping, verbose=args.verbose)
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    from render import discover_mappings, manifest_path, mapping_owners
 
-    if args.verbose:
-        print(f"wrote {args.out} ({len(manifest['claims'])} claims, hash={manifest['content_hash'][:12]}…)")
-
-    return 0 if ok else 1
+    mappings = (
+        [args.mapping or TOOL_DIR / "mapping.toml"]
+        if args.mapping is not None or args.out is not None
+        else discover_mappings(TOOL_DIR)
+    )
+    mapping_owners(mappings)
+    native = load_native_claims()
+    validate_native_join(discover_mappings(TOOL_DIR), native)
+    all_ok = True
+    for mapping in mappings:
+        manifest, ok = build_manifest(mapping, verbose=args.verbose, native=native)
+        output = args.out or manifest_path(mapping)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+        all_ok = all_ok and ok
+        if args.verbose:
+            print(
+                f"wrote {output} ({len(manifest['claims'])} claims, hash={manifest['content_hash'][:12]}…)"
+            )
+    return 0 if all_ok else 1
 
 
 if __name__ == "__main__":

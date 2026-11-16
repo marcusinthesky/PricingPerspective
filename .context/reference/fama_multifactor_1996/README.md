@@ -21,5 +21,3 @@ cites:
 - ross_arbitrage_1976
 - sharpe_capital_1964
 ---
-
-# Multifactor Explanations of Asset Pricing Anomalies

@@ -1,10 +1,10 @@
 """Typed adapters over the pure-JAX source-measure barycentre solvers.
 
-The geometry lives in :mod:`jcor.geometry._barycentre.wasserstein.measure`,
+The geometry lives in :mod:`statadic.geometry.frechet.wasserstein.measure.measure`,
 which knows only dense ``(k, n, d)`` arrays.  Everything here is the pipeline's
 half of that boundary: registry-vocabulary validation, support-ID minting,
 error translation, and the objective-semantics string the artifact schema
-expects.  The module deliberately carries the same name as its jcor counterpart
+expects.  The module deliberately carries the same name as its statadic counterpart
 so the two halves of one computation are found under one word.
 """
 
@@ -14,12 +14,13 @@ from typing import TYPE_CHECKING, NamedTuple
 
 import jax.numpy as jnp
 import numpy as np
-from jcor.geometry import (
+from statadic.geometry.frechet.wasserstein.measure import (
     solve_wasserstein_free_support_barycentre as _solve_jax_free_support_barycentre,
 )
-from jcor.geometry import (
+from statadic.geometry.frechet.wasserstein.measure import (
     solve_wasserstein_measure_barycentre as _solve_jax_measure_barycentre,
 )
+from statadic.measure.clouds import PackedClouds
 
 from pipeline._kernels.typed_barycentre._common import (
     MINIMUM_CLOUDS,
@@ -33,7 +34,9 @@ from pipeline._kernels.typed_barycentre._diagnostics import (
 )
 
 if TYPE_CHECKING:
-    from jcor.geometry import WassersteinBarycentreResult
+    from statadic.geometry.frechet.wasserstein.measure import (
+        WassersteinBarycentreResult,
+    )
 
     from pipeline._kernels.typed_geometry import EmbeddingCloud
 
@@ -53,7 +56,7 @@ class _ArmIdentity(NamedTuple):
 
     @property
     def order(self) -> float:
-        """The transport order jcor takes for this arm's estimator."""
+        """The transport order statadic takes for this arm's estimator."""
         if self.estimator not in _ESTIMATORS:
             _barycentre_error(f"unsupported Wasserstein estimator {self.estimator!r}")
         return 2.0 if self.estimator == "balanced_wasserstein_2" else 1.0
@@ -62,7 +65,7 @@ class _ArmIdentity(NamedTuple):
     def objective_semantics(self) -> str:
         """The artifact vocabulary for this arm's reported objective.
 
-        Restated rather than passed through from jcor, which reports
+        Restated rather than passed through from statadic, which reports
         ``W2_powered_transport_objective`` where the artifact schema and its
         readers speak ``squared_statistical_distance``.
         """
@@ -77,7 +80,7 @@ def _measure_result(
     support_ids: tuple[str, ...],
     arm: _ArmIdentity,
 ) -> MeasureBarycentreKernelResult:
-    """Translate one jcor certificate into the artifact-boundary result."""
+    """Translate one statadic certificate into the artifact-boundary result."""
     return MeasureBarycentreKernelResult(
         support_ids=support_ids,
         support_values=np.asarray(result.support_values),
@@ -116,7 +119,8 @@ def solve_wasserstein_measure_barycentre(
     source carrying the larger weight and the interpolant is not a minimizer at
     all -- ``balanced_wasserstein_1`` with unequal weights is therefore rejected
     instead of returned under ``converged=True``.  See
-    :func:`jcor.geometry.solve_wasserstein_measure_barycentre` for the
+    :func:`statadic.geometry.frechet.wasserstein.measure.solve_wasserstein_measure_barycentre`
+    for the
     derivation.
 
     More than two source measures need
@@ -136,7 +140,7 @@ def solve_wasserstein_measure_barycentre(
     sources = _stacked_sources(items)
     try:
         result = _solve_jax_measure_barycentre(
-            jnp.asarray(sources),
+            PackedClouds.from_clouds([jnp.asarray(source) for source in sources]),
             jnp.asarray(source_weights),
             p=arm.order,
             metric="euclidean",
@@ -202,7 +206,7 @@ def solve_wasserstein_free_support_barycentre(
     sources = _stacked_sources(items)
     try:
         result = _solve_jax_free_support_barycentre(
-            jnp.asarray(sources),
+            PackedClouds.from_clouds([jnp.asarray(source) for source in sources]),
             jnp.asarray(source_weights),
             p=arm.order,
             metric="euclidean",

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 import pandas as pd
 
@@ -20,8 +20,16 @@ _REQUIRED_METADATA_COLUMNS = ("Symbol", "Name", "Sector")
 _CAPTION = (
     r"Canonical empirical roster: ticker symbol, firm name, and sector label "
     r"from Nasdaq summary metadata for the firms in the canonical priced "
-    r"$W_2$ geometry, sorted by sector then symbol. Authors' calculations."
+    r"$W_2$ geometry, sorted by sector then symbol."
 )
+_SECTOR_LIST_CAPTION = (
+    r"Canonical empirical roster: ticker symbols of the firms in the canonical "
+    r"priced $W_2$ geometry, grouped by the sector label in Nasdaq summary "
+    r"metadata. Firm names accompany the symbols in the replication archive's "
+    r"universe metadata."
+)
+
+RosterLayout = Literal["longtable", "sector-list"]
 
 
 def _distance_item_ids(
@@ -94,30 +102,87 @@ def _metadata_rows(
     ]
 
 
-def _render_longtable(rows: Sequence[tuple[str, str, str]]) -> str:
-    lines = [
-        r"\begin{longtable}{lll}",
-        rf"\caption{{{_CAPTION}}}",
-        r"\label{tab:sample-universe} \\",
-        r"\toprule",
-        r"Symbol & Name & Sector \\",
-        r"\midrule",
-        r"\endfirsthead",
-        r"\toprule",
-        r"Symbol & Name & Sector \\",
-        r"\midrule",
-        r"\endhead",
-        r"\midrule",
-        r"\endfoot",
-        r"\bottomrule",
-        r"\endlastfoot",
-    ]
+def _render_longtable(
+    rows: Sequence[tuple[str, str, str]] | Sequence[str],
+    *,
+    columns: str = "lll",
+    header: str = r"Symbol & Name & Sector \\",
+    caption: str = _CAPTION,
+    label: str = "tab:sample-universe",
+    font_size: str | None = None,
+    tabcolsep: str | None = None,
+) -> str:
+    lines = []
+    if font_size is not None or tabcolsep is not None:
+        lines.append(r"\begingroup")
+        if font_size is not None:
+            lines.append(rf"\{font_size}")
+        if tabcolsep is not None:
+            lines.append(rf"\setlength{{\tabcolsep}}{{{tabcolsep}}}")
+    lines.extend(
+        [
+            rf"\begin{{longtable}}{{{columns}}}",
+            rf"\caption{{{caption}}}",
+            rf"\label{{{label}}} \\",
+            r"\toprule",
+            header,
+            r"\midrule",
+            r"\endfirsthead",
+            (
+                rf"\multicolumn{{{header.count('&') + 1}}}{{c}}"
+                r"{\tablename\ \thetable\ (continued)} \\"
+            ),
+            r"\toprule",
+            header,
+            r"\midrule",
+            r"\endhead",
+            r"\midrule",
+            r"\endfoot",
+            r"\bottomrule",
+            r"\endlastfoot",
+        ]
+    )
     rendered_rows = [
-        " & ".join(escape_latex(cell) for cell in row) + r" \\" for row in rows
+        row
+        if isinstance(row, str)
+        else " & ".join(escape_latex(cell) for cell in row) + r" \\"
+        for row in rows
     ]
     lines.append("\n".join(rendered_rows))
     lines.append(r"\end{longtable}")
+    if font_size is not None or tabcolsep is not None:
+        lines.append(r"\endgroup")
     return "\n".join(lines)
+
+
+def _render_sector_list(rows: Sequence[tuple[str, str, str]]) -> str:
+    """Render one row per sector listing its ticker symbols."""
+    by_sector: dict[str, list[str]] = {}
+    for symbol, _name, sector in rows:
+        by_sector.setdefault(sector, []).append(symbol)
+    rendered_rows = [
+        f"{escape_latex(sector)} & {len(symbols)} & "
+        + ", ".join(escape_latex(symbol) for symbol in symbols)
+        + r" \\"
+        for sector, symbols in by_sector.items()
+    ]
+    return "\n".join(
+        [
+            r"\begin{table}[htbp]",
+            r"\centering",
+            r"\small",
+            r"\begin{tabularx}{\linewidth}{@{}lr>{\raggedright\arraybackslash}X@{}}",
+            r"\toprule",
+            r"Sector & Firms & Ticker symbols \\",
+            r"\midrule",
+            *rendered_rows,
+            r"\bottomrule",
+            r"\end{tabularx}",
+            rf"\caption{{{_SECTOR_LIST_CAPTION}}}",
+            r"\label{tab:sample-universe}",
+            r"\end{table}",
+        ]
+    )
 
 
 def render_sample_universe_table(
@@ -129,8 +194,13 @@ def render_sample_universe_table(
     provider_id: str,
     representation_id: str,
     distance_id: str = "wasserstein_w2",
+    layout: RosterLayout = "longtable",
 ) -> str:
-    """Render the canonical priced W2 roster as an appendix ``longtable``."""
+    """Render the canonical priced W2 roster as an appendix table.
+
+    ``longtable`` lists symbol, name, and sector per firm; ``sector-list`` is a
+    compact one-row-per-sector list of ticker symbols.
+    """
     item_ids = _distance_item_ids(
         distance_artifact_dir,
         returns_dir,
@@ -143,11 +213,17 @@ def render_sample_universe_table(
     rows = _metadata_rows(universe_csv, item_ids)
     fragment = (
         "% AUTO-GENERATED by pipeline render-sample-universe-table "
-        "-- do not edit by hand.\n\n" + _render_longtable(rows) + "\n"
+        "-- do not edit by hand.\n\n"
+        + (
+            _render_sector_list(rows)
+            if layout == "sector-list"
+            else _render_longtable(rows)
+        )
+        + "\n"
     )
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(fragment, encoding="utf-8")
     return fragment
 
 
-__all__ = ["render_sample_universe_table"]
+__all__ = ["RosterLayout", "render_sample_universe_table"]

@@ -1,11 +1,10 @@
 project-root = "."
 pipeline-file = "dvc.yaml"
 hash-dir = ".semflow/hashes"
+# Statadic is a pinned PyPI dependency; source roots cover repository code only.
 source-roots = [
   "src/python/apps/pipeline/src",
-  "src/python/apps/simulation/src",
-  "src/python/apps/ettax/src",
-  "src/python/packages/jcor/src",
+  "src/python/apps/hotelling/src",
 ]
 
 [hashing]
@@ -15,4 +14,6 @@ ignore-type-checking-blocks = true
 
 [tracking]
 auto-typer = true
-control-stages = ["semflow_refresh"]
+# These control stages retain complete local source and locked-environment
+# byte dependencies.
+control-stages = ["semflow_refresh", "co_mentions", "public_inputs_check"]

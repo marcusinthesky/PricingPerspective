@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from typing import TYPE_CHECKING, cast
 
-import yaml
+from pipeline.figures.shared_tables import _render_longtable
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -22,9 +23,7 @@ _MAIN_TEXT_CELL_ORDER = (
     "qwen4b_1024",
     "bge_large_full",
     "qwen8b_64",
-    "ettax_v0",
-    "ettax_v1",
-    "ettax_v3",
+    *(f"chronobert_{year}" for year in range(2017, 2025)),
 )
 
 
@@ -58,7 +57,7 @@ def _percentile(designs: object, label: str, candidate: str) -> str:
 
 def _cell_label(cell: dict[str, object]) -> str:
     label = str(cell["label"])
-    if str(cell.get("provider_id", "")).startswith("ettax-"):
+    if cell.get("contrast_role") == "encoder_vintage":
         return label
     dimension = cell.get("effective_dimension")
     native = cell.get("native_dimension")
@@ -130,8 +129,8 @@ def _main_text_rows(cells: list[dict[str, object]]) -> list[str]:
 
     rows: list[str] = []
     for cell_id in _MAIN_TEXT_CELL_ORDER:
-        if cell_id == "ettax_v0":
-            rows.append(r"\addlinespace[1.5pt]")
+        if cell_id == "chronobert_2017":
+            rows.append(r"\midrule")
         row = indexed[cell_id]
         cell = cast("dict[str, object]", row["cell"])
         benchmark = cast("dict[str, object]", row["news_only_benchmark"])
@@ -163,7 +162,7 @@ def render_paper3_representation_ablation_table(
     main_output_path: Path | None = None,
 ) -> None:
     """Render appendix detail and, when requested, a compact main-text table."""
-    payload = yaml.safe_load(summary_path.read_text(encoding="utf-8"))
+    payload = json.loads(summary_path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict) or not isinstance(payload.get("cells"), list):
         message = "Paper 3 representation merge must contain a cells list"
         raise TypeError(message)
@@ -252,8 +251,8 @@ def render_paper3_representation_ablation_table(
                 r"\end{tabular}",
                 (
                     r"\caption{Representation sensitivity of the news-only allocation "
-                    r"across seven base representations and three matched "
-                    f"EttaX encoder vintages on {sample_scope}. The four middle "
+                    r"across seven base representations and eight published annual "
+                    f"ChronoBERT encoder vintages on {sample_scope}. The four middle "
                     r"columns report the "
                     r"percentage of "
                     r"fixed-law allocations with standardized variance no greater "
@@ -271,35 +270,33 @@ def render_paper3_representation_ablation_table(
                 r"\label{tab:p3-representation-ablation}",
                 r"\end{table}",
                 r"\medskip",
-                r"\begin{table}[H]",
-                r"\centering",
-                r"\scriptsize",
-                r"\setlength{\tabcolsep}{3.0pt}",
-                r"\begin{tabularx}{\linewidth}{Xrrrrrr}",
-                r"\toprule",
-                (
-                    r"Contrast ($c-r$) & Estimate & 95\% CI & Raw $p$ & "
-                    r"Holm $p$ & Bound & Equiv. \\"
+                _render_longtable(
+                    contrast_rows,
+                    columns=r"@{}p{0.35\linewidth}rrrrrr@{}",
+                    header=(
+                        r"Contrast ($c-r$) & Estimate & 95\% CI & $p$ & "
+                        r"$p_H$ & Bound & Eq. \\"
+                    ),
+                    caption=(
+                        r"Paired stationary-return-bootstrap contrasts for the "
+                        r"15-cell representation ladder. The seven base contrasts are "
+                        r"descriptive candidate-minus-reference relative-GMV "
+                        r"index-point "
+                        r"differences, so a negative estimate favours the candidate. "
+                        r"$p$ denotes two-sided add-one sign-tail probabilities; "
+                        r"$p_H$ denotes Holm adjustment separately within the seven "
+                        r"base and 28 vintage contrasts. The ChronoBERT rows use the "
+                        r"BGE-large-minus-Qwen3-8B@1024 interval as a "
+                        r"benchmark-calibrated, "
+                        r"post-specified robustness threshold. Eq. requires strict "
+                        r"containment of the full marginal interval; intervals are not "
+                        r"simultaneous. Published annual cumulative training is not a "
+                        r"matched-compute causal or architecture-only comparison."
+                    ),
+                    label="tab:p3-representation-contrasts",
+                    font_size="scriptsize",
+                    tabcolsep="3.0pt",
                 ),
-                r"\midrule",
-                *contrast_rows,
-                r"\bottomrule",
-                r"\end{tabularx}",
-                (
-                    r"\caption{Paired stationary-return-bootstrap contrasts for the "
-                    r"ten-cell representation ladder. The seven base contrasts are "
-                    r"descriptive candidate-minus-reference relative-GMV index-point "
-                    r"differences, so a negative estimate favours the candidate. Raw "
-                    r"$p$-values are two-sided add-one sign-tail probabilities; Holm "
-                    r"adjustment is applied separately to the seven base and three "
-                    r"vintage contrasts. The "
-                    r"EttaX rows additionally use the BGE-large-minus-Qwen3-8B@1024 "
-                    r"interval as a benchmark-calibrated, post-specified robustness "
-                    r"threshold. Equivalence requires strict containment of the full "
-                    r"interval; this is not a causal or architecture-only comparison.}"
-                ),
-                r"\label{tab:p3-representation-contrasts}",
-                r"\end{table}",
                 "",
             ]
         ),

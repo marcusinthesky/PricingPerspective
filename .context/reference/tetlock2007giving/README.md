@@ -14,5 +14,3 @@ issue: '3'
 publisher: Wiley
 page: 1139-1168
 ---
-
-# Giving Content to Investor Sentiment: The Role of Media in the Stock Market

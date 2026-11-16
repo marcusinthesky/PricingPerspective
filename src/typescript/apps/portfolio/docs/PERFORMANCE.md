@@ -32,8 +32,8 @@ These are enforced by the pinned Lighthouse CI command in `lighthouserc.json` an
 A score from PageSpeed Insights also reflects the final host, compression, cache headers, redirects, DNS/TLS setup, canonical domain, and any scripts added after handoff. Before launch:
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://marcusinthesky.github.io/pricing-perspective \\
-NEXT_PUBLIC_BASE_PATH=/pricing-perspective bun run build
+NEXT_PUBLIC_SITE_URL=https://marcusinthesky.github.io/PricingPerspective \\
+NEXT_PUBLIC_BASE_PATH=/PricingPerspective bun run build
 bun run verify:export
 bun run audit:schema
 ```

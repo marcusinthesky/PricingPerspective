@@ -21,5 +21,3 @@ cites:
 - goldstein_term_2000
 - kennedy_term_1994
 ---
-
-# The Dynamics of the Forward Interest Rate Curve with Stochastic String Shocks

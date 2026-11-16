@@ -19,5 +19,3 @@ cites:
 - chamberlain_rothschild_1983
 - connor_unified_1984
 ---
-
-# On Stable Factor Structures in the Pricing of Risk: Do Time-Varying Betas Help or Hurt?

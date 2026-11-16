@@ -20,5 +20,3 @@ publisher: AIMS
 cites:
 - santa_clara_sornette_2001
 ---
-
-# An Infinite-Dimensional Model of Liquidity in Financial Markets

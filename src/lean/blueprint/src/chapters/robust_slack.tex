@@ -110,20 +110,34 @@ between the two geometries and should be promoted into
 
 \section{Reconciling the two geometries}
 
+\begin{definition}[Squared energy functional]
+  \label{def:energy-distance}
+  For laws with finite first distance moments, let
+  \[
+    \mathcal E^2(\mu,\nu)
+    =2\mathbb E d(X,Y)-\mathbb E d(X,X')-\mathbb E d(Y,Y'),
+  \]
+  where the four draws are independent with the indicated marginal laws.
+  Negative type ensures nonnegativity; the upper bound below does not require
+  that additional geometric property.
+\end{definition}
+
 \begin{theorem}[Wasserstein balls sit inside energy balls]
   \label{thm:ball-inclusion}
-  \uses{def:exposure-law, def:energy-negative-type}
-  If \(W_2(\mu,\nu)\le\delta\) then \(\mathcal E^2(\mu,\nu)\le 2\delta\); the
+  \uses{def:exposure-law, def:energy-distance}
+  For probability laws with finite first distance moments, if
+  \(W_2(\mu,\nu)\le\delta\) then \(\mathcal E^2(\mu,\nu)\le 2\delta\); the
   Wasserstein ball of radius \(\delta\) is therefore contained in the
-  energy-distance ball of radius \(2\delta\).
-  The inclusion is one-directional, and that direction is the pivot's
-  justification: a \(W_2\) hypothesis is the stronger one, so results proved
-  under it apply to the energy ball, while the converse fails.
+  squared-energy sublevel set with threshold \(2\delta\).
+  A guarantee uniform over this larger sublevel set also holds over the
+  Wasserstein ball; the inclusion does not give the reverse implication.
   This node belongs with the trunk rather than with this chapter.
 \end{theorem}
 
 \begin{proof}
-  \uses{def:energy-negative-type}
-  Bound the energy distance by the transport cost through the negative-type
-  representation.
+  \uses{def:energy-distance}
+  The triangle inequality bounds the energy functional by twice the expected
+  distance under any coupling.
+  Cauchy--Schwarz bounds that expectation by the root mean squared coupling
+  cost; taking the infimum gives the Wasserstein bound.
 \end{proof}

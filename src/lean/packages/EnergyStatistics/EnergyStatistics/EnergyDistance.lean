@@ -1,3 +1,4 @@
+import StatadicFormal.Discrepancy.Energy.PopulationNegativeType
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.MeasureTheory.Constructions.Pi
 import Mathlib.Probability.Independence.Basic
@@ -26,7 +27,7 @@ following Székely & Rizzo (2023), "The Energy of Data and Distance Correlation"
 
 * `energy_distance_nonneg`: Energy distance is nonnegative
 * `energyDistanceSq_cnd`: population conditional negative definiteness of the energy matrix
-* `energyDistanceSq_simplexMixture`: mixture-energy expansion `2c'w − w'Qw − b` (Paper 2 sign)
+* `energyDistanceSq_simplexMixture`: mixture-energy expansion `2c'w − w'Qw − b`
 * `energy_distance_zero_iff_of_strong`: zero-iff characterization under `StrongDistNegativeType`
 * `energy_distance_zero_iff_refuted`: the naive zero-iff over a bare `PseudoMetricSpace` is false
 
@@ -73,7 +74,7 @@ noncomputable def energyDistanceSq
     (2013), Definition 28 and Proposition 29. -/
 def StrongDistNegativeType
     (α : Type*) [MeasurableSpace α] [PseudoMetricSpace α] : Prop :=
-  DistNegativeType α ∧
+  StatadicFormal.Geometry.DistNegativeType α ∧
     ∀ (μ ν : ProbabilityMeasure α),
       FiniteDistMoment μ ν → FiniteDistMoment μ μ → FiniteDistMoment ν ν →
         energyDistanceSq μ ν = 0 → μ = ν
@@ -81,18 +82,6 @@ def StrongDistNegativeType
 section EnergyNonneg
 
 open MeasureTheory ProbabilityTheory Filter
-
-/-- Pair marginal of an iid product: two distinct coordinates of `Measure.pi (fun _ => μ)`
-are jointly distributed as `μ ⊗ μ`. -/
-private lemma pi_map_pair {α : Type*} [MeasurableSpace α] {μ : Measure α}
-    [IsProbabilityMeasure μ] {n : ℕ} {i j : Fin n} (hij : i ≠ j) :
-    (Measure.pi fun _ : Fin n => μ).map (fun ω => (ω i, ω j)) = μ.prod μ := by
-  have hindep : IndepFun (fun ω : Fin n → α => ω i) (fun ω : Fin n → α => ω j)
-      (Measure.pi fun _ : Fin n => μ) :=
-    (iIndepFun_pi (X := fun _ : Fin n => id) fun _ => aemeasurable_id).indepFun hij
-  rw [hindep.map_prod_eq_prod_map_map (measurable_pi_apply i).aemeasurable
-    (measurable_pi_apply j).aemeasurable,
-    (measurePreserving_eval _ i).map_eq, (measurePreserving_eval _ j).map_eq]
 
 /-- Transport of the distance integrand through a distribution identity `P.map φ = Q`:
 integrability and the value of the integral both descend from `Q` to `P`. -/
@@ -106,248 +95,40 @@ private lemma integrable_integral_dist_comp {α Ω : Type*} [MeasurableSpace α]
   exact ⟨(integrable_map_measure hQ.aestronglyMeasurable hφ).mp hQ,
     (integral_map hφ hQ.aestronglyMeasurable).symm⟩
 
-/-- Pointwise block form of conditional negative definiteness: for two `n`-tuples `a b` and
-weights `+1` on the `a`-block, `−1` on the `b`-block,
-
-`∑ᵢⱼ d(aᵢ,aⱼ) + ∑ᵢⱼ d(bᵢ,bⱼ) ≤ 2·∑ᵢⱼ d(aᵢ,bⱼ)`. -/
-private lemma cnd_block_sums {α : Type*} [PseudoMetricSpace α] (h_neg : DistNegativeType α)
-    {n : ℕ} (a b : Fin n → α) :
-    (∑ i, ∑ j, dist (a i) (a j)) + (∑ i, ∑ j, dist (b i) (b j))
-      ≤ 2 * ∑ i, ∑ j, dist (a i) (b j) := by
-  have hsum : (∑ i, Fin.addCases (motive := fun _ => ℝ)
-      (fun _ : Fin n => 1) (fun _ : Fin n => -1) i) = 0 := by
-    rw [Fin.sum_univ_add]
-    simp only [Fin.addCases_left, Fin.addCases_right]
-    simp
-  have h0 := h_neg (n + n) (Fin.addCases (motive := fun _ => α) a b)
-    (Fin.addCases (motive := fun _ => ℝ) (fun _ => 1) fun _ => -1) hsum
-  rw [Fin.sum_univ_add] at h0
-  simp only [Fin.sum_univ_add, Fin.addCases_left, Fin.addCases_right, one_mul,
-    neg_mul, Finset.sum_neg_distrib] at h0
-  rw [Finset.sum_add_distrib, Finset.sum_add_distrib] at h0
-  have hswap : (∑ i, ∑ j, dist (b i) (a j)) = ∑ i, ∑ j, dist (a i) (b j) := by
-    rw [Finset.sum_comm]
-    exact Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => dist_comm _ _
-  rw [hswap] at h0
-  simp only [Finset.sum_neg_distrib] at h0
-  linarith
-
-/-- The `n`-sample bound behind `energy_distance_nonneg`: integrating the discrete CND
-inequality over `μ^⊗n ⊗ ν^⊗n` and counting off-diagonal pairs gives
-
-`n(n−1)·(I(μ,μ) + I(ν,ν)) ≤ 2n²·I(μ,ν)`
-
-where `I(κ,λ) = ∫ dist d(κ⊗λ)`.  Letting `n → ∞` yields the energy inequality. -/
-private lemma energy_sample_bound {α : Type*} [MeasurableSpace α] [PseudoMetricSpace α]
-    (h_neg : DistNegativeType α) (μ ν : ProbabilityMeasure α)
-    (h_μν : FiniteDistMoment μ ν) (h_μμ : FiniteDistMoment μ μ) (h_νν : FiniteDistMoment ν ν)
-    (n : ℕ) :
-    (n : ℝ) * ((n : ℝ) - 1) *
-        ((∫ z : α × α, dist z.1 z.2 ∂(μ.measure.prod μ.measure))
-          + ∫ z : α × α, dist z.1 z.2 ∂(ν.measure.prod ν.measure))
-      ≤ 2 * (n : ℝ) ^ 2 * ∫ z : α × α, dist z.1 z.2 ∂(μ.measure.prod ν.measure) := by
-  classical
-  set Iμμ := ∫ z : α × α, dist z.1 z.2 ∂(μ.measure.prod μ.measure) with hIμμ
-  set Iνν := ∫ z : α × α, dist z.1 z.2 ∂(ν.measure.prod ν.measure) with hIνν
-  set Iμν := ∫ z : α × α, dist z.1 z.2 ∂(μ.measure.prod ν.measure) with hIμν
-  set P : Measure ((Fin n → α) × (Fin n → α)) :=
-    (Measure.pi fun _ => μ.measure).prod (Measure.pi fun _ => ν.measure) with hPdef
-  haveI : IsProbabilityMeasure P := by rw [hPdef]; infer_instance
-  -- distribution identities for the coordinate pairs
-  have hmapAA : ∀ {i j : Fin n}, i ≠ j →
-      P.map (fun ω : (Fin n → α) × (Fin n → α) => (ω.1 i, ω.1 j))
-        = μ.measure.prod μ.measure := by
-    intro i j hij
-    have h1 : (fun ω : (Fin n → α) × (Fin n → α) => (ω.1 i, ω.1 j))
-        = (fun a : Fin n → α => (a i, a j)) ∘ Prod.fst := rfl
-    rw [h1, ← Measure.map_map (by fun_prop) measurable_fst, hPdef, Measure.map_fst_prod]
-    simp only [measure_univ, one_smul]
-    exact pi_map_pair hij
-  have hmapBB : ∀ {i j : Fin n}, i ≠ j →
-      P.map (fun ω : (Fin n → α) × (Fin n → α) => (ω.2 i, ω.2 j))
-        = ν.measure.prod ν.measure := by
-    intro i j hij
-    have h1 : (fun ω : (Fin n → α) × (Fin n → α) => (ω.2 i, ω.2 j))
-        = (fun a : Fin n → α => (a i, a j)) ∘ Prod.snd := rfl
-    rw [h1, ← Measure.map_map (by fun_prop) measurable_snd, hPdef, Measure.map_snd_prod]
-    simp only [measure_univ, one_smul]
-    exact pi_map_pair hij
-  have hmapAB : ∀ (i j : Fin n),
-      P.map (fun ω : (Fin n → α) × (Fin n → α) => (ω.1 i, ω.2 j))
-        = μ.measure.prod ν.measure := by
-    intro i j
-    have h1 : (fun ω : (Fin n → α) × (Fin n → α) => (ω.1 i, ω.2 j))
-        = Prod.map (Function.eval i) (Function.eval j) := rfl
-    rw [h1, hPdef, ← Measure.map_prod_map _ _ (measurable_pi_apply i) (measurable_pi_apply j),
-      (measurePreserving_eval _ i).map_eq, (measurePreserving_eval _ j).map_eq]
-  -- integrability and values of the atomic terms
-  have hAA_int : ∀ i j : Fin n,
-      Integrable (fun ω : (Fin n → α) × (Fin n → α) => dist (ω.1 i) (ω.1 j)) P := by
-    intro i j
-    by_cases hij : i = j
-    · subst hij
-      simp [dist_self]
-    · exact (integrable_integral_dist_comp (by fun_prop) (hmapAA hij) h_μμ).1
-  have hAA_val : ∀ i j : Fin n,
-      (∫ ω, dist (ω.1 i) (ω.1 j) ∂P) = if i = j then 0 else Iμμ := by
-    intro i j
-    by_cases hij : i = j
-    · subst hij; simp [dist_self]
-    · rw [if_neg hij]
-      exact (integrable_integral_dist_comp (by fun_prop) (hmapAA hij) h_μμ).2
-  have hBB_int : ∀ i j : Fin n,
-      Integrable (fun ω : (Fin n → α) × (Fin n → α) => dist (ω.2 i) (ω.2 j)) P := by
-    intro i j
-    by_cases hij : i = j
-    · subst hij
-      simp [dist_self]
-    · exact (integrable_integral_dist_comp (by fun_prop) (hmapBB hij) h_νν).1
-  have hBB_val : ∀ i j : Fin n,
-      (∫ ω, dist (ω.2 i) (ω.2 j) ∂P) = if i = j then 0 else Iνν := by
-    intro i j
-    by_cases hij : i = j
-    · subst hij; simp [dist_self]
-    · rw [if_neg hij]
-      exact (integrable_integral_dist_comp (by fun_prop) (hmapBB hij) h_νν).2
-  have hAB_int : ∀ i j : Fin n,
-      Integrable (fun ω : (Fin n → α) × (Fin n → α) => dist (ω.1 i) (ω.2 j)) P :=
-    fun i j => (integrable_integral_dist_comp (by fun_prop) (hmapAB i j) h_μν).1
-  have hAB_val : ∀ i j : Fin n, (∫ ω, dist (ω.1 i) (ω.2 j) ∂P) = Iμν :=
-    fun i j => (integrable_integral_dist_comp (by fun_prop) (hmapAB i j) h_μν).2
-  -- integrability of the block sums
-  have hA_int : Integrable
-      (fun ω : (Fin n → α) × (Fin n → α) => ∑ i, ∑ j, dist (ω.1 i) (ω.1 j)) P :=
-    integrable_finsetSum _ fun i _ => integrable_finsetSum _ fun j _ => hAA_int i j
-  have hB_int : Integrable
-      (fun ω : (Fin n → α) × (Fin n → α) => ∑ i, ∑ j, dist (ω.2 i) (ω.2 j)) P :=
-    integrable_finsetSum _ fun i _ => integrable_finsetSum _ fun j _ => hBB_int i j
-  have hC_int : Integrable
-      (fun ω : (Fin n → α) × (Fin n → α) => ∑ i, ∑ j, dist (ω.1 i) (ω.2 j)) P :=
-    integrable_finsetSum _ fun i _ => integrable_finsetSum _ fun j _ => hAB_int i j
-  -- values of the block-sum integrals
-  have hA_val : (∫ ω, ∑ i, ∑ j, dist (ω.1 i) (ω.1 j) ∂P) = (n : ℝ) * (((n : ℝ) - 1) * Iμμ) := by
-    rw [integral_finsetSum _ fun i _ => integrable_finsetSum _ fun j _ => hAA_int i j]
-    have h1 : ∀ i : Fin n,
-        (∫ ω, ∑ j, dist (ω.1 i) (ω.1 j) ∂P) = ((n : ℝ) - 1) * Iμμ := by
-      intro i
-      rw [integral_finsetSum _ fun j _ => hAA_int i j]
-      simp_rw [hAA_val i]
-      have hsplit : ∀ j : Fin n,
-          (if i = j then (0 : ℝ) else Iμμ) = Iμμ - (if i = j then Iμμ else 0) := by
-        intro j; split <;> ring
-      simp_rw [hsplit]
-      rw [Finset.sum_sub_distrib, Finset.sum_const, Finset.sum_ite_eq, if_pos (Finset.mem_univ i)]
-      simp only [Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-      ring
-    simp_rw [h1]
-    rw [Finset.sum_const]
-    simp only [Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  have hB_val : (∫ ω, ∑ i, ∑ j, dist (ω.2 i) (ω.2 j) ∂P) = (n : ℝ) * (((n : ℝ) - 1) * Iνν) := by
-    rw [integral_finsetSum _ fun i _ => integrable_finsetSum _ fun j _ => hBB_int i j]
-    have h1 : ∀ i : Fin n,
-        (∫ ω, ∑ j, dist (ω.2 i) (ω.2 j) ∂P) = ((n : ℝ) - 1) * Iνν := by
-      intro i
-      rw [integral_finsetSum _ fun j _ => hBB_int i j]
-      simp_rw [hBB_val i]
-      have hsplit : ∀ j : Fin n,
-          (if i = j then (0 : ℝ) else Iνν) = Iνν - (if i = j then Iνν else 0) := by
-        intro j; split <;> ring
-      simp_rw [hsplit]
-      rw [Finset.sum_sub_distrib, Finset.sum_const, Finset.sum_ite_eq, if_pos (Finset.mem_univ i)]
-      simp only [Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-      ring
-    simp_rw [h1]
-    rw [Finset.sum_const]
-    simp only [Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  have hC_val : (∫ ω, ∑ i, ∑ j, dist (ω.1 i) (ω.2 j) ∂P) = (n : ℝ) * ((n : ℝ) * Iμν) := by
-    rw [integral_finsetSum _ fun i _ => integrable_finsetSum _ fun j _ => hAB_int i j]
-    have h1 : ∀ i : Fin n, (∫ ω, ∑ j, dist (ω.1 i) (ω.2 j) ∂P) = (n : ℝ) * Iμν := by
-      intro i
-      rw [integral_finsetSum _ fun j _ => hAB_int i j]
-      simp_rw [hAB_val i]
-      rw [Finset.sum_const]
-      simp only [Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-    simp_rw [h1]
-    rw [Finset.sum_const]
-    simp only [Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
-  -- integrate the pointwise CND inequality
-  have hmono : (∫ ω, ((∑ i, ∑ j, dist (ω.1 i) (ω.1 j)) + ∑ i, ∑ j, dist (ω.2 i) (ω.2 j)) ∂P)
-      ≤ ∫ ω, 2 * ∑ i, ∑ j, dist (ω.1 i) (ω.2 j) ∂P :=
-    integral_mono (hA_int.add hB_int) (hC_int.const_mul 2)
-      (fun ω => cnd_block_sums h_neg ω.1 ω.2)
-  rw [integral_add hA_int hB_int, integral_const_mul, hA_val, hB_val, hC_val] at hmono
-  calc (n : ℝ) * ((n : ℝ) - 1) * (Iμμ + Iνν)
-      = (n : ℝ) * (((n : ℝ) - 1) * Iμμ) + (n : ℝ) * (((n : ℝ) - 1) * Iνν) := by ring
-    _ ≤ 2 * ((n : ℝ) * ((n : ℝ) * Iμν)) := hmono
-    _ = 2 * (n : ℝ) ^ 2 * Iμν := by ring
-
 /-- Energy distance is nonnegative **on spaces of negative type**.
 
     D_E²(μ, ν) ≥ 0
 
-    The negative-type hypothesis `DistNegativeType α` is necessary: over a bare
+    The negative-type hypothesis `StatadicFormal.Geometry.DistNegativeType α` is necessary: over a bare
     `PseudoMetricSpace` the statement is false (circle with geodesic distance,
-    Székely & Rizzo 2023 §3.2). Restated 2026-07 per ROADMAP §3.2 #5 — the
-    hypothesis is discharged for Euclidean/Hilbert spaces by Schoenberg's
-    theorem (future work: formalize Lyons 2013 or use the existing
-    `InnerProductSpace` CND instance).
+    Székely & Rizzo 2023 §3.2). The hypothesis is discharged for Euclidean/Hilbert spaces by Schoenberg's
+    theorem in the public Statadic geometry library.
 
     The moment hypotheses are essential: under Lean's junk-zero Bochner
     convention the statement is FALSE without them (e.g. α = ℝ, ν = ½(δ₀+δ₁),
     μ Cauchy: both μ-integrals junk-zero and energyDistanceSq = −½).
 
-    **Proof** (sampling argument): for each `n`, integrating the discrete CND
-    inequality (`h_neg` with `2n` points, weights `±1`) over `μ^⊗n ⊗ ν^⊗n` and
-    counting off-diagonal pairs gives `n(n−1)(I(μ,μ)+I(ν,ν)) ≤ 2n²·I(μ,ν)`
-    (`energy_sample_bound`); dividing by `n²` and letting `n → ∞` yields
-    `I(μ,μ) + I(ν,ν) ≤ 2·I(μ,ν)`.  The finite-sample analogue is
-    `v_statistic_nonneg`.
+    **Proof:** specialize Statadic's population negative-type theorem to the
+    symmetric hollow cost `dist`. The reverse mixed moment follows by swapping
+    the supplied mixed product measure. No additional Borel or separability
+    hypothesis is imposed.
 
     Reference: Székely & Rizzo (2023), Theorem 3.2, §3.3; Lyons (2013), §3. -/
 theorem energy_distance_nonneg
     {α : Type*} [MeasurableSpace α] [PseudoMetricSpace α]
-    (h_neg : DistNegativeType α)
+    (h_neg : StatadicFormal.Geometry.DistNegativeType α)
     (μ ν : ProbabilityMeasure α)
     (h_μν : FiniteDistMoment μ ν) (h_μμ : FiniteDistMoment μ μ) (h_νν : FiniteDistMoment ν ν) :
     0 ≤ energyDistanceSq μ ν := by
-  unfold energyDistanceSq
-  -- rewrite the iterated integrals as product-measure integrals
-  have hEμν : (∫ z : α × α, dist z.1 z.2 ∂(μ.measure.prod ν.measure))
-      = ∫ x, ∫ y, dist x y ∂ν.measure ∂μ.measure := MeasureTheory.integral_prod _ h_μν
-  have hEμμ : (∫ z : α × α, dist z.1 z.2 ∂(μ.measure.prod μ.measure))
-      = ∫ x, ∫ y, dist x y ∂μ.measure ∂μ.measure := MeasureTheory.integral_prod _ h_μμ
-  have hEνν : (∫ z : α × α, dist z.1 z.2 ∂(ν.measure.prod ν.measure))
-      = ∫ x, ∫ y, dist x y ∂ν.measure ∂ν.measure := MeasureTheory.integral_prod _ h_νν
-  rw [← hEμν, ← hEμμ, ← hEνν]
-  set Iμμ := ∫ z : α × α, dist z.1 z.2 ∂(μ.measure.prod μ.measure) with hIμμ
-  set Iνν := ∫ z : α × α, dist z.1 z.2 ∂(ν.measure.prod ν.measure) with hIνν
-  set Iμν := ∫ z : α × α, dist z.1 z.2 ∂(μ.measure.prod ν.measure) with hIμν
-  -- the n → ∞ limit of the sampling bound
-  have hkey : Iμμ + Iνν ≤ 2 * Iμν := by
-    have htend : Tendsto (fun k : ℕ => ((k : ℝ) - 1) / k * (Iμμ + Iνν)) atTop
-        (nhds (Iμμ + Iνν)) := by
-      have h1 : Tendsto (fun k : ℕ => ((k : ℝ) - 1) / k) atTop (nhds 1) := by
-        have h2 : Tendsto (fun k : ℕ => 1 - 1 / (k : ℝ)) atTop (nhds (1 - 0)) :=
-          tendsto_const_nhds.sub tendsto_one_div_atTop_nhds_zero_nat
-        rw [sub_zero] at h2
-        refine h2.congr' ?_
-        filter_upwards [eventually_ne_atTop 0] with k hk
-        have hk' : (k : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hk
-        field_simp
-      simpa using h1.mul_const (Iμμ + Iνν)
-    refine le_of_tendsto htend ?_
-    filter_upwards [eventually_ge_atTop 1] with k hk
-    have hb := energy_sample_bound h_neg μ ν h_μν h_μμ h_νν k
-    have hkpos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast hk
-    have hk2 : (0 : ℝ) < (k : ℝ) ^ 2 := by positivity
-    rw [div_mul_eq_mul_div, div_le_iff₀ hkpos]
-    nlinarith [hb, hkpos]
-  linarith [hkey]
+  simpa only [energyDistanceSq, StatadicFormal.Discrepancy.Energy.pairMean] using
+    StatadicFormal.Discrepancy.Energy.population_negative_type_energy
+      μ.measure ν.measure dist dist_comm dist_self h_neg
+      h_μμ h_μν (FiniteDistMoment.symm h_μν) h_νν
 
-/-- Conditional negative definiteness over an arbitrary finite index type: `DistNegativeType`
+/-- Conditional negative definiteness over an arbitrary finite index type: `StatadicFormal.Geometry.DistNegativeType`
 transported along `Fintype.equivFin`.  For any finite family of points `x : ι → α` and
 zero-sum weights `w`, `∑ᵢⱼ wᵢ wⱼ d(xᵢ,xⱼ) ≤ 0`. -/
-private lemma cnd_of_fintype {α : Type*} [PseudoMetricSpace α] (h_neg : DistNegativeType α)
+private lemma cnd_of_fintype {α : Type*} [PseudoMetricSpace α] (h_neg : StatadicFormal.Geometry.DistNegativeType α)
     {ι : Type*} [Fintype ι] (x : ι → α) (w : ι → ℝ) (hw : ∑ i, w i = 0) :
     ∑ i, ∑ j, w i * w j * dist (x i) (x j) ≤ 0 := by
   classical
@@ -381,7 +162,7 @@ of the `K` blocks, assigning weight `u k` to every point of block `k` (total wei
 
 Dividing by `n²` and letting `n → ∞` (in `energyDistanceSq_cnd`) yields `∑ₖₗ uₖuₗ I_{kl} ≤ 0`. -/
 private lemma energyDistanceSq_sample_bound {α : Type*} [MeasurableSpace α] [PseudoMetricSpace α]
-    (h_neg : DistNegativeType α) {K : ℕ} (ν : Fin K → ProbabilityMeasure α)
+    (h_neg : StatadicFormal.Geometry.DistNegativeType α) {K : ℕ} (ν : Fin K → ProbabilityMeasure α)
     (hmom : ∀ k l, FiniteDistMoment (ν k) (ν l))
     (u : Fin K → ℝ) (hsum : ∑ k, u k = 0) (n : ℕ) :
     (n : ℝ) ^ 2 *
@@ -472,7 +253,7 @@ private lemma energyDistanceSq_sample_bound {α : Type*} [MeasurableSpace α] [P
 
 /-- **Population conditional negative definiteness of the energy-distance matrix.**
 
-For a space of negative type (`DistNegativeType α`), a finite family `ν : Fin K →
+For a space of negative type (`StatadicFormal.Geometry.DistNegativeType α`), a finite family `ν : Fin K →
 ProbabilityMeasure α` with pairwise finite distance moments, and zero-sum weights
 `u : Fin K → ℝ`, the weighted double sum of pairwise squared energy distances is nonpositive:
 
@@ -482,12 +263,12 @@ This is the K-block generalization of `energy_distance_nonneg` (which is the two
 `±1` case): the algebra `∑ₖₗ uₖuₗ 𝓔²_{kl} = 2·∑ₖₗ uₖuₗ I_{kl}` (the `I_{kk}`, `I_{ll}`
 self-terms cancel under `∑u = 0`), and `∑ₖₗ uₖuₗ I_{kl} ≤ 0` by the sampling bound
 `energyDistanceSq_sample_bound` in the `n → ∞` limit.  Both the negative-type and the
-finite-moment hypotheses are essential (see `energy_distance_nonneg`).  Consumed by Paper 2's
+finite-moment hypotheses are essential (see `energy_distance_nonneg`).  This supports
 mixture-QP convexity (`Q_concave_on_simplex` at `D = √𝓔`).
 
 Reference: Székely & Rizzo (2023), §3.2, §10; Lyons (2013), §3. -/
 theorem energyDistanceSq_cnd {α : Type*} [MeasurableSpace α] [PseudoMetricSpace α]
-    (h_neg : DistNegativeType α) {K : ℕ} (ν : Fin K → ProbabilityMeasure α)
+    (h_neg : StatadicFormal.Geometry.DistNegativeType α) {K : ℕ} (ν : Fin K → ProbabilityMeasure α)
     (hmom : ∀ k l, FiniteDistMoment (ν k) (ν l))
     (u : Fin K → ℝ) (hsum : ∑ k, u k = 0) :
     ∑ k, ∑ l, u k * u l * energyDistanceSq (ν k) (ν l) ≤ 0 := by
@@ -543,9 +324,9 @@ theorem energyDistanceSq_cnd {α : Type*} [MeasurableSpace α] [PseudoMetricSpac
     nlinarith [hb, hmpos]
   linarith [hS]
 
-/-! ### C2: simplex-mixture energy expansion + convexity (Paper 2)
+/-! ### C2: simplex-mixture energy expansion + convexity
 
-**Adjudicated sign convention (Paper 2 methodology).** Expanding the squared energy distance
+**Sign convention.** Expanding the squared energy distance
 of `μ` against a simplex mixture `mix w ν = ∑ₖ w_k ν_k` gives, with cross moments
 `c_k = ∫ dist d(μ ⊗ ν_k)`, Gram `Q_{kl} = ∫ dist d(ν_k ⊗ ν_l)`, and constant `b = ∫ dist d(μ ⊗ μ)`,
 
@@ -555,10 +336,8 @@ The mixture-optimization QP is therefore `argmin_w (2 c'w − w'Qw)` — i.e. th
 `−Q`, **not** `argmin_w (w'Qw − 2 c'w)` (its negative). Convexity of the objective along the
 simplex holds because the only non-affine term is `−w'Qw`, and `Q` (the distance-cross-moment
 Gram) is **conditionally negative definite on zero-sum vectors** (`energyCrossGram_cnd`), so
-`−w'Qw` is convex — this is the correct mechanism, **not** "Q is positive semidefinite".  This
-docstring adjudicates `02_long_short_testing/chapters/methodology.typ:32-45`; the manuscript prose
-is fixed in the F(P2) lane (do not edit the Typst here).  The simplex-convexity corollary
-`energyDistanceSq_simplexMixture_convex` lives in `Connections/EnergyStatistics.lean`.
+`−w'Qw` is convex — this is the correct mechanism. The simplex-convexity corollary
+`PricingPerspective.Exposure.EnergyEmbedding.energyDistanceSq_simplexMixture_convex` lives in `PricingPerspective/Exposure/EnergyEmbedding.lean`.
 
 Reference: Székely & Rizzo (2023), §3, §10. -/
 
@@ -666,8 +445,8 @@ mixture `mix w ν` decomposes into the cross, Gram, and constant terms:
   `𝓔²(μ, mix w ν) = 2·(∑ₖ w_k c_k) − (∑ₖ ∑ₗ w_k w_l Q_{kl}) − b`,
 
 with `c_k = mixC μ ν k`, `Q_{kl} = mixQ ν k l`, `b = mixB μ`.  This is the identity that fixes the
-Paper-2 mixture-QP sign convention (see the section docstring); the simplex-convexity corollary
-is `energyDistanceSq_simplexMixture_convex` (`Connections/EnergyStatistics.lean`).
+mixture-QP sign convention (see the section docstring); the simplex-convexity corollary
+is `PricingPerspective.Exposure.EnergyEmbedding.energyDistanceSq_simplexMixture_convex` (`Connections/EnergyStatistics.lean`).
 
 Reference: Székely & Rizzo (2023), §3, §10. -/
 theorem energyDistanceSq_simplexMixture {α : Type*} [MeasurableSpace α] [PseudoMetricSpace α]
@@ -703,12 +482,12 @@ and a finite family `ν` with pairwise finite distance moments, the raw distance
   `∑ₖ ∑ₗ u_k u_l Q_{kl} ≤ 0`   whenever `∑ u = 0`.
 
 This is the `n → ∞` limit of the K-block sampling bound `energyDistanceSq_sample_bound`; it is the
-CND fact behind the convexity of the mixture-energy QP objective `−w'Qw` (Paper 2), i.e. the
+CND fact behind the convexity of the mixture-energy QP objective `−w'Qw`, i.e. the
 correct replacement for "Q is positive semidefinite" (see `energyDistanceSq_simplexMixture`).
 
 Reference: Székely & Rizzo (2023), §3.2, §10; Lyons (2013), §3. -/
 theorem energyCrossGram_cnd {α : Type*} [MeasurableSpace α] [PseudoMetricSpace α]
-    (h_neg : DistNegativeType α) {K : ℕ} (ν : Fin K → ProbabilityMeasure α)
+    (h_neg : StatadicFormal.Geometry.DistNegativeType α) {K : ℕ} (ν : Fin K → ProbabilityMeasure α)
     (hmom : ∀ k l, FiniteDistMoment (ν k) (ν l))
     (u : Fin K → ℝ) (hsum : ∑ k, u k = 0) :
     ∑ k, ∑ l, u k * u l *
@@ -901,19 +680,21 @@ theorem energy_distance_zero_iff_refuted :
         energyDistanceSq μ ν = 0 ↔ μ = ν := by
   intro h
   have hdist : ∀ x y : ZeroTwoPoint, dist x y = 0 := fun _ _ => rfl
+  let x0 : ZeroTwoPoint := false
+  let x1 : ZeroTwoPoint := true
   refine absurd
-    ((h ZeroTwoPoint ⟨Measure.dirac false, by simp⟩ ⟨Measure.dirac true, by simp⟩).mp ?_) ?_
+    ((h ZeroTwoPoint ⟨Measure.dirac x0, by simp⟩ ⟨Measure.dirac x1, by simp⟩).mp ?_) ?_
   · -- `𝓔² = 0`: the pseudometric is identically zero, so every distance integral vanishes.
     unfold energyDistanceSq
     simp_rw [hdist]
     simp
   · -- `δ_false ≠ δ_true`: they disagree on the (measurable) singleton `{false}`.
     intro hEq
-    have hm : (Measure.dirac (false : ZeroTwoPoint)) = Measure.dirac true :=
+    have hm : Measure.dirac x0 = Measure.dirac x1 :=
       congrArg ProbabilityMeasure.measure hEq
-    have h1 : (Measure.dirac (false : ZeroTwoPoint)) {false} = 1 := by
-      rw [Measure.dirac_apply' _ (measurableSet_singleton false)]; simp
-    rw [hm, Measure.dirac_apply' _ (measurableSet_singleton false)] at h1
-    simp at h1
+    apply dirac_ne_dirac ?_ hm
+    intro h01
+    change (false : Bool) = true at h01
+    cases h01
 
 end EnergyStatistics

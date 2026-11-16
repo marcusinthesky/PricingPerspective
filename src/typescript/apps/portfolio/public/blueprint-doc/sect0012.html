@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-  MathJax = {
+  MathJax = { 
     tex: {
 		    inlineMath: [['$','$'], ['\\(','\\)']]
 	} }
@@ -98,6 +98,25 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -113,147 +132,21 @@
     <span class="theorem_thmcaption">
     Theorem
     </span>
-    <span class="theorem_thmlabel">30</span>
-    <span class="theorem_thmtitle">SAR compatibility of the Wasserstein operator</span>
+    <span class="theorem_thmlabel">31</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0012.html#thm:wflat-sar-gate">#</a>
-
-    <a class="icon proof" href="sect0012.html#a0000000046"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
-</a>
-
-
-
-    <button class="modal lean">L∃∀N</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Lean declarations</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialWasserstein.anchoredW2_sar_gate" class="lean_decl">PricingPerspective.Connections.SpatialWasserstein.anchoredW2_sar_gate</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-        </div>
-  </div>
-  <div class="theorem_thmcontent">
-  <p>   A leave-one-out simplex operator is nonnegative, row stochastic, and zero-diagonal. Its induced infinity norm is at most one, so \(\lVert \rho W\rVert _\infty {\lt}1\) whenever \(|\rho |{\lt}1\). </p>
-
-  </div>
-</div>
-<div class="proof_wrapper" id="a0000000046">
-  <div class="proof_heading">
-    <span class="proof_caption">
-    Proof
-    </span>
-    <span class="expand-proof">▼</span>
-  </div>
-  <div class="proof_content">
-  <p> The simplex constraints give the row sums and nonnegativity; the norm gate follows from the maximum absolute row sum. </p>
-
-  </div>
-</div>
-<div class="definition_thmwrapper theorem-style-definition" id="def:perron-limit">
-  <div class="definition_thmheading">
-    <span class="definition_thmcaption">
-    Definition
-    </span>
-    <span class="definition_thmlabel">31</span>
-    <span class="definition_thmtitle">Geometric Perron certificate</span>
-    <div class="thm_header_extras">
-
-
-    ✓
-        </div>
-    <div class="thm_header_hidden_extras">
-
-    <a class="icon proof" href="sect0012.html#def:perron-limit">#</a>
-
-
-
-    <button class="modal lean">L∃∀N</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Lean declarations</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.HasGeometricPerronBound" class="lean_decl">PricingPerspective.Connections.SpatialAsymptotics.HasGeometricPerronBound</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-        </div>
-  </div>
-  <div class="definition_thmcontent">
-  <p>   For \(P=\mathbf1\pi ^\top \), a geometric Perron certificate records constants \(C\geq 0\) and \(0\leq q{\lt}1\) such that \(\lVert W^k-P\rVert \leq Cq^k\) for every natural number \(k\). </p>
-
-  </div>
-</div>
-<div class="theorem_thmwrapper theorem-style-plain" id="thm:perron-from-geometric">
-  <div class="theorem_thmheading">
-    <span class="theorem_thmcaption">
-    Theorem
-    </span>
-    <span class="theorem_thmlabel">32</span>
-    <span class="theorem_thmtitle">Geometric certificate implies the Perron limit</span>
-    <div class="thm_header_extras">
-
-
-    ✓
-        </div>
-    <div class="thm_header_hidden_extras">
-
-    <a class="icon proof" href="sect0012.html#thm:perron-from-geometric">#</a>
-
+    
     <a class="icon proof" href="sect0012.html#a0000000047"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0012.html#def:perron-limit">Definition 31</a></li>
-
-          <li><a href="sect0012.html#def:perron-limit">Definition 31</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -262,21 +155,21 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.isPerronLimit_of_geometric_bound" class="lean_decl">PricingPerspective.Connections.SpatialAsymptotics.isPerronLimit_of_geometric_bound</a></li>
-
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Wasserstein.anchoredW2_sar_gate" class="lean_decl">PricingPerspective.Spatial.Wasserstein.anchoredW2_sar_gate</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    A geometric Perron certificate implies \(W^k\to P\). </p>
+  <p>  A leave-one-out simplex operator is nonnegative, row-stochastic and zero-diagonal, has induced infinity norm at most one, and therefore satisfies the SAR norm gate whenever absolute rho is below one. Assumptions: each row is a leave-one-out simplex vector; absolute rho below one. </p>
 
   </div>
 </div>
@@ -288,30 +181,72 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p>  The geometric upper bound converges to zero because \(q{\lt}1\). </p>
+  
 
   </div>
 </div>
-<div class="theorem_thmwrapper theorem-style-plain" id="thm:replication-centrality">
+<div class="definition_thmwrapper theorem-style-definition" id="def:perron-limit">
+  <div class="definition_thmheading">
+    <span class="definition_thmcaption">
+    Definition
+    </span>
+    <span class="definition_thmlabel">32</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#def:perron-limit">#</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.HasGeometricPerronBound" class="lean_decl">PricingPerspective.Spatial.Asymptotics.HasGeometricPerronBound</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="definition_thmcontent">
+  <p>  A quantitative geometric Perron certificate records that the operator powers approach the rank-one stationary projection at rate \(Cq^k\). </p>
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:perron-from-geometric">
   <div class="theorem_thmheading">
     <span class="theorem_thmcaption">
     Theorem
     </span>
     <span class="theorem_thmlabel">33</span>
-    <span class="theorem_thmtitle">Interaction cascades converge to a constant vector</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
-    <a class="icon proof" href="sect0012.html#thm:replication-centrality">#</a>
-
+    <a class="icon proof" href="sect0012.html#thm:perron-from-geometric">#</a>
+    
     <a class="icon proof" href="sect0012.html#a0000000048"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -321,18 +256,18 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
-          <li><a href="sect0012.html#thm:perron-from-geometric">Theorem 32</a></li>
-
+          
+          <li><a href="sect0012.html#def:perron-limit">Definition 32</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -341,21 +276,21 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.replication_centrality" class="lean_decl">PricingPerspective.Connections.SpatialAsymptotics.replication_centrality</a></li>
-
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.isPerronLimit_of_geometric_bound" class="lean_decl">PricingPerspective.Spatial.Asymptotics.isPerronLimit_of_geometric_bound</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    Under the Perron limit, \(W^kx\to (\pi ^\top x)\mathbf1\) for every vector \(x\). The limit is a constant vector, not a traded basket. </p>
+  <p>   Any geometric Perron certificate with rate \(0\leq q{\lt}1\) implies convergence of \(W^k\) to the rank-one stationary projection. Assumptions: \(0\leq q{\lt}1\); the stated geometric matrix-norm bound holds for every natural k. </p>
 
   </div>
 </div>
@@ -367,51 +302,30 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p> Apply the matrix limit to \(x\). </p>
+  
 
   </div>
 </div>
-<div class="theorem_thmwrapper theorem-style-plain" id="thm:stationarity">
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:replication-centrality">
   <div class="theorem_thmheading">
     <span class="theorem_thmcaption">
     Theorem
     </span>
     <span class="theorem_thmlabel">34</span>
-    <span class="theorem_thmtitle">Stationarity</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
-    <a class="icon proof" href="sect0012.html#thm:stationarity">#</a>
-
+    <a class="icon proof" href="sect0012.html#thm:replication-centrality">#</a>
+    
     <a class="icon proof" href="sect0012.html#a0000000049"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0012.html#thm:perron-from-geometric">Theorem 32</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -420,21 +334,21 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Connections.SpatialAsymptotics.perron_stationary" class="lean_decl">PricingPerspective.Connections.SpatialAsymptotics.perron_stationary</a></li>
-
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.replication_centrality" class="lean_decl">PricingPerspective.Spatial.Asymptotics.replication_centrality</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    Under the Perron limit, the limiting vector obeys \(\pi ^\top W=\pi ^\top \). </p>
+  <p>  Conditional on the Perron limit hypothesis for \((W,\pi )\), every \(k\)-step interaction cascade converges to a constant vector whose common entry is the \(\pi \)-weighted average of the starting vector: \(W^kx\to (\pi ^\top x)\mathbf{1}\) as \(k\to \infty \), for any vector \(x\). The limit is a constant vector; nothing here identifies \(\pi \) as a portfolio or a traded object. Assumptions: the Perron power-limit premise for \((W,\pi )\). </p>
 
   </div>
 </div>
@@ -446,7 +360,65 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p> Pass the limit through one additional multiplication by \(W\). </p>
+  
+
+  </div>
+</div>
+<div class="theorem_thmwrapper theorem-style-plain" id="thm:stationarity">
+  <div class="theorem_thmheading">
+    <span class="theorem_thmcaption">
+    Theorem
+    </span>
+    <span class="theorem_thmlabel">35</span>
+    <div class="thm_header_extras">
+
+    
+    ✓
+        </div>
+    <div class="thm_header_hidden_extras">
+
+    <a class="icon proof" href="sect0012.html#thm:stationarity">#</a>
+    
+    <a class="icon proof" href="sect0012.html#a0000000050"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+</a>
+    
+    
+    
+    <button class="modal lean">L∃∀N</button>
+        <div class="modal-container">
+      <div class="modal-content">
+        <header>
+          <h1>Lean declarations</h1>
+          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
+</button>
+        </header>
+        
+        <ul class="uses">
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Spatial.Asymptotics.perron_stationary" class="lean_decl">PricingPerspective.Spatial.Asymptotics.perron_stationary</a></li>
+          
+        </ul>
+    
+      </div>
+    </div>
+
+    
+        </div>
+  </div>
+  <div class="theorem_thmcontent">
+  <p>  Conditional on the Perron limit hypothesis for \((W,\pi )\), the limiting weight vector \(\pi \) satisfies the fixed-point relation \(\pi ^\top W=\pi ^\top \). The declaration proves only that relation; nonnegativity and unit mass are separate results requiring row-stochasticity as an extra hypothesis. Assumptions: the Perron power-limit premise for \((W,\pi )\); \(\iota \) nonempty. </p>
+
+  </div>
+</div>
+<div class="proof_wrapper" id="a0000000050">
+  <div class="proof_heading">
+    <span class="proof_caption">
+    Proof
+    </span>
+    <span class="expand-proof">▼</span>
+  </div>
+  <div class="proof_content">
+  
 
   </div>
 </div>

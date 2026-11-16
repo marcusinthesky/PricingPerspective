@@ -1,21 +1,18 @@
-# Shared body for the parallel test tiers. $1 is the marker expression.
-# `-p no:monitor` below is load-bearing under `-n auto`, not a preference:
-# pytest-monitor races its own `.pymon` INSERT across workers and the resulting
-# worker crash surfaces as `INTERNALERROR> KeyError: <WorkerController gwN>`.
-# Full derivation in `src/python/apps/pipeline/justfile`.
-_pytest markexpr *args:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    cd '{{ source_directory() }}'
-    export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
-    exec env -u VIRTUAL_ENV uv run pytest -q -p no:monitor -n auto -m '{{ markexpr }}' {{ args }}
+set shell := ["bash", "-uc"]
+set positional-arguments
 
-# Run fast unit tests (default) with Testmon's xdist-aware cache.
-test *args: (_pytest "not slow" "--testmon-forceselect" args)
+# Run cached fast tests in this project's own process and pytest configuration.
+test *args:
+    env -u VIRTUAL_ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 uv run --locked pytest -q -p no:monitor -p no:tach -n auto --maxprocesses=2 -m "not slow and not gpu" --testmon-forceselect "$@"
 
-# Run all tests.
-test-all *args: (_pytest "" args)
+# Run the complete fast suite without Testmon selection.
+test-fresh *args:
+    env -u VIRTUAL_ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 uv run --locked pytest -q -p no:monitor -p no:tach -n auto --maxprocesses=2 -m "not slow and not gpu" --no-testmon "$@"
 
-# Run tests with duration report.
-test-durations:
-    env -u VIRTUAL_ENV uv run pytest -v --durations=20
+# Run every test independently of the affected-test cache.
+test-all *args:
+    env -u VIRTUAL_ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 uv run --locked pytest -q -p no:monitor -p no:tach -n auto --maxprocesses=2 -m "" --no-testmon "$@"
+
+# Report serial fast-test durations without profiling-plugin setup.
+test-durations *args:
+    env -u VIRTUAL_ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 uv run --locked pytest -q -p no:monitor -p no:tach -n auto --maxprocesses=2 -m "not slow and not gpu" --no-testmon -n 0 --durations=20 "$@"

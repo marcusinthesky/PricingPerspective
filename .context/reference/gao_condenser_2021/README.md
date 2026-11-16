@@ -18,5 +18,3 @@ container-title: Proceedings of the 2021 Conference on Empirical Methods in Natu
 publisher: Association for Computational Linguistics
 page: 981-993
 ---
-
-# Condenser

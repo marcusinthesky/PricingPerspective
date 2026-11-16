@@ -17,5 +17,3 @@ issue: '6'
 publisher: The Econometric Society
 page: 2805-2826
 ---
-
-# Inference for Parameters Defined by Moment Inequalities: {A} Recommended Moment Selection Procedure

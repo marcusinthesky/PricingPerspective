@@ -21,5 +21,3 @@ cites:
 - reisman1992reference
 - ross_arbitrage_1976
 ---
-
-# Deriving the APT when the Number of Factors is Unknown

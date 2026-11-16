@@ -1,5 +1,6 @@
 ---
 number: "03"
+audio: false
 category: Methods and infrastructure
 title: Why finance needs vintage, reproducible encoders
 summary: The design of the EttaX models and why a dated encoder should be treated as part of the information set in financial econometrics.
@@ -14,6 +15,10 @@ keywords:
 Reproducibility is often treated as the last section of a paper: publish the code, list the packages, and give the reader a command that runs. For financial machine learning, that is not enough. The model itself is part of the data-generating environment. If the encoder changes, the measured firm information changes, even when the financial dataset and the downstream estimator remain untouched.
 
 That is the reason for building EttaX as a set of explicit model vintages rather than as one moving `latest` checkpoint.
+
+<Callout title="Historical experiment">
+The current papers use the published 2017–2024 ChronoBERT checkpoint staircase. This note describes the earlier EttaX experiment; its local training application is not part of the current replication package.
+</Callout>
 
 ## A compact encoder with a fixed training contract
 

@@ -2,14 +2,10 @@
 
 The figures are deliberately schematic or simulation-based. They make the
 economic sequence visible without presenting synthetic geometry as evidence
-from the 100-firm panel. The retained rank-one illustration also keeps the
-numerical warning that the strong-interaction limit approaches a singular
-resolvent.
+from the 100-firm panel.
 
 Outputs:
 
-``rank_one_collapse.pgf``
-    Heatmaps of ``(1-rho)^2 Sigma_SAR`` and a condition-number curve.
 ``spatial_exposure_arc.pgf``
     Observed, latent, theorem, and estimated objects in the manuscript arc.
 ``w2_operator_construction.pgf``
@@ -20,7 +16,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from itertools import combinations, pairwise
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import matplotlib as mpl
@@ -30,26 +25,23 @@ from numpy.typing import NDArray
 from scipy.optimize import linear_sum_assignment, minimize
 
 mpl.use("Agg")
-from matplotlib import pyplot as plt
 
 from pipeline.figures._common import (
     _C,
     _TINT,
     Grid,
-    _save,
-    _style,
     figsize,
     figure,
-    fit_to_width,
 )
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
+    from matplotlib import pyplot as plt
     from matplotlib.axes import Axes
 
 Float = NDArray[np.float64]
 
-_DEFAULT_RHOS = np.array([0.0, 0.5, 0.9, 0.99, 0.9999], dtype=np.float64)
-_MIN_FIRMS = 3
 
 # Exposure-arc schematic. Boxes are sized in data units from a point-valued label, so
 # the padding is data units and the arrow floor is points -- the two are not
@@ -89,35 +81,6 @@ _ROW_BAR_WIDTH = 0.62
 _ROW_AXIS_X = -0.92
 
 
-class IllustrationInputError(ValueError):
-    """Report invalid inputs to Paper 5 conceptual illustrations."""
-
-    @classmethod
-    def too_few_firms(cls) -> IllustrationInputError:
-        """Construct the minimum-universe error."""
-        return cls("n must be at least 3")
-
-    @classmethod
-    def nonpositive_bandwidth(cls) -> IllustrationInputError:
-        """Construct the invalid-bandwidth error."""
-        return cls("bandwidth must be positive")
-
-    @classmethod
-    def invalid_rho(cls) -> IllustrationInputError:
-        """Construct the invalid-interaction-strength error."""
-        return cls("the illustration requires 0 <= rho < 1")
-
-    @classmethod
-    def invalid_rho_grid(cls) -> IllustrationInputError:
-        """Construct the invalid-rho-grid error."""
-        return cls("rhos must be a non-empty one-dimensional array")
-
-    @classmethod
-    def rho_grid_out_of_bounds(cls) -> IllustrationInputError:
-        """Construct the rho-grid bounds error."""
-        return cls("every rho must satisfy 0 <= rho < 1")
-
-
 class IllustrationComputationError(RuntimeError):
     """Report a failed numerical illustration computation."""
 
@@ -130,11 +93,6 @@ class IllustrationComputationError(RuntimeError):
     def nonfinite_weights(cls) -> IllustrationComputationError:
         """Construct the nonfinite-weights error."""
         return cls("simplex QP returned non-finite weights")
-
-    @classmethod
-    def missing_heatmap(cls) -> IllustrationComputationError:
-        """Construct the missing-heatmap error."""
-        return cls("rank-one illustration did not produce a heatmap")
 
     @classmethod
     def box_overflows_axes(cls, key: str) -> IllustrationComputationError:
@@ -156,18 +114,6 @@ class IllustrationComputationError(RuntimeError):
 
 
 @dataclass(frozen=True)
-class RankOneCollapseData:
-    """Inputs and outputs used by the rank-one-collapse illustration."""
-
-    w: Float
-    v: Float
-    rhos: Float
-    covariances: Float
-    condition_rhos: Float
-    condition_numbers: Float
-
-
-@dataclass(frozen=True)
 class W2OperatorConstructionData:
     """Synthetic inputs and outputs for one target-anchored operator row."""
 
@@ -178,90 +124,6 @@ class W2OperatorConstructionData:
     reconstruction: Float
     row: Float
     self_index: int
-
-
-def make_symmetric_row_stochastic_w(n: int = 24, bandwidth: float = 2.5) -> Float:
-    """Construct a primitive, symmetric row-stochastic interaction matrix.
-
-    The circular distance makes the matrix doubly stochastic, so its stationary
-    distribution is uniform.  The diagonal is set to zero to keep the toy
-    interaction operator close to the Paper 5 construction; all off-diagonal
-    entries remain positive, making the chain primitive.
-    """
-    if n < _MIN_FIRMS:
-        raise IllustrationInputError.too_few_firms()
-    if bandwidth <= 0.0:
-        raise IllustrationInputError.nonpositive_bandwidth()
-
-    indices = np.arange(n)
-    distance = np.abs(indices[:, None] - indices[None, :])
-    circular_distance = np.minimum(distance, n - distance)
-    weights = np.exp(-((circular_distance / bandwidth) ** 2))
-    np.fill_diagonal(weights, 0.0)
-    return weights / weights.sum(axis=1, keepdims=True)
-
-
-def rescaled_covariance(rho: float, w: Float, v: Float) -> tuple[Float, float]:
-    """Return ``(1-rho)^2 Sigma_SAR`` and ``cond(I-rho W)``.
-
-    ``np.linalg.solve`` avoids explicitly forming an inverse, but it does not
-    make the problem well-conditioned.  The condition number is therefore
-    returned as a first-class output and plotted by
-    :func:`render_rank_one_collapse`.
-    """
-    if not 0.0 <= rho < 1.0:
-        raise IllustrationInputError.invalid_rho()
-    n = w.shape[0]
-    identity = np.eye(n)
-    resolvent = identity - rho * w
-    condition_number = float(np.linalg.cond(resolvent))
-    multiplier = (1.0 - rho) * np.linalg.solve(resolvent, identity)
-    covariance = np.asarray(multiplier @ v @ multiplier.T, dtype=np.float64)
-    return covariance, condition_number
-
-
-def simulate_rank_one_collapse(
-    n: int = 24, rhos: Float | None = None
-) -> RankOneCollapseData:
-    """Simulate the strong-interaction limit with a uniform stationary law."""
-    selected_rhos = (
-        np.asarray(rhos, dtype=np.float64) if rhos is not None else _DEFAULT_RHOS.copy()
-    )
-    if selected_rhos.ndim != 1 or selected_rhos.size == 0:
-        raise IllustrationInputError.invalid_rho_grid()
-    if np.any((selected_rhos < 0.0) | (selected_rhos >= 1.0)):
-        raise IllustrationInputError.rho_grid_out_of_bounds()
-
-    w = make_symmetric_row_stochastic_w(n=n)
-    # Heterogeneous idiosyncratic variances make the path to the uniform limit
-    # visible; the uniform stationary distribution still makes the limiting
-    # rank-one matrix spatially constant.
-    v = np.diag(np.linspace(0.5, 1.5, n, dtype=np.float64))
-    covariances = []
-    for rho in selected_rhos:
-        covariance, _ = rescaled_covariance(float(rho), w, v)
-        covariances.append(covariance)
-
-    condition_rhos = np.unique(
-        np.concatenate(
-            [
-                np.linspace(0.0, 0.99, 120),
-                1.0 - np.logspace(-2.0, -5.0, 80),
-            ]
-        )
-    )
-    condition_numbers = np.array(
-        [rescaled_covariance(float(rho), w, v)[1] for rho in condition_rhos],
-        dtype=np.float64,
-    )
-    return RankOneCollapseData(
-        w=w,
-        v=v,
-        rhos=selected_rhos,
-        covariances=np.stack(covariances),
-        condition_rhos=condition_rhos,
-        condition_numbers=condition_numbers,
-    )
 
 
 def simulate_w2_operator_construction() -> W2OperatorConstructionData:
@@ -354,117 +216,6 @@ def simulate_w2_operator_construction() -> W2OperatorConstructionData:
         row=row,
         self_index=self_index,
     )
-
-
-def _format_rho(rho: float) -> str:
-    """Format heatmap rho values without implying that rho=1 was evaluated."""
-    return f"$\\rho={rho:.4g}$"
-
-
-def render_rank_one_collapse(
-    output_path: Path, data: RankOneCollapseData | None = None
-) -> None:
-    """Render the covariance heatmaps and the condition-number diagnostic."""
-    _style()
-    illustration = data or simulate_rank_one_collapse()
-    n_heatmaps = illustration.rhos.size
-    fig = plt.figure(figsize=figsize(0.8, 4.9 / 10.2))
-    grid = fig.add_gridspec(
-        2,
-        n_heatmaps,
-        height_ratios=(3.0, 1.8),
-        hspace=0.52,
-        wspace=0.12,
-        left=0.13,
-        right=0.87,
-        top=0.90,
-        bottom=0.13,
-    )
-    heat_axes = [fig.add_subplot(grid[0, i]) for i in range(n_heatmaps)]
-    condition_ax = fig.add_subplot(grid[1, :])
-
-    vmin = float(np.min(illustration.covariances))
-    vmax = float(np.max(illustration.covariances))
-    image = None
-    for i, (ax, rho, covariance) in enumerate(
-        zip(heat_axes, illustration.rhos, illustration.covariances, strict=True)
-    ):
-        image = ax.imshow(
-            covariance,
-            origin="lower",
-            cmap="viridis",
-            vmin=vmin,
-            vmax=vmax,
-            interpolation="nearest",
-            aspect="equal",
-        )
-        ax.set_title(_format_rho(float(rho)), pad=5)
-        ax.set_xticks([])
-        ax.set_yticks([])
-        if i == 0:
-            ax.set_ylabel("firm $i$")
-        ax.set_xlabel("firm $j$", labelpad=2)
-
-    if image is None:
-        raise IllustrationComputationError.missing_heatmap()
-    colorbar = fig.colorbar(image, ax=heat_axes, fraction=0.018, pad=0.02)
-    colorbar.set_label(r"$(1-\rho)^2\Sigma_{SAR,ij}$", rotation=270, labelpad=13)
-    colorbar.ax.tick_params(labelsize=7)
-
-    condition_ax.semilogy(
-        illustration.condition_rhos,
-        illustration.condition_numbers,
-        color=_C["vermilion"],
-        linewidth=1.4,
-        label=r"$\kappa_2(I-\rho W)$",
-    )
-    heatmap_conditions = np.array(
-        [
-            np.linalg.cond(np.eye(illustration.w.shape[0]) - rho * illustration.w)
-            for rho in illustration.rhos
-        ],
-        dtype=np.float64,
-    )
-    condition_ax.semilogy(
-        illustration.rhos,
-        heatmap_conditions,
-        linestyle="none",
-        marker="o",
-        markersize=3.5,
-        color=_C["black"],
-        label="heatmap values",
-    )
-    condition_ax.axvline(1.0, color=_C["gray"], linestyle="--", linewidth=0.8)
-    condition_ax.text(
-        0.995,
-        0.96,
-        r"$\rho=1$: singular",
-        transform=condition_ax.transAxes,
-        ha="right",
-        va="top",
-        fontsize=8,
-        color=_C["gray"],
-    )
-    condition_ax.set_xlim(0.0, 1.01)
-    condition_ax.set_xlabel(r"Interaction strength $\rho$ (endpoint $1$ not evaluated)")
-    # Short label: the full expression is already carried by the legend, and the long
-    # rotated form was what tight-bbox cropped once the canvas shrank to print size.
-    condition_ax.set_ylabel("Condition number", fontsize=8)
-    condition_ax.set_title(
-        "The rank-one limit is accompanied by a resolvent singularity"
-    )
-    condition_ax.legend(loc="upper left", ncol=2)
-    condition_ax.grid(axis="y", alpha=0.2)
-    # At `axes.titlesize` rather than the default `large`: this suptitle is the
-    # widest artist in the figure, so at 10.8pt it, not the axes, set the saved
-    # bounding box — and being point-valued it does not respond to `fit_to_width`.
-    fig.suptitle(
-        r"Strong-interaction limit: $(1-\rho)^2\Sigma_{SAR}$ becomes spatially uniform",
-        fontsize=10,
-        y=0.99,
-    )
-    fit_to_width(fig, 0.8)
-    _save(fig, output_path)
 
 
 @dataclass(frozen=True)
@@ -1158,12 +909,9 @@ def render_w2_operator_construction(
             )
 
 
-def render_paper5_illustrations(
-    output_dir: Path = Path("src/latex/projects/05_spatial_pricing/src/images"),
-) -> None:
-    """Render the conceptual illustrations plus the support asset."""
+def render_paper5_illustrations(output_dir: Path) -> None:
+    """Render the shared conceptual illustrations."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    render_rank_one_collapse(output_dir / "rank_one_collapse.pgf")
     render_spatial_exposure_arc(output_dir / "spatial_exposure_arc.pgf")
     operator_data = simulate_w2_operator_construction()
     render_w2_operator_construction(
@@ -1172,14 +920,9 @@ def render_paper5_illustrations(
 
 
 __all__ = [
-    "RankOneCollapseData",
     "W2OperatorConstructionData",
-    "make_symmetric_row_stochastic_w",
     "render_paper5_illustrations",
-    "render_rank_one_collapse",
     "render_spatial_exposure_arc",
     "render_w2_operator_construction",
-    "rescaled_covariance",
-    "simulate_rank_one_collapse",
     "simulate_w2_operator_construction",
 ]

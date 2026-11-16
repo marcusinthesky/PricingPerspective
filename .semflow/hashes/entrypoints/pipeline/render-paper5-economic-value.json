@@ -1,0 +1,26 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p5.economic_value:cli_render_paper5_economic_value",
+  "digest": "sha256:58641135708723cab1010e431c752373c72071073f95e9aaa04f0f4381cff31b",
+  "entrypoint": "pipeline render-paper5-economic-value",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:23d076ea9d1ab419b82159266bcf23ef0cd76a98fb45b8ee03c205ec383bde47","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/economic_value.py","symbol":"pipeline.cli.commands.p5.economic_value:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/economic_value.py","symbol":"pipeline.cli.commands.p5.economic_value:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/economic_value.py","symbol":"pipeline.cli.commands.p5.economic_value:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/economic_value.py","symbol":"pipeline.cli.commands.p5.economic_value:<binding:typer=typer>"},
+    {"digest":"sha256:f3ec707ac52b409e907ff24c4e21d15a482dd71d8b65298409746a7744d11346","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/economic_value.py","symbol":"pipeline.cli.commands.p5.economic_value:cli_render_paper5_economic_value"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/economic_value.py","symbol":"pipeline.cli.commands.p5.economic_value:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/economic_value.py","symbol":"pipeline.figures.paper5.economic_value:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:f5b270e78401abfa55a4047c331b1199b42df2ba4065a6f1882f58a0a906008b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/economic_value.py","symbol":"pipeline.figures.paper5.economic_value:<binding:cast=typing:cast>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/economic_value.py","symbol":"pipeline.figures.paper5.economic_value:<binding:json=json>"},
+    {"digest":"sha256:1a14b293eb2aebbcc94499e1b1257c720a727b78675d857530fb09fae8689531","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/economic_value.py","symbol":"pipeline.figures.paper5.economic_value:_load"},
+    {"digest":"sha256:dc6db863fca78ef383e72927e421ac260bbe23187fe614fd839d421815c15906","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/economic_value.py","symbol":"pipeline.figures.paper5.economic_value:_number"},
+    {"digest":"sha256:f6e0d90304b4222b12d0e730977903576cfe6b86917a3a77b9d1a449a771f873","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/economic_value.py","symbol":"pipeline.figures.paper5.economic_value:_optional_number"},
+    {"digest":"sha256:55b74418a603a7aa051d9e3b32c3b0c8a95352765c34b81294c240d76f057975","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/economic_value.py","symbol":"pipeline.figures.paper5.economic_value:_yes_no"},
+    {"digest":"sha256:f2751e76186721dc35638112b6b14c60f33265d930f77ec61ccfa2379c580f4c","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/economic_value.py","symbol":"pipeline.figures.paper5.economic_value:render_paper5_economic_value_tables"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

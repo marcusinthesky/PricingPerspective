@@ -16,5 +16,3 @@ issue: '1'
 cites:
 - sharpe_capital_1964
 ---
-
-# Towards Maximum Diversification

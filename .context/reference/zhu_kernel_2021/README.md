@@ -17,5 +17,3 @@ issued:
 URL: https://arxiv.org/abs/2006.06981
 container-title: Proceedings of the 24th International Conference on Artificial Intelligence and Statistics (AISTATS 2021)
 ---
-
-# Kernel Distributionally Robust Optimization: Generalized Duality Theorem and Stochastic Approximation

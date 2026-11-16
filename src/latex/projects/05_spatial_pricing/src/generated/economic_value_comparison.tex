@@ -1,0 +1,24 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.0pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Dependence specification & $\hat\rho$ & QLL & Held-out score & Gain & 95\% CI \\
+\midrule
+Factor-only & 0.000 & 205748.3 & 2.468881 & 0.000000 & -- \\
+Direct Ledoit--Wolf residual covariance & -- & -- & 2.558644 & 0.089763 & [-0.0028, 0.0903] \\
+W1 barycentric & 0.684 & 209488.3 & 2.526065 & 0.057184 & [0.0497, 0.0656] \\
+W2 barycentric & 0.687 & 209476.0 & 2.525957 & 0.057076 & [0.0496, 0.0653] \\
+Median-bandwidth W2 RBF & 0.467 & 206227.6 & 2.479192 & 0.010311 & [0.0082, 0.0129] \\
+Calibration-tuned W2 RBF & 0.572 & 206604.0 & 2.484870 & 0.015989 & [0.0135, 0.0191] \\
+Centroid reconstruction & 0.470 & 209343.1 & 2.522691 & 0.053810 & [0.0460, 0.0625] \\
+Equal active support & 0.619 & 207216.3 & 2.494105 & 0.025224 & [0.0218, 0.0294] \\
+Persistent co-mentions & 0.466 & 209240.3 & 2.519320 & 0.050439 & [0.0428, 0.0586] \\
+Industry/sector fallback & 0.229 & 207873.3 & 2.501014 & 0.032133 & [0.0259, 0.0390] \\
+\bottomrule
+\end{tabular}
+\caption{Factor-conditioned peer-field and covariance benchmarks. All rows use the primary FF5-plus-momentum controls, the same firms and dates; fields use firm information dated through 2022 and are held fixed throughout the 2023--2026 evaluation, and covariance inputs are calibrated on 2018--2022 returns. The held-out score is the mean Gaussian quasi-log score per firm-day on 2023--2026; gain is relative to the factor-only fit. The direct Ledoit--Wolf row estimates a conventional factor-residual covariance from the calibration sample and therefore has no spatial coefficient or QLL. Intervals are paired stationary-block bootstrap intervals that refit every comparator on each calibration draw, matching the resampling architecture of \Cref{tab:spatial-value}.}
+\label{tab:p5-economic-field-comparison}
+\end{table}

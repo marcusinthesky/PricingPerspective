@@ -24,5 +24,3 @@ note: SSRN Working Paper 4986939
 cites:
 - higham_functions_2002
 ---
-
-# Squeezing Financial Noise (Gerber IQ)

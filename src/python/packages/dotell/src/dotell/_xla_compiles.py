@@ -9,7 +9,7 @@ JAX wraps every backend compilation in ``jax/_src/interpreters/pxla.py``'s
 event, published through the public ``jax.monitoring`` listener API. That
 function is ``weakref_lru_cache``d on the jaxpr and its avals, so the event
 fires exactly once per *in-process jit-cache miss*: a stage whose array shapes
-churn (the ``design[active]`` slice in ``jcor.model._dyadic.inference``, which
+churn (the ``design[active]`` slice in ``statadic.numerics.linalg.dyadic``, which
 made every bootstrap draw recompile) shows a compile count that scales with
 iterations rather than with kernels. A persistent-cache hit still fires it --
 correctly, since the executable still had to be fetched and loaded.
@@ -149,9 +149,8 @@ def attached() -> bool:
 #
 # The directory travels in the environment rather than through a pool's
 # ``initargs`` because spawned children inherit the parent's environment
-# wholesale: that reaches both ``simulation.harness.parallel.parallel_map`` and
-# the ``pipeline`` hedge pool (which passes no initializer at all) without either
-# needing to know telemetry exists.
+# wholesale: that reaches the ``pipeline`` hedge pool (which passes no
+# initializer at all) without it needing to know telemetry exists.
 _WORKER_SINK_ENV = "PP_TELEMETRY_WORKER_COMPILE_DIR"
 _owner_pid: int | None = None
 _worker_export_registered = False

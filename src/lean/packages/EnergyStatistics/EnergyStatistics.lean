@@ -1,9 +1,4 @@
 import EnergyStatistics.Defs
 import EnergyStatistics.EnergyDistance
-import EnergyStatistics.VStatistic
-import EnergyStatistics.DistanceCovariance
-import EnergyStatistics.DistanceCorrelation
-import EnergyStatistics.BrownianCovariance
-import EnergyStatistics.SampleStatistics
-import EnergyStatistics.PermutationTest
 import EnergyStatistics.MeanEmbedding
+import EnergyStatistics.VStatistic

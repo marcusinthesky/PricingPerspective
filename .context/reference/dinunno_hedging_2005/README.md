@@ -15,5 +15,3 @@ issue: '3'
 publisher: World Scientific
 page: 291-314
 ---
-
-# Minimal-Variance Hedging in Large Financial Markets: Random Fields Approach

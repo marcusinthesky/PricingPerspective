@@ -15,5 +15,3 @@ issue: '3'
 publisher: Oxford University Press
 page: 329-343
 ---
-
-# Computing the Nearest Correlation Matrix—A Problem from Finance

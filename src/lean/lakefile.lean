@@ -2,36 +2,33 @@ import Lake
 open Lake DSL
 
 package «pricing-perspective» where
+  lintDriver := "batteries/runLinter"
+  lintDriverArgs := #["EnergyStatistics", "WassersteinGeometry",
+    "PricingPerspective", "Publication"]
 
-require «doc-gen4» from git
-  "https://github.com/leanprover/doc-gen4" @
-  "v4.31.0"
-
--- last mdgen commit on lean4 v4.31.0 (main is already on v4.32.0-rc1)
-require «mdgen» from git
-  "https://github.com/Seasawher/mdgen" @
-  "94463fabecb27dc443266207b578ca834e94b595"
+-- Publication annotations stay downstream of all mathematical libraries.
+require LeanArchitect from git
+  "https://github.com/hanwenzhu/LeanArchitect" @
+  "9f3bb53916b9d6fa05b7777389e1844f82b1c9a6"
 
 require «PricingPerspective» from "./packages/PricingPerspective"
 require «EnergyStatistics» from "./packages/EnergyStatistics"
 require «WassersteinGeometry» from "./packages/WassersteinGeometry"
-require «PaperReconstructions» from "./packages/PaperReconstructions"
+
+require proofs from git
+  "https://github.com/marcusinthesky/statadic.git" @
+  "213a32399705af3463a3c1d8835409f284025ca1" / "src/lean"
 
 -- mathlib also declared at root so `lake exe cache get` resolves against the workspace manifest.
--- All sub-packages must pin the same mathlib version.
+-- All sub-packages must pin the same mathlib version. Keep it last.
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4" @
-  "v4.31.0"
+  "v4.35.0"
 
 @[default_target]
 lean_lib «Main» where
   roots := #[`«Main»]
 
--- Declaration dumper for the DuckDB harness's Lean plane (`just lean::decl-dump`).
--- NOT a default_target: it is operator tooling, so `lake build` / `just lean::check`
--- (the proof gate) must not depend on it. supportInterpreter is required because
--- it calls importModules at run time rather than importing Mathlib at compile time
--- — see tools/DeclDump.lean for why.
-lean_exe «decl_dump» where
-  root := `tools.DeclDump
-  supportInterpreter := true
+-- Native LeanArchitect facets: Publication:blueprint and Publication:blueprintJson.
+lean_lib Publication where
+  roots := #[`Publication]

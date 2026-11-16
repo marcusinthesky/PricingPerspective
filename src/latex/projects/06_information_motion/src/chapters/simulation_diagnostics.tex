@@ -1,0 +1,156 @@
+\section{Recovery diagnostics}\label{app:recovery-diagnostics}
+
+\subsection{Directional and magnitude assessment}\label{app:directional-diagnostics}
+
+The assessment in Section~\ref{sec:simulation} uses
+\ppnum[0]{ir-validation-redraws} article redraws per history, with
+stationary-law, reporting-only and bounded shock controls alongside the
+common-reporting coverage ladder.
+All sixteen mechanism histories satisfy the positivity, baseline-price,
+solver and active-domain requirements.
+Each history has a common-reporting operating-law target $\beta_h^0$ and a
+reported-law target $\beta_h^\lambda$; sampled coefficients can be
+compared with either target according to the measurement question.
+Sign frequencies and coefficient errors summarize these comparisons.
+
+For an event indicator $S_{hr}$ in history $h$ and article redraw $r$, let
+$S_{hr}=0$ when the estimate is undefined.
+With $H=16$ histories and $R$ redraws per history, write
+$\widehat p_h=R^{-1}\sum_r S_{hr}$.
+The equally weighted frequency and stratified Monte Carlo standard error are
+\begin{equation}\label{eq:sign-mcse}
+  \widehat p=\frac1H\sum_h\widehat p_h,\qquad
+  \widehat{\operatorname{se}}(\widehat p)=
+  \left[\frac1{H^2(R-1)}\sum_h\widehat p_h(1-\widehat p_h)\right]^{1/2}.
+\end{equation}
+The histories are enumerated economic paths, so this standard error measures
+article-redraw uncertainty within those paths.
+
+Numerical sign classification uses an arithmetic error allowance fixed before
+the control results were inspected.
+With $\eta=10^{-12}$, axis-transport allowances propagate through squared
+distance, approach and dated financial weights to the centered numerator.
+A sign is resolved only when that numerator exceeds its propagated
+allowance in absolute value; constructed population zeros retain their
+exact-zero status.
+This arithmetic convention is separate from the economic solver certificates
+and preserves a zero financial denominator as an undefined coefficient.
+
+The identity
+\begin{equation}\label{eq:recovery-accounting}
+  \widehat\beta^\lambda-\beta^0
+  =(\widehat\beta^\lambda-\beta^\lambda)+(\beta^\lambda-\beta^0)
+\end{equation}
+separates article measurement error from observation distortion.
+Only the first term vanishes with infinitely many articles under the
+maintained sampling law.
+For recovery of the operating-law target, normalized RMSE is
+\begin{equation}\label{eq:recovery-rmse}
+  \mathcal R_s^\lambda=
+  \frac{\sqrt{16^{-1}\sum_h E_r[(\widehat\beta_{h,r,s}^\lambda-\beta_h^0)^2]}}
+  {\sqrt{16^{-1}\sum_h(\beta_h^0)^2}}.
+\end{equation}
+Operational recovery requires this normalized RMSE plus twice its stratified
+Monte Carlo standard error to be at most 25\%.
+The 25\% threshold is a declared accuracy convention applied only to the
+tested budgets.
+
+Signed coefficient bias and its Monte Carlo standard error are in
+coefficient units; normalized RMSE uses the oracle RMS as its scale.
+For squared errors $L_{hr}$ and oracle RMS $B$, the RMSE standard error uses
+\begin{equation}\label{eq:recovery-mcse}
+  \widehat{\operatorname{se}}(\widehat{\mathcal R})=
+  \frac{\sqrt{H^{-2}R^{-1}\sum_h\widehat{\operatorname{Var}}_r(L_{hr})}}
+  {2B\sqrt{H^{-1}R^{-1}\sum_{h,r}L_{hr}}}.
+\end{equation}
+This estimates article-redraw Monte Carlo uncertainty, conditional on the
+enumerated histories, rather than uncertainty about another economic
+environment.
+If an estimate is undefined, the summary records its count and the affected
+recovery criterion cannot pass.
+The common-reporting population oracle has zero recovery error by definition;
+the changing-reporting population error is calculated exactly.
+
+These summaries are equal-history performance averages; the theoretical expected
+moment does not require each finite-history ratio to be positive.
+The ratio of expected moments differs from the average of history-specific ratios.
+Budget comparisons pair each history's nested redraws rather than treating
+budgets or dyads as independent replications.
+All attempted estimates remain in their eligible rate denominators;
+execution failures, failed economic premises and undefined statistics are
+counted separately.
+For zero population coefficients, absolute bias, MAE and RMSE remain
+available, while sign recovery and normalized RMSE are unavailable.
+
+\input{generated/information_recovery_validation_details_table}
+
+To examine the local approximation, we halve and double the baseline
+opportunity innovation at observed article coverage.
+All sixteen histories remain in the economic domain and retain positive
+tangent and finite-capacity oracles.
+Correct-sign recovery is
+\ppnum[1]{ir-validation-half-correct-pct}\% and
+\ppnum[1]{ir-validation-double-correct-pct}\%, respectively.
+The financial denominator scales approximately with the squared shock
+amplitude while the population ratio changes little, so this variation
+chiefly changes signal relative to article noise.
+
+\subsection{Historical recovery and multi-activity
+comparisons}\label{app:historical-recovery}
+
+The 128-redraw study provides the common- and changing-reporting comparison
+and the multi-activity dimension checks alongside the current controls.
+Its retained magnitude results also document the 25\% recovery benchmark.
+Its positive-estimate diagnostic uses
+$S_{hr}=\mathbf1\{\widehat\beta_{h,r,s}^\lambda>0\}$ for defined
+estimates and zero otherwise, with $R=128$ in \eqref{eq:sign-mcse}.
+It precedes the resolved-sign convention used by the current assessment.
+Table~\ref{tab:directional-recovery} reports these historical frequencies.
+
+The historical 128-redraw study checks positive opportunities, baseline prices
+and active capacities, the solver-distance bound, and agreement of the
+operating and affine active domains for every canonical history.
+The largest relative solver bound is
+\ppnume[2]{ir-maximum-solver-bound}; the minimum canonical capacity and
+baseline price are \ppnum[6]{ir-minimum-capacity} and
+\ppnum[6]{ir-minimum-baseline-price}.
+These checks yield \ppnum[0]{ir-failures} failed histories and
+\ppnum[0]{ir-active-domain-violations} active-domain violations.
+
+\input{generated/information_recovery_directional_table}
+
+\begin{figure}[tb]
+  \centering
+  \ppfigure{0.95}{information_recovery}
+  \caption{Article information and reporting distortion in the fixed recovery
+    experiment.
+    Left: normalized recovery RMSE at observed article coverage and count
+    multipliers four and sixteen, with bars of two stratified Monte Carlo
+    standard errors; population-law points show the exact
+    infinite-article error.
+    The horizontal line is the 25\% operational convention; the left ordinate
+    is logarithmic above that convention and linear below it.
+    Right: exact population distortion across the specified log-intensity
+    amplitudes, including a fixed-capacity reporting-only observation
+    counterfactual.
+    Every calculation retains all sixteen canonical economic histories.
+    Financial news is calculated from the local valuation response to permanent
+    opportunity innovations along the same operating path.
+  Reporting amplitudes are illustrative benchmarks rather than empirical calibrations.}
+  \label{fig:information-recovery}
+\end{figure}
+
+Table~\ref{tab:recovery-diagnostics} retains the historical signed bias,
+normalized RMSE and their Monte Carlo standard errors.
+
+\input{generated/information_recovery_diagnostics_table}
+
+The appendix check varies geometric dimension over 2, 4, 8 and 16 while
+holding 100 firms, eight activities, 64 demand nodes and $\kappa=1$ fixed.
+It uses common reporting and the observed and sixteenfold article budgets,
+with the same dated news histories and monthly discount convention.
+These are generic multi-activity economies; the two-opportunity sign
+mechanism is not imposed.
+Table~\ref{tab:recovery-dimensions} reports their recovery and economic-domain checks.
+
+\input{generated/information_recovery_dimensions_table}

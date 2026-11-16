@@ -18,5 +18,3 @@ container-title: NBER Working Paper Series
 volume: '26186'
 publisher: National Bureau of Economic Research
 ---
-
-# Predicting Returns with Text Data

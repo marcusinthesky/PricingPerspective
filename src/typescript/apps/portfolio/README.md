@@ -15,7 +15,7 @@ A MDX-first research website by Marcus Gawronsky and Chun-Sung Huang. Its visual
 - Local MDX for the long-form site and paper copy
 - WebM/MP4 video fallbacks and AVIF/WebP imagery
 
-Direct `@next/mdx` is used instead of a documentation framework. Fumadocs was considered, but this site currently has the paper collection, a three-entry Blog collection, and no client-side search or documentation tree. Avoiding that extra runtime surface keeps the exported publication pages smaller. Fumadocs becomes a sensible migration when the collection grows into a searchable methods or replication portal.
+Direct `@next/mdx` renders the four-paper collection and seven blog posts as static pages. The site has no client-side search or documentation tree.
 
 ## Start from the workspace root
 
@@ -79,7 +79,8 @@ The generator uses the exact workspace-pinned `gray-matter@4.0.3` and
 `kokoro-js@1.2.1` dependencies, renders long notes as bounded sentence batches
 through the Kokoro CPU model, and uses the shell's `ffmpeg` to encode Opus/WebM
 files under `public/audio/`. Regenerate audio after changing a blog's prose or
-captions.
+captions. Set `audio: false` in a post's frontmatter when narration is absent
+or no longer matches its text; remove obsolete audio and caption files.
 
 Paper titles, dates, arXiv identifiers, outbound links, researcher profiles, keywords, and short card summaries are centralised in:
 
@@ -103,7 +104,7 @@ bun run sync:blueprint
 ```
 
 The copied `public/blueprint-doc/` directory is a derived static artifact. The current generated
-document contains the four formal chapters described in `src/lean/blueprint/README.md`.
+document contains the five formal chapters described in `src/lean/blueprint/README.md`.
 
 ## Links requiring author confirmation
 
@@ -117,7 +118,7 @@ Structured data includes `WebSite`, `CollectionPage`, `ItemList`, `ScholarlyArti
 
 The Lighthouse budget targets 95+ performance and 100 for accessibility, best practices, and SEO, with explicit FCP, LCP, CLS, and blocking-time limits. A perfect remote PageSpeed result cannot be guaranteed before the final domain, CDN headers, and third-party link behaviour are known; the project is designed to keep the static pages within these budgets. See `docs/PERFORMANCE.md`.
 
-Exact dependency pins are listed in `docs/VERSIONS.md`. Delivery checks and the environment boundary are documented in `AUDIT_REPORT.md` and `BUILD_STATUS.md`.
+Exact dependency pins are recorded in `package.json` and the workspace `bun.lock`.
 
 ## Useful commands
 

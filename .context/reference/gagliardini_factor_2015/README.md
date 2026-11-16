@@ -21,5 +21,3 @@ page: 503-521
 cites:
 - al1995decomposition
 ---
-
-# A Diagnostic Criterion for Approximate Factor Structure

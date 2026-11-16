@@ -1,0 +1,36 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p1.text_controls:cli_render_text_controls",
+  "digest": "sha256:44c81f4d67fc778827bced48cd9428a6a33e9f75460bffac7c55be1b02cf9283",
+  "entrypoint": "pipeline render-paper1-text-controls",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:701b162d541e1c9506cca310ef2b8a90b9ce4ab016c5aeb67a529eb0e89c9e8f","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p1/text_controls.py","symbol":"pipeline.cli.commands.p1.text_controls:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p1/text_controls.py","symbol":"pipeline.cli.commands.p1.text_controls:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p1/text_controls.py","symbol":"pipeline.cli.commands.p1.text_controls:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p1/text_controls.py","symbol":"pipeline.cli.commands.p1.text_controls:<binding:typer=typer>"},
+    {"digest":"sha256:fae76eeebd2509877855090bd3c2c4251a3d638ed6b24fa023a286005d5cbfb5","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p1/text_controls.py","symbol":"pipeline.cli.commands.p1.text_controls:InputFile"},
+    {"digest":"sha256:236a64ef7f904e48c797a2ca9cb1c1a5f4299cfd07cc493395e528b992f845f0","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p1/text_controls.py","symbol":"pipeline.cli.commands.p1.text_controls:OutputDir"},
+    {"digest":"sha256:cfc384080e80f7df62622c87547dd5693e9995bc69e784bd47ddfd939a7c3ddb","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p1/text_controls.py","symbol":"pipeline.cli.commands.p1.text_controls:cli_render_text_controls"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p1/text_controls.py","symbol":"pipeline.cli.commands.p1.text_controls:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:d1e9c47ceb17a97de5ec09a9ff4a9f88aa251adbfb204c2f5887c7e80dc06cf4","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:_TEX_SPECIALS"},
+    {"digest":"sha256:2e3cda6994f92700f4fa27cef44561f25a8728081b6ae266974e721af2f972d9","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:escape_latex"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/_format.py","symbol":"pipeline.figures.paper1._format:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:e25c3a6c621dba9a02705a801942253b4af4954873134a4d0da0440bbe0a2de6","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/_format.py","symbol":"pipeline.figures.paper1._format:EM_DASH"},
+    {"digest":"sha256:902fc7cc222f40e5974990650993ec6ad00e18a8ae5bef31d2c8624efcbe7744","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/_format.py","symbol":"pipeline.figures.paper1._format:fmt"},
+    {"digest":"sha256:3d8472152feda0eacc232fc2c60dc84956c757a34aeae7401bc5229b4c52e82d","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/text_controls.py","symbol":"pipeline.figures.paper1.text_controls:<binding:_render_longtable=pipeline.figures.shared_tables:_render_longtable>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/text_controls.py","symbol":"pipeline.figures.paper1.text_controls:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:3f2813190cb1209edecae38b4dd18f6ae12090133bdb48a05c8b85c389211ef4","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/text_controls.py","symbol":"pipeline.figures.paper1.text_controls:<binding:fmt=pipeline.figures.paper1._format:fmt>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/text_controls.py","symbol":"pipeline.figures.paper1.text_controls:<binding:json=json>"},
+    {"digest":"sha256:b8a31b69e3a1a847269e9397fa918c83427923e918d56b1405dd2a43145a9cf2","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/text_controls.py","symbol":"pipeline.figures.paper1.text_controls:_LABELS"},
+    {"digest":"sha256:a8d759a18d0824dc0660f246b34a84cb7c89cefa5705a263e8ce83504e897386","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper1/text_controls.py","symbol":"pipeline.figures.paper1.text_controls:render_paper1_text_controls"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/shared_tables.py","symbol":"pipeline.figures.shared_tables:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:dd4bf60e55265a9e6cf38eaf781fe0f3bef2d89af2c1f59bb4bc1963a6530db9","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/shared_tables.py","symbol":"pipeline.figures.shared_tables:<binding:escape_latex=pipeline.figures._latex:escape_latex>"},
+    {"digest":"sha256:df015dfc6693763489c423aad959fd5632f6e87e7e5faf4589b15c92f73e2962","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/shared_tables.py","symbol":"pipeline.figures.shared_tables:_CAPTION"},
+    {"digest":"sha256:c4922b90ff31b293086fad2502e43eac5badfcafd1e8e43ec9eae5d32cc7bc9d","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/shared_tables.py","symbol":"pipeline.figures.shared_tables:_render_longtable"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

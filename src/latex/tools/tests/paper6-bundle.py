@@ -1,0 +1,112 @@
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
+"""Keep Paper 6 arXiv sources free of unused generated material."""
+
+from __future__ import annotations
+
+import runpy
+import tempfile
+from pathlib import Path
+
+TOOLS = Path(__file__).resolve().parent.parent
+audit = runpy.run_path(str(TOOLS / "bundle-audit"))
+AuditError = audit["AuditError"]
+prune = audit["prune_paper6_generated"]
+USED_VALUES = (
+    b"% Generated fixture; retained declaration bytes must not change.\n"
+    b"\\ppDeclareValue{used}{1.234500} % preserve this exact line\n"
+    b"\\ppDeclareValue{dependent}{\\ppvalue{source}}\n"
+    b"\\ppDeclareValue{source}{9.0000}\n"
+)
+ALL_VALUES = (
+    USED_VALUES
+    + b"\\ppDeclareValue{historical}{999}\n"
+    + b"\\ppDeclareValue{unused-parent}{\\ppvalue{unused-child}}\n"
+    + b"\\ppDeclareValue{unused-child}{100}\n"
+)
+TABLE = b"\\ppnume[2]{dependent} \\ppvalue{used}\n"
+
+
+def fixture(project: Path) -> None:
+    """Create an arXiv document with retained and obsolete generated files."""
+    source = project / "src"
+    for directory in ("chapters", "generated"):
+        (source / directory).mkdir(parents=True)
+    (source / "metadata.tex").write_text("", encoding="utf-8")
+    (source / "pp-manuscript.sty").write_text("", encoding="utf-8")
+    (source / "refs.bib").write_text("", encoding="utf-8")
+    (source / "body.tex").write_text(r"\input{chapters/main}", encoding="utf-8")
+    (source / "appendix.tex").write_text(
+        r"\input{generated/retained_table}", encoding="utf-8"
+    )
+    (source / "chapters/main.tex").write_text(
+        r"\input{generated/numbers}\ppnum[4]{used}"
+        r"% \input{generated/lean_status} \ppnum[2]{historical}",
+        encoding="utf-8",
+    )
+    (source / "generated/numbers.tex").write_bytes(ALL_VALUES)
+    (source / "generated/retained_table.tex").write_bytes(TABLE)
+    for name in ("lean_status", "historical_table"):
+        (source / f"generated/{name}.tex").write_text(name, encoding="utf-8")
+
+
+with tempfile.TemporaryDirectory() as temporary:
+    root = Path(temporary)
+    stage = root / "arxiv-stage"
+    fixture(stage)
+    source = stage / "src"
+    (source / "main.tex").write_text(r"\input{body}\input{appendix}", encoding="utf-8")
+    assert prune(source, "main.tex") == [
+        "generated/historical_table.tex",
+        "generated/lean_status.tex",
+    ]
+    assert (source / "generated/numbers.tex").read_bytes() == USED_VALUES
+    assert prune(source, "main.tex") == []
+    (source / "main.tex").write_text(r"\input{generated/missing}", encoding="utf-8")
+    try:
+        prune(source, "main.tex")
+    except AuditError as error:
+        assert "missing reachable LaTeX input" in str(error)
+    else:
+        raise AssertionError("missing published inputs must fail staging")
+
+    # Unsupported declarations fail before any generated file is changed.
+    bad = source / "generated/bad.tex"
+    unsupported = b"\\ppDeclareValue{broken}\n{1}\n"
+    bad.write_bytes(unsupported)
+    untouched = source / "generated/unread.tex"
+    untouched.write_bytes(b"unread")
+    (source / "main.tex").write_text(r"\input{generated/bad}", encoding="utf-8")
+    try:
+        prune(source, "main.tex")
+    except AuditError as error:
+        assert "unsupported value declaration" in str(error)
+    else:
+        raise AssertionError("unsupported declarations must not be silently pruned")
+    assert bad.read_bytes() == unsupported
+    assert untouched.read_bytes() == b"unread"
+
+    # Governed multiline disclosures are preserved, including their scalar dependencies.
+    status = source / "generated/lean_status.tex"
+    governed = (
+        b"% Generated formal disclosure; preserve every byte.\n"
+        b"\\ppDeclareValue{lean-disclosure-prop:example}{Checked under\n"
+        b"  the stated assumptions; benchmark \\ppvalue{historical}.}\n"
+    )
+    status.write_bytes(governed)
+    (source / "generated/numbers.tex").write_bytes(ALL_VALUES)
+    (source / "main.tex").write_text(
+        r"\input{generated/numbers}\input{generated/lean_status}\ppvalue{used}",
+        encoding="utf-8",
+    )
+    prune(source, "main.tex")
+    assert status.read_bytes() == governed
+    assert (source / "generated/numbers.tex").read_bytes() == (
+        USED_VALUES.splitlines(keepends=True)[0]
+        + USED_VALUES.splitlines(keepends=True)[1]
+        + b"\\ppDeclareValue{historical}{999}\n"
+    )
+    assert prune(source, "main.tex") == []

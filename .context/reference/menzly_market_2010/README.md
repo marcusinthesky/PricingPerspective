@@ -19,5 +19,3 @@ volume: '65'
 issue: '4'
 page: 1555-1580
 ---
-
-# Market {Segmentation} and {Cross}‐predictability of {Returns}

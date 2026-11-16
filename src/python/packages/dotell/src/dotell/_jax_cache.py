@@ -7,11 +7,11 @@ cached executable is keyed by HLO + platform + jaxlib version and is
 bit-identical to a fresh compile, so this changes *when* code compiles, never
 *what* it computes (exempt from the t05 parity gate).
 
-This module is the single config site for both apps. ``pipeline.jax_cache`` and
-``simulation.backend`` are thin adapters over it; before t63 they were separate
-implementations whose cache dirs could diverge (one resolved through pydantic
-settings at call time, the other read the env var once at *module import*, so a
-later ``monkeypatch.setenv`` silently no-opped).
+This module is the shared config site; ``pipeline.jax_cache`` supplies the
+application's typed settings. Before t63, pipeline and the now-retired simulation
+app had separate implementations whose cache dirs could diverge (one resolved
+through pydantic settings at call time, the other read the env var once at
+*module import*, so a later ``monkeypatch.setenv`` silently no-opped).
 
 It deliberately configures ONLY the compilation cache -- never global dtype
 policy (``jax_enable_x64``), which is numerics-affecting and owned per stage.
@@ -36,9 +36,9 @@ MAX_GIB_ENV = "PP_JAX_CACHE_MAX_GIB"
 STRICT_ENV = "PP_JAX_CACHE_STRICT"
 # Internal, deliberately NOT the documented knob. The resolved absolute path is
 # republished here for spawn children so a parent and its workers share one
-# directory even when they resolve it differently (the pipeline app goes through
-# pydantic settings, which also read `.env`; simulation reads the environment
-# only). Writing back to `PP_JAX_CACHE_DIR` itself would invert the precedence
+# directory even when they resolve it differently (pipeline uses pydantic
+# settings, which also read `.env`; children can read the resolved path directly).
+# Writing back to `PP_JAX_CACHE_DIR` itself would invert the precedence
 # `pipeline/ARCHITECTURE.md` guarantees -- process env beats `.env` -- so a
 # child could never honour a `.env` value once a parent had exported one.
 RESOLVED_DIR_ENV = "PP_JAX_CACHE_DIR_RESOLVED"

@@ -24,14 +24,6 @@ IMPORT_PATTERN = re.compile(r"\\import\s*\{([^{}]*)\}\s*\{([^{}]+)\}")
 # the intended width stays greppable for tests/figures/test_print_size.py. Expand
 # the macro here, since this tool reads the sources rather than the expanded TeX.
 PPFIGURE_PATTERN = re.compile(r"\\ppfigure\s*\{[0-9.]*\}\s*\{([A-Za-z0-9_\-]+)\}")
-# A target adapter can select separately authored variants by redefining the
-# transport suffix declared in `pp-manuscript.sty`. Parse the target entry before
-# following its chapters so clean bundles stage the same files TeX will import.
-PPFIGURE_SUFFIX_MARKER = re.compile(r"\\renewcommand\s*\{\s*\\ppfiguresuffix\s*\}")
-PPFIGURE_SUFFIX_PATTERN = re.compile(
-    r"\\renewcommand\s*\{\s*\\ppfiguresuffix\s*\}\s*"
-    r"\{\s*([A-Za-z0-9_\-]*)\s*\}"
-)
 GRAPHICS_EXTENSIONS = (".pdf", ".png", ".jpg", ".jpeg")
 IMPORT_EXTENSIONS = (".pgf",)
 
@@ -70,17 +62,6 @@ def resolve_inside(root: Path, raw: str, suffixes: tuple[str, ...]) -> Path:
     raise StageError(f"missing reachable LaTeX dependency {raw!r}; tried: {tried}")
 
 
-def ppfigure_suffix(entry_text: str) -> str:
-    """Read the optional target-owned PGF filename suffix."""
-    matches = PPFIGURE_SUFFIX_PATTERN.findall(entry_text)
-    if PPFIGURE_SUFFIX_MARKER.search(entry_text) and not matches:
-        raise StageError("unsupported \\ppfiguresuffix target declaration")
-    variants = set(matches)
-    if len(variants) > 1:
-        raise StageError("target declares conflicting \\ppfiguresuffix values")
-    return next(iter(variants), "")
-
-
 def stage_reachable_images(
     source_root: Path, stage_root: Path, entry: str
 ) -> list[Path]:
@@ -88,8 +69,6 @@ def stage_reachable_images(
     source_root = source_root.resolve()
     stage_root = stage_root.resolve()
     entry_path = resolve_inside(stage_root, entry, (".tex",))
-    entry_text = strip_comments(entry_path.read_text(encoding="utf-8"))
-    figure_suffix = ppfigure_suffix(entry_text)
     pending = [entry_path]
     visited: set[Path] = set()
     graphics: set[Path] = set()
@@ -117,7 +96,7 @@ def stage_reachable_images(
             imported.add(
                 resolve_inside(
                     source_root,
-                    f"images/{name}{figure_suffix}",
+                    f"images/{name}",
                     IMPORT_EXTENSIONS,
                 )
             )

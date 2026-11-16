@@ -19,5 +19,3 @@ issue: '3'
 publisher: Elsevier
 page: 501-524
 ---
-
-# Characteristics Are Covariances

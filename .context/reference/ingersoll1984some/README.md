@@ -17,5 +17,3 @@ page: 1019-1034
 cites:
 - ross_arbitrage_1976
 ---
-
-# Some Results in the Theory of Arbitrage Pricing

@@ -1,6 +1,6 @@
 """Result and certificate shapes crossing the artifact boundary.
 
-These are the pipeline's own vocabulary, not geometry: ``jcor`` deliberately
+These are the pipeline's own vocabulary, not geometry: ``statadic`` deliberately
 knows nothing about cloud IDs, arm IDs, or artifact schemas, so the solver
 families here translate its array-level certificates into these.  Sits above
 :mod:`._common` and below every family module.
@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import numpy as np
-    from jcor.geometry import EnergyBarycentreDiagnostics
+    from statadic.geometry.frechet.energy import EnergyBarycentreDiagnostics
 
 
 @dataclass(frozen=True)

@@ -13,5 +13,3 @@ volume: Cancer research
 issue: '2'
 page: 209-220
 ---
-
-# The detection of disease clustering and a generalized regression approach

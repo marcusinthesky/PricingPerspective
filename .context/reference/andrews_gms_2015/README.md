@@ -20,5 +20,3 @@ page: 2805-2826
 cites:
 - andrews2010inference
 ---
-
-# Moment Inequality Inference

@@ -6,24 +6,22 @@ For fixed latent exposure laws, quadratic Wasserstein geometry gives sharp covar
 
 ## Reading the map
 
-The plot shows broad economic neighborhoods rather than perfectly isolated sectors. Figure 1 shows 100 firms in two-dimensional metric MDS coordinates computed from the exact pairwise Wasserstein-2 distances between their capped 128-article representations. The axes are unitless projection coordinates; colors identify the Nasdaq summary sector.
+The map below places the same 100 firms in a two-dimensional metric multidimensional scaling (MDS) fit to the exact pairwise Wasserstein-2 distances between their capped 128-article Qwen3-Embedding-8B representations. The axes are unitless, ticker labels identify firms, and colors identify sectors.
 
-Technology firms form the clearest concentration in the lower half. AMD, NVDA, INTC, MU, QCOM, and equipment makers such as AMAT, LRCX, and ASML sit in the same broad region. Consumer Defensive names including PEP, KHC, KDP, and DLTR form a second upper-right pocket. These patterns are consistent with shared language about products, inputs, customers, and demand conditions, but the plot alone cannot identify which channel matters.
+The map's Stress-1 is 0.396, and the Pearson and Spearman correlations between original and projected distances are both 0.553. It retains 27% of each firm's five nearest neighbours on average and the exact nearest neighbour for 9 of the 100 firms. These diagnostics describe projection fidelity, not return variance explained by news. The original Wasserstein-2 distances remain authoritative for the paper's statistics and pair selections. The axes have no assigned economic meaning and can reflect without changing the represented distances.
 
-The exceptions are especially useful for an economic reader. AAL and UAL are both airlines classified as Industrials, yet they sit far apart. AZN is a high Healthcare point above the main Healthcare cloud. Those positions invite concrete questions: do route, fleet, labour, and geographic news separate the two carriers? Does AZN's product mix or international clinical footprint give its articles a different distribution? The geometry proposes these questions; it does not answer them.
+Principal coordinates analysis (PCoA) provides a separate spectral diagnostic. Two principal coordinates retain 6.45% of the canonical news geometry's positive inertia. For comparison, the first two principal components of the same firms' in-sample returns retain 47.92% of total return variance, using the unstandardized covariance matrix. The appendix compares the full spectra across the encoder and embedding-width ladder and reports negative inertia separately. These percentages concern different objects and do not describe the metric-MDS coordinates.
 
-The underlying checks support a cautious reading. In the original distance matrix, sector labels account for about 15.3% of total distance dispersion, and every multi-firm sector has lower mean within-sector W2 than cross-sector W2. MDS is lossy: its stress is about 0.433, and it preserves the exact nearest neighbour for only 16 of 100 firms. Use visible proximity as global orientation, not as a peer-selection rule. The axes can rotate or reflect, and the original Wasserstein-2 distances, not these approximate coordinates, remain authoritative for the paper's statistics and pair selections.
-
-<Callout title="Reader's question">
-Do the visible sector pockets reflect economically meaningful common exposures, and can the outlying firms be explained by business model, geography, regulation, or event-specific news?
+<Callout title="Interpretation">
+Sector colors help readers locate firms, while projection-fidelity diagnostics show how much of the original geometry the map retains. Economic comparisons and pair selections use the original distance matrix.
 </Callout>
 
 <PaperFigure
-  src="/figures/paper-1-mds.webp"
-  alt="Scatter plot of firms in two-dimensional metric MDS coordinates, showing a lower technology concentration, an upper-right consumer-defensive pocket, and several sector outliers."
+  src="/figures/paper-1-pcoa.webp"
+  alt="Sector-colored, ticker-labeled metric MDS map of 100 firms fitted to their exact Wasserstein-2 article distances."
   width={1050}
-  height={885}
-  caption="Paper 1: Metric MDS of pairwise exact Wasserstein-2 distances. The descriptive projection supplies orientation only; all statistics and pair selections use the original distance matrix."
+  height={1209}
+  caption="Paper 1: Descriptive two-dimensional metric MDS of exact Wasserstein-2 distances between 128-article firm representations. The axes are unitless and colors identify sectors. All statistics and pair selections use the original distance matrix."
   />
 
 ## Mathematical sequence

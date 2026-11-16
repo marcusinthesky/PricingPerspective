@@ -22,5 +22,3 @@ page: 1616-1655
 cites:
 - sharpe_capital_1964
 ---
-
-# The Network Factor of Equity Pricing: A Signed Graph Laplacian Approach

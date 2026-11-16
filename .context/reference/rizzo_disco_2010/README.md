@@ -18,5 +18,3 @@ issue: '2'
 publisher: Institute of Mathematical Statistics
 page: 1034-1055
 ---
-
-# DISCO Analysis: A Nonparametric Extension of Analysis of Variance

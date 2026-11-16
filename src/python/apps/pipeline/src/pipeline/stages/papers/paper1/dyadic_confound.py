@@ -4,8 +4,9 @@ The publication specification regresses return-correlation chord distance on
 the square root of the sample energy functional with symmetric additive firm
 effects and multinomial node-bootstrap inference.  Its ladder, input schemas,
 diagnostics, and artifact rendering are Paper-specific and live under
-``paper1._dyadic``.  Array-only design and estimation contracts live in
-``jcor.operators.design`` and ``jcor.model.dyadic``.
+``paper1._dyadic``. Shared design, specification, point-estimation and inference
+contracts live in ``statadic.numerics.linalg.dyadic``, ``statadic.law.dyadic``,
+``statadic.estimation.least_squares.dyadic`` and ``statadic.inference.dyadic``.
 
 This module intentionally remains a stable import facade for the CLI and for
 downstream Paper-1 stages.  Every name below is a direct re-export; no numeric
@@ -14,18 +15,18 @@ implementation is duplicated here.
 
 from __future__ import annotations
 
-from jcor.model.dyadic import (
-    DyadicBootstrapDesign,
+from statadic.estimation.least_squares.dyadic import (
     DyadicComputationError,
-    DyadicFit,
-    DyadicInference,
-    DyadicInputError,
-    DyadicModel,
-    DyadicSample,
-    bootstrap_coefficient_inference,
     build_dyadic_design,
 )
-from jcor.operators.design import (
+from statadic.inference.dyadic import (
+    DyadicBootstrapDesign,
+    DyadicFitRequest,
+    DyadicInference,
+    bootstrap_coefficient_inference,
+)
+from statadic.law.dyadic import DyadicInputError, DyadicModel, DyadicSample
+from statadic.numerics.linalg.dyadic import (
     drop_collinear_columns,
     fwl_coefficient,
     symmetric_dyadic_effects,
@@ -48,13 +49,10 @@ from pipeline.stages.papers.paper1._dyadic.diagnostics import (
 )
 from pipeline.stages.papers.paper1._dyadic.driver import run_dyadic_confound
 from pipeline.stages.papers.paper1._dyadic.estimation import (
-    _bootstrap_spec_draws,
     _BootstrapDesign,
     _fit_spec,
     _fwl_display,
-    _node_bootstrap_energy,
     _partial_r2_block,
-    _quadratic_functional_form_sensitivity,
     _return_chord_translation,
 )
 from pipeline.stages.papers.paper1._dyadic.inputs import (
@@ -81,14 +79,13 @@ __all__ = [
     "DyadicBootstrapDesign",
     "DyadicComputationError",
     "DyadicConfoundConfig",
-    "DyadicFit",
+    "DyadicFitRequest",
     "DyadicInference",
     "DyadicInputError",
     "DyadicModel",
     "DyadicSample",
     "_BootstrapDesign",
     "_bootstrap_inference",
-    "_bootstrap_spec_draws",
     "_build_design",
     "_design_diagnostic_row",
     "_draw_node_counts",
@@ -101,9 +98,7 @@ __all__ = [
     "_load_covariance_long",
     "_load_energy_long",
     "_load_w2_long",
-    "_node_bootstrap_energy",
     "_partial_r2_block",
-    "_quadratic_functional_form_sensitivity",
     "_return_chord_translation",
     "_shared_endpoint_scale_statistic",
     "_symmetric_firm_effects",

@@ -1,6 +1,7 @@
 ---
 type: report
-title: 'Wasserstein-Barycentric Interaction Fields for Spatial Factor Models: Evidence from Language-Model Representations'
+title: 'Wasserstein-Barycentric Interaction Fields for Spatial Factor Models: Evidence
+  from Language-Model Representations'
 description: Our paper — Gawronsky & Huang, University of Cape Town.
 author:
 - family: Gawronsky
@@ -10,9 +11,9 @@ author:
 issued:
   date-parts:
   - - 2026
-URL: https://arxiv.org/abs/2608.29669
+URL: https://arxiv.org/abs/2608.29669v2
 publisher: arXiv
-number: '2608.29669'
+number: 2608.29669v2
 cites:
 - anselin_1988
 - blanchet_robust_2019
@@ -26,5 +27,3 @@ cites:
 - uddin2024network
 - wang2025newsnet
 ---
-
-# Wasserstein-Barycentric Interaction Fields for Spatial Factor Models: Evidence from Language-Model Representations

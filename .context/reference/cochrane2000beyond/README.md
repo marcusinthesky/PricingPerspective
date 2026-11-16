@@ -21,5 +21,3 @@ cites:
 - hansen1991implications
 - ross_arbitrage_1976
 ---
-
-# Beyond Arbitrage: Good-Deal Asset Price Bounds in Incomplete Markets

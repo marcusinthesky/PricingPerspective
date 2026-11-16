@@ -1,5 +1,6 @@
 ---
 number: "01"
+audio: false
 category: Methods and infrastructure
 title: Reproducibility is a graph, not a lockfile
 summary: How Nix, DVC, Semflow, typed interfaces, and formal verification make the path from data to publication inspectable.
@@ -22,7 +23,7 @@ That is the design problem behind this repository. Nix pins the cross-language e
 
 The result is not a claim that every computation is automatically correct. It is a claim that fewer important decisions are left implicit.
 
-This note uses the public release as its evidence boundary. It treats design claims as public only when the supporting documentation ships with that release. Some architecture notes exist only to guide development and are not part of the public record. For those components, the public README and source provide the evidence. A reproducible release should promise readers a path they can inspect, not expose the contents of a private workspace.
+This note uses the public release as its evidence boundary. It treats design claims as public only when the supporting documentation ships with that release. Some architecture notes exist only to guide development and are not part of the public record. For those components, the public README and source provide the evidence. A reproducible release should give readers a complete path they can inspect.
 
 ## Five layers, five jobs
 
@@ -116,7 +117,7 @@ This is also why Semflow does not use runtime tracing as its authority. A trace 
 
 The workflow is review-first. `semflow patch` prints a diff and writes nothing. `patch --apply` changes the authored DVC YAML only after an explicit request. `refresh --apply` updates JSON fingerprints but refuses to repair stale instrumentation. The control-plane stage cannot instrument itself.
 
-The [Semflow package](https://github.com/marcusinthesky/pricing-perspective/tree/main/src/python/packages/semflow) is therefore an adapter, not a new pipeline language. This distinction is useful beyond this repository: add a semantic layer when a workflow engine's file-level dependency model is too coarse, but do not quietly fork the engine's ownership model.
+The [Semflow package](https://github.com/marcusinthesky/semflow) is therefore an adapter, not a new pipeline language. This distinction is useful beyond this repository: add a semantic layer when a workflow engine's file-level dependency model is too coarse, but do not quietly fork the engine's ownership model.
 
 ## DVC, Snakemake, Make, and Docker solve different problems
 
@@ -203,11 +204,10 @@ This is a deliberate rejection of two tempting shortcuts. A second release engin
 
 ## The archive is part of the method
 
-The public source is not an accidental copy of the private workspace. The repository's `git archive` rules preserve paths while excluding development history, agent material, research notes, tests, and non-DVC implementation code outside the declared release closure. The release tooling checks that projection against the DVC and Semflow source closure.
+The replication package preserves the source, numerical inputs and environment specifications required by the declared DVC stages. The release checks validate those paths against the DVC and Semflow computation closure.
 
 That makes the archive a useful reproducibility object in its own right. A reader can distinguish between:
 
-- the private environment used to develop the work;
 - the versioned source and metadata needed to understand the computation; and
 - the generated publication artifacts and their manifests.
 

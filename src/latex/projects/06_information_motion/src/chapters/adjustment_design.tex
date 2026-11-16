@@ -1,0 +1,95 @@
+\subsection{Directional Measurement and Estimator}\label{sec:adjustment-design}
+
+The model's exposure ordering concerns a target's movement relative to other
+firms, which we measure by holding their article distributions fixed while
+the target's distribution changes.
+This preserves a common origin for each comparison, separating the target's
+approach from the reference firm's contemporaneous movement.
+Let $\widehat C_{iy}$ be firm $i$'s annual distribution over unit-normalized
+article vectors and keep every reference law $\widehat C_{j0}$ at the 2018
+origin, and for reference $j\ne i$ define
+\begin{equation}\label{eq:frozen-approach}
+  D_{ijy}=W_2^2(\widehat C_{iy},\widehat C_{j0}),\qquad
+  A_{ijy}=D_{ij,y-1}-D_{ijy}.
+\end{equation}
+Positive $A$ means that target $i$ approaches reference $j$, with $A$ measured
+in squared embedding-distance units under the squared Euclidean ground cost.
+Under the two-opportunity law \eqref{eq:axis-observation}, changes in
+distribution shape reveal movement even though all centroids coincide.
+
+News of a free cash flow shock arriving early in a year can precede more of
+the target's coverage than news arriving near its end.
+We reflect this timing by weighting each reference return by the fraction
+of target articles still to appear.
+For return date $s$ in destination year $y$, denote that fraction by
+$h_{iys}$ and the reference's daily simple decimal excess return by
+$r^e_{js}$, and set
+\begin{equation}\label{eq:dated-financial}
+  h_{iys}=\frac{1}{n_{iy}}\sum_{\ell=1}^{n_{iy}}
+  \mathbf1\{d_{iy\ell}>s\},\qquad
+  R_{ijy}=\sum_{s\in y}h_{iys}r^e_{js}.
+\end{equation}
+We sum each reference firm's daily excess returns, weighting them by the
+fraction of the target firm's articles published later in the year.
+This is an additive return measure, not a compounded annual return.
+The strict inequality excludes same-day news without assigning an intraday
+arrival time.
+Because dates remain paired with articles, each redraw changes both the
+information distribution and its article-timing weights.
+
+Centering subtracts the cross-reference mean within each target-year,
+so the coefficient compares which reference profiles the target approaches
+more closely with which references have higher weighted excess returns.
+References receive equal weight within each target-year.
+For $V=A,R$, write $\bar V_{iy}=(N-1)^{-1}\sum_{j\ne i}V_{ijy}$ and
+$\widetilde V_{ijy}=V_{ijy}-\bar V_{iy}$.
+With $Y$ transitions, the annual moments and pooled estimator are
+\begin{equation}\label{eq:directional-ratio}
+  q_y=\frac{\sum_i\sum_{j\ne i}\widetilde R_{ijy}\widetilde A_{ijy}}{N(N-1)},\quad
+  d_y=\frac{\sum_i\sum_{j\ne i}\widetilde R_{ijy}^2}{N(N-1)},\quad
+  \widehat\beta=\frac{\sum_y q_y}{\sum_y d_y}.
+\end{equation}
+The coefficient solves the aggregate centered moment $\sum_y(q_y-\beta
+d_y)=0$ and minimizes the pooled squared residual after target-year intercepts.
+A return date with zero article-timing weight contributes zero to the
+weighted excess-return measure without invalidating the comparison.
+A zero pooled financial denominator makes the coefficient undefined.
+When annual ratios differ, pooling weights years by $d_y$, giving reference
+firms with greater relative financial dispersion greater denominator
+influence despite equal reference weights.
+
+Each firm enters many comparisons, both as a target and as a reference.
+Article redraws therefore reuse each sampled firm-year distribution wherever
+that firm appears, preserving the resulting dependence.
+These redraws assess article-selection variability for the observed firms
+and financial histories under the scheme in Section~\ref{sec:data}.
+
+Uncertainty under independently sampled complete firm histories concerns a
+different target.
+Appendix~\ref{app:annual-gmm} uses a complete-triple representation to
+examine a variance approximation under independently sampled complete firm
+histories, retaining dependence across years and both roles.
+The simulation evaluates the two procedures against their respective known
+targets.
+
+\subsection{Restricted-Form Hypothesis}\label{sec:hypothesis}
+
+In the restricted two-opportunity economy, when one opportunity improves
+relative to the other, firms with greater initial exposure to it have more
+favorable return responses, while other firms expanding toward it approach those
+firms' initial news distributions.
+Because Proposition~\ref{prop:directional-alignment} signs the moments that
+\eqref{eq:directional-ratio} pools, its conditions imply a nonnegative population
+ratio of expected pooled moments whenever the denominator is positive.
+In the simulated economy, where this coefficient is strictly positive in every
+history under common reporting, we therefore state the hypothesis as
+$H_0:\beta\leq0$ against $H_1:\beta>0$.
+
+Since changes in reporting alone can also produce a positive coefficient at
+fixed capacities, we assess the estimator against a positive operating target
+under common reporting, a zero target under stationary reporting, and a positive
+reported target without operating movement.
+In the corporate archive, where the proposition's conditions are not verified
+and no established design samples independent firm histories, we report the
+estimate with its sensitivity to article selection
+rather than test $H_0$.

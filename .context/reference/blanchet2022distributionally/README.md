@@ -20,5 +20,3 @@ issue: '9'
 publisher: INFORMS
 page: 6382-6410
 ---
-
-# Distributionally Robust Mean-Variance Portfolio Selection

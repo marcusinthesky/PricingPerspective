@@ -35,9 +35,9 @@ def _barycentre_error(message: str) -> NoReturn:
 
 
 def _reraise_as_barycentre_error(error: Exception) -> NoReturn:
-    """Restate a ``jcor`` array-boundary rejection in the typed vocabulary.
+    """Restate a ``statadic`` array-boundary rejection in the typed vocabulary.
 
-    The solvers here own a typed error surface; ``jcor`` raises bare
+    The solvers here own a typed error surface; ``statadic`` raises bare
     ``ValueError`` at its own eager boundary.  Chaining preserves the original
     for a traceback while keeping ``TypedDistanceError`` the single exception
     callers of this package have to catch.
@@ -46,7 +46,7 @@ def _reraise_as_barycentre_error(error: Exception) -> NoReturn:
 
 
 def _stacked_sources(items: tuple[EmbeddingCloud, ...]) -> np.ndarray:
-    """Stack equal-shaped clouds into the dense ``(k, n, d)`` array jcor takes.
+    """Stack equal-shaped clouds into the dense ``(k, n, d)`` array statadic takes.
 
     Shape agreement is checked here rather than left to ``stack`` so that a
     ragged roster fails with this package's vocabulary instead of a NumPy

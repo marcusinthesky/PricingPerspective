@@ -21,5 +21,3 @@ container-title: International Conference on Learning Representations
 volume: '2024'
 page: 55198-55218
 ---
-
-# Conformal Risk Control

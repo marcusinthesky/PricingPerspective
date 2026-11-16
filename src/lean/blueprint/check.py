@@ -6,6 +6,7 @@ import argparse
 import importlib.util
 import json
 import re
+import sys
 from pathlib import Path
 from types import ModuleType
 
@@ -14,30 +15,44 @@ LEAN_DIR = BLUEPRINT_DIR.parent
 REPO_ROOT = LEAN_DIR.parents[1]
 MANIFEST_PATH = LEAN_DIR / "tools" / "claim-manifest" / "generated" / "manifest.json"
 SOURCE_DIR = BLUEPRINT_DIR / "src"
-GENERATED_BINDINGS = SOURCE_DIR / "generated" / "claim_bindings.tex"
+NATIVE_DIR = LEAN_DIR / ".lake" / "build" / "blueprint"
 CHAPTERS_DIR = REPO_ROOT / "src" / "latex" / "projects"
 
 LABEL_RE = re.compile(r"\\label\{([^}]+)\}")
 LEAN_RE = re.compile(r"\\lean\s*\{([^}]+)\}")
 LEANOK_RE = re.compile(r"\\leanok\b")
-CLAIM_BINDING_RE = re.compile(r"\\ppClaim(?:Proof)?Binding\s*\{([^}]+)\}")
+NATIVE_NODE_RE = re.compile(r"\\inputleannode\s*\{([^}]+)\}")
+INPUT_RE = re.compile(r"\\(?:input|include)\s*\{([^}]+)\}")
+REFERENCE_RE = re.compile(r"\\(?:uses|proves|[Cc]ref|eqref|ref)\s*\{([^}]+)\}")
+LEGACY_BINDING_RE = re.compile(r"\\ppClaim(?:Proof)?Binding\b")
 PRINT_STUB_RE = re.compile(
     r"\\newcommand\{\\(?:lean|leanok|discussion|mathlibok|notready)\}(?:\[1\])?\{\}"
 )
-BLUEPRINT_MACRO_RE = re.compile(r"\\(?:lean|leanok|uses|notready)\b")
+BLUEPRINT_MACRO_RE = re.compile(
+    r"\\(?:lean|leanok|uses|notready|inputleannode|inputleanmodule|ppClaimBinding|ppClaimProofBinding)\b"
+)
 LEAN_SOURCE_RE = re.compile(r"\.lean\b|(?:^|[/{\s])(?:src/lean|packages)/[^}\s]+")
-STATUS_VALUE_RE = re.compile(r"\\ppDeclareValue\{lean-verified-([^}]+)\}")
 CAMEL_TEXTTT_RE = re.compile(r"\\texttt\{[^}]*[a-z][A-Z][^}]*\}")
 
 
-def _renderer_module() -> ModuleType:
-    path = LEAN_DIR / "tools" / "claim-manifest" / "render.py"
-    spec = importlib.util.spec_from_file_location("claim_manifest_render", path)
+def _tool_module(name: str) -> ModuleType:
+    path = LEAN_DIR / "tools" / "claim-manifest" / f"{name}.py"
+    spec = importlib.util.spec_from_file_location(f"claim_manifest_{name}", path)
     if spec is None or spec.loader is None:
-        raise RuntimeError(f"cannot load renderer at {path}")
+        raise RuntimeError(f"cannot load claim tool at {path}")
     module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def _renderer_module() -> ModuleType:
+    return _tool_module("render")
+
+
+def tex_text(path: Path) -> str:
+    """Ignore TeX comments while retaining escaped percent signs."""
+    return re.sub(r"(?<!\\)%[^\n]*", "", path.read_text())
 
 
 def authored_tex_files(source_dir: Path) -> list[Path]:
@@ -46,11 +61,34 @@ def authored_tex_files(source_dir: Path) -> list[Path]:
     )
 
 
+def reachable_tex_files(source_dir: Path, entry: Path) -> tuple[list[Path], list[str]]:
+    """Follow authored inputs; external compiled native libraries stay optional."""
+    root = source_dir.resolve()
+    seen: set[Path] = set()
+    errors: list[str] = []
+    pending = [entry.resolve()]
+    while pending:
+        path = pending.pop()
+        if path in seen:
+            continue
+        if not path.is_file():
+            errors.append(f"missing authored Blueprint input: {path}")
+            continue
+        seen.add(path)
+        for name in INPUT_RE.findall(tex_text(path)):
+            target = (root / name).resolve()
+            if target.suffix != ".tex":
+                target = target.with_suffix(".tex")
+            if target.is_relative_to(root):
+                pending.append(target)
+    return sorted(seen), errors
+
+
 def validate_unique_labels(paths: list[Path]) -> list[str]:
     owners: dict[str, Path] = {}
     errors: list[str] = []
     for path in paths:
-        for label in LABEL_RE.findall(path.read_text()):
+        for label in LABEL_RE.findall(tex_text(path)):
             if label in owners:
                 errors.append(
                     f"duplicate Blueprint label {label!r}: {owners[label]} and {path}"
@@ -65,9 +103,11 @@ def validate_authored_markers(paths: list[Path]) -> list[str]:
     for path in paths:
         # The printable target must define inert stubs for web-only commands;
         # these are command definitions, not authored verification assertions.
-        text = path.read_text()
+        text = tex_text(path)
         if path.name == "print.tex" and path.parent.name == "macros":
             text = PRINT_STUB_RE.sub("", text)
+        if LEGACY_BINDING_RE.search(text):
+            errors.append(f"retired custom Blueprint claim binding in {path}")
         if LEAN_RE.search(text):
             errors.append(f"manually authored \\lean declaration link in {path}")
         if LEANOK_RE.search(text):
@@ -75,51 +115,104 @@ def validate_authored_markers(paths: list[Path]) -> list[str]:
     return errors
 
 
-def validate_manifest_projection(manifest: dict, generated_path: Path) -> list[str]:
+def validate_native_projection(manifest: dict, native_dir: Path) -> list[str]:
+    """Check compiler exports on the proof-certification path, without building."""
+    try:
+        extractor = _tool_module("extract")
+        native = extractor.load_native_claims(rebuild=False, native_dir=native_dir)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return [f"cannot read native LeanArchitect exports: {exc}"]
+    expected = {claim["claim_id"]: claim for claim in manifest["claims"]}
     errors: list[str] = []
-    claim_ids = [claim["claim_id"] for claim in manifest["claims"]]
-    duplicates = sorted(
-        {claim_id for claim_id in claim_ids if claim_ids.count(claim_id) > 1}
-    )
-    if duplicates:
-        errors.append(f"duplicate manifest claim IDs: {duplicates}")
-
-    expected = _renderer_module().render_blueprint(manifest)
-    actual = generated_path.read_text() if generated_path.exists() else ""
-    if actual != expected:
+    if native.keys() != expected.keys():
         errors.append(
-            f"stale or hand-edited generated Blueprint bindings: {generated_path}"
+            "native publication claim mismatch: "
+            f"missing={sorted(expected.keys() - native.keys())}; "
+            f"unclaimed={sorted(native.keys() - expected.keys())}"
         )
-
-    expected_declarations = sorted(
-        claim["declaration"]
-        for claim in manifest["claims"]
-        if claim["build_result"] == "checked"
-    )
-    actual_declarations = sorted(LEAN_RE.findall(actual))
-    if actual_declarations != expected_declarations:
-        errors.append(
-            "generated \\lean links differ from checked manifest declarations: "
-            f"expected={expected_declarations}, actual={actual_declarations}"
-        )
-    # Two slots per checked claim: the statement marker beside \lean, and the
-    # proof marker LeanBlueprint colours independently (see render_blueprint).
-    if len(LEANOK_RE.findall(actual)) != 2 * len(expected_declarations):
-        errors.append(
-            "generated \\leanok count differs from twice the checked manifest claim count"
-        )
+    for label in sorted(native.keys() & expected.keys()):
+        node, claim = native[label], expected[label]
+        if node["name"] != claim["declaration"]:
+            errors.append(f"native declaration differs from manifest for {label!r}")
+        summary = " ".join(node["statement"]["text"].split())
+        if summary != " ".join(claim["statement_summary"].split()):
+            errors.append(f"native statement differs from manifest for {label!r}")
+        for part in (node.get("statement"), node.get("proof")):
+            for dependency in (part or {}).get("usesLabels", []):
+                if dependency not in native:
+                    errors.append(
+                        f"unknown native Blueprint dependency {dependency!r} in {label!r}"
+                    )
+    # LeanArchitect writes its inferred graph to the LaTeX artifacts. The JSON
+    # `uses` fields describe authored overrides, not those inferred edges.
+    try:
+        modules: set[str] = set()
+        for library in extractor.NATIVE_LIBRARIES:
+            index = native_dir / "library" / f"{library}.json"
+            modules.update(json.loads(index.read_text())["modules"])
+            if not index.with_suffix(".tex").is_file():
+                errors.append(
+                    f"missing native LaTeX library: {index.with_suffix('.tex')}"
+                )
+        for module in sorted(modules):
+            module_path = native_dir / module
+            for item in json.loads(module_path.read_text()):
+                if item.get("type") != "node":
+                    continue
+                node = item["data"]
+                label = node["latexLabel"]
+                artifact = module_path.with_suffix(".artifacts") / f"{label}.tex"
+                text = tex_text(artifact)
+                if LABEL_RE.findall(text) != [label]:
+                    errors.append(
+                        f"native LaTeX label differs from metadata: {artifact}"
+                    )
+                if LEAN_RE.findall(text) != [node["name"]]:
+                    errors.append(
+                        f"native LaTeX declaration differs from metadata: {artifact}"
+                    )
+                for group in REFERENCE_RE.findall(text):
+                    for dependency in (part.strip() for part in group.split(",")):
+                        if dependency and dependency not in native:
+                            errors.append(
+                                f"unknown inferred native Blueprint reference {dependency!r}: {artifact}"
+                            )
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        errors.append(f"cannot read native LeanArchitect LaTeX: {exc}")
     return errors
 
 
-def validate_claim_binding_references(paths: list[Path], manifest: dict) -> list[str]:
-    known = {claim["claim_id"] for claim in manifest["claims"]}
+def validate_node_references(paths: list[Path], manifest: dict) -> list[str]:
+    """Every approved node is included once; every informal edge resolves."""
+    ids = [claim["claim_id"] for claim in manifest["claims"]]
+    known = set(ids)
     errors: list[str] = []
+    if len(known) != len(ids):
+        errors.append("duplicate manifest claim IDs")
+    includes: dict[str, list[Path]] = {}
+    labels: set[str] = set()
     for path in paths:
-        for claim_id in CLAIM_BINDING_RE.findall(path.read_text()):
-            if claim_id not in known:
-                errors.append(
-                    f"Blueprint claim binding {claim_id!r} is absent from manifest: {path}"
-                )
+        text = tex_text(path)
+        labels.update(LABEL_RE.findall(text))
+        for label in NATIVE_NODE_RE.findall(text):
+            includes.setdefault(label, []).append(path)
+            if label not in known:
+                errors.append(f"unknown native Blueprint input {label!r}: {path}")
+    for label in sorted(known):
+        count = len(includes.get(label, []))
+        if count != 1:
+            errors.append(
+                f"native Blueprint node {label!r} must appear once; found {count}"
+            )
+        if label in labels:
+            errors.append(f"native Blueprint label {label!r} is also authored by hand")
+    available = labels | (known & includes.keys())
+    for path in paths:
+        for group in REFERENCE_RE.findall(tex_text(path)):
+            for label in (item.strip() for item in group.split(",")):
+                # Printable command definitions refer to their arguments.
+                if label and "#" not in label and label not in available:
+                    errors.append(f"unknown Blueprint reference {label!r}: {path}")
     return errors
 
 
@@ -147,7 +240,7 @@ def validate_claim_labels_exist(chapters_dir: Path, manifest: dict) -> list[str]
             for path in sorted(paper_src.rglob("*.tex")):
                 if "generated" in path.parts:
                     continue
-                labels.update(LABEL_RE.findall(path.read_text()))
+                labels.update(LABEL_RE.findall(tex_text(path)))
             labels_by_paper[paper] = labels
         if claim["claim_id"] not in labels_by_paper[paper]:
             errors.append(
@@ -159,39 +252,46 @@ def validate_claim_labels_exist(chapters_dir: Path, manifest: dict) -> list[str]
 
 
 def validate_status_projections_are_current(
-    chapters_dir: Path, manifest: dict
+    chapters_dir: Path,
+    by_paper: dict[str, dict],
+    fallback_manifest: dict,
+    projects: set[str] | None = None,
 ) -> list[str]:
-    r"""Assert no paper's status file asserts a claim the manifest dropped.
-
-    The reverse direction of :func:`validate_claim_labels_exist`. ``render.py``
-    writes one ``lean_status.tex`` per paper, and a paper whose last claim is
-    withdrawn would otherwise keep a stale projection asserting machine-checked
-    backing forever -- the file is generated, so nobody reads it, and no other
-    gate looks at it. That is the worst shape a verification claim can take.
-    """
+    """Require exact status, disclosure, list and own-manifest hash projections."""
+    existing = {
+        path.parents[2].name
+        for path in chapters_dir.glob("*/src/generated/lean_status.tex")
+        if not path.parents[2].name.startswith("_")
+    }
+    papers = set(by_paper) | existing
+    if projects is not None:
+        papers &= projects
+    renderer = _renderer_module()
     errors: list[str] = []
-    declared: dict[str, set[str]] = {}
-    for claim in manifest["claims"]:
-        declared.setdefault(claim["paper"], set()).add(claim["claim_id"])
-    for path in sorted(chapters_dir.glob("*/src/generated/lean_status.tex")):
-        paper = path.parents[2].name
-        rendered = set(STATUS_VALUE_RE.findall(path.read_text()))
-        orphaned = sorted(rendered - declared.get(paper, set()))
-        if orphaned:
+    for paper in sorted(papers):
+        path = chapters_dir / paper / "src/generated/lean_status.tex"
+        if not path.is_file():
+            errors.append(f"missing generated status projection for {paper}: {path}")
+            continue
+        expected = renderer.render_paper_status(
+            by_paper.get(paper, fallback_manifest), paper
+        )
+        if path.read_text() != expected:
             errors.append(
-                f"stale generated status projection for {paper}: asserts "
-                f"{orphaned} which the manifest no longer declares; re-run "
-                "src/lean/tools/claim-manifest/render.py"
+                f"stale or hand-edited generated status projection for {paper}: {path}; "
+                "regenerate from that paper's own manifest"
             )
     return errors
 
 
 def validate_publication_boundary(
-    chapters_dir: Path, declarations: list[str]
+    chapters_dir: Path, declarations: list[str], projects: set[str] | None = None
 ) -> list[str]:
     errors: list[str] = []
     for path in sorted(chapters_dir.glob("*/src/chapters/*.tex")):
-        text = path.read_text()
+        if projects is not None and path.parents[2].name not in projects:
+            continue
+        text = tex_text(path)
         if BLUEPRINT_MACRO_RE.search(text):
             errors.append(f"Blueprint macro leaked into publication chapter: {path}")
         if LEAN_SOURCE_RE.search(text):
@@ -209,20 +309,65 @@ def validate_publication_boundary(
 
 
 def validate(
-    manifest_path: Path, source_dir: Path, generated_path: Path, chapters_dir: Path
+    manifest_path: Path,
+    source_dir: Path,
+    native_dir: Path | None,
+    chapters_dir: Path,
+    projects: set[str] | None = None,
 ) -> list[str]:
-    manifest = json.loads(manifest_path.read_text())
+    try:
+        manifest = json.loads(manifest_path.read_text())
+        by_paper = _renderer_module().paper_manifests(manifest, manifest_path)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return [f"cannot select publication manifests: {exc}"]
+    all_claims = {
+        "claims": [
+            claim
+            for paper, record in by_paper.items()
+            for claim in record["claims"]
+            if claim["paper"] == paper
+        ]
+    }
+    publication_claims = {
+        "claims": [
+            claim
+            for paper, record in by_paper.items()
+            if projects is None or paper in projects
+            for claim in record["claims"]
+            if claim["paper"] == paper
+        ]
+    }
     authored = authored_tex_files(source_dir)
     errors = validate_unique_labels(authored)
+    if projects is not None:
+        for paper in sorted(projects):
+            if not (chapters_dir / paper / "src" / "chapters").is_dir():
+                errors.append(f"missing publication chapter directory: {paper}")
     errors.extend(validate_authored_markers(authored))
-    errors.extend(validate_claim_binding_references(authored, manifest))
-    errors.extend(validate_manifest_projection(manifest, generated_path))
-    errors.extend(validate_claim_labels_exist(chapters_dir, manifest))
-    errors.extend(validate_status_projections_are_current(chapters_dir, manifest))
+    entries = [source_dir / name for name in ("web.tex", "print.tex")]
+    entries = [path for path in entries if path.is_file()]
+    if not entries:
+        entries = [source_dir / "content.tex"]
+    for entry in entries:
+        reachable, input_errors = reachable_tex_files(source_dir, entry)
+        errors.extend(input_errors)
+        errors.extend(
+            f"{entry.name}: {error}"
+            for error in validate_node_references(reachable, all_claims)
+        )
+    if native_dir is not None:
+        errors.extend(validate_native_projection(all_claims, native_dir))
+    errors.extend(validate_claim_labels_exist(chapters_dir, publication_claims))
+    errors.extend(
+        validate_status_projections_are_current(
+            chapters_dir, by_paper, manifest, projects
+        )
+    )
     errors.extend(
         validate_publication_boundary(
             chapters_dir,
-            [claim["declaration"] for claim in manifest["claims"]],
+            [claim["declaration"] for claim in publication_claims["claims"]],
+            projects,
         )
     )
     return errors
@@ -232,18 +377,28 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, default=MANIFEST_PATH)
     parser.add_argument("--source-dir", type=Path, default=SOURCE_DIR)
-    parser.add_argument("--generated", type=Path, default=GENERATED_BINDINGS)
+    parser.add_argument(
+        "--native-dir",
+        type=Path,
+        help="Also validate already-built native LeanArchitect exports (no build).",
+    )
     parser.add_argument("--chapters-dir", type=Path, default=CHAPTERS_DIR)
+    parser.add_argument(
+        "--project", action="append", help="Limit publication checks to these projects."
+    )
     args = parser.parse_args()
 
-    errors = validate(args.manifest, args.source_dir, args.generated, args.chapters_dir)
+    projects = set(args.project) if args.project else None
+    errors = validate(
+        args.manifest, args.source_dir, args.native_dir, args.chapters_dir, projects
+    )
     if errors:
         for error in errors:
             print(f"[FAIL] {error}")
         return 1
     print(
-        "[PASS] Blueprint labels, generated bindings, authored markers, "
-        "manifest claim labels, and publication boundary"
+        "[PASS] Blueprint native inputs, references, publication labels, exact status "
+        "projections, and publication boundary"
     )
     return 0
 

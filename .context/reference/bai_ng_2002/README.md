@@ -19,5 +19,3 @@ page: 191-221
 cites:
 - chamberlain_rothschild_1983
 ---
-
-# Determining the Number of Factors in Approximate Factor Models

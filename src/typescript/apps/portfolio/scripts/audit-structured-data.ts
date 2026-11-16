@@ -54,7 +54,7 @@ for (const [file, html] of documents) {
       if (type === "BlogPosting") {
         blogPostCount += 1;
         const audio = node.audio;
-        const post = blogPosts.find((post) => file.includes(`/blog/${post.slug}/`));
+        const post = blogPosts.find((item) => file.includes(`/blog/${item.slug}/`));
         if (
           post?.audio &&
           (!audio ||

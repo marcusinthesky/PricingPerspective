@@ -2,7 +2,7 @@
 
 The policy itself -- which flags are set, why the cache dir stays outside the
 DVC graph, why a cached executable is exempt from the t05 parity gate -- lives
-in :mod:`dotell._jax_cache`, shared with the simulation app. This module
+in :mod:`dotell._jax_cache`, shared by workspace consumers. This module
 only supplies the pipeline's own resolution of the cache location: pydantic
 ``runtime_settings()``, which reads ``PP_JAX_CACHE_DIR`` from the environment or
 ``.env``.

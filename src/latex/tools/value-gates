@@ -116,12 +116,7 @@ def check_project(src: Path) -> tuple[list[str], list[str]]:
     numbers = load_numbers(src / "generated" / "numbers.tex")
     emit_bad: list[str] = []
     literal_bad: list[str] = []
-    subdirectories = (
-        ("chapters",)
-        if (src.parent / "dissertation.toml").is_file()
-        else ("chapters", "targets")
-    )
-    for sub in subdirectories:
+    for sub in ("chapters", "targets"):
         d = src / sub
         if not d.is_dir():
             continue
@@ -157,7 +152,6 @@ def main() -> int:
     args = ap.parse_args()
     root = Path(args.root).resolve()
     projects = sorted((root / "projects").glob("*/src"))
-    projects = [p for p in projects if (p.parent.name != "_template")]
     emit_all: list[str] = []
     lit_all: list[str] = []
     for src in projects:

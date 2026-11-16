@@ -22,5 +22,3 @@ cites:
 - chung_exact_2013
 - sejdinovic_equivalence_2013
 ---
-
-# Robust Multivariate Nonparametric Tests via Projection-Averaging

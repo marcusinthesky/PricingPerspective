@@ -1,13 +1,19 @@
-## Strategic repositioning under rivalry
+## Competition, operating adjustment and information
 
-The paper models firm positions as probability distributions over economic activities. Firms choose how to allocate capacity across opportunities while accounting for heterogeneous capabilities, costs, and rival participation. The ESCAPE model establishes a unique equilibrium and separates the effects of changing opportunities from strategic crowding.
+Firms reallocate capacity when economic opportunities change. Their responses alter competitors' profitability and the cash flows investors anticipate. This paper extends a multi-contest framework to connect competition and costly operating adjustment with financial responses and changing distributions of corporate news.
 
-## Main results
+## From the mechanism to measurement
 
-In a benchmark many-firm economy, relative strategic responses account for 90.5% of the weighted composition-response contrast between strategic and independent firms. That component is numerically zero when capabilities are identical.
+In a restricted two-opportunity economy, positive exogenous free cash flow shocks produce larger return responses for firms with greater initial exposure. As competitors expand toward the opportunity, their news distributions approach the initial distributions of those firms. Common reporting intensity and explicit timing assumptions imply a nonnegative expected local association between financial returns and movement toward competitors in information space. General multi-activity economies have no universal sign.
 
-A corpus-scale analysis of corporate news finds that optimized peer reconstructions retain 86.5% of their aggregate validation advantage one year later, even as absolute distance from frozen reconstructions grows. The result points to persistent peer structure without a fixed destination.
+A directional estimator relates changes in Wasserstein distances between news distributions to excess returns weighted by article timing. The corporate application uses 100 firms, four annual transitions ending in 2019–2022, and Qwen3-Embedding-4B representations. It compares native and compressed vectors and matched and expanded article samples.
 
-## Paper
+## Historical evidence and its limits
 
-The complete paper, including its formal derivations and empirical design, is available on [arXiv](https://arxiv.org/abs/2609.37820).
+The primary native, expanded specification has a positive coefficient of approximately 0.00477. Across 199 paired article redraws, its 2.5th and 97.5th percentiles are approximately 0.00175 and 0.00724. These percentiles describe article-selection sensitivity conditional on the retained firms, articles, financial histories and years.
+
+<Callout title="Interpretation">
+The evidence is a small positive historical directional association. The study does not establish a calibrated population confidence interval or identify competition as its causal source. Simulations show that limited or changing news coverage can obscure operating adjustments and generate similar observed movements.
+</Callout>
+
+The complete derivations, simulation controls and empirical design are available in the [paper](https://arxiv.org/abs/2609.37820).

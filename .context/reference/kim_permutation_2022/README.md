@@ -22,5 +22,3 @@ cites:
 - chung_exact_2013
 - kim_robust_2020
 ---
-
-# Minimax Optimality of Permutation Tests

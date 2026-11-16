@@ -13,5 +13,3 @@ issued:
 URL: https://arxiv.org/abs/1905.10943
 container-title: Advances in Neural Information Processing Systems 32 (NeurIPS 2019)
 ---
-
-# Distributionally Robust Optimization and Generalization in Kernel Methods

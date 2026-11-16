@@ -11,5 +11,3 @@ issued:
   date-parts:
   - - 2026
 ---
-
-# Text Distance Identifies Return-Exposure Geometry: A Corrected Frontier and a Modest Certified Cap

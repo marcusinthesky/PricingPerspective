@@ -13,5 +13,3 @@ volume: '68'
 issue: '3'
 page: 1267-1300
 ---
-
-# Sentiment during recessions

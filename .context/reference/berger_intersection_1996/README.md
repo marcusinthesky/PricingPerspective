@@ -17,5 +17,3 @@ issue: '4'
 publisher: Institute of Mathematical Statistics
 page: 283-319
 ---
-
-# Bioequivalence Trials, Intersection-Union Tests and Equivalence Confidence Sets

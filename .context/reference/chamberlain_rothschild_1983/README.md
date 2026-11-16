@@ -19,5 +19,3 @@ page: 1281-1304
 cites:
 - sharpe_capital_1964
 ---
-
-# Arbitrage, Factor Structure, and Mean-Variance Analysis on Large Asset Markets

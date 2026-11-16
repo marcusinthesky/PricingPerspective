@@ -1,0 +1,36 @@
+{
+  "algorithm": "sha256",
+  "callback": "pipeline.cli.commands.p5.representation_ablation:cli_render_paper5_representation_ablation",
+  "digest": "sha256:bd6998f8e44ee8afa2fed88fba97f827898671b8340ee78d22829de7f217ec7a",
+  "entrypoint": "pipeline render-paper5-representation-ablation",
+  "fallbacks": [
+  ],
+  "members": [
+    {"digest":"sha256:701b162d541e1c9506cca310ef2b8a90b9ce4ab016c5aeb67a529eb0e89c9e8f","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/representation_ablation.py","symbol":"pipeline.cli.commands.p5.representation_ablation:<binding:Annotated=typing:Annotated>"},
+    {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/representation_ablation.py","symbol":"pipeline.cli.commands.p5.representation_ablation:<binding:Path=pathlib:Path>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/representation_ablation.py","symbol":"pipeline.cli.commands.p5.representation_ablation:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/representation_ablation.py","symbol":"pipeline.cli.commands.p5.representation_ablation:<binding:typer=typer>"},
+    {"digest":"sha256:41dc890c346e6b93fb51feaa3cfd573d3b1768fccf1bed2b96f78622f3906baf","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/representation_ablation.py","symbol":"pipeline.cli.commands.p5.representation_ablation:cli_render_paper5_representation_ablation"},
+    {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/p5/representation_ablation.py","symbol":"pipeline.cli.commands.p5.representation_ablation:commands"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:d1e9c47ceb17a97de5ec09a9ff4a9f88aa251adbfb204c2f5887c7e80dc06cf4","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:_TEX_SPECIALS"},
+    {"digest":"sha256:2e3cda6994f92700f4fa27cef44561f25a8728081b6ae266974e721af2f972d9","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/_latex.py","symbol":"pipeline.figures._latex:escape_latex"},
+    {"digest":"sha256:3d8472152feda0eacc232fc2c60dc84956c757a34aeae7401bc5229b4c52e82d","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:<binding:_render_longtable=pipeline.figures.shared_tables:_render_longtable>"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:f5b270e78401abfa55a4047c331b1199b42df2ba4065a6f1882f58a0a906008b","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:<binding:cast=typing:cast>"},
+    {"digest":"sha256:211ee42757705c7e350e70e36b762987a737f5e9c268f2a343e2dbfcb8fbea75","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:<binding:json=json>"},
+    {"digest":"sha256:8c795ab0cfd25f254259d0d0674b225e9f8a564487dce2b662ee87e2d5deac9b","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_CONTRAST_PRECISION"},
+    {"digest":"sha256:12136fd65ad6b6bfdc18d530b4c1d9585fcad45617896edac0f9358657d132b9","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_OPERATOR_LABELS"},
+    {"digest":"sha256:82e504551d2576ebe0d3b2a937f87e2f3213fbed62277c6f0c6cc577dcc71821","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_cell_label"},
+    {"digest":"sha256:ab6a8e55bf0b178d09661dcd65439cc9b0b8a895ab156730f4419e6dd79ae5cd","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_contrast_rows"},
+    {"digest":"sha256:50878b8a0e551618a98eccf7dda194799e11a90ab3313b2823024a3253e92e12","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_number"},
+    {"digest":"sha256:57d2f309a532f4d7695e308b7171c639a56ea3205e5d9a6a5ecad798527e2e8a","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:_result_row"},
+    {"digest":"sha256:5e66d42f39a84c73dc491489673ee0154cd9945ba645e9cf67d85c2da4945ba3","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/paper5/tables.py","symbol":"pipeline.figures.paper5.tables:render_paper5_representation_ablation_table"},
+    {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/shared_tables.py","symbol":"pipeline.figures.shared_tables:<binding:annotations=__future__:annotations>"},
+    {"digest":"sha256:dd4bf60e55265a9e6cf38eaf781fe0f3bef2d89af2c1f59bb4bc1963a6530db9","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/figures/shared_tables.py","symbol":"pipeline.figures.shared_tables:<binding:escape_latex=pipeline.figures._latex:escape_latex>"},
+    {"digest":"sha256:df015dfc6693763489c423aad959fd5632f6e87e7e5faf4589b15c92f73e2962","kind":"global","path":"src/python/apps/pipeline/src/pipeline/figures/shared_tables.py","symbol":"pipeline.figures.shared_tables:_CAPTION"},
+    {"digest":"sha256:c4922b90ff31b293086fad2502e43eac5badfcafd1e8e43ec9eae5d32cc7bc9d","kind":"function","path":"src/python/apps/pipeline/src/pipeline/figures/shared_tables.py","symbol":"pipeline.figures.shared_tables:_render_longtable"}
+  ],
+  "policy": {"ignore_annotations": true, "ignore_docstrings": true, "ignore_type_checking_blocks": true},
+  "schema_version": 2
+}

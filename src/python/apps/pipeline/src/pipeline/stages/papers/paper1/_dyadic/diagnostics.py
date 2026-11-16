@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 import numpy as np
 import pandas as pd
-from jcor.model.dyadic import build_dyadic_design
-from jcor.operators.design import symmetric_dyadic_effects
+from statadic.estimation.least_squares.dyadic import build_dyadic_design
+from statadic.law.dyadic import DyadicModel, DyadicSample
+from statadic.numerics.linalg.dyadic import fwl_residualize, symmetric_dyadic_effects
 
+from pipeline.stages.papers.paper1._dyadic.adapters import dyadic_regression
 from pipeline.stages.papers.paper1._dyadic.estimation import _fwl_display
-
-if TYPE_CHECKING:
-    from jcor.model.dyadic import DyadicModel
 
 _build_design = build_dyadic_design
 _symmetric_firm_effects = symmetric_dyadic_effects
@@ -53,23 +52,17 @@ def _design_diagnostic_row(
     # off the retired NumPy path.
     design = np.asarray(jax_design, dtype=np.float64)
     focal_position = names.index(focal_name)
-    nuisance = np.delete(design, focal_position, axis=1)
     focal = design[:, focal_position]
-    residual = focal - nuisance @ np.linalg.lstsq(nuisance, focal, rcond=None)[0]
+    residual = np.asarray(fwl_residualize(design, focal, focal_position).focal_residual)
     total = float(np.sum((focal - focal.mean()) ** 2))
     residual_ss = float(residual @ residual)
     residual_share = residual_ss / total if total > 0.0 else 0.0
     vif = 1.0 / residual_share if residual_share > 0.0 else float("inf")
-    firms = sorted(
-        set(model.sample.endpoint_i.tolist()) | set(model.sample.endpoint_j.tolist())
-    )
+    endpoint_i = np.asarray(model.sample.endpoint_i)
+    endpoint_j = np.asarray(model.sample.endpoint_j)
+    firms = sorted(set(endpoint_i.tolist()) | set(endpoint_j.tolist()))
     degrees = {
-        firm: int(
-            np.sum(
-                (model.sample.endpoint_i == firm) | (model.sample.endpoint_j == firm)
-            )
-        )
-        for firm in firms
+        firm: int(np.sum((endpoint_i == firm) | (endpoint_j == firm))) for firm in firms
     }
     n_dyads = len(model.sample.endpoint_i)
     total_dyad_pairs = n_dyads * (n_dyads - 1) / 2
@@ -137,7 +130,7 @@ def _assemble_primary_fit_frame(
     """Build the persisted per-dyad frame and FWL audit payload."""
     design = cast("np.ndarray", primary_fit["_point_design"])
     names = cast("list[str]", primary_fit["_point_design_names"])
-    beta = np.linalg.lstsq(design, outcome, rcond=None)[0]
+    beta = cast("np.ndarray", primary_fit["_point_parameters"])
     frame = _primary_fit_frame(design, beta, outcome, firm_i, firm_j)
     for name in functional_display.columns:
         frame[name] = functional_display[name].to_numpy()
@@ -203,29 +196,17 @@ def _point_focal_fit(
     focal_name: str,
 ) -> tuple[float, float]:
     """Return the focal symmetric-FE fit for a leave-one-firm-out subgraph."""
-    jax_design, names, _ = _build_design(
-        [focal_name],
-        columns,
-        firm_i,
-        firm_j,
-        node_effects=True,
-        effect_name_prefix="firm_fe",
+    spec, data = dyadic_regression(
+        DyadicModel(
+            [focal_name],
+            {focal_name: columns[focal_name]},
+            DyadicSample[str](outcome, firm_i.tolist(), firm_j.tolist()),
+            node_effects=True,
+            effect_name_prefix="firm_fe",
+        )
     )
-    # Same host landing as `_design_diagnostic_row`: `within_r2` differences two
-    # near-equal residual sums, so a float32 product here showed up as 1.5e-07
-    # absolute drift against the retired NumPy path.
-    design = np.asarray(jax_design, dtype=np.float64)
-    beta = np.linalg.lstsq(design, outcome, rcond=None)[0]
-    residual = outcome - design @ beta
-    jax_effects, _ = _symmetric_firm_effects(firm_i, firm_j)
-    effects = np.asarray(jax_effects, dtype=np.float64)
-    effect_only = np.column_stack([np.ones(len(outcome)), effects])
-    effect_residual = (
-        outcome - effect_only @ np.linalg.lstsq(effect_only, outcome, rcond=None)[0]
-    )
-    denominator = float(effect_residual @ effect_residual)
-    within_r2 = 1.0 - float(residual @ residual) / denominator
-    return float(beta[names.index(focal_name)]), float(within_r2)
+    fit = spec.estimate(data).core
+    return float(fit.coefficients[focal_name]), float(cast("float", fit.within_r2))
 
 
 def _leave_one_firm_out(
@@ -237,15 +218,17 @@ def _leave_one_firm_out(
     """Return point fits after deleting each endpoint in turn."""
     rows: list[dict[str, object]] = []
     sample = model.sample
-    firms = sorted(set(sample.endpoint_i.tolist()) | set(sample.endpoint_j.tolist()))
+    endpoint_i = np.asarray(sample.endpoint_i)
+    endpoint_j = np.asarray(sample.endpoint_j)
+    firms = sorted(set(endpoint_i.tolist()) | set(endpoint_j.tolist()))
     for firm in firms:
-        keep = (sample.endpoint_i != firm) & (sample.endpoint_j != firm)
+        keep = (endpoint_i != firm) & (endpoint_j != firm)
         sub_columns = {name: values[keep] for name, values in model.columns.items()}
         beta, within_r2 = _point_focal_fit(
             sub_columns,
             sample.outcome[keep],
-            sample.endpoint_i[keep],
-            sample.endpoint_j[keep],
+            endpoint_i[keep],
+            endpoint_j[keep],
             focal_name,
         )
         delta = beta - full_beta

@@ -1,0 +1,19 @@
+% AUTO-GENERATED -- do not edit by hand.
+\begin{table}[H]
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\begin{tabular}{lrrrr}
+\toprule
+Interaction field & $\hat\rho$ & Held-out score & Gain & 95\% CI \\
+\midrule
+Factor-only & 0.000 & 2.468881 & 0.000000 & -- \\
+ChronoBERT 2017 W2 barycentric & 0.561 & 2.497084 & 0.028203 & [0.0249, 0.0318] \\
+ChronoBERT 2017 median-bandwidth W2 RBF & 0.452 & 2.478885 & 0.010004 & [0.0082, 0.0120] \\
+\midrule
+W2 minus median RBF & -- & -- & 0.018199 & [0.0152, 0.0214] \\
+\bottomrule
+\end{tabular}
+\caption{Point-in-time representation sensitivity under the primary FF5-plus-momentum specification. ChronoBERT 2017 has a reported training-information cutoff of 2017-12-31, pre-period relative to the 2018--2022 article and calibration windows. This is not a claim of historical checkpoint availability. Fields are held fixed throughout the 2023--2026 evaluation. The score is the mean Gaussian quasi-log score per firm-day; intervals use paired stationary-block bootstrap draws. The RBF field uses the median off-diagonal squared W2 distance as its bandwidth.}
+\label{tab:p5-point-in-time-encoder}
+\end{table}

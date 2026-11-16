@@ -17,5 +17,3 @@ issue: '1'
 publisher: Taylor & Francis
 page: 53-70
 ---
-
-# Automatic Block-Length Selection for the Dependent Bootstrap

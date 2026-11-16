@@ -1,0 +1,9 @@
+profile: dev
+require_version: true
+inputs:
+  nixpkgs:
+    follows: pricing-flake/nixpkgs
+  pricing-flake:
+    url: path:./infra/nix
+  devenv:
+    url: github:cachix/devenv/e44d88a683bf945c72445babd85f1d2e4e933409?dir=src/modules

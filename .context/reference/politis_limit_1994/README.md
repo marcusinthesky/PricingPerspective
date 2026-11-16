@@ -16,5 +16,3 @@ volume: '4'
 publisher: Statistica Sinica
 page: 461-476
 ---
-
-# Limit Theorems for Stationary Bootstrap in Hilbert Space

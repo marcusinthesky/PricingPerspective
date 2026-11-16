@@ -1,3 +1,4 @@
+import Architect
 import PricingPerspective.Transmission.Dispersion.AggregateCarrier
 import PricingPerspective.Transmission.Dispersion.OptimalVariance
 
@@ -9,11 +10,11 @@ open WassersteinGeometry WassersteinGeometry.Hilbert
 open WassersteinGeometry.Multimarginal
 
 /-!
-# Sharp information-certified portfolio variance
+# Aggregate information-certified portfolio variance
 
 The pairwise certificate of `CertifiedVariance.lean` relaxes the multi-marginal dispersion
 to a weighted sum of pairwise floors and subtracts each pair's slack radii separately.  This
-module states the sharp form: the multi-marginal infimum caps systematic variance directly,
+module states the aggregate form: the multi-marginal infimum caps systematic variance directly,
 and the aggregate carrier floor bounds that infimum from below after subtracting one weighted
 root-mean-square slack radius.
 
@@ -53,18 +54,30 @@ theorem jointPortfolioVariance_le_dispersionEnvelope
     ← weightedDispersionCost_toReal_eq_realizedJointDispersion q J hint]
   linarith
 
-/-- **Sharp information-certified coherent portfolio-variance bound.**
+/-- **Aggregate information-certified coherent portfolio-variance bound.**
 
 The observable aggregate carrier floor — inverse carrier distortion applied to multi-firm
 characteristic dispersion, less one weighted root-mean-square transmission radius, truncated
 at zero — deducts its square from coherent systematic portfolio variance.
 
 This is the multi-marginal counterpart of `jointPortfolioVariance_le_informationCertifiedCap`.
-It is sharper in two independent ways: the dispersion infimum dominates any weighted sum of
-pairwise floors, and slack is subtracted once in aggregate rather than per pair.  It is
+At zero slack the multi-marginal pairwise relaxation gives a credit at least as large as
+the pairwise credit. With positive slack, neither credit uniformly dominates: aggregate
+root-mean-square slack and pairwise positive parts interact differently. This bound is
 conditional on the same carrier, slack, joint-law, and integrability premises, and calibrates
 none of them.
 -/
+@[blueprint "thm:p3-sharp-certificate"
+  (statement := /--
+    Under a measurable antilipschitz carrier with integrated synchronous slack, coherent
+    systematic portfolio variance is at most the weighted marginal second moments minus the
+    square of the aggregate carrier floor built from multi-firm characteristic dispersion.
+    Assumptions: finite asset universe and normalized long-only risk weights; a measurable
+    embedding that is antilipschitz with nonzero constant; common carrier and realized exposure
+    laws are coordinatewise pushforwards of the characteristic laws; each realized transmission
+    has the stated integrated squared slack radius; one coherent joint exposure law with the
+    declared coordinate marginals; integrability of every pairwise exposure inner product.
+  -/)]
 theorem jointPortfolioVariance_le_aggregateCertifiedCap
     {K : ℝ≥0} (hK : K ≠ 0) {t : X → H} (ht : AntilipschitzWith K t)
     (hme : MeasurableEmbedding t) (q : ProbabilityWeight A)

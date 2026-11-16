@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import cache
 from pathlib import Path
 
-from pydantic import Field, PositiveInt, SecretStr, field_validator  # noqa: TC002
+from pydantic import Field, PositiveInt, field_validator  # noqa: TC002
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _SETTINGS_CONFIG = SettingsConfigDict(
@@ -17,17 +17,6 @@ _SETTINGS_CONFIG = SettingsConfigDict(
     extra="ignore",
     frozen=True,
 )
-
-
-class OpenRouterSettings(BaseSettings):
-    """Authentication settings for paid OpenRouter embedding requests."""
-
-    model_config = _SETTINGS_CONFIG
-
-    api_key: SecretStr | None = Field(
-        default=None,
-        validation_alias="OPENROUTER_API_KEY",
-    )
 
 
 class PipelineRuntimeSettings(BaseSettings):
@@ -54,20 +43,46 @@ class PipelineRuntimeSettings(BaseSettings):
 
 
 @cache
-def openrouter_settings() -> OpenRouterSettings:
-    """Load and cache provider settings once for this process."""
-    return OpenRouterSettings()
-
-
-@cache
 def runtime_settings() -> PipelineRuntimeSettings:
     """Load and cache numerical runtime settings once for this process."""
     return PipelineRuntimeSettings()
 
 
+class _BenchmarkThreadSettings(BaseSettings):
+    """Actual non-secret process controls, read for provenance without dotenv."""
+
+    model_config = SettingsConfigDict(
+        case_sensitive=True, env_file=None, extra="ignore", frozen=True
+    )
+
+    omp: str | None = Field(default=None, validation_alias="OMP_NUM_THREADS")
+    openblas: str | None = Field(default=None, validation_alias="OPENBLAS_NUM_THREADS")
+    mkl: str | None = Field(default=None, validation_alias="MKL_NUM_THREADS")
+    numexpr: str | None = Field(default=None, validation_alias="NUMEXPR_NUM_THREADS")
+    jax_platforms: str | None = Field(default=None, validation_alias="JAX_PLATFORMS")
+    xla_flags: str | None = Field(default=None, validation_alias="XLA_FLAGS")
+
+
+def benchmark_thread_settings() -> dict[str, str | None]:
+    """Snapshot non-secret numerical process controls for measurement provenance.
+
+    These are recorded values, not a second configuration owner. The helper
+    neither changes process settings nor infers effective hardware parallelism
+    from a requested thread cap.
+    """
+    actual = _BenchmarkThreadSettings()
+    return {
+        "OMP_NUM_THREADS": actual.omp,
+        "OPENBLAS_NUM_THREADS": actual.openblas,
+        "MKL_NUM_THREADS": actual.mkl,
+        "NUMEXPR_NUM_THREADS": actual.numexpr,
+        "JAX_PLATFORMS": actual.jax_platforms,
+        "XLA_FLAGS": actual.xla_flags,
+    }
+
+
 __all__ = [
-    "OpenRouterSettings",
     "PipelineRuntimeSettings",
-    "openrouter_settings",
+    "benchmark_thread_settings",
     "runtime_settings",
 ]

@@ -21,6 +21,7 @@
 \ppDeclareValue{embed-dim}{4096}
 \ppDeclareValue{sample-year-start}{2018}
 \ppDeclareValue{sample-year-end}{2022}
+\ppDeclareValue{text-controls-max-features}{4096}
 
 % --- News corpus summary (data/shared/corpus/summary.yaml) ---
 \ppDeclareValue{corpus-raw-records}{397041}
@@ -30,7 +31,7 @@
 \ppDeclareValue{corpus-year-max}{2023}
 \ppDeclareValue{corpus-articles-window}{129568}
 
-% --- Dyadic confound-aware robustness check (data/papers/paper1/dyadic_confound/summary.yaml) ---
+% --- Dyadic confound-aware robustness check (data/papers/paper1/dyadic_confound/results.json) ---
 \ppDeclareValue{n-firms}{100}
 \ppDeclareValue{n-pairs}{4950}
 \ppDeclareValue{confound-w2-coef}{1.873854}
@@ -44,7 +45,7 @@
 \ppDeclareValue{confound-w2-effect-one-sd}{0.068656}
 \ppDeclareValue{confound-bootstrap-valid}{1999}
 
-% --- Fixed-W2 random-exposure envelope diagnostic (data/papers/paper1/dyadic_confound/summary.yaml) ---
+% --- Fixed-W2 random-exposure envelope diagnostic (data/papers/paper1/dyadic_confound/results.json) ---
 \ppDeclareValue{confound-w2-within-r2}{0.332462}
 \ppDeclareValue{confound-w2-l1-tau0-coverage}{0.706667}
 \ppDeclareValue{confound-w2-l1-tau0-violation}{0.293333}
@@ -109,27 +110,118 @@
 \ppDeclareValue{chord-rho-q75}{0.299024}
 \ppDeclareValue{chord-rho-after-q75}{0.215375}
 \ppDeclareValue{chord-delta-rho-q75}{-0.083649}
+% --- Classification controls within the FE design ---
+\ppDeclareValue{classification-sector-coefficient}{1.721295}
+\ppDeclareValue{classification-sector-se}{0.204990}
+\ppDeclareValue{classification-sector-ci-low}{1.337921}
+\ppDeclareValue{classification-sector-ci-high}{2.128913}
+\ppDeclareValue{classification-sector-pvalue}{0.001000}
+\ppDeclareValue{classification-sector-effect-one-sd}{0.063067}
+\ppDeclareValue{classification-sector-delta-correlation}{-0.071954}
+\ppDeclareValue{classification-sector-anchor-correlation}{0.384630}
+\ppDeclareValue{classification-sector-partial-r2}{0.227419}
+\ppDeclareValue{classification-sector-n-firms}{100}
+\ppDeclareValue{classification-sector-n-dyads}{4950}
+\ppDeclareValue{classification-sector-bootstrap-valid-draws}{1999}
+\ppDeclareValue{classification-industry-coefficient}{1.554714}
+\ppDeclareValue{classification-industry-se}{0.205098}
+\ppDeclareValue{classification-industry-ci-low}{1.166991}
+\ppDeclareValue{classification-industry-ci-high}{1.967252}
+\ppDeclareValue{classification-industry-pvalue}{0.001000}
+\ppDeclareValue{classification-industry-effect-one-sd}{0.056963}
+\ppDeclareValue{classification-industry-delta-correlation}{-0.064817}
+\ppDeclareValue{classification-industry-anchor-correlation}{0.384630}
+\ppDeclareValue{classification-industry-partial-r2}{0.184065}
+\ppDeclareValue{classification-industry-n-firms}{100}
+\ppDeclareValue{classification-industry-n-dyads}{4950}
+\ppDeclareValue{classification-industry-bootstrap-valid-draws}{1999}
+\ppDeclareValue{classification-within-industry-coefficient}{1.444067}
+\ppDeclareValue{classification-within-industry-se}{0.494869}
+\ppDeclareValue{classification-within-industry-ci-low}{0.530278}
+\ppDeclareValue{classification-within-industry-ci-high}{2.441902}
+\ppDeclareValue{classification-within-industry-pvalue}{0.013000}
+\ppDeclareValue{classification-within-industry-effect-one-sd}{0.054247}
+\ppDeclareValue{classification-within-industry-delta-correlation}{-0.049728}
+\ppDeclareValue{classification-within-industry-anchor-correlation}{0.604331}
+\ppDeclareValue{classification-within-industry-partial-r2}{0.309414}
+\ppDeclareValue{classification-within-industry-n-firms}{86}
+\ppDeclareValue{classification-within-industry-n-dyads}{182}
+\ppDeclareValue{classification-within-industry-bootstrap-valid-draws}{1999}
+\ppDeclareValue{classification-etnic-roster-coefficient}{1.765123}
+\ppDeclareValue{classification-etnic-roster-se}{0.252055}
+\ppDeclareValue{classification-etnic-roster-ci-low}{1.297325}
+\ppDeclareValue{classification-etnic-roster-ci-high}{2.279645}
+\ppDeclareValue{classification-etnic-roster-pvalue}{0.001000}
+\ppDeclareValue{classification-etnic-roster-effect-one-sd}{0.062758}
+\ppDeclareValue{classification-etnic-roster-delta-correlation}{-0.070297}
+\ppDeclareValue{classification-etnic-roster-anchor-correlation}{0.407320}
+\ppDeclareValue{classification-etnic-roster-partial-r2}{0.227563}
+\ppDeclareValue{classification-etnic-roster-n-firms}{81}
+\ppDeclareValue{classification-etnic-roster-n-dyads}{3240}
+\ppDeclareValue{classification-etnic-roster-bootstrap-valid-draws}{1999}
+\ppDeclareValue{classification-etnic-coefficient}{1.313738}
+\ppDeclareValue{classification-etnic-se}{0.258404}
+\ppDeclareValue{classification-etnic-ci-low}{0.857583}
+\ppDeclareValue{classification-etnic-ci-high}{1.880262}
+\ppDeclareValue{classification-etnic-pvalue}{0.001000}
+\ppDeclareValue{classification-etnic-effect-one-sd}{0.046709}
+\ppDeclareValue{classification-etnic-delta-correlation}{-0.051945}
+\ppDeclareValue{classification-etnic-anchor-correlation}{0.407320}
+\ppDeclareValue{classification-etnic-partial-r2}{0.112393}
+\ppDeclareValue{classification-etnic-n-firms}{81}
+\ppDeclareValue{classification-etnic-n-dyads}{3240}
+\ppDeclareValue{classification-etnic-bootstrap-valid-draws}{1999}
+\ppDeclareValue{classification-etnic-control-coefficient}{-0.233846}
+\ppDeclareValue{classification-etnic-control-se}{0.054750}
+\ppDeclareValue{classification-etnic-control-ci-low}{-0.343407}
+\ppDeclareValue{classification-etnic-control-ci-high}{-0.128983}
+\ppDeclareValue{classification-etnic-control-effect-one-sd}{-0.022161}
+\ppDeclareValue{classification-etnic-control-partial-r2}{0.053310}
+\ppDeclareValue{classification-etnic-control-correlation-with-w2}{-0.546430}
+\ppDeclareValue{classification-n-industries}{38}
+\ppDeclareValue{etnic-n-firms}{81}
+\ppDeclareValue{etnic-year-start}{2018}
+\ppDeclareValue{etnic-year-end}{2022}
+\ppDeclareValue{etnic-matrix-correlation-w2}{0.546430}
+\ppDeclareValue{etnic-matrix-correlation-w2-spearman}{0.396029}
+\ppDeclareValue{etnic-matrix-correlation-w2-partial-sector}{0.326985}
+\ppDeclareValue{etnic-matrix-correlation-pvalue-max}{0.000100}
+\ppDeclareValue{etnic-matrix-correlation-permutations}{9999}
 
-% --- DISCO (energy-distance ANOVA, Rizzo-Szekely 2010; t19) global sector-separation statistic, in place of the silhouette table; t13 dyadic confound-aware regression above remains primary ---
-% Source: data/papers/paper1/disco/summary.yaml
-\ppDeclareValue{disco-r2}{0.152656}
-\ppDeclareValue{disco-f}{2.049296}
-\ppDeclareValue{disco-p}{0.000100}
-\ppDeclareValue{disco-dispersion-p}{0.982000}
+% --- Original-W2 sector PERMANOVA and dispersion companion ---
+% Source: data/papers/paper1/w2_permanova/results.json
+\ppDeclareValue{w2-permanova-n-firms}{100}
+\ppDeclareValue{w2-permanova-n-groups}{9}
+\ppDeclareValue{w2-permanova-r2}{0.136479}
+\ppDeclareValue{w2-permanova-f}{1.797814}
+\ppDeclareValue{w2-permanova-p}{0.000100}
+\ppDeclareValue{w2-permanova-null-r2}{0.080808}
+\ppDeclareValue{w2-permanova-excess-r2}{0.055676}
+\ppDeclareValue{w2-permanova-dispersion-p}{0.000100}
 
-% --- Sample descriptives, pooled/overall (data/papers/paper1/sample_descriptives/summary.yaml) ---
+% --- Sample descriptives, pooled/overall (data/shared/sample_descriptives/results.json) ---
+\ppDeclareValue{sample-desc-articles-per-firm}{128.000000}
 \ppDeclareValue{sample-desc-total-articles}{12800}
 
-% --- Truncated-vs-full W2 agreement per Matryoshka width (data/papers/paper1/diagnostics/summary.yaml) ---
+% --- Truncated-vs-full W2 agreement per Matryoshka width (data/papers/paper1/diagnostics/results.json) ---
 \ppDeclareValue{matryoshka-preserve-64-spearman}{0.803636}
 \ppDeclareValue{matryoshka-preserve-256-spearman}{0.925257}
 
-% --- Descriptive two-dimensional MDS projection fidelity (t17) ---
-\ppDeclareValue{mds-stress-1}{0.433457}
-\ppDeclareValue{mds-shepard-pearson}{0.508259}
-\ppDeclareValue{mds-shepard-spearman}{0.512868}
-\ppDeclareValue{mds-top5-neighbour-recall}{0.262000}
-\ppDeclareValue{mds-exact-nearest-preserved}{16}
+% --- Descriptive two-axis PCoA: fidelity and inertia shares ---
+\ppDeclareValue{pcoa-stress-1}{0.776467}
+\ppDeclareValue{pcoa-shepard-pearson}{0.546199}
+\ppDeclareValue{pcoa-shepard-spearman}{0.514484}
+\ppDeclareValue{pcoa-top5-neighbour-recall}{0.252000}
+\ppDeclareValue{pcoa-exact-nearest-preserved}{14}
+\ppDeclareValue{pcoa-two-axis-share}{0.064480}
+\ppDeclareValue{pcoa-negative-inertia-share}{0.000000}
+
+% --- Descriptive two-axis metric MDS: original-distance fidelity ---
+\ppDeclareValue{metric-mds-stress-1}{0.396103}
+\ppDeclareValue{metric-mds-shepard-pearson}{0.553424}
+\ppDeclareValue{metric-mds-shepard-spearman}{0.553463}
+\ppDeclareValue{metric-mds-top5-neighbour-recall}{0.270000}
+\ppDeclareValue{metric-mds-exact-nearest-preserved}{9}
 
 % --- Preregistered original-space neighbour outcome split (t30, t80). Keys keep their neighbour-holdout- prefix; the evaluation window is in-sample. ---
 \ppDeclareValue{neighbour-holdout-n-firms}{100}
@@ -172,7 +264,7 @@
 \ppDeclareValue{neighbour-holdout-utilities-percentile}{100.0}
 
 % --- t37 out-of-sample PRIMARY dyadic association: FIXED 2018-22 Qwen3-Embedding 8B W2 matrix, 2023-2026 return chord distance ---
-% Source: data/papers/paper1/dyadic_oos/summary.yaml. Symmetric additive firm effects re-estimated on the surviving panel;
+% Source: data/papers/paper1/dyadic_oos/results.json. Symmetric additive firm effects re-estimated on the surviving panel;
 % multinomial node bootstrap (dyad weight w_i*w_j), seed 42, percentile [2.5, 97.5] -- the in-sample convention, fixed in advance.
 \ppDeclareValue{oos-dyadic-n-firms}{100}
 \ppDeclareValue{oos-dyadic-n-dyads}{4950}
@@ -188,3 +280,7 @@
 \ppDeclareValue{oos-dyadic-w2-ci-high}{2.453857}
 \ppDeclareValue{oos-dyadic-w2-effect-one-sd}{0.071265}
 \ppDeclareValue{oos-dyadic-w2-within-r2}{0.313726}
+\ppDeclareValue{text-controls-tfidf-document-partial-r2}{0.132819}
+\ppDeclareValue{source-pool-total-articles}{43720}
+\ppDeclareValue{classification-identifying-industries}{7}
+\ppDeclareValue{classification-identifying-firms}{45}

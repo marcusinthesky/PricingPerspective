@@ -81,7 +81,7 @@ export default function BlueprintPage() {
         </div>
         <p className="blueprint-note">
           This is a proof-development companion, not a publication manuscript. The current generated
-          view contains four formal chapters; claim mappings remain owned by the Lean blueprint.
+          view contains five formal chapters; claim mappings remain owned by the Lean blueprint.
         </p>
       </section>
     </>

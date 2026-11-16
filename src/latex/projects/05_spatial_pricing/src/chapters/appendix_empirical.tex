@@ -1,0 +1,571 @@
+\section{Additional Empirical Evidence}
+\label{sec:app-empirical}
+
+\subsection{Sample composition and specification history}
+\label{sec:app-sample}
+
+\input{generated/sample_descriptives}
+
+\Cref{tab:p5-sample-descriptives} records the news frame's industry
+composition and its return and text dispersion.
+Sector sizes are heavily unbalanced, with Technology holding roughly a third of
+the frame and two sectors holding fewer than three firms, so peer sets built
+from the text geometry inherit that imbalance.
+Mean within-sector $W_2$ distance is below the corresponding cross-sector
+distance in every sector holding more than one firm: the frozen geometry
+contains industry structure before any return is used.
+
+The reported specification expands the priced universe from an earlier 52-firm
+specification to \ppvalue{n-tickers-priced} firms and ends the return window
+on 6 April 2026, the final common date before HOLX's take-private.
+\Cref{tab:p5-universe-horizon-bridge} bridges the three observed
+specifications.
+At 52 firms, extending the common-date window from 6 April to 15 July 2026
+moves $\hat\rho$ from
+$\ppnum[3]{bridge-reference-52-short-rho}$ to
+$\ppnum[3]{bridge-reference-52-long-rho}$, a difference of
+$\ppnum[3]{bridge-horizon-rho-difference}$.
+At the short horizon, expanding the universe from 52 to 100 firms moves
+$\hat\rho$ from $\ppnum[3]{bridge-reference-52-short-rho}$ to
+$\ppnum[3]{bridge-current-100-short-rho}$, a difference of
+$\ppnum[3]{bridge-universe-rho-difference}$.
+Both are arithmetic differences reported without contrast-level inference.
+The universe comparison changes the frozen operator as well as the roster, and
+its complete-case intersection has one fewer date.
+The 52 shared return histories are identical through the common cutoff, so
+data revision within those histories does not explain the comparison.
+
+\input{generated/universe_horizon_bridge}
+
+\subsection{The complete barycentric field}
+\label{sec:app-field-anatomy}
+
+\Cref{fig:wflat-barycentric-mixtures} displays the complete field.
+Each row is a target firm and each column a candidate source; color marks the
+five largest actual coefficients in each row without renormalizing them.
+The upper panel reports each source's total incoming mass across target rows,
+and the right-hand panels report each target's effective source count and the
+share of its row captured by the five displayed cells.
+
+\begin{figure}[htbp]
+  \centering
+  \ppfigure{1}{w2_barycentric_mixture_weights}
+  \caption{Illustrative barycentric interaction field from the target-anchored
+    Wasserstein barycentric reconstruction. Each row is the actual
+    leave-one-out solution $W^\flat_{i\cdot}$ to \eqref{eq:w2-barycentre} over
+    the frozen 2018--2022 article clouds: weights are nonnegative, sum to one,
+    and assign zero self-weight. The heat map shows each target's five largest
+    \emph{actual} coefficients without renormalizing them; the remaining
+    positive coefficients still belong to $W^\flat$ but are not colored. The
+  upper and right-hand diagnostics are calculated from the complete field.}
+  \label{fig:wflat-barycentric-mixtures}
+  \figalttext{Rows index target firms and columns index source firms. Colored
+    cells mark each target's five largest actual barycentric weights; their
+    scattered, row-specific locations show that the field is directed and
+    heterogeneous. Marginal bar charts show heterogeneous incoming mass,
+    effective source counts, and the fraction of each full row contained in the
+  displayed top five. Uncolored positive weights remain in the operator.}
+\end{figure}
+
+Both concentration within rows and total incoming mass across rows vary across
+firms, and the colored locations are scattered and row specific: the field is
+directed and heterogeneous rather than a block-diagonal industry map.
+\Cref{tab:p5-peer-interpretation} lists actual reconstruction weights $W^\flat_{ij}$,
+pairwise-distance ranks, sector and industry matches, and persistent
+co-mention status for AMD and for the targets with minimum, median, and maximum
+effective source count.
+A large weight records a peer's usefulness within the target's reconstructing
+combination, which need not coincide with its pairwise rank.
+
+\input{generated/peer_interpretation}
+
+\subsection{The common-factor ladder and its information criteria}
+\label{sec:app-information-criteria}
+
+\Cref{tab:factor-set-sensitivity} repeats the primary specification under
+each common-factor control set on the same dates.
+The spatial coefficient is stable across the ladder and every bootstrap
+interval excludes zero; adding momentum lowers $\hat\rho$ by about one
+percentage point within either factor family.
+
+\begin{table}[H]
+  \centering
+  \caption{Common-factor sensitivity for the barycentric field $W^\flat$.
+    Each row profiles firm-specific intercepts and loadings on the indicated
+    factors. The empirical 95\% intervals use 2,000 paired joint-date
+    stationary-bootstrap refits. The held-out score fits all parameters on
+    2018--2022 and evaluates the mean Gaussian quasi-log score per firm-day on
+    2023--2026 returns; higher is better. FF5 plus momentum is the prespecified
+  primary model.}
+  \label{tab:factor-set-sensitivity}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Factor controls & $K$ & $\hat\rho$ & 95\% interval & Held-out score \\
+    \midrule
+    FF3 &
+    \ppvalue{transport-factor-ff3-n-factors} &
+    \ppnum[3]{transport-factor-ff3-w2-rho} &
+    $[\ppnum[3]{transport-factor-ff3-w2-rho-ci-lower},
+    \ppnum[3]{transport-factor-ff3-w2-rho-ci-upper}]$ &
+    \ppnum[6]{transport-factor-ff3-w2-predictive-score} \\
+    FF3 plus momentum &
+    \ppvalue{transport-factor-ff3-mom-n-factors} &
+    \ppnum[3]{transport-factor-ff3-mom-w2-rho} &
+    $[\ppnum[3]{transport-factor-ff3-mom-w2-rho-ci-lower},
+    \ppnum[3]{transport-factor-ff3-mom-w2-rho-ci-upper}]$ &
+    \ppnum[6]{transport-factor-ff3-mom-w2-predictive-score} \\
+    FF5 &
+    \ppvalue{transport-factor-ff5-n-factors} &
+    \ppnum[3]{transport-factor-ff5-w2-rho} &
+    $[\ppnum[3]{transport-factor-ff5-w2-rho-ci-lower},
+    \ppnum[3]{transport-factor-ff5-w2-rho-ci-upper}]$ &
+    \ppnum[6]{transport-factor-ff5-w2-predictive-score} \\
+    FF5 plus momentum (primary) &
+    \ppvalue{transport-factor-ff5-mom-n-factors} &
+    \ppnum[3]{transport-factor-ff5-mom-w2-rho} &
+    $[\ppnum[3]{transport-factor-ff5-mom-w2-rho-ci-lower},
+    \ppnum[3]{transport-factor-ff5-mom-w2-rho-ci-upper}]$ &
+    \ppnum[6]{transport-factor-ff5-mom-w2-predictive-score} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The held-out score is highest under FF3, and working information criteria rank
+the ladder differently according to their penalty; FF5 plus momentum remains
+primary because it conditions on the broadest prespecified set of observed
+factors.
+
+\begin{table}[H]
+  \centering
+  \caption{Working information criteria for the barycentric factor ladder.
+    The first panel reports the maximized post-corpus quasi-log-likelihood and
+    AIC. The second reports HQC and BIC using either multivariate dates, $T$,
+    or firm-days, $NT$, as the effective sample size. Lower information
+  criteria are better.}
+  \label{tab:factor-information-criteria}
+  \begin{tabular}{lrrr}
+    \toprule
+    Factor controls & Parameters & QLL & AIC \\
+    \midrule
+    FF3 &
+    \ppvalue{spatial-value-factor-ff3-parameter-count} &
+    \ppnum[1]{spatial-value-factor-ff3-loglik} &
+    \ppnum[1]{spatial-value-factor-ff3-aic} \\
+    FF3 plus momentum &
+    \ppvalue{spatial-value-factor-ff3-mom-parameter-count} &
+    \ppnum[1]{spatial-value-factor-ff3-mom-loglik} &
+    \ppnum[1]{spatial-value-factor-ff3-mom-aic} \\
+    FF5 &
+    \ppvalue{spatial-value-factor-ff5-parameter-count} &
+    \ppnum[1]{spatial-value-factor-ff5-loglik} &
+    \ppnum[1]{spatial-value-factor-ff5-aic} \\
+    FF5 plus momentum &
+    \ppvalue{spatial-value-factor-ff5-mom-parameter-count} &
+    \ppnum[1]{spatial-value-factor-ff5-mom-loglik} &
+    \ppnum[1]{spatial-value-factor-ff5-mom-aic} \\
+    \bottomrule
+  \end{tabular}
+
+  \begin{tabular}{lrrrr}
+    \toprule
+    Factor controls & $\mathrm{HQC}_T$ & $\mathrm{HQC}_{NT}$ &
+    $\mathrm{BIC}_T$ & $\mathrm{BIC}_{NT}$ \\
+    \midrule
+    FF3 &
+    \ppnum[1]{spatial-value-factor-ff3-hqc-dates} &
+    \ppnum[1]{spatial-value-factor-ff3-hqc-firm-days} &
+    \ppnum[1]{spatial-value-factor-ff3-bic-dates} &
+    \ppnum[1]{spatial-value-factor-ff3-bic-firm-days} \\
+    FF3 plus momentum &
+    \ppnum[1]{spatial-value-factor-ff3-mom-hqc-dates} &
+    \ppnum[1]{spatial-value-factor-ff3-mom-hqc-firm-days} &
+    \ppnum[1]{spatial-value-factor-ff3-mom-bic-dates} &
+    \ppnum[1]{spatial-value-factor-ff3-mom-bic-firm-days} \\
+    FF5 &
+    \ppnum[1]{spatial-value-factor-ff5-hqc-dates} &
+    \ppnum[1]{spatial-value-factor-ff5-hqc-firm-days} &
+    \ppnum[1]{spatial-value-factor-ff5-bic-dates} &
+    \ppnum[1]{spatial-value-factor-ff5-bic-firm-days} \\
+    FF5 plus momentum &
+    \ppnum[1]{spatial-value-factor-ff5-mom-hqc-dates} &
+    \ppnum[1]{spatial-value-factor-ff5-mom-hqc-firm-days} &
+    \ppnum[1]{spatial-value-factor-ff5-mom-bic-dates} &
+    \ppnum[1]{spatial-value-factor-ff5-mom-bic-firm-days} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Because each added factor introduces one loading for every firm, the working
+information criteria impose materially different penalties from the held-out
+score comparison.
+Working AIC and both HQC conventions are lowest for FF5 plus momentum, whereas
+both BIC conventions are lowest for FF3 plus momentum; the ranking depends on
+the penalty and the effective sample size.
+The criteria are
+$\mathrm{AIC}=-2\ell+2k$,
+$\mathrm{HQC}_T=-2\ell+2k\log\log T$,
+$\mathrm{HQC}_{NT}=-2\ell+2k\log\log(NT)$,
+$\mathrm{BIC}_T=-2\ell+k\log T$, and
+$\mathrm{BIC}_{NT}=-2\ell+k\log(NT)$, using dates and firm-days,
+respectively, as the effective sample size; lower values are preferred.
+For $K$ factors, $k=N(K+1)+1$ under the spherical factor-only model and
+$N(K+1)+2$ under a spatial alternative; the diagonal-variance models have
+$N(K+1)+N$ and $N(K+1)+N+1$ parameters.
+Momentum additions are nested within each factor family, whereas the official
+FF3 and FF5 files differ in their SMB construction.
+
+\subsection{Firm-specific innovation variances}
+\label{sec:app-diagonal}
+
+\begin{table}[H]
+  \centering
+  \caption{Spatial-value robustness with firm-specific innovation variances.
+    QLL gains, restricted-null QLR tests, and held-out score gains compare each
+  field with the matched diagonal-variance factor-only model.}
+  \label{tab:spatial-value-diagonal}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Field & $\hat\rho$ & QLL gain & QLR $p$ & Held-out gain \\
+    \midrule
+    Target-anchored W1 &
+    \ppnum[3]{spatial-value-diagonal-w1-rho} &
+    \ppnum[1]{spatial-value-diagonal-w1-versus-none-loglik-gain} &
+    \ppnum[4]{spatial-value-diagonal-w1-versus-none-qlr-pvalue} &
+    $\ppnum[4]{spatial-value-diagonal-w1-versus-none-held-out-score-gain}$
+    $[\ppnum[4]{spatial-value-diagonal-w1-versus-none-held-out-score-gain-ci-lower},
+    \ppnum[4]{spatial-value-diagonal-w1-versus-none-held-out-score-gain-ci-upper}]$
+    \\
+    Target-anchored W2 &
+    \ppnum[3]{spatial-value-diagonal-w2-rho} &
+    \ppnum[1]{spatial-value-diagonal-w2-versus-none-loglik-gain} &
+    \ppnum[4]{spatial-value-diagonal-w2-versus-none-qlr-pvalue} &
+    $\ppnum[4]{spatial-value-diagonal-w2-versus-none-held-out-score-gain}$
+    $[\ppnum[4]{spatial-value-diagonal-w2-versus-none-held-out-score-gain-ci-lower},
+    \ppnum[4]{spatial-value-diagonal-w2-versus-none-held-out-score-gain-ci-upper}]$
+    \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+With firm-specific variances, each spatial model also has lower working AIC,
+HQC, and BIC than its matched factor-only benchmark, and the reduced-form
+coefficient identity holds to within its $10^{-10}$ absolute and relative
+tolerance.
+
+\subsection{Covariance-sensitive portfolio diagnostic}
+\label{sec:app-gmv}
+
+Proposition~\ref{prop:factor-beta-invariance} implies that the economic
+difference across fields lies in the covariance assigned to factor-residual
+returns. For each fitted field, the stored total covariance is
+\begin{equation}
+  \widehat{\Sigma}_{r,m}
+  =\widehat{B}\widehat{\Sigma}_{f}\widehat{B}^{\prime}
+  + A_m^{-1}\widehat{\Omega}_m A_m^{-\prime},
+  \qquad A_m=I-\hat\rho_m W_m,
+  \label{eq:app-gmv-covariance}
+\end{equation}
+where $m$ indexes the factor-only, W1, and W2 specifications and
+$\widehat{\Omega}_m$ is the constant-correlation Ledoit--Wolf estimate of the
+factor-residualized spatial innovations. The factor-only row sets
+$\hat\rho_m=0$ and uses the same residual estimator. Thus the covariance inputs
+combine common-factor covariance with the same estimator-defined local
+factor-residual covariance rule across candidates.
+We translate these covariance estimates into a fixed-weight allocation
+diagnostic. The weights are formed on the factor-complete 2018--2022 panel,
+frozen at the formation vintage, and evaluated on 2023--2026 excess returns
+under a fully invested long-only constraint with a 15\% single-name cap.
+
+\input{generated/gmv_validation}
+
+Under this fixed-weight GMV convention, W1 and W2 do not reduce realized
+variance relative to the factor-only covariance benchmark; direct
+Ledoit--Wolf shrinkage is slightly lower. The exhibit is therefore a diagnostic
+of the residual-covariance interpretation, while the paper's primary evidence
+remains the held-out joint-density comparison.
+
+\subsection{Transport order at the article level and jointly}
+\label{sec:app-transport-order}
+
+The transport-order equivalence holds across the factor ladder.
+The W2-minus-W1 coefficient difference ranges from
+\ppnum[6]{transport-factor-ff3-mom-delta-rho} to
+\ppnum[6]{transport-factor-ff5-delta-rho}, and the held-out score difference
+from \ppnum[6]{transport-factor-ff5-delta-predictive-score} to
+\ppnum[6]{transport-factor-ff3-delta-predictive-score} per firm-day.
+After projection on the intercept and factors, the induced peer-return signals
+correlate at
+\ppnum[6]{transport-factor-residualized-signal-correlation} with a normalized
+difference of
+\ppnum[3]{transport-factor-residualized-relative-signal-difference-sd}, so the
+factor-residualized quantities leave the weak-separation classification
+unchanged.
+
+At full dimension the two transport orders send
+\ppnum[0]{transport-switch-d4096-switched-atoms} target atoms to different peer
+atoms.
+Scoring both assignments on the same chord distance, the mean W2-minus-W1
+difference is \ppnum[4]{transport-switch-d4096-max-difference} in the longest
+matched distance and \ppnum[4]{transport-switch-d4096-p95-difference} at its
+95th percentile, against
+$+\ppnum[4]{transport-switch-d4096-switched-difference}$ in mean matched
+distance on the reassigned atoms.
+Quadratic transport thus buys a shorter displacement tail with slightly longer
+typical matches, which is the economic content of squaring the ground cost.
+W2 gives a strictly shorter longest match in
+\ppnum[3]{transport-switch-d4096-max-reduction-share} of firm pairs, at a mean
+difference of \ppnum[3]{transport-switch-d4096-max-reduction-given-lower}, and
+a strictly longer one in
+\ppnum[3]{transport-switch-d4096-max-increase-share}, at
+$+\ppnum[3]{transport-switch-d4096-max-increase-given-higher}$; the remaining
+pairs share the same longest match.
+The pattern strengthens monotonically down the dimension ladder, reaching
+\ppnum[4]{transport-switch-d64-max-difference} in the longest match and a
+shorter-tail share of \ppnum[3]{transport-switch-d64-max-reduction-share} at 64
+dimensions.
+
+After observing the standalone comparison, we estimated both fields jointly,
+entering each supplied matrix unchanged:
+
+\begin{equation}\label{eq:factor-two-field-transport}
+  (I-\rho^\flat_1 W^\flat_1-\rho^\flat W^\flat)r_t^e
+  =\alpha+A f_t+\varepsilon_t,
+  \qquad
+  \rho^\flat_1,\rho^\flat\geq 0,
+  \quad \rho^\flat_1+\rho^\flat<1.
+\end{equation}
+
+At every candidate $(\rho^\flat_1,\rho^\flat)$ the specification re-profiles the same
+firm intercepts, factor loadings, and innovation variance as
+\eqref{eq:factor-spatial-lag}, and the restrictions $\rho^\flat=0$ and $\rho^\flat_1=0$
+recover the single-field models.
+The incremental statistic for W2 given W1 is
+\[
+  \operatorname{QLR}_{2\mid 1}
+  =2\left\{
+    \ell^Q(\hat\rho^\flat_1,\hat\rho^\flat)
+    -\ell^Q(\hat\rho^{\flat,0}_1,0)
+  \right\},
+\]
+with the reverse statistic defined analogously.
+Because each null places a coefficient on the boundary, reference distributions
+come from 2,000 restricted-null stationary-block innovation resamples generated
+through the restricted spatial inverse, with the factor nuisance space projected
+anew before both models are refit.
+
+\begin{table}[H]
+  \centering
+  \caption{Factor-conditioned joint W1 and W2 specification. Both
+    supplied fields
+    enter unchanged under nonnegative coefficients whose sum is below one.
+    Intervals are descriptive 95\% bootstrap quantiles, and the
+    coefficient-zero share is the fraction of draws in which that coefficient is
+    estimated at zero; both use 2,000 joint-date stationary-bootstrap refits.
+  The specification was added after the standalone transport-order comparison.}
+  \label{tab:transport-order-joint}
+  \begin{tabular}{lrrr}
+    \toprule
+    Quantity & Estimate & 95\% interval & Coefficient-zero share \\
+    \midrule
+    W1 coefficient $\rho^\flat_1$ &
+    \ppnum[3]{transport-joint-w1-rho} &
+    $[\ppnum[3]{transport-joint-rho-w1-ci-lower},
+    \ppnum[3]{transport-joint-rho-w1-ci-upper}]$ &
+    \ppnum[3]{transport-joint-w2-only-boundary-share} \\
+    W2 coefficient $\rho^\flat$ &
+    \ppnum[3]{transport-joint-w2-rho} &
+    $[\ppnum[3]{transport-joint-rho-w2-ci-lower},
+    \ppnum[3]{transport-joint-rho-w2-ci-upper}]$ &
+    \ppnum[3]{transport-joint-w1-only-boundary-share} \\
+    Total feedback $\rho^\flat_1+\rho^\flat$ &
+    \ppnum[3]{transport-joint-rho-total} &
+    $[\ppnum[3]{transport-joint-rho-total-ci-lower},
+    \ppnum[3]{transport-joint-rho-total-ci-upper}]$ & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The joint estimates are $\hat\rho^\flat_1=
+\ppnum[3]{transport-joint-w1-rho}$ and $\hat\rho^\flat=
+\ppnum[3]{transport-joint-w2-rho}$, so allowing W2 adds
+\ppnum[2]{transport-joint-loglik-gain-w1} quasi-log-likelihood units beyond
+W1 alone.
+The bootstrap places \ppnum[3]{transport-joint-w1-only-boundary-share} of draws
+on the W1-only boundary, where $\rho^\flat=0$, and the two channel estimates
+correlate at
+\ppnum[3]{transport-joint-channel-correlation}: total feedback is precisely
+positive, while its allocation between two nearly collinear fields is weakly
+determined.
+For W2 conditional on W1,
+$\operatorname{QLR}_{2\mid 1}=
+\ppnum[3]{transport-joint-qlr-w2-given-w1-statistic}$ with working-null
+$p=\ppnum[4]{transport-joint-qlr-w2-given-w1-pvalue}$; for W1 conditional on
+W2, $\operatorname{QLR}_{1\mid 2}=
+\ppnum[3]{transport-joint-qlr-w1-given-w2-statistic}$ with
+$p=\ppnum[4]{transport-joint-qlr-w1-given-w2-pvalue}$.
+The in-sample nested fit therefore favors W1, while the held-out scores remain
+predictively equivalent.
+
+\subsection{Raw-return, common-intercept estimates}
+\label{sec:app-unadjusted}
+
+\begin{table}[H]
+  \centering
+  \caption{Pooled 2023--2026 single-field estimates in the
+    raw-return, common-intercept
+    specification. The models use
+    raw returns and a common intercept. The 95\% intervals use 2,000
+    joint-date stationary-bootstrap refits, and
+    $\hat\rho=\hat\lambda/(1+\hat\lambda)$. The final column reports the
+  maximized conditional quasi-log-likelihood on the common return sample.}
+  \label{tab:qmle-pooled}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Interaction field & $\hat\lambda$ & 95\% interval & Implied $\hat\rho$
+    & $\ell^Q$ \\
+    \midrule
+    Barycentric field ($W^\flat$) &
+    \ppnum[2]{post-pooled-2023-2026-w-flat-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-pooled-2023-2026-w-flat-rho} &
+    \ppnum[1]{post-pooled-2023-2026-w-flat-loglik} \\
+    RBF--Wasserstein diffusion &
+    \ppnum[2]{post-pooled-2023-2026-w-h-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-w-h-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-w-h-lambda-ci-upper}]$ &
+    \ppnum[3]{post-pooled-2023-2026-w-h-rho} &
+    \ppnum[1]{post-pooled-2023-2026-w-h-loglik} \\
+    Persistent news co-mentions &
+    \ppnum[2]{post-pooled-2023-2026-w-co-mentions-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-w-co-mentions-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-w-co-mentions-lambda-ci-upper}]$ &
+    \ppnum[3]{post-pooled-2023-2026-w-co-mentions-rho} &
+    \ppnum[1]{post-pooled-2023-2026-w-co-mentions-loglik} \\
+    \midrule
+    Equal active support &
+    \ppnum[2]{post-pooled-2023-2026-equal-support-lambda} &
+    $[\ppnum[2]{post-pooled-2023-2026-equal-support-lambda-ci-lower},
+    \ppnum[2]{post-pooled-2023-2026-equal-support-lambda-ci-upper}]$ &
+    \ppnum[3]{post-pooled-2023-2026-equal-support-rho} &
+    \ppnum[1]{post-pooled-2023-2026-equal-support-loglik} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+In the raw-return, common-intercept specification, the barycentric field has
+pooled adjustment index
+$\hat\lambda=\ppnum[2]{post-pooled-2023-2026-w-flat-lambda}$, with interval
+$[\ppnum[2]{post-pooled-2023-2026-w-flat-lambda-ci-lower},
+\ppnum[2]{post-pooled-2023-2026-w-flat-lambda-ci-upper}]$, and feedback
+coefficient $\hat\rho=\ppnum[3]{post-pooled-2023-2026-w-flat-rho}$.
+When the identification condition in \Cref{sec:estimand} holds, this index
+corresponds to an adjustment criterion that places about
+\ppnum[2]{post-pooled-2023-2026-w-flat-lambda} times as much weight on
+misalignment with the barycentric peer average as on departure from
+stand-alone exposure; the interval determines the sign more sharply than the
+magnitude.
+Equal weighting of the same active support and pairwise RBF proximity both
+yield positive feedback and lower quasi-log-likelihood than the barycentric
+field, and the news-link field attains higher likelihood than the RBF field
+with a smaller adjustment index.
+
+The raw-return joint fit provides a corroborating channel comparison. Its
+pooled barycentric and news-link coefficients are estimated jointly with a
+common intercept, while the factor-conditioned estimates in
+\Cref{tab:two-field-pooled} are the primary specification.
+
+\begin{table}[H]
+  \centering
+  \caption{Raw-return, common-intercept joint barycentric and news-link model.
+  The 95\% intervals use 2,000 joint-date stationary-bootstrap refits.}
+  \label{tab:two-field-raw-appendix}
+  \begin{tabular}{lrrr}
+    \toprule
+    Channel & $\hat\rho$ & 95\% interval & $\hat\lambda$ \\
+    \midrule
+    Barycentric ($W^\flat$) &
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-b} &
+    $[\ppnum[3]{post-pooled-2023-2026-two-field-rho-b-ci-lower},
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-b-ci-upper}]$ &
+    \ppnum[2]{post-pooled-2023-2026-two-field-lambda-b} \\
+    News-link ($W^{\mathrm{news}}$) &
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-n} &
+    $[\ppnum[3]{post-pooled-2023-2026-two-field-rho-n-ci-lower},
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-n-ci-upper}]$ &
+    \ppnum[2]{post-pooled-2023-2026-two-field-lambda-n} \\
+    Total &
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-total} &
+    $[\ppnum[3]{post-pooled-2023-2026-two-field-rho-total-ci-lower},
+    \ppnum[3]{post-pooled-2023-2026-two-field-rho-total-ci-upper}]$ & \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \ppfigure{1}{two_field_region}
+  \caption{Joint two-field likelihood and bootstrap geometry in the raw-return,
+    common-intercept specification of \Cref{tab:two-field-raw-appendix}. The horizontal
+    axis is barycentric-channel feedback $\rho^\flat$, and the vertical axis is
+    news-link feedback $\rho^{\mathrm{news}}$. The left panel places the joint estimate
+    inside the admissible triangle, with both single-field fits on the axes and
+    the stability boundary $\rho^\flat+\rho^{\mathrm{news}}=1$ marked. The
+    right panel is the same
+    profiled surface zoomed to the bootstrap cloud, with a descriptive
+    two-parameter quasi-log-likelihood contour. The cloud's diagonal
+    tilt records
+    the trade-off between channels, while its dispersion in both directions
+  shows the sampling variation in their allocation.}
+  \label{fig:two-field-region}
+  \figalttext{Two contour panels plot barycentric-channel feedback horizontally
+    and news-link feedback vertically. The left panel shows an interior joint
+    estimate within the triangular stability region and single-field estimates
+    on the axes. The right panel magnifies an elongated downward-sloping
+    bootstrap cloud around the joint estimate, indicating a trade-off in
+  allocating feedback between channels.}
+\end{figure}
+
+\Cref{fig:two-field-region} shows the profiled joint surface behind
+\Cref{tab:two-field-raw-appendix}.
+The bootstrap cloud tilts along the diagonal, reflecting the trade-off between
+two channels whose peer-return signals correlate at
+\ppnum[3]{overlap-induced-pearson}, yet it varies in both directions rather
+than collapsing onto a one-dimensional ridge.
+
+\begin{table}[H]
+  \centering
+  \caption{Annual unadjusted model-implied adjustment under the frozen
+    barycentric interaction field. The 2026 period ends on
+  \ppvalue{post-evaluation-date-end}.}
+  \label{tab:qmle-annual}
+  \begin{tabular}{lrrr}
+    \toprule
+    Evaluation year & $\hat\lambda$ & 95\% interval & Implied $\hat\rho$ \\
+    \midrule
+    2023 & \ppnum[2]{post-eval2023-w-flat-lambda} &
+    $[\ppnum[2]{post-eval2023-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-eval2023-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-eval2023-w-flat-rho} \\
+    2024 & \ppnum[2]{post-eval2024-w-flat-lambda} &
+    $[\ppnum[2]{post-eval2024-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-eval2024-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-eval2024-w-flat-rho} \\
+    2025 & \ppnum[2]{post-eval2025-w-flat-lambda} &
+    $[\ppnum[2]{post-eval2025-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-eval2025-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-eval2025-w-flat-rho} \\
+    2026 & \ppnum[2]{post-eval2026-w-flat-lambda} &
+    $[\ppnum[2]{post-eval2026-w-flat-lambda-ci-lower},
+    \ppnum[2]{post-eval2026-w-flat-lambda-ci-upper}]$ &
+    \ppnum[3]{post-eval2026-w-flat-rho} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+With the 2018--2022 field held fixed, re-estimating only the common coefficient
+and nuisance parameters within each calendar year yields adjustment indices
+between \ppnum[2]{post-eval2024-w-flat-lambda} and
+\ppnum[2]{post-eval2026-w-flat-lambda}, and all four intervals lie above zero.
+Interval widths vary, especially in 2025, and the 2026 estimate uses
+\ppvalue{post-eval2026-w-flat-trading-days} dates.

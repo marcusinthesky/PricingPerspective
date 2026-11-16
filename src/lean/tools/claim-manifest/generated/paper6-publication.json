@@ -1,0 +1,519 @@
+{
+  "claims": [
+    {
+      "assumptions": [
+        "Finite fixed sites, nonnegative opportunities and costs, positive outside appeal and own curvature."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "prop:equilibrium",
+      "declaration": "PricingPerspective.Operating.RationalShare.existsUnique_isNashOrthant_of_primitives",
+      "disclosure": "The capacity equilibrium statement is checked for nonnegative rational-share primitives and symmetric uniformly positive cost curvature; the Gaussian benchmark economy is a specialization. Symmetry and the independent counterfactual are supported by the separate entries below.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/Equilibrium.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Unique Nash equilibrium of the rational-share capacity economy under primitive curvature conditions. Assumptions: Finite fixed sites, nonnegative opportunities and costs, positive outside appeal and own curvature.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 (\u2200 (i : \u03b9) (a : \u03b1), 0 \u2264 c i a) \u2192 \u2203! v, PricingPerspective.Operating.RationalShare.IsNashOrthant N c H v"
+    },
+    {
+      "assumptions": [
+        "Nonnegative one-firm rational-share appeals and positive cost curvature."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "app:independent-proof",
+      "declaration": "PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.existsUnique_isEquilibrium",
+      "disclosure": "The independent arm is checked as a product of one-firm problems, each facing outside appeal alone.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/SolverCertificates/IndependentEquilibriumCertificate.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Unique equilibrium of the independent product economy. Assumptions: Nonnegative one-firm rational-share appeals and positive cost curvature.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [DecidableEq \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 \u2203! x, PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.IsEquilibrium N c H x"
+    },
+    {
+      "assumptions": [
+        "Common firm primitives and a unique Nash equilibrium."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "app:symmetry-proof",
+      "declaration": "PricingPerspective.Operating.RationalShare.equilibrium_blocks_eq_of_common_primitives",
+      "disclosure": "The symmetry conclusion concerns firms within one economy, not equality between strategic and independent economies.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/Symmetry.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Identical primitives and uniqueness imply equal firm blocks. Assumptions: Common firm primitives and a unique Nash equilibrium.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c\u2080 : \u03b1 \u2192 \u211d) {H\u2080 : \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d}, (\u2200 (a b : \u03b1), H\u2080 a b = H\u2080 b a) \u2192 0 < mu \u2192 (\u2200 (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H\u2080 a b * u a * u b) \u2192 (\u2200 (a : \u03b1), 0 \u2264 c\u2080 a) \u2192 \u2200 {v : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, PricingPerspective.Operating.RationalShare.IsNashOrthant N (fun x => c\u2080) (fun x => H\u2080) v \u2192 \u2200 (i j : \u03b9) (a : \u03b1), v.ofLp (i, a) = v.ofLp (j, a)"
+    },
+    {
+      "assumptions": [
+        "Feasible profile and strongly monotone rational-share operator."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:certificate",
+      "declaration": "PricingPerspective.Operating.RationalShare.SolverCertificates.EquilibriumRegretCertificate.dist_orthantEquilibrium_le_equilibriumStationarityResidual",
+      "disclosure": "The joint residual supplies a distance certificate for the strategic capacity equilibrium.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/SolverCertificates/EquilibriumRegretCertificate.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Joint stationarity bounds equilibrium distance. Assumptions: Feasible profile and strongly monotone rational-share operator.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d} {x y : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 (\u2200 (i : \u03b9) (a : \u03b1), 0 \u2264 c i a) \u2192 x \u2208 PricingPerspective.Operating.RationalShare.EquilibriumResponse.capacityOrthant \u2192 PricingPerspective.Operating.RationalShare.IsNashOrthant N c H y \u2192 \u2016x - y\u2016 \u2264 \u2016PricingPerspective.Operating.RationalShare.SolverCertificates.EquilibriumRegretCertificate.equilibriumStationarityResidual (PricingPerspective.Operating.RationalShare.pseudoGradient N c H) x\u2016 / mu"
+    },
+    {
+      "assumptions": [
+        "Own strong concavity, feasibility, and frozen rivals."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "app:regret-proof",
+      "declaration": "PricingPerspective.Operating.RationalShare.SolverCertificates.EquilibriumRegretCertificate.unilateralPayoffGain_le_sq_norm_firmStationarityResidual_div",
+      "disclosure": "The residual bounds payoff regret, not only an optimizer stopping criterion.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/SolverCertificates/EquilibriumRegretCertificate.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Firm stationarity residual bounds unilateral regret. Assumptions: Own strong concavity, feasibility, and frozen rivals.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 \u2200 {mu : \u211d}, 0 < mu \u2192 \u2200 {x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, x \u2208 PricingPerspective.Operating.RationalShare.EquilibriumResponse.capacityOrthant \u2192 \u2200 (i : \u03b9) (q : \u03b1 \u2192 \u211d), (\u2200 (a : \u03b1), 0 \u2264 q a) \u2192 (\u2200 (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 PricingPerspective.Operating.RationalShare.payoff N c H i (PricingPerspective.Operating.RationalShare.replaceFirm x i q) - PricingPerspective.Operating.RationalShare.payoff N c H i x \u2264 \u2016PricingPerspective.Operating.RationalShare.SolverCertificates.EquilibriumRegretCertificate.firmStationarityResidual (PricingPerspective.Operating.RationalShare.pseudoGradient N c H) x i\u2016 ^ 2 / (2 * mu)"
+    },
+    {
+      "assumptions": [
+        "Nonnegative capacities and computed mass exceeding the error-dependent threshold."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:normalization-bound",
+      "declaration": "PricingPerspective.Operating.RationalShare.SolverCertificates.NormalizationCertificate.norm_normalized_incumbentBlock_sub_normalized_incumbentBlock_le",
+      "disclosure": "The bound composes joint-to-block error control with normalization and ensures positive exact mass.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/SolverCertificates/NormalizationCertificate.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Joint capacity error bounds normalized firm composition error. Assumptions: Nonnegative capacities and computed mass exceeding the error-dependent threshold.",
+      "statement_type": "\u2200 {\u03b1 : Type u_1} [inst : Fintype \u03b1] {\u03b9 : Type u_2} [inst_1 : Fintype \u03b9] (qhat qstar : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1) (i : \u03b9) {e : \u211d}, 0 < Fintype.card \u03b1 \u2192 (\u2200 (p : \u03b9 \u00d7 \u03b1), 0 \u2264 qhat.ofLp p) \u2192 (\u2200 (p : \u03b9 \u00d7 \u03b1), 0 \u2264 qstar.ofLp p) \u2192 \u2016qhat - qstar\u2016 \u2264 e \u2192 \u221a\u2191(Fintype.card \u03b1) * e < PricingPerspective.Operating.RationalShare.SolverCertificates.NormalizationCertificate.totalMass (PricingPerspective.Operating.RationalShare.FirmResponse.IncumbentResponse.incumbentBlock qhat i) \u2192 \u2016PricingPerspective.Operating.RationalShare.SolverCertificates.NormalizationCertificate.normalized (PricingPerspective.Operating.RationalShare.FirmResponse.IncumbentResponse.incumbentBlock qhat i) - PricingPerspective.Operating.RationalShare.SolverCertificates.NormalizationCertificate.normalized (PricingPerspective.Operating.RationalShare.FirmResponse.IncumbentResponse.incumbentBlock qstar i)\u2016 \u2264 2 * \u221a\u2191(Fintype.card \u03b1) * e / (PricingPerspective.Operating.RationalShare.SolverCertificates.NormalizationCertificate.totalMass (PricingPerspective.Operating.RationalShare.FirmResponse.IncumbentResponse.incumbentBlock qhat i) - \u221a\u2191(Fintype.card \u03b1) * e)"
+    },
+    {
+      "assumptions": [
+        "Independent one-firm rational-share objectives, feasibility, and positive cost curvature."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "app:independent-distance",
+      "declaration": "PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.dist_equilibrium_le_equilibriumStationarityResidual",
+      "disclosure": "The certificate applies to the Cartesian product of no-rival objectives.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/SolverCertificates/IndependentEquilibriumCertificate.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "The independent product residual bounds joint equilibrium error. Assumptions: Independent one-firm rational-share objectives, feasibility, and positive cost curvature.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d} {x y : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 x \u2208 PricingPerspective.Operating.RationalShare.EquilibriumResponse.capacityOrthant \u2192 PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.IsEquilibrium N c H y \u2192 \u2016x - y\u2016 \u2264 \u2016PricingPerspective.Operating.RationalShare.SolverCertificates.EquilibriumRegretCertificate.equilibriumStationarityResidual (PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.pseudoGradient N c H) x\u2016 / mu"
+    },
+    {
+      "assumptions": [
+        "Independent one-firm rational-share objectives, feasibility, and positive cost curvature."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "app:independent-regret",
+      "declaration": "PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.unilateralPayoffGain_le_sq_norm_firmStationarityResidual_div",
+      "disclosure": "The certificate applies to the Cartesian product of no-rival objectives.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/SolverCertificates/IndependentEquilibriumCertificate.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Independent firm residual bounds unilateral regret. Assumptions: Independent one-firm rational-share objectives, feasibility, and positive cost curvature.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] [inst_4 : DecidableEq \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} (i : \u03b9), (\u2200 (a b : \u03b1), H i a b = H i b a) \u2192 \u2200 {mu : \u211d}, 0 < mu \u2192 \u2200 {x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, x \u2208 PricingPerspective.Operating.RationalShare.EquilibriumResponse.capacityOrthant \u2192 \u2200 (q : \u03b1 \u2192 \u211d), (\u2200 (a : \u03b1), 0 \u2264 q a) \u2192 (\u2200 (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.independentPayoff N c H i (PricingPerspective.Operating.RationalShare.replaceFirm x i q) - PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.independentPayoff N c H i x \u2264 \u2016PricingPerspective.Operating.RationalShare.SolverCertificates.EquilibriumRegretCertificate.firmStationarityResidual (PricingPerspective.Operating.RationalShare.SolverCertificates.IndependentEquilibriumCertificate.pseudoGradient N c H) x i\u2016 ^ 2 / (2 * mu)"
+    },
+    {
+      "assumptions": [
+        "Nash equilibria of two rational-share economies that differ only in nonnegative opportunity values, with symmetric uniformly positive cost curvature and nonnegative linear costs."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:response-continuity",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.orthantEquilibrium_dist_le_opportunityShift",
+      "disclosure": "The Lipschitz bound is checked for any two equilibria that differ only in opportunity values, with no differentiability, interiority, or active-set condition.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/ResponseOperator.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Equilibrium capacities are Lipschitz in opportunity values with constant $L_r/\\nu$. Assumptions: Nash equilibria of two rational-share economies that differ only in nonnegative opportunity values, with symmetric uniformly positive cost curvature and nonnegative linear costs.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (r : \u03ba \u2192 \u211d) (hr : \u2200 (l : \u03ba), 0 \u2264 r l) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d} {x y : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 (\u2200 (i : \u03b9) (a : \u03b1), 0 \u2264 c i a) \u2192 PricingPerspective.Operating.RationalShare.IsNashOrthant N c H x \u2192 PricingPerspective.Operating.RationalShare.IsNashOrthant (N.withRevenue r hr) c H y \u2192 \u2016y - x\u2016 \u2264 \u221a(PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityModulusSq \u03b9 N) * \u221a(\u2211 l, (r l - N.revenue l) ^ 2) / mu"
+    },
+    {
+      "assumptions": [
+        "A profile with positive share denominators and any direction."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "app:response-jacobian",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.hasDerivAt_pseudoGradient_line",
+      "disclosure": "The Jacobian blocks are checked as the derivative of the field along every line through a profile with positive denominators.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/LinearResponse.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "The own and rival Jacobian blocks are the directional derivative of the negative marginal-profit field. Assumptions: A profile with positive share denominators and any direction.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) (x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d), (\u2200 (l : \u03ba), 0 < N.denom x l) \u2192 \u2200 (u : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1) (p : \u03b9 \u00d7 \u03b1), HasDerivAt (fun t => (PricingPerspective.Operating.RationalShare.pseudoGradient N c H (x + t \u2022 u)).ofLp p) (((PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x) u).ofLp p) 0"
+    },
+    {
+      "assumptions": [
+        "A nonnegative profile, uniformly positive cost curvature, and any set of active coordinates."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "prop:response",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.linearResponse_existsUnique",
+      "disclosure": "The response is checked as the unique solution of the equilibrium conditions linearized on any fixed active set; its identification with the derivative of the equilibrium map is checked separately under strict complementarity.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/LinearResponse.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "The equilibrium conditions linearized on any active set have a unique solution. Assumptions: A nonnegative profile, uniformly positive cost curvature, and any set of active coordinates.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) (x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1) {mu : \u211d}, 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 (\u2200 (p : \u03b9 \u00d7 \u03b1), 0 \u2264 x.ofLp p) \u2192 \u2200 (act : \u03b9 \u00d7 \u03b1 \u2192 Prop) [inst_3 : DecidablePred act] (\u03b4 : \u03ba \u2192 \u211d), \u2203! u, PricingPerspective.Operating.RationalShare.EquilibriumResponse.SolvesRestricted (PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL act) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityImpulse N x \u03b4) u"
+    },
+    {
+      "assumptions": [
+        "A nonnegative profile, uniformly positive cost curvature, and any set of active coordinates."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:linear-response",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.linearResponse_norm_le",
+      "disclosure": "The bound uses curvature of the Jacobian at every nonnegative profile, not only at an equilibrium.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/LinearResponse.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "The linearized response is bounded by the restricted opportunity impulse divided by nu. Assumptions: A nonnegative profile, uniformly positive cost curvature, and any set of active coordinates.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) (x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1) {mu : \u211d}, 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 (\u2200 (p : \u03b9 \u00d7 \u03b1), 0 \u2264 x.ofLp p) \u2192 \u2200 (act : \u03b9 \u00d7 \u03b1 \u2192 Prop) [inst_3 : DecidablePred act] {\u03b4 : \u03ba \u2192 \u211d} {u : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, PricingPerspective.Operating.RationalShare.EquilibriumResponse.SolvesRestricted (PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL act) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityImpulse N x \u03b4) u \u2192 \u2016u\u2016 \u2264 \u2016(PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL act) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityImpulse N x \u03b4)\u2016 / mu"
+    },
+    {
+      "assumptions": [
+        "Full and direct responses on the same active set."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:feedback",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.feedback_eq_response_to_rival_forcing",
+      "disclosure": "The identity is checked in solved-system form; the explicit inverse follows from uniqueness of the linearized response.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/LinearResponse.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Full minus direct response is the full response to the rival forcing generated by the direct response. Assumptions: Full and direct responses on the same active set.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) (x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1) (act : \u03b9 \u00d7 \u03b1 \u2192 Prop) [inst_3 : DecidablePred act] {\u03b4 : \u03ba \u2192 \u211d} {uf ud : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, PricingPerspective.Operating.RationalShare.EquilibriumResponse.SolvesRestricted (PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL act) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityImpulse N x \u03b4) uf \u2192 PricingPerspective.Operating.RationalShare.EquilibriumResponse.SolvesRestricted (PricingPerspective.Operating.RationalShare.EquilibriumResponse.ownJac N H x) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL act) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityImpulse N x \u03b4) ud \u2192 PricingPerspective.Operating.RationalShare.EquilibriumResponse.SolvesRestricted (PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL act) (-(PricingPerspective.Operating.RationalShare.EquilibriumResponse.crossJac N x) ud) (uf - ud)"
+    },
+    {
+      "assumptions": [
+        "A capacity block with positive total mass."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:composition-derivative",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.hasDerivAt_composition",
+      "disclosure": "The normalization derivative is checked coordinatewise at any block with positive mass.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/ResponseOperator.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "The derivative of composition with respect to capacity removes the proportional scale direction. Assumptions: A capacity block with positive total mass.",
+      "statement_type": "\u2200 {\u03b1 : Type u_1} [inst : Fintype \u03b1] {q h : \u03b1 \u2192 \u211d}, 0 < \u2211 b, q b \u2192 \u2200 (a : \u03b1), HasDerivAt (fun t => (q a + t * h a) / \u2211 b, (q b + t * h b)) ((h a - (q a / \u2211 b, q b) * \u2211 b, h b) / \u2211 b, q b) 0"
+    },
+    {
+      "assumptions": [
+        "Fixed capacities and two opportunity-value vectors."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "cor:exposure",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.payoff_withRevenue_sub",
+      "disclosure": "The exposure identity is exact at fixed capacities; it does not include the equilibrium response of capacities.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/ResponseOperator.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "At fixed capacities, payoff is affine in opportunity values with slopes equal to node shares. Assumptions: Fixed capacities and two opportunity-value vectors.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (r : \u03ba \u2192 \u211d) (hr : \u2200 (l : \u03ba), 0 \u2264 r l) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) (i : \u03b9) (x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), PricingPerspective.Operating.RationalShare.payoff (N.withRevenue r hr) c H i x - PricingPerspective.Operating.RationalShare.payoff N c H i x = \u2211 l, (r l - N.revenue l) * N.share x i l"
+    },
+    {
+      "assumptions": [
+        "Square-integrable innovations and a predetermined share matrix."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:exposure-covariance",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.covariance_exposure",
+      "disclosure": "The covariance formula is checked for square-integrable innovations passed through a predetermined share matrix.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/ResponseOperator.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Share-weighted opportunity innovations have covariance $S\\Omega S^\\top$. Assumptions: Square-integrable innovations and a predetermined share matrix.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} [inst : Fintype \u03ba] {\u03a9 : Type u_3} {m\u03a9 : MeasurableSpace \u03a9} {\u03bc : MeasureTheory.Measure \u03a9} [MeasureTheory.IsFiniteMeasure \u03bc] (s : \u03b9 \u2192 \u03ba \u2192 \u211d) (\u03b5 : \u03ba \u2192 \u03a9 \u2192 \u211d), (\u2200 (l : \u03ba), MeasureTheory.MemLp (\u03b5 l) 2 \u03bc) \u2192 \u2200 (i j : \u03b9), ProbabilityTheory.covariance (fun \u03c9 => \u2211 l, s i l * \u03b5 l \u03c9) (fun \u03c9 => \u2211 m, s j m * \u03b5 m \u03c9) \u03bc = \u2211 l, \u2211 m, s i l * s j m * ProbabilityTheory.covariance (\u03b5 l) (\u03b5 m) \u03bc"
+    },
+    {
+      "assumptions": [
+        "A nonnegative profile and a rival whose capacities weakly rise."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:rival-cross",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.payoff_replaceFirm_rival_le",
+      "disclosure": "The nonpositive rival cross-effect is checked in finite-difference form.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/ResponseOperator.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "A rival's weak capacity expansion weakly lowers a firm's payoff. Assumptions: A nonnegative profile and a rival whose capacities weakly rise.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) {x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, (\u2200 (p : \u03b9 \u00d7 \u03b1), 0 \u2264 x.ofLp p) \u2192 \u2200 {i j : \u03b9}, j \u2260 i \u2192 \u2200 {q : \u03b1 \u2192 \u211d}, (\u2200 (a : \u03b1), x.ofLp (j, a) \u2264 q a) \u2192 PricingPerspective.Operating.RationalShare.payoff N c H i (PricingPerspective.Operating.RationalShare.replaceFirm x j q) \u2264 PricingPerspective.Operating.RationalShare.payoff N c H i x"
+    },
+    {
+      "assumptions": [
+        "Uniformly positive cost curvature, a nonnegative adjustment weight, contemporaneous rivals, and any anchor."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "app:anchored-stage",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.existsUnique_proxSolvesVI_capacityOrthant",
+      "disclosure": "Existence and uniqueness of the anchored stage equilibrium are checked with no sign restriction on the anchor-shifted linear cost.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/AnchoredStage.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Every anchored stage game of the rational-share economy has a unique equilibrium on the capacity orthant. Assumptions: Uniformly positive cost curvature, a nonnegative adjustment weight, contemporaneous rivals, and any anchor.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) {mu kappa : \u211d}, 0 < mu \u2192 0 \u2264 kappa \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 \u2200 (a : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), \u2203! y, PricingPerspective.Operating.VariationalInequality.ProxSolvesVI (PricingPerspective.Operating.RationalShare.pseudoGradient N c H) PricingPerspective.Operating.RationalShare.EquilibriumResponse.capacityOrthant kappa a y"
+    },
+    {
+      "assumptions": [
+        "Assumption 1 primitives, an equilibrium with strict complementarity, the active set of positive capacities, and nonnegative nearby opportunity values."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:equilibrium-derivative",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.equilibrium_sub_linearResponse_le",
+      "disclosure": "The first-order approximation of the equilibrium map by the linear response is checked under strict complementarity, without an implicit-function theorem.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/EquilibriumDerivative.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Under strict complementarity the linear response is the derivative of the equilibrium map in opportunity values. Assumptions: Assumption 1 primitives, an equilibrium with strict complementarity, the active set of positive capacities, and nonnegative nearby opportunity values.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 (\u2200 (i : \u03b9) (a : \u03b1), 0 \u2264 c i a) \u2192 \u2200 {x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, PricingPerspective.Operating.RationalShare.IsNashOrthant N c H x \u2192 (\u2200 (p : \u03b9 \u00d7 \u03b1), 0 < x.ofLp p \u2228 0 < (PricingPerspective.Operating.RationalShare.pseudoGradient N c H x).ofLp p) \u2192 \u2200 {\u03b5 : \u211d}, 0 < \u03b5 \u2192 \u2203 d > 0, \u2200 (r : \u03ba \u2192 \u211d) (hr : \u2200 (l : \u03ba), 0 \u2264 r l), PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityDist N.revenue r < d \u2192 \u2200 (y : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), PricingPerspective.Operating.RationalShare.IsNashOrthant (N.withRevenue r hr) c H y \u2192 \u2200 (u : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), PricingPerspective.Operating.RationalShare.EquilibriumResponse.SolvesRestricted (PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL fun p => 0 < x.ofLp p) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityImpulse N x fun l => r l - N.revenue l) u \u2192 \u2016y - x - u\u2016 \u2264 \u03b5 * PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityDist N.revenue r"
+    },
+    {
+      "assumptions": [
+        "A profile with positive share denominators."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "app:equilibrium-derivative",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.hasFDerivAt_pseudoGradient",
+      "disclosure": "Fr\u00e9chet differentiability of the field and the identification of its derivative with the Jacobian blocks are checked.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/EquilibriumDerivative.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "The negative marginal-profit field is Fr\u00e9chet differentiable with derivative equal to the Jacobian blocks. Assumptions: A profile with positive share denominators.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) (x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), (\u2200 (l : \u03ba), 0 < N.denom x l) \u2192 HasFDerivAt (PricingPerspective.Operating.RationalShare.pseudoGradient N c H) (LinearMap.toContinuousLinearMap (PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x)) x"
+    },
+    {
+      "assumptions": [
+        "Symmetric cost curvature and positive share denominators."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:envelope",
+      "declaration": "PricingPerspective.Operating.Valuation.CashFlowResponse.hasDerivAt_cashFlowLine",
+      "disclosure": "The three-term derivative of cash flow along any joint direction is checked.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/Valuation/CashFlowResponse.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Cash flow along a joint capacity and opportunity direction changes by direct news, the own-adjustment term, and the rival value effect. Assumptions: Symmetric cost curvature and positive share denominators.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) (x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 (\u2200 (l : \u03ba), 0 < N.denom x l) \u2192 \u2200 (u : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1) (\u03b4 : \u03ba \u2192 \u211d) (i : \u03b9), HasDerivAt (PricingPerspective.Operating.Valuation.CashFlowResponse.cashFlowLine N c H x u \u03b4 i) (\u2211 l, \u03b4 l * N.share x i l + PricingPerspective.Operating.Valuation.CashFlowResponse.ownAdjustmentEffect N c H x u i + PricingPerspective.Operating.Valuation.CashFlowResponse.rivalValueEffect N x u i) 0"
+    },
+    {
+      "assumptions": [
+        "Symmetric cost curvature, positive share denominators, and a field that vanishes wherever the direction moves the firm's capacity."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "rem:envelope",
+      "declaration": "PricingPerspective.Operating.Valuation.CashFlowResponse.hasDerivAt_cashFlowLine_static",
+      "disclosure": "The static envelope split is checked at an equilibrium where the own-adjustment term vanishes.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/Valuation/CashFlowResponse.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "At a static equilibrium the own term vanishes, leaving direct opportunity news plus the rival value effect. Assumptions: Symmetric cost curvature, positive share denominators, and a field that vanishes wherever the direction moves the firm's capacity.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) (H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d) (x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 (\u2200 (l : \u03ba), 0 < N.denom x l) \u2192 \u2200 (u : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1) (\u03b4 : \u03ba \u2192 \u211d) (i : \u03b9), (\u2200 (a : \u03b1), u.ofLp (i, a) \u2260 0 \u2192 (PricingPerspective.Operating.RationalShare.pseudoGradient N c H x).ofLp (i, a) = 0) \u2192 HasDerivAt (PricingPerspective.Operating.Valuation.CashFlowResponse.cashFlowLine N c H x u \u03b4 i) (\u2211 l, \u03b4 l * N.share x i l + PricingPerspective.Operating.Valuation.CashFlowResponse.rivalValueEffect N x u i) 0"
+    },
+    {
+      "assumptions": [
+        "Assumption 1 primitives and an equilibrium with strict complementarity."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:equilibrium-cash-flow",
+      "declaration": "PricingPerspective.Operating.Valuation.EquilibriumCashFlow.equilibriumCashFlow_sub_le",
+      "disclosure": "The equilibrium cash-flow sensitivity is checked as a first-order approximation under strict complementarity; the firm's own adjustment contributes nothing at first order.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/Valuation/EquilibriumCashFlow.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Equilibrium free cash flow responds to opportunity values through direct news plus the value of rivals' equilibrium repositioning. Assumptions: Assumption 1 primitives and an equilibrium with strict complementarity.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 (\u2200 (i : \u03b9) (a : \u03b1), 0 \u2264 c i a) \u2192 \u2200 {x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, PricingPerspective.Operating.RationalShare.IsNashOrthant N c H x \u2192 (\u2200 (p : \u03b9 \u00d7 \u03b1), 0 < x.ofLp p \u2228 0 < (PricingPerspective.Operating.RationalShare.pseudoGradient N c H x).ofLp p) \u2192 \u2200 (i : \u03b9) {\u03b5 : \u211d}, 0 < \u03b5 \u2192 \u2203 d > 0, \u2200 (r : \u03ba \u2192 \u211d) (hr : \u2200 (l : \u03ba), 0 \u2264 r l), PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityDist N.revenue r < d \u2192 \u2200 (y : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), PricingPerspective.Operating.RationalShare.IsNashOrthant (N.withRevenue r hr) c H y \u2192 \u2200 (u : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), PricingPerspective.Operating.RationalShare.EquilibriumResponse.SolvesRestricted (PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL fun p => 0 < x.ofLp p) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityImpulse N x fun l => r l - N.revenue l) u \u2192 |PricingPerspective.Operating.RationalShare.payoff (N.withRevenue r hr) c H i y - PricingPerspective.Operating.RationalShare.payoff N c H i x - (\u2211 l, (r l - N.revenue l) * N.share x i l + PricingPerspective.Operating.Valuation.CashFlowResponse.rivalValueEffect N x u i)| \u2264 \u03b5 * PricingPerspective.Operating.RationalShare.EquilibriumResponse.opportunityDist N.revenue r"
+    },
+    {
+      "assumptions": [
+        "Assumption 1 primitives, an equilibrium with strict complementarity, the active set of positive capacities, and nonnegative nearby linear costs."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:cost-response",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.equilibrium_sub_costResponse_le",
+      "disclosure": "The first-order approximation of the equilibrium map in linear costs is checked under strict complementarity, without an implicit-function theorem.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/CostResponse.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Under strict complementarity the equilibrium responds to a change in linear activity costs through the restricted linear system with forcing minus the cost change. Assumptions: Assumption 1 primitives, an equilibrium with strict complementarity, the active set of positive capacities, and nonnegative nearby linear costs.",
+      "statement_type": "\u2200 {\u03ba : Type u_1} {\u03b9 : Type u_2} {\u03b1 : Type u_3} [inst : Fintype \u03ba] [inst_1 : Fintype \u03b9] [inst_2 : Fintype \u03b1] [inst_3 : DecidableEq \u03b9] (N : PricingPerspective.Operating.RationalShare.Nodes \u03ba \u03b1) (c : \u03b9 \u2192 \u03b1 \u2192 \u211d) {H : \u03b9 \u2192 \u03b1 \u2192 \u03b1 \u2192 \u211d} {mu : \u211d}, (\u2200 (i : \u03b9) (a b : \u03b1), H i a b = H i b a) \u2192 0 < mu \u2192 (\u2200 (i : \u03b9) (u : \u03b1 \u2192 \u211d), mu * \u2211 a, u a ^ 2 \u2264 \u2211 a, \u2211 b, H i a b * u a * u b) \u2192 (\u2200 (i : \u03b9) (a : \u03b1), 0 \u2264 c i a) \u2192 \u2200 {x : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1}, PricingPerspective.Operating.RationalShare.IsNashOrthant N c H x \u2192 (\u2200 (p : \u03b9 \u00d7 \u03b1), 0 < x.ofLp p \u2228 0 < (PricingPerspective.Operating.RationalShare.pseudoGradient N c H x).ofLp p) \u2192 \u2200 {\u03b5 : \u211d}, 0 < \u03b5 \u2192 \u2203 d > 0, \u2200 (c' : \u03b9 \u2192 \u03b1 \u2192 \u211d), (\u2200 (i : \u03b9) (a : \u03b1), 0 \u2264 c' i a) \u2192 PricingPerspective.Operating.RationalShare.EquilibriumResponse.costDist c c' < d \u2192 \u2200 (y : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), PricingPerspective.Operating.RationalShare.IsNashOrthant N c' H y \u2192 \u2200 (u : PricingPerspective.Operating.RationalShare.Profile \u03b9 \u03b1), PricingPerspective.Operating.RationalShare.EquilibriumResponse.SolvesRestricted (PricingPerspective.Operating.RationalShare.EquilibriumResponse.jac N H x) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.restrictL fun p => 0 < x.ofLp p) (-PricingPerspective.Operating.RationalShare.EquilibriumResponse.costShift c c') u \u2192 \u2016y - x - u\u2016 \u2264 \u03b5 * PricingPerspective.Operating.RationalShare.EquilibriumResponse.costDist c c'"
+    },
+    {
+      "assumptions": [
+        "Both shares lie in the unit interval; diagonal transport costs zero and cross-site transport costs d squared."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:two-site-transport",
+      "declaration": "WassersteinGeometry.twoSiteDistanceSq_eq",
+      "disclosure": "Machine-checked by a lower bound for every nonnegative finite coupling and construction of an attaining coupling. The result concerns the finite two-site transport problem.",
+      "file": "packages/WassersteinGeometry/WassersteinGeometry/TwoSite.lean",
+      "package": "WassersteinGeometry",
+      "paper": "06_information_motion",
+      "statement_summary": "The finite two-site squared optimal transport infimum is d squared times the absolute probability-share difference. Assumptions: Both shares lie in the unit interval; diagonal transport costs zero and cross-site transport costs d squared.",
+      "statement_type": "\u2200 {d p q : \u211d}, p \u2208 Set.Icc 0 1 \u2192 q \u2208 Set.Icc 0 1 \u2192 WassersteinGeometry.twoSiteDistanceSq d p q = d ^ 2 * |p - q|"
+    },
+    {
+      "assumptions": [
+        "Finite activity set and strictly positive total initial capacity."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "eq:proportional-feedback",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.full_eq_direct_iff_feedback_proportional",
+      "disclosure": "Exact normalization equivalence. Identification with equilibrium derivatives separately requires the manuscript's differentiable fixed-active-set path premises; no implicit-function theorem is claimed here.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/CompositionFeedback.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Full and direct normalized derivatives coincide exactly when capacity feedback is proportional to the initial allocation. Assumptions: Finite activity set and strictly positive total initial capacity.",
+      "statement_type": "\u2200 {\u03b1 : Type u_1} [inst : Fintype \u03b1] {q hFull hDirect : \u03b1 \u2192 \u211d}, 0 < \u2211 b, q b \u2192 ((\u2200 (a : \u03b1), PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.compositionDerivative q hFull a = PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.compositionDerivative q hDirect a) \u2194 \u2203 lambda, \u2200 (a : \u03b1), hFull a - hDirect a = lambda * q a)"
+    },
+    {
+      "assumptions": [
+        "Positive curvature, opportunity value, denominator and cost reduction, strict strategic substitution at the affected activity."
+      ],
+      "axioms": [
+        "propext",
+        "Classical.choice",
+        "Quot.sound"
+      ],
+      "build_result": "checked",
+      "claim_id": "prop:composition-feedback",
+      "declaration": "PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.RankOneCostShock.primitive_response_signs",
+      "disclosure": "Supporting sign result for the explicit rank-one response system. The equilibrium-path identification, activity separability and unaffected-activity interpretation remain explicit human-proof premises. This binding does not enlarge coverage to arbitrary multi-activity or active-set-changing equilibria.",
+      "file": "packages/PricingPerspective/PricingPerspective/Operating/RationalShare/EquilibriumResponse/CompositionFeedback.lean",
+      "package": "PricingPerspective",
+      "paper": "06_information_motion",
+      "statement_summary": "Conditional many-firm activity-local cost-response signs support the composition benchmark. Assumptions: Positive curvature, opportunity value, denominator and cost reduction, strict strategic substitution at the affected activity.",
+      "statement_type": "\u2200 {\u03b9 : Type u_1} [inst : Fintype \u03b9] [inst_1 : DecidableEq \u03b9] {omega own rival : \u03b9 \u2192 \u211d} {revenue denominator shock : \u211d} {recipient : \u03b9}, (\u2200 (i : \u03b9), 0 < omega i) \u2192 0 < revenue \u2192 0 < denominator \u2192 (\u2200 (i : \u03b9), own i < rival i) \u2192 0 < shock \u2192 0 < PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.RankOneCostShock.response (PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.RankOneCostShock.primitiveDiagonal omega revenue denominator) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.RankOneCostShock.primitiveLoading own rival revenue denominator) recipient shock recipient \u2227 \u2200 (i : \u03b9), i \u2260 recipient \u2192 PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.RankOneCostShock.response (PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.RankOneCostShock.primitiveDiagonal omega revenue denominator) (PricingPerspective.Operating.RationalShare.EquilibriumResponse.CompositionFeedback.RankOneCostShock.primitiveLoading own rival revenue denominator) recipient shock i < 0"
+    }
+  ],
+  "content_hash": "5d6617d332c8e36a44534d45886801bcde9729b47bcce2c36ebb46398df00f0f",
+  "schema_version": "1.0"
+}

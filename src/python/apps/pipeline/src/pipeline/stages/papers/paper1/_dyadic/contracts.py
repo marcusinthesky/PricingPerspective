@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     import numpy as np
     import pandas as pd
-    from jcor.model.dyadic import DyadicSample
+    from statadic.law.dyadic import DyadicSample
 
 DEFAULT_BOOTSTRAP_ITERS = 1_999
 DEFAULT_BOOTSTRAP_SEED = 42
@@ -46,10 +47,13 @@ class DyadicConfoundConfig:
     energy_comparator_artifact_dir: Path
     covariance_matrix: Path
     universe_csv: Path
-    market_data_dir: Path
+    liquidity_proxy_file: Path
     returns_dir: Path
     output_file: Path
-    embeddings_dir: Path = Path("data/shared/embeddings/qwen3-embedding-8b")
+    embeddings_dir: Path
+    # Hoberg-Phillips ETNIC alignment output (pairs.parquet, results.json); when
+    # set, the classification block adds the ETNIC-roster comparison rows.
+    etnic_alignment_dir: Path | None = None
     bootstrap_iters: int = DEFAULT_BOOTSTRAP_ITERS
     bootstrap_seed: int = DEFAULT_BOOTSTRAP_SEED
 

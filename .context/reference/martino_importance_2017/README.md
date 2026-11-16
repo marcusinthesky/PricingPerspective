@@ -18,5 +18,3 @@ volume: '131'
 publisher: Elsevier
 page: 386-401
 ---
-
-# Effective Sample Size for Importance Sampling Based on Discrepancy Measures

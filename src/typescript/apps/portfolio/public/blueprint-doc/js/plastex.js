@@ -46,7 +46,7 @@ $(document).ready(function() {
                 var proof = $('#'+ref)
                 proof.show()
                 proof.children('.proof_content').each(
-                    function() {
+                    function() { 
                         var proof_content = $(this)
                         proof_content.show().addClass('hilite')
                         setTimeout(function(){

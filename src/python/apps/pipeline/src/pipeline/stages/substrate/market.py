@@ -1,20 +1,9 @@
-"""Market data, returns, and covariance computation.
-
-Provides:
-- ``download_market_data`` — download OHLCV + adjusted close via yfinance.
-- ``compute_returns`` — compute daily simple returns from adjusted close.
-- ``compute_covariance`` — compute variance-covariance matrix from returns.
-"""
+"""Compute covariance from the published adjusted-return panels."""
 
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-
-# Runtime import, not TYPE_CHECKING: `download_market_data` constructs the
-# default archive root as a real Path when MarketSource is 'archive'.
-from pathlib import Path
-from string import Template
 from typing import TYPE_CHECKING
 
 import duckdb
@@ -22,20 +11,18 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 import typer
-import yfinance as yf
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
-
+    from pathlib import Path
 logger = logging.getLogger(__name__)
 
-# Fallback contract for the in-sample panel when a caller supplies no explicit
-# expectation. The authoritative values are the per-window `expected_*` keys in
-# params.yaml:return_panels, which dvc.yaml passes on every stage invocation;
-# these constants only cover direct library use.
 CANONICAL_RETURN_PANEL_TICKERS = 100
+
 CANONICAL_RETURN_PANEL_OBSERVATIONS = 1207
+
 CANONICAL_RETURN_PANEL_START_DATE = "2018-03-19"
+
 CANONICAL_RETURN_PANEL_END_DATE = "2022-12-30"
 
 
@@ -88,42 +75,6 @@ class _ReturnPanelShapeError(ValueError):
 class _NonfiniteReturnPanelError(ValueError):
     def __init__(self) -> None:
         super().__init__("complete-case return panel still contains nonfinite values")
-
-
-class _EmptyMarketDownloadError(RuntimeError):
-    def __init__(self, ticker: str, start_date: str, end_date: str) -> None:
-        super().__init__(
-            f"yfinance returned no data for {ticker!r} over {start_date}..{end_date}; "
-            "refusing to write an empty market-data parquet"
-        )
-
-
-class _UnknownMarketSourceError(ValueError):
-    def __init__(self, ticker: str, source: str) -> None:
-        super().__init__(
-            f"universe.csv declares MarketSource {source!r} for {ticker!r}; "
-            "supported sources are 'yfinance' and 'archive'"
-        )
-
-
-class _MissingUniverseRowError(ValueError):
-    def __init__(self, ticker: str, universe_csv: Path) -> None:
-        super().__init__(f"{universe_csv} has no row for ticker {ticker!r}")
-
-
-class _MissingArchiveError(RuntimeError):
-    def __init__(self, ticker: str, archive_path: Path) -> None:
-        super().__init__(
-            f"{ticker!r} is declared MarketSource='archive' in universe.csv because "
-            f"its listing ended and a live provider request returns nothing, but "
-            f"{archive_path} does not exist. Supply the recorded price history at "
-            "that path; do not substitute a successor ticker or forward-fill."
-        )
-
-
-class _MissingReturnCountError(RuntimeError):
-    def __init__(self) -> None:
-        super().__init__("DuckDB returned no row for the return count")
 
 
 class _MissingCombinedReturnCountError(RuntimeError):
@@ -200,166 +151,6 @@ def _complete_case_return_panel(
     if not np.isfinite(clean_data).all():
         raise _NonfiniteReturnPanelError
     return clean_dates, clean_data
-
-
-def _resolve_market_route(ticker: str, universe_csv: Path | None) -> tuple[str, str]:
-    """Resolve ``(market_symbol, market_source)`` for one roster ticker.
-
-    With no universe file the historical behaviour is preserved exactly: fetch
-    the ticker itself from yfinance.
-    """
-    if universe_csv is None:
-        return ticker, "yfinance"
-
-    with duckdb.connect() as con:
-        row = con.execute(
-            """
-            SELECT UPPER(MarketSymbol), MarketSource
-            FROM read_csv_auto(?)
-            WHERE UPPER(Symbol) = ?
-            """,
-            [str(universe_csv), ticker.upper()],
-        ).fetchone()
-    if row is None:
-        raise _MissingUniverseRowError(ticker, universe_csv)
-    market_symbol, market_source = str(row[0]), str(row[1]).strip().lower()
-    if market_source not in {"yfinance", "archive"}:
-        raise _UnknownMarketSourceError(ticker, market_source)
-    return market_symbol, market_source
-
-
-def download_market_data(
-    start_date: str,
-    end_date: str,
-    ticker: str,
-    output_dir: Path,
-    universe_csv: Path | None = None,
-    archive_dir: Path | None = None,
-) -> None:
-    """Materialize total return data for one ticker from its declared source.
-
-    ``universe.csv`` carries a ``MarketSymbol``/``MarketSource`` pair per firm.
-    ``yfinance`` fetches live; ``archive`` copies a recorded history for a firm
-    whose listing has ended, so a delisting is an explicit, reviewable artifact
-    rather than an empty response indistinguishable from a network failure.
-
-    ``auto_adjust=True`` keeps the schema consistent across tickers (adjusted
-    ``Close``; no separate ``Adj Close`` column). A transient yfinance/network
-    failure returns an *empty* frame; we retry once and then fail loudly rather
-    than write an empty parquet, which would silently break ``compute_returns``
-    downstream (the empty frame has no ``Date`` column).
-    """
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{ticker}.parquet"
-    market_symbol, market_source = _resolve_market_route(ticker, universe_csv)
-
-    if market_source == "archive":
-        archive_root = archive_dir or Path("data/archive/market_data")
-        archive_path = archive_root / f"{market_symbol}.parquet"
-        if not archive_path.is_file():
-            raise _MissingArchiveError(ticker, archive_path)
-        archived = pq.read_table(archive_path)
-        pq.write_table(archived, output_path)
-        return
-
-    # One retry — transient yfinance/network failures return an empty frame.
-    data = yf.download(
-        market_symbol, start=start_date, end=end_date, auto_adjust=True, progress=False
-    )
-    if data is None or data.empty:
-        data = yf.download(
-            market_symbol,
-            start=start_date,
-            end=end_date,
-            auto_adjust=True,
-            progress=False,
-        )
-    if data is None or data.empty:
-        raise _EmptyMarketDownloadError(market_symbol, start_date, end_date)
-    data.to_parquet(output_path)
-
-
-def compute_returns(
-    market_data: Path,
-    start_date: str,
-    end_date: str,
-    output_file: Path,
-) -> None:
-    """Compute daily simple returns from market data for a single ticker.
-
-    Reads a market data parquet file, computes daily returns, and saves
-    to a parquet file with columns: Date, ticker, return.
-
-    The vendor close series is deliberately not carried into the output: it is
-    identical to the withheld ``market_data`` Close column, and the return
-    panels are published (see ``scripts/strip_close_price``).
-
-    One consequence: this stage sees a single window, so the first row's return
-    is null and the cross-window seam return cannot be produced here -- the OOS
-    window's ``market_data`` does not contain the last in-sample close. The
-    published panels carry that value in the OOS leading row, backfilled by the
-    operator above. ``compute_returns`` is therefore frozen in ``dvc.yaml``;
-    unfreezing and re-running yields a null seam return until this stage is
-    given the prior close as an explicit input.
-    """
-    ticker = market_data.stem
-    typer.echo(f"Computing returns for {ticker}")
-    typer.echo(f"Date range: {start_date} to {end_date}")
-
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-
-    if not market_data.exists():
-        typer.echo(f"Error: Market data not found at {market_data}", err=True)
-        raise typer.Exit(code=1)
-
-    close_col = _quote_duckdb_identifier(f"('Close', '{ticker}')")
-
-    with duckdb.connect(":memory:") as con:
-        returns_query = Template("""
-        CREATE OR REPLACE TABLE returns AS
-        SELECT
-            Date,
-            ? as ticker,
-            ($close_column / LAG($close_column) OVER (ORDER BY Date) - 1) as return
-        FROM read_parquet(?)
-        WHERE Date BETWEEN CAST(? AS DATE) AND CAST(? AS DATE)
-        ORDER BY Date;
-        """).substitute(close_column=close_col)
-
-        typer.echo("Computing returns...")
-        con.execute(returns_query, [ticker, str(market_data), start_date, end_date])
-
-        count_result = con.execute("SELECT COUNT(*) FROM returns").fetchone()
-        if count_result is None:
-            raise _MissingReturnCountError
-        typer.echo(f"Total return records: {count_result[0]}")
-
-        summary = con.execute(
-            """
-            SELECT
-                ticker,
-                COUNT(*) as days,
-                MIN(Date) as first_date,
-                MAX(Date) as last_date,
-                AVG(return) as mean_return,
-                STDDEV(return) as std_return
-            FROM returns
-            WHERE return IS NOT NULL
-            GROUP BY ticker
-            """
-        ).fetchone()
-
-        if summary:
-            typer.echo(f"\nSummary for {ticker}:")
-            typer.echo(f"  Days: {summary[1]}")
-            typer.echo(f"  Date range: {summary[2]} to {summary[3]}")
-            typer.echo(f"  Mean return: {summary[4]:.6f}")
-            typer.echo(f"  Std return: {summary[5]:.6f}")
-
-        typer.echo(f"\nSaving to {output_file}")
-        con.table("returns").write_parquet(str(output_file))
-
-    typer.echo("Returns computation complete!")
 
 
 def _load_wide_return_panel(

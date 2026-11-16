@@ -1,0 +1,1 @@
+"""Figure-package guards."""

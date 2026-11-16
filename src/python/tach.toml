@@ -1,0 +1,24 @@
+# First-party consumer direction. Statadic owns its internal module DAG upstream;
+# check-external verifies this workspace's declared dependency on its pinned wheel.
+source_roots = [
+  "apps/pipeline/src",
+  "apps/hotelling/src",
+  "packages/dotell/src"
+]
+exclude = ["**/tests/**"]
+root_module = "ignore"
+forbid_circular_dependencies = true
+ignore_type_checking_imports = false
+include_string_imports = true
+
+[[modules]]
+path = "pipeline"
+depends_on = ["hotelling", "dotell"]
+
+[[modules]]
+path = "hotelling"
+depends_on = []
+
+[[modules]]
+path = "dotell"
+depends_on = []

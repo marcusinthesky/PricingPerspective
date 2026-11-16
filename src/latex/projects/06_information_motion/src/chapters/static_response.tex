@@ -1,0 +1,265 @@
+\section{Static response and exposure support}\label{app:static-response}
+
+\subsection{Direct and full responses}\label{sec:model-counterfactuals}
+
+Starting from the strategic equilibrium
+$q^0=q^{\mathrm S,*}(r_0,c_0)$, we compare responses to the same change in
+opportunity values.
+With rivals frozen at $q_{-i}^0$, each firm solves its new capacity problem;
+the collection of these individual best responses is the direct allocation
+and need not itself be an equilibrium.
+Allowing rivals to respond instead gives the full allocation, the new
+strategic equilibrium.
+Because both calculations share the initial appeal, saturation and marginal
+costs at $q^0$, full minus direct isolates rival adjustment at that origin.
+The same definitions apply to linear-cost changes with opportunities fixed.
+Removing rival appeal altogether gives a different benchmark: its
+independently equilibrated origin changes as well as its response
+(Appendix~\ref{app:independent-proof}).
+
+\subsection{Comparative statics of rival feedback}\label{sec:model-response}
+
+To characterize the common-origin comparison locally, first change
+opportunity values while holding all cost primitives fixed.
+At an equilibrium marginal contribution equals marginal cost on active
+coordinates, and a small disturbance must preserve that balance.
+On firm $i$'s active coordinates this requires
+\begin{equation}\label{eq:firm-response}
+  \underbrace{J_{ii}\,\delta q_i}_{\text{own adjustment}}
+  =\underbrace{\mathcal G_i\,\delta r}
+  _{\substack{\text{changed opportunity}\\\text{incentives}}}
+  -\underbrace{\sum_{j\ne i}J_{ij}\,\delta q_j}
+  _{\substack{\text{changed incentives}\\\text{from rivals}}}.
+\end{equation}
+Here $J_{ii}$ measures how quickly firm $i$'s incentive to expand declines as
+it adds capacity, $J_{ij}$ measures how rival $j$'s capacity changes that
+incentive, and $\mathcal G_i$ translates changes in node opportunities into
+changes in the marginal returns to firm $i$'s activities.
+The frozen-rival response sets every rival movement $\delta q_j$ to zero; the
+full response solves all firms' equations jointly.
+
+Write $J$ for the Jacobian of marginal cost less marginal contribution,
+$J_{\mathrm d}=\operatorname{blockdiag}(J_{ii})$ for its own blocks and
+$J_{\mathrm o}=J-J_{\mathrm d}$ for its rival blocks.
+Let $\mathcal U$ collect positive-capacity coordinates.
+Strict complementarity means that every unused activity has a strictly
+negative incentive to enter, so small disturbances leave this active
+set unchanged.
+All inverses below are restricted to $\mathcal U$;
+Appendix~\ref{app:response} supplies their entries and the projected systems.
+Theorem~3 of \citet{xu_zenou_zhou_conflict_2022} gives the corresponding
+active-coordinate comparative statics in their pure-cost setting under their
+cost assumptions and nondegeneracy.
+Here the same fixed-active-set logic supports an explicit comparison between
+joint adjustment and the own-firm response with rivals frozen.
+
+\begin{proposition}[Equilibrium response and common-origin
+  feedback]\label{prop:response}
+  Maintain Assumption~\ref{ass:primitives} at an equilibrium with strict
+  complementarity.
+  For an opportunity direction $\delta r$, the full equilibrium derivative
+  $\chi\delta r$ and the direct derivative $\delta q^{\mathrm d}$ are uniquely
+  determined on the active coordinates by the joint and own-block response
+  systems, respectively.
+  Their difference is
+  \begin{equation}\label{eq:feedback}
+    \chi\delta r-\delta q^{\mathrm d}
+    =-J_{\mathcal U\mathcal U}^{-1}(J_{\mathrm o})_{\mathcal U\mathcal U}
+    \delta q^{\mathrm d}.
+  \end{equation}
+\end{proposition}
+
+Feedback transmits the direct adjustment through the rival blocks, allowing
+the induced adjustments of all firms to change each firm's final response.
+Appendix~\ref{app:response} proves the derivative identification.
+
+Whereas opportunity changes alter the marginal contribution from capacity,
+linear-cost changes directly alter its marginal cost.
+Under strict complementarity and nearby nonnegative costs, a cost reduction
+raises the marginal incentive to expand in the affected activities;
+\eqref{eq:cost-response} gives its response system.
+If only one firm's costs change, every other firm's frozen-rival
+problem is unchanged.
+Their live-rival responses then arise entirely through the recipient's
+expansion and the adjustments it sets off.
+
+The sign of feedback depends on relative appeal and activity overlap.
+The rival blocks contain the difference between rival-plus-outside appeal
+and own appeal, $B_{i\ell}-A_{i\ell}$, so they admit both signs
+(Appendix~\ref{app:response-jacobian}).
+When own appeal is smaller than rival-plus-outside appeal, rival expansion
+lowers the marginal incentive to expand at that node; appeal dominance
+reverses this effect, and overlapping activities combine the
+node-specific effects.
+Whether rivalry attenuates, amplifies or redirects a response is therefore a
+property of the economy's appeal and overlap, rather than a general sign restriction.
+
+\subsection{Scale and composition}\label{sec:model-composition}
+
+A firm can expand without changing its business mix.
+Raising capacities in two activities from $(40,60)$ to $(80,120)$ doubles
+scale while leaving composition at $(0.4,0.6)$.
+Raising them instead to $(60,60)$ changes the shares to $(0.5,0.5)$, although
+neither activity contracts: a change in normalized mix is distinct from a
+physical transfer of installed capacity.
+More generally, a capacity response $h$ changes total scale by
+$\mathbf1^\top h$, and at positive total capacity, differentiating normalized
+composition gives
+\begin{equation}\label{eq:composition-derivative}
+  \frac{d}{dt}\frac{q_i+th}{\mathbf1^\top(q_i+th)}\bigg|_{t=0}
+  =\frac{h-p_i\mathbf1^\top h}{S_i}.
+\end{equation}
+The subtraction removes proportional expansion: for $h=\alpha q_i$, the
+numerator is $\alpha q_i-\alpha p_i S_i=0$.
+Thus a large capacity response need not imply a large change in business mix.
+
+For a vector $h$, write $D p_{q_i}(h)$ for the right-hand side of
+\eqref{eq:composition-derivative}.
+Applied to full minus direct adjustment, this derivative removes precisely
+the feedback proportional to initial capacity.
+An activity-separable equilibrium illustrates the remaining business-mix
+response.
+Under strict substitution, a marginal cost reduction in one activity expands
+the recipient
+there and crowds rivals out of that activity.
+Positive capacity elsewhere then turns those changes into business-mix movement.
+The activity-local cost shock considered here differs from the relative
+opportunity news used in Section~\ref{sec:simulation}.
+The result establishes business-mix movement, while movement toward or away
+from competitors requires additional exposure ordering
+(Appendix~\ref{app:two-site-example}).
+
+\begin{proposition}[Proportional feedback and business-mix
+  response]\label{prop:composition-feedback}
+  Let $S_i>0$ and let $h_i^{\mathrm f}$ and $h_i^{\mathrm d}$ be full and
+  direct capacity directions at the same initial allocation.
+  Then
+  \begin{equation}\label{eq:proportional-feedback}
+    Dp_{q_i}(h_i^{\mathrm f})=Dp_{q_i}(h_i^{\mathrm d})
+    \quad\Longleftrightarrow\quad
+    h_i^{\mathrm f}-h_i^{\mathrm d}=\lambda_i q_i
+    \text{ for some }\lambda_i\in\mathbb R.
+  \end{equation}
+  For an equilibrium interpretation, maintain an interior differentiable path
+  and a fixed active set.
+  In an activity-separable economy with identity demand loading and positive
+  diagonal cost curvature, consider a marginal linear-cost reduction $s>0$ at
+  one activity of firm $j$.
+  At that activity let $A_i>0$, $D=b+\sum_k A_k$, $B_i=D-A_i$, $r,b>0$, and
+  assume strict substitution $A_i<B_i$ for every firm.
+  The recipient expands there and every unshocked rival contracts.
+  Other activities remain unchanged.
+  Each firm with positive capacity at another activity therefore
+  changes business mix.
+\end{proposition}
+
+\begin{proof}[Proof idea]
+  By \eqref{eq:composition-derivative}, zero normalized response means
+  $h=p_i\mathbf1^\top h$, which is precisely a multiple of $q_i$.
+  Apply this identity to the difference of the full and direct directions.
+  For the separable benchmark, the activity Jacobian is diagonal plus rank
+  one; its explicit solution has a positive recipient coordinate and negative
+  rival coordinates.
+  Unaffected activities solve homogeneous invertible systems.
+  Appendix~\ref{app:composition-feedback} gives that solution and the
+  composition argument.
+\end{proof}
+
+Attenuating a nonzero composition response changes the firm's
+position even if it leaves the response's direction unchanged.
+
+\subsection{Cash flow and competitive news}\label{sec:model-cash-flow}
+
+The activity portfolio creates an exposure before any firm adjusts.
+Write $X_{i\ell}=A_{i\ell}/D_\ell$ for firm $i$'s opportunity share, with
+$D_\ell=b_\ell+\sum_j A_{j\ell}$; at fixed capacities, an opportunity change
+$dr$ changes cash flow by $\sum_\ell X_{i\ell}\,dr_\ell$, so shared
+opportunity exposure can generate correlated cash-flow news even before
+competitive adjustment (Corollary~\ref{cor:exposure}).
+
+The cash-flow envelope measures how much of an improvement in market
+opportunities becomes additional operating cash flow once competitors respond.
+Under strict complementarity, let $u=\chi\delta r$ be the equilibrium
+capacity response to an opportunity direction $\delta r$, holding cost
+primitives fixed, with block $u_j$ for firm $j$.
+Write $k_\ell^\top$ for row $\ell$ of the activity-to-demand map $K$.
+The envelope then gives
+\begin{equation}\label{eq:equilibrium-cash-flow}
+  \begin{split}
+    \frac{d}{dt}\pi_i\bigl(q^*(r+t\delta r);r+t\delta r\bigr)\Big|_{t=0}
+    ={}&\underbrace{\sum_\ell X_{i\ell}\,\delta r_\ell}
+    _{\mathclap{\text{value of improved opportunities}}}\\
+    &-\underbrace{\sum_\ell\frac{r_\ell A_{i\ell}}{D_\ell^2}
+    \sum_{j\ne i}k_\ell^\top u_j}
+    _{\mathclap{\text{effect of competitors' capacity changes}}}.
+  \end{split}
+\end{equation}
+The first term values the disturbance at the firm's existing opportunity
+shares.
+The second evaluates how competitors' responses alter the contribution margin
+available to the firm: $\sum_{j\ne i}k_\ell^\top u_j$ is their combined change
+in appeal at node $\ell$, so their expansion lowers the value of the improved
+opportunity and their contraction raises it.
+At the optimizing allocation the firm's own marginal payoff is zero on
+coordinates where capacity moves, so its own adjustment adds no first-order
+cash-flow term.
+
+Remark~\ref{rem:envelope} derives the split.
+The payoff is stylized unlevered operating cash flow, abstracting from taxes,
+working capital and depreciation; the envelope therefore supplies the operating
+cash-flow component of a broader valuation, to which financing and discounting
+would be added.
+
+Holding a firm's own appeal fixed, competitors' expansion at a node lowers its
+share there in proportion to the resulting growth in total appeal, so the
+firm's loss depends on where it earns its margin and on how strongly a change
+in margin moves its cash flow.
+To express this dependence, let the share of firm $i$'s contribution margin
+earned at node $\ell$ be
+$\psi_{i\ell}=r_\ell X_{i\ell}/\mathcal M_i$.
+Its operating leverage $\Lambda_i=\mathcal M_i/\pi_i$, contribution margin per
+unit of operating cash flow, scales a change in margin into a cash-flow return.
+For a capacity direction $u$, the proportional growth of total appeal at node
+$\ell$ is $g_\ell=\sum_j k_\ell^\top u_j/D_\ell$, which is the same
+for every firm.
+
+\begin{proposition}[Common and differential competitive
+  news]\label{prop:common-news}
+  Maintain Assumption~\ref{ass:primitives} at an equilibrium with strict
+  complementarity, and let $u$ be a capacity direction supported on its
+  positive coordinates, such as the response to an opportunity or a
+  linear-cost disturbance.
+  For a firm with $\pi_i>0$, the rival term of the cash-flow change along $u$,
+  expressed as a cash-flow return, is
+  \begin{equation}\label{eq:rival-return}
+    -\Lambda_i\sum_\ell\psi_{i\ell}\Bigl(g_\ell-\frac{k_\ell^\top
+    u_i}{D_\ell}\Bigr).
+  \end{equation}
+  Let $\vartheta_i=\Lambda_i\psi_i$ and let
+  $\zeta_i=-\vartheta_i^\top g$ denote the common-node component, before the
+  own-appeal correction.
+  Firms with equal operating leverage and contribution mix receive identical
+  common-node news.
+  For any square-integrable node-growth distribution with positive total
+  common-node second moment, the retained share after removing the
+  cross-sectional mean is
+  $\varrho=\mathbb E\sum_i(\zeta_i-\bar\zeta)^2/
+  \mathbb E\sum_i\zeta_i^2$, where $\bar\zeta=N^{-1}\sum_i\zeta_i$.
+  Equal contribution mixes and leverage give $\varrho=0$.
+\end{proposition}
+
+Because firms face the same node-level growth in total appeal, differences
+in their contribution mixes and operating leverage determine differences in
+common-node news.
+A comparison of firms within a period removes the mean of this
+component $\zeta_i$, leaving the dispersion of $\vartheta_i$ in the directions
+in which total appeal moves.
+The own-appeal correction in~\eqref{eq:rival-return} removes each firm's own
+contribution to total appeal growth, completing the rival effect; its
+cross-firm variation must be retained separately.
+The retained share $\varrho$ is a fraction of squared common-node response across firms,
+not a fraction of the aggregate cash-flow loss.
+The size of the competitive effect and the cross-sectional variation it
+leaves are thus distinct: competitors' expansion can lower every firm's cash
+flow substantially while barely changing how firms' cash-flow returns differ.
+Appendix~\ref{app:common-news} gives the second-moment expansion and proof.

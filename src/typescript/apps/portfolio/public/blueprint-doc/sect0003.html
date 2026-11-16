@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-  MathJax = {
+  MathJax = { 
     tex: {
 		    inlineMath: [['$','$'], ['\\(','\\)']]
 	} }
@@ -98,6 +98,25 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -121,8 +140,8 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0003.html#ass:random-common-map">#</a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -132,23 +151,23 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0001.html#def:exposure-law">Definition 1</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="definition_thmcontent">
   <p>   The exposure law is generated from an observable characteristic law by one common stochastic map with bounded slack: </p>
-<div class="displaymath" id="a0000000026">
+<div class="displaymath" id="a0000000028">
   \[  B_i=T(X_i,U_i)=t(X_i)+\delta _i(X_i,U_i),\qquad X_i\sim C_i,\qquad \lVert \delta _i(X_i,U_i)\rVert \le \tau _i,  \]
 </div>
 <p> with the common carrier \(t\) bi-Lipschitz, \(\ell \, d(x,y)\le \lVert t(x)-t(y)\rVert \le L\, d(x,y)\) for \(0{\lt}\ell \le L\). The constants \(L\), \(\ell \), and the slack radii \(\tau _i\) are maintained modelling restrictions, not quantities the observed distances identify or the empirical design estimates. </p>
@@ -161,45 +180,20 @@
     Theorem
     </span>
     <span class="theorem_thmlabel">12</span>
-    <span class="theorem_thmtitle">Upper transport transfer under slack</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0003.html#eq:random-w2-upper-transfer">#</a>
-
-    <a class="icon proof" href="sect0003.html#a0000000027"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    
+    <a class="icon proof" href="sect0003.html#a0000000029"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0003.html#ass:random-common-map">Definition 11</a></li>
-
-          <li><a href="sect0001.html#def:finite-exposure-cloud">Definition 2</a></li>
-
-          <li><a href="sect0001.html#lem:transport-polarization">Lemma 4</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -208,25 +202,25 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.RandomExposure.optimized_transportCost_le_of_upper_lipschitz_slack" class="lean_decl">PricingPerspective.RandomExposure.optimized_transportCost_le_of_upper_lipschitz_slack</a></li>
-
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Finite.optimized_transportCost_le_of_upper_lipschitz_slack" class="lean_decl">PricingPerspective.Transmission.Finite.optimized_transportCost_le_of_upper_lipschitz_slack</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    Under the upper Lipschitz bound and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at most \(L^2\) times the optimized squared characteristic cost, plus a slack term carrying the maintained support diameter. </p>
+  <p>  Under an upper Lipschitz transmission bound and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at most the squared Lipschitz constant times the optimized squared characteristic cost, plus a slack term carrying the maintained support diameter. Assumptions: finite-support source and target laws with finite transport certificates; upper Lipschitz transmission bound; nonnegative endpoint slack bounds; a maintained support-diameter bound. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000027">
+<div class="proof_wrapper" id="a0000000029">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -234,7 +228,7 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p>  Push the certificate coupling of the characteristic clouds through \(T\), bound the resulting cost pointwise, and absorb the slack endpoints. </p>
+  
 
   </div>
 </div>
@@ -244,45 +238,20 @@
     Theorem
     </span>
     <span class="theorem_thmlabel">13</span>
-    <span class="theorem_thmtitle">Lower transport transfer under slack</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0003.html#eq:random-w2-lower-transfer">#</a>
-
-    <a class="icon proof" href="sect0003.html#a0000000028"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    
+    <a class="icon proof" href="sect0003.html#a0000000030"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0003.html#ass:random-common-map">Definition 11</a></li>
-
-          <li><a href="sect0001.html#def:finite-exposure-cloud">Definition 2</a></li>
-
-          <li><a href="sect0001.html#lem:transport-polarization">Lemma 4</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -291,25 +260,25 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
-          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.RandomExposure.optimized_transportCost_ge_of_lower_lipschitz_slack" class="lean_decl">PricingPerspective.RandomExposure.optimized_transportCost_ge_of_lower_lipschitz_slack</a></li>
-
+          
+          <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Finite.optimized_transportCost_ge_of_lower_lipschitz_slack" class="lean_decl">PricingPerspective.Transmission.Finite.optimized_transportCost_ge_of_lower_lipschitz_slack</a></li>
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    Under a positive lower Lipschitz constant and bounded per-endpoint slack, the optimized squared exposure transport cost is at least \(\ell ^{-2}\) times the optimized squared characteristic cost, less a slack term carrying the maintained support diameter. </p>
+  <p>  Under a positive lower Lipschitz constant and bounded per-endpoint slack, the optimized squared exposure transport cost of two finitely supported clouds is at least the inverse squared Lipschitz constant times the optimized squared characteristic cost, less a slack term carrying the maintained support diameter. Assumptions: finite-support source and target laws with finite transport certificates; positive lower Lipschitz constant; lower Lipschitz transmission bound; nonnegative endpoint slack bounds; a maintained support-diameter bound. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000028">
+<div class="proof_wrapper" id="a0000000030">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -317,7 +286,7 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p>  Symmetric to the upper direction, using injectivity of \(T\) supplied by the lower bound. </p>
+  
 
   </div>
 </div>
@@ -334,8 +303,8 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0003.html#cor:random-w2-metric">#</a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -345,25 +314,25 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0003.html#eq:random-w2-upper-transfer">Theorem 12</a></li>
-
+          
           <li><a href="sect0003.html#eq:random-w2-lower-transfer">Theorem 13</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="corollary_thmcontent">
   <p>   At the level of the metric rather than the squared optimized cost, the slack enters additively and no support diameter appears: </p>
-<div class="displaymath" id="a0000000029">
+<div class="displaymath" id="a0000000031">
   \[  \ell ^{-1}W_2(C_i,C_j)-(\tau _i+\tau _j) \le W_{2,\Gamma }(P_i,P_j) \le L\, W_2(C_i,C_j)+(\tau _i+\tau _j).  \]
 </div>
 <p> This sharper form is what the empirical diagnostic uses. </p>
@@ -384,8 +353,8 @@
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0003.html#eq:random-kappa-bracket">#</a>
-
-
+    
+    
     <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
 </button>
         <div class="modal-container">
@@ -395,20 +364,20 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="sect0002.html#thm:random-exposure-envelope">Theorem 6</a></li>
-
+          
           <li><a href="sect0003.html#cor:random-w2-metric">Corollary 14</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
-
+    
+    
         </div>
   </div>
   <div class="corollary_thmcontent">

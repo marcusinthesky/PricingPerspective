@@ -18,5 +18,3 @@ container-title: Proceedings of the 43rd International ACM SIGIR Conference on R
 publisher: Association for Computing Machinery
 page: 39-48
 ---
-
-# ColBERT

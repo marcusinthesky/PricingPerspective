@@ -1,0 +1,100 @@
+\subsection{Two-site exposure ordering}\label{app:two-site-example}
+
+Whether a capacity response separates firms' business mixes depends on
+their initial exposures.
+To make that dependence explicit, consider two firms at two distinct activity
+sites with identity demand loading and positive diagonal quadratic cost
+curvature.
+Initial interior capacities are $q_i=(q_{i1},q_{i2})$ and
+$q_j=(q_{j1},q_{j2})$, all positive.
+At activity 1, the node-1 opportunity value and outside appeal satisfy $r,b>0$,
+and each firm's payoff component has the form
+\begin{equation}\label{eq:sign-payoff}
+  \pi_i^{(1)}(q_{i1},q_{j1})
+  =\frac{rq_{i1}}{b+q_{i1}+q_{j1}}-c_i q_{i1}-\frac{\omega_i}{2}q_{i1}^2,
+  \qquad \omega_i,\omega_j>0.
+\end{equation}
+Firm $j$ receives a small cost reduction $c_j\mapsto c_j-s$, preserving
+nonnegative costs.
+Assume a differentiable interior equilibrium path satisfying both first-order
+conditions locally, with activity 2 unchanged.
+To compare business mixes we use the quadratic Wasserstein distance $W_2$,
+the least root-mean-square distance over which mass must move to turn one
+composition into the other.
+The two sites are a distance $d_*>0$ apart.
+Define $P_k(s)$ from the normalized two-site capacities and
+$Y^F_{ij}(s)=W_2^2(P_i(s),P_j(0))-W_2^2(P_i(0),P_j(0))$, the change in the
+squared distance from firm $i$'s business mix to firm $j$'s initial mix.
+
+\begin{proposition}[Conditional capacity and composition
+  response]\label{prop:two-site-adjustment}
+  In the two-site economy and along the path just specified, suppose
+  \begin{equation}\label{eq:sign-conditions}
+    q_{i1}<b+q_{j1},\qquad q_{j1}q_{i2}>q_{i1}q_{j2}.
+  \end{equation}
+  Then the cost recipient expands in activity 1, $\dot q_{j1}>0$, its competitor
+  contracts, $\dot q_{i1}<0$, and $\dot Y^F_{ij}>0$.
+  Reversing the strict initial exposure ordering reverses the sign of
+  $\dot Y^F_{ij}$ while preserving the capacity-response signs.
+\end{proposition}
+
+\subsubsection{Proof of the two-site capacity and composition
+response}\label{app:two-site-adjustment}
+
+\begin{proof}[Proof of Proposition~\ref{prop:two-site-adjustment}]
+  Differentiate the two interior first-order conditions in
+  \eqref{eq:sign-payoff}.
+  Write $D=b+q_{i1}+q_{j1}$, $B_i=b+q_{j1}$, $B_j=b+q_{i1}$, and define
+  \begin{equation}\label{eq:sign-jacobian}
+    \begin{aligned}
+      J_{ii}&=\omega_i+2rB_i/D^3,& J_{jj}&=\omega_j+2rB_j/D^3,\\
+      J_{ij}&=r(B_i-q_{i1})/D^3,& J_{ji}&=r(B_j-q_{j1})/D^3,\\
+      \Delta&=J_{ii}J_{jj}-J_{ij}J_{ji}.
+    \end{aligned}
+  \end{equation}
+  These are the own and rival entries of the field's
+  Jacobian~\eqref{eq:jacobian} restricted to activity 1.
+  The demand-only part of the determinant has numerator
+  $r^2[4{B_i}B_j-(B_i-q_{i1})(B_j-q_{j1})]$ over $D^6$.
+  The bracket equals $3b^2+4b(q_{i1}+q_{j1})+(q_{i1}+q_{j1})^2>0$.
+  The additional terms from $\omega_i,\omega_j>0$ are positive, so $\Delta>0$.
+  Solving the differentiated conditions gives
+  \begin{equation}\label{eq:sign-capacity}
+    \begin{pmatrix}J_{ii}&J_{ij}\\J_{ji}&J_{jj}
+    \end{pmatrix}
+    \begin{pmatrix}\dot q_{i1}\\\dot q_{j1}
+    \end{pmatrix}
+    =
+    \begin{pmatrix}0\\1
+    \end{pmatrix},
+    \qquad \dot q_{i1}=-J_{ij}/\Delta,\quad \dot q_{j1}=J_{ii}/\Delta.
+  \end{equation}
+  The substitution inequality $q_{i1}<b+q_{j1}$ makes $J_{ij}>0$, yielding
+  competitor contraction and recipient expansion.
+
+  For shares $p,p'\in[0,1]$ on two sites separated by $d_*>0$, the exact
+  squared transport distance is
+  \begin{equation}\label{eq:two-site-transport}
+    W_2^2\bigl((p,1-p),(p',1-p')\bigr)=d_*^2|p-p'|.
+  \end{equation}
+  Any feasible nonnegative coupling has off-diagonal masses whose
+  difference is $p-p'$.
+  Their sum is at least $|p-p'|$, and matching the common mass at each site
+  attains the bound.
+  Put $p_k=q_{k1}/(q_{k1}+q_{k2})$.
+  Because activity 2 is unchanged,
+  $\dot p_i=q_{i2}\dot q_{i1}/(q_{i1}+q_{i2})^2<0$.
+  The exposure ordering implies $p_j(0)>p_i(0)$ and persists locally against
+  the frozen $p_j(0)$.
+  Differentiating the squared distance therefore gives
+  \begin{equation}\label{eq:sign-distance}
+    \dot Y^F_{ij}=-d_*^2\dot p_i
+    =\frac{d_*^2{q_{i2}}J_{ij}}{(q_{i1}+q_{i2})^2\Delta}>0.
+  \end{equation}
+  If $p_j(0)<p_i(0)$, the derivative instead equals $d_*^2\dot p_i<0$.
+  This establishes the statement and its reversed-order conclusion.
+\end{proof}
+
+Initial exposure ordering determines whether contraction moves the
+competitor's business mix toward or away from the recipient's initial mix;
+the capacity-response signs alone do not determine that direction.

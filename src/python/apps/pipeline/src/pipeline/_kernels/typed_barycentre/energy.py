@@ -1,10 +1,9 @@
 """Energy target projections on the simplex and the signed feasible sets.
 
 The simplex arm delegates its numerics to
-:func:`jcor.geometry.energy_barycentre_weights`; the signed arms are a
-least-squares solve small enough to keep here.  What this module owns either way
-is the declared-arm validation and the certificate assembly -- registry
-vocabulary ``jcor`` has no business knowing.
+:func:`statadic.geometry.frechet.energy.energy_barycentre_weights`. The signed
+arms use a small least-squares solve here. This module owns declared-arm
+validation and certificate assembly, including pipeline registry vocabulary.
 """
 
 from __future__ import annotations
@@ -13,7 +12,8 @@ from typing import TYPE_CHECKING
 
 import jax.numpy as jnp
 import numpy as np
-from jcor.geometry import energy_barycentre_weights
+from statadic.geometry.frechet.energy import energy_barycentre_weights
+from statadic.measure.clouds import PackedClouds
 
 from pipeline._kernels.typed_barycentre._common import (
     ACTIVE_WEIGHT_EPS_FACTOR,
@@ -129,11 +129,14 @@ def solve_energy_target_projections(
         min_weight = 0.0
         if feasible_set == "simplex_nonnegative":
             weights_jax, certificate = energy_barycentre_weights(
-                jnp.asarray(target.values),
-                [jnp.asarray(candidate.values) for candidate in candidates],
+                PackedClouds(
+                    jnp.asarray(target.values), jnp.asarray(len(target.values))
+                ),
+                PackedClouds.from_clouds(
+                    [jnp.asarray(candidate.values) for candidate in candidates]
+                ),
                 metric=ground.metric,
                 exponent=geometry.exponent,
-                solver="qp" if arm.solver == "energy_qp" else "pgd",
                 tol=tol,
                 maxiter=maxiter,
                 precomputed_components=(gram, cross),

@@ -16,5 +16,3 @@ issued:
   - - 2022
 container-title: 'RSS 2022-Robotics: Science and Systems'
 ---
-
-# Prox-QP: Yet another quadratic programming solver for robotics and beyond

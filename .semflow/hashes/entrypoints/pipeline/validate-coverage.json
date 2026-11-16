@@ -1,7 +1,7 @@
 {
   "algorithm": "sha256",
   "callback": "pipeline.cli.commands.substrate.embeddings:cli_validate_coverage",
-  "digest": "sha256:facef6ef67a71caef16d73211d6899759c0fa9f8ba272f8a27b6df05b4c6ba73",
+  "digest": "sha256:3a8cdf14a3b6a62dd27d6300820ce7d2ebcfcf82ab3d1875a2837a42467c807b",
   "entrypoint": "pipeline validate-coverage",
   "fallbacks": [
   ],
@@ -11,10 +11,11 @@
     {"digest":"sha256:7ab2f9eb7c8678bb12d80d5701814204291260a27cdd206deb6154c34c024338","kind":"class","path":"src/python/apps/pipeline/src/pipeline/_kernels/arrays.py","symbol":"pipeline._kernels.arrays:InvalidNormalizationRowsError"},
     {"digest":"sha256:7e0a05bd0ffa50d09444c6e784c24c6ec04e4019e39c57b86a61d2569ffe2a15","kind":"global","path":"src/python/apps/pipeline/src/pipeline/_kernels/arrays.py","symbol":"pipeline._kernels.arrays:_MATRIX_NDIM"},
     {"digest":"sha256:90dd8e6205ee5dc8d8e9372490ce766c6c09cf59476687152082125b895f7a80","kind":"function","path":"src/python/apps/pipeline/src/pipeline/_kernels/arrays.py","symbol":"pipeline._kernels.arrays:l2_normalize_rows"},
+    {"digest":"sha256:701b162d541e1c9506cca310ef2b8a90b9ce4ab016c5aeb67a529eb0e89c9e8f","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:<binding:Annotated=typing:Annotated>"},
     {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:<binding:Path=pathlib:Path>"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:<binding:annotations=__future__:annotations>"},
     {"digest":"sha256:c2aca12beee4fc1aeed3bef753e93eafb76446a37b36add6e610f3c8db452d85","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:<binding:typer=typer>"},
-    {"digest":"sha256:35503a94a3dd8864543f616e47280980f245b9a38a827734086f6d0c6b481d91","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:cli_validate_coverage"},
+    {"digest":"sha256:7f676ce72cf58500566bfd851a2554d74aee4d7d1ce220076b968ad4073ccc05","kind":"function","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:cli_validate_coverage"},
     {"digest":"sha256:10e04a00aa1dee5243a5f08d56d75261dbfd3517bcd6eba9c0e8d8dcb450958f","kind":"global","path":"src/python/apps/pipeline/src/pipeline/cli/commands/substrate/embeddings.py","symbol":"pipeline.cli.commands.substrate.embeddings:commands"},
     {"digest":"sha256:59051b17634cdcb5a576ceb58fdc0a4e5652ed3b60d66667e92ddefd931abeca","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/embeddings.py","symbol":"pipeline.stages.substrate.embeddings:<binding:Path=pathlib:Path>"},
     {"digest":"sha256:890bede517510aea64e32258c9530f0172f5a6ea2fcbcb247fdadc40c714e8bf","kind":"binding","path":"src/python/apps/pipeline/src/pipeline/stages/substrate/embeddings.py","symbol":"pipeline.stages.substrate.embeddings:<binding:annotations=__future__:annotations>"},

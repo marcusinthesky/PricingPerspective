@@ -17,5 +17,3 @@ page: 341-360
 cites:
 - sharpe_capital_1964
 ---
-
-# The Arbitrage Theory of Capital Asset Pricing

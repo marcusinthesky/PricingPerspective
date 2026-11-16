@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <script>
-  MathJax = {
+  MathJax = { 
     tex: {
 		    inlineMath: [['$','$'], ['\\(','\\)']]
 	} }
@@ -98,6 +98,25 @@
 
   </ul>
  </li>
+<li class="">
+  <a href="chap-native-claims.html"><span class="toc_ref">5</span> <span class="toc_entry">Further approved native claims</span></a>
+  <span class="expand-toc">▶</span>
+  <ul class="sub-toc-1">
+     <li class="">
+  <a href="sect0014.html"><span class="toc_ref">5.1</span> <span class="toc_entry">01 continuous bounds</span></a>
+ </li>
+<li class="">
+  <a href="sect0015.html"><span class="toc_ref">5.2</span> <span class="toc_entry">03 distance implied mpt</span></a>
+ </li>
+<li class="">
+  <a href="sect0016.html"><span class="toc_ref">5.3</span> <span class="toc_entry">05 spatial pricing</span></a>
+ </li>
+<li class="">
+  <a href="sect0017.html"><span class="toc_ref">5.4</span> <span class="toc_entry">06 information motion</span></a>
+ </li>
+
+  </ul>
+ </li>
 <li ><a href="dep_graph_document.html">Dependency graph</a></li>
 </ul>
 </nav>
@@ -114,41 +133,20 @@
     Theorem
     </span>
     <span class="theorem_thmlabel">21</span>
-    <span class="theorem_thmtitle">Additive residual-budget cap</span>
     <div class="thm_header_extras">
 
-
+    
     ✓
         </div>
     <div class="thm_header_hidden_extras">
 
     <a class="icon proof" href="sect0007.html#eq:p3-residual-budget-cap">#</a>
-
-    <a class="icon proof" href="sect0007.html#a0000000036"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
+    
+    <a class="icon proof" href="sect0007.html#a0000000037"><svg  class="icon icon-cogs "><use xlink:href="symbol-defs.svg#icon-cogs"></use></svg>
 </a>
-
-
-    <button class="modal"><svg  class="icon icon-mindmap "><use xlink:href="symbol-defs.svg#icon-mindmap"></use></svg>
-</button>
-        <div class="modal-container">
-      <div class="modal-content">
-        <header>
-          <h1>Uses</h1>
-          <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
-</button>
-        </header>
-
-        <ul class="uses">
-
-          <li><a href="sect0006.html#thm:p3-information-certified-cap">Theorem 20</a></li>
-
-        </ul>
-
-      </div>
-    </div>
-
-
-
+    
+    
+    
     <button class="modal lean">L∃∀N</button>
         <div class="modal-container">
       <div class="modal-content">
@@ -157,29 +155,25 @@
           <button class="closebtn"><svg  class="icon icon-cross "><use xlink:href="symbol-defs.svg#icon-cross"></use></svg>
 </button>
         </header>
-
+        
         <ul class="uses">
-
+          
           <li><a href="https://leanprover-community.github.io/mathlib4_docs/find/#doc/PricingPerspective.Transmission.Dispersion.totalVariance_le_informationCertificate_add_residualBudget" class="lean_decl">PricingPerspective.Transmission.Dispersion.totalVariance_le_informationCertificate_add_residualBudget</a></li>
-
+          
         </ul>
-
+    
       </div>
     </div>
 
-
+    
         </div>
   </div>
   <div class="theorem_thmcontent">
-  <p>    If standardized total variance decomposes into the certified systematic term and an aggregate residual contribution bounded by \(\delta \geq 0\), then </p>
-<div class="displaymath" id="a0000000037">
-  \[  \operatorname {Var}(R_q)\leq 1-\mathcal C(q)+\delta .  \]
-</div>
-<p> Multiplication by a nonnegative raw scale gives the corresponding raw-variance inequality. The theorem assumes \(\delta \); it does not estimate it or derive residual orthogonality. </p>
+  <p>  A systematic standardized variance cap and an assumed aggregate residual-covariance budget imply the additive total-return cap, with a nonnegative-scale raw-variance corollary. Assumptions: an additive decomposition of total standardized variance into systematic and residual contributions; the information-certificate systematic variance cap; an assumed upper budget for the aggregate residual contribution. </p>
 
   </div>
 </div>
-<div class="proof_wrapper" id="a0000000036">
+<div class="proof_wrapper" id="a0000000037">
   <div class="proof_heading">
     <span class="proof_caption">
     Proof
@@ -187,7 +181,7 @@
     <span class="expand-proof">▼</span>
   </div>
   <div class="proof_content">
-  <p> Add the assumed residual budget to the systematic certificate and preserve the inequality under multiplication by the square of the raw scale. </p>
+  
 
   </div>
 </div>

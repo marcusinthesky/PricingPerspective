@@ -1,8 +1,8 @@
 """Paper 1's controlled cross-encoder distributional comparator.
 
 The common-width Wasserstein W1 and W2 matrices are read from the shared
-typed-distance backplane. Matched V-energy, signed-U, bootstrap, sensitivity,
-and same-firm noise-floor diagnostics are computed here on deterministic
+typed-distance backplane. Matched V-energy, signed-U, and sample-size
+sensitivity pairs are computed here on deterministic
 ``url_hash`` prefixes. Rows are L2-normalized and use harmonized Euclidean chord
 ground geometry across complete encoder/input pipelines. This is an inference
 geometry, not a claim that the four encoders share one native training loss.
@@ -18,14 +18,11 @@ from typing import TYPE_CHECKING, cast
 import numpy as np
 import pandas as pd
 import yaml
-from scipy.stats import pearsonr, spearmanr
+from statadic.geometry.discrepancy.transport.exact import chord_cost_matrix
 
 from pipeline._kernels.typed_distances import (
     EmbeddingCloud,
     compute_statistical_distance,
-)
-from pipeline._kernels.wasserstein import (
-    chord_cost_matrix,
 )
 from pipeline.io.typed_analysis import PointDistanceSpec, StatisticalDistanceSpec
 from pipeline.stages.shared.typed_artifacts import read_typed_distance_artifact
@@ -35,12 +32,8 @@ if TYPE_CHECKING:
 
 _COMMON_M = 128
 # The frozen Qwen3-Embedding-8B pool contains 128 rows per firm. Keep the
-# sensitivity within that support, and require two nonempty halves for the
-# same-firm split floor.
+# sensitivity within that support.
 _SENSITIVITY_M = (32, 64, 128)
-_FLOOR_M = (32, 64)
-_DEFAULT_BOOTSTRAP_ITERS = 999
-_DEFAULT_BOOTSTRAP_SEED = 20260727
 # Roster sizes. The source of truth is params.yaml:symbols / market_symbols;
 # these mirror it because this module never loads params. They are equal now:
 # every firm in the news universe is return-eligible, so the projection to
@@ -54,7 +47,6 @@ _ENCODER_COUNT = 4
 _FUNCTIONAL_NEGATIVE_TOLERANCE = -1e-10
 _CORRELATION_SYMMETRY_TOLERANCE = 1e-12
 _MATRIX_NDIM = 2
-_MIN_CORRELATION_PAIRS = 2
 _MODEL_DIRS = {
     "qwen3-embedding-4b": "qwen3-embedding-4b",
     "qwen3-embedding-8b": "qwen3-embedding-8b",
@@ -65,10 +57,6 @@ _MODEL_DIRS = {
 
 class WassersteinInputError(ValueError):
     """Report invalid comparator inputs or incompatible artifacts."""
-
-
-class WassersteinComputationError(RuntimeError):
-    """Report a failed comparator bootstrap or orchestration invariant."""
 
 
 @dataclass(frozen=True)
@@ -85,26 +73,13 @@ class TransportMatrices:
 
 
 @dataclass(frozen=True)
-class RunSummaryOptions:
-    """Collect metadata and bootstrap controls for one comparator run."""
-
-    native_dim: int
-    n_embedding_tickers: int
-    n_boot: int
-    seed: int
-
-
-@dataclass(frozen=True)
 class WassersteinComparatorConfig:
-    """Paths and bootstrap controls for the encoder comparator."""
+    """Input paths and the matched encoder pair artifact."""
 
     embeddings_root: Path
     typed_distance_root: Path
     covariance_matrix: Path
-    output_summary: Path
     output_pairs: Path
-    bootstrap_iters: int = _DEFAULT_BOOTSTRAP_ITERS
-    bootstrap_seed: int = _DEFAULT_BOOTSTRAP_SEED
 
 
 def _unit_rows(rows: np.ndarray) -> np.ndarray:
@@ -213,7 +188,7 @@ def _within_terms(sample: np.ndarray) -> tuple[float, float]:
 
     Called once per ticker, so this deliberately stays on the eager float64
     ``chord_cost_matrix`` door: it is where every sample entering
-    :func:`_pair_metrics` passes JCOR's unit-row validation, and this per-firm
+    :func:`_pair_metrics` passes Statadic's unit-row validation, and this per-firm
     loop is not the computational bottleneck.
     """
     costs = chord_cost_matrix(sample, sample)
@@ -289,9 +264,9 @@ def _pair_metrics(
     # This is a pipeline boundary: callers may supply raw model embeddings, but
     # every statistic below is defined on the unit-sphere projection. Keep the
     # model-aware transformation here and pass only Euclidean/chord inputs to
-    # JCOR. The operation is idempotent for artifacts normalized by `_load_prefix`.
+    # Statadic. The operation is idempotent for artifacts normalized by `_load_prefix`.
     normalized = {ticker: _unit_rows(samples[ticker][:m]) for ticker in tickers}
-    # Every ticker's sample passes JCOR's eager unit-row validation here, once,
+    # Every ticker's sample passes Statadic's eager unit-row validation here, once,
     # before the dyad loop enters the transformable core with it.
     within = {ticker: _within_terms(normalized[ticker]) for ticker in tickers}
     pairs = list(combinations(tickers, 2))
@@ -359,126 +334,6 @@ def _pair_metrics(
     return frame
 
 
-def _matrix_statistics(frame: pd.DataFrame) -> dict[str, dict[str, float]]:
-    target = frame["return_chord"].to_numpy(dtype=np.float64)
-    result: dict[str, dict[str, float]] = {}
-    metrics = [
-        "wasserstein_w1",
-        "wasserstein_w2",
-        "energy_v",
-        "energy_u_functional",
-    ]
-    if "energy_u_sqrt" in frame:
-        metrics.append("energy_u_sqrt")
-    for metric in metrics:
-        values = frame[metric].to_numpy(dtype=np.float64)
-        result[metric] = {
-            "pearson": float(pearsonr(values, target).statistic),
-            "spearman": float(spearmanr(values, target).statistic),
-        }
-    return result
-
-
-def _vector_to_matrix(
-    frame: pd.DataFrame, tickers: list[str], column: str
-) -> np.ndarray:
-    lookup = {ticker: pos for pos, ticker in enumerate(tickers)}
-    matrix = np.zeros((len(tickers), len(tickers)), dtype=np.float64)
-    for row in frame[["ticker_i", "ticker_j", column]].itertuples(index=False):
-        i, j = lookup[str(row.ticker_i)], lookup[str(row.ticker_j)]
-        value = float(str(row[2]))
-        matrix[i, j] = value
-        matrix[j, i] = value
-    return matrix
-
-
-def _distinct_original_pairs(idx: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Return resampled endpoint indices, excluding duplicate-original dyads."""
-    tri_i, tri_j = np.triu_indices(len(idx), k=1)
-    distinct = idx[tri_i] != idx[tri_j]
-    return idx[tri_i][distinct], idx[tri_j][distinct]
-
-
-def _paired_node_bootstrap(
-    frame: pd.DataFrame,
-    tickers: list[str],
-    n_boot: int,
-    seed: int,
-) -> dict[str, dict[str, dict[str, float]]]:
-    """Paired node bootstrap gaps versus V-energy matrix correlation."""
-    columns = (
-        "wasserstein_w1",
-        "wasserstein_w2",
-        "energy_u_functional",
-        "energy_v",
-        "return_chord",
-    )
-    matrix_columns = list(columns)
-    if "energy_u_sqrt" in frame:
-        matrix_columns.append("energy_u_sqrt")
-    matrices = {
-        name: _vector_to_matrix(frame, tickers, name) for name in matrix_columns
-    }
-    n = len(tickers)
-    rng = np.random.default_rng(seed)
-    comparators = [
-        "wasserstein_w1",
-        "wasserstein_w2",
-        "energy_u_functional",
-    ]
-    if "energy_u_sqrt" in frame:
-        comparators.append("energy_u_sqrt")
-    draws: dict[str, dict[str, list[float]]] = {
-        comparator: {"pearson": [], "spearman": []} for comparator in comparators
-    }
-    for _ in range(n_boot):
-        idx = rng.integers(0, n, size=n)
-        rows, cols = _distinct_original_pairs(idx)
-        target = matrices["return_chord"][rows, cols]
-        reference = matrices["energy_v"][rows, cols]
-        if (
-            target.size < _MIN_CORRELATION_PAIRS
-            or np.std(target) <= 0.0
-            or np.std(reference) <= 0.0
-        ):
-            continue
-        reference_corr = {
-            "pearson": float(pearsonr(reference, target).statistic),
-            "spearman": float(spearmanr(reference, target).statistic),
-        }
-        for comparator in comparators:
-            values = matrices[comparator][rows, cols]
-            if np.std(values) <= 0.0:
-                continue
-            draws[comparator]["pearson"].append(
-                float(pearsonr(values, target).statistic) - reference_corr["pearson"]
-            )
-            draws[comparator]["spearman"].append(
-                float(spearmanr(values, target).statistic) - reference_corr["spearman"]
-            )
-
-    observed = _matrix_statistics(frame)
-    output: dict[str, dict[str, dict[str, float]]] = {}
-    for comparator in comparators:
-        output[comparator] = {}
-        for method in ("pearson", "spearman"):
-            values = np.asarray(draws[comparator][method], dtype=np.float64)
-            if values.size == 0:
-                message = "paired node bootstrap produced no valid draws"
-                raise WassersteinComputationError(message)
-            output[comparator][method] = {
-                "observed_gap_vs_energy_v": (
-                    observed[comparator][method] - observed["energy_v"][method]
-                ),
-                "bootstrap_mean_gap": float(values.mean()),
-                "ci_low": float(np.percentile(values, 2.5)),
-                "ci_high": float(np.percentile(values, 97.5)),
-                "probability_le_zero": float(np.mean(values <= 0.0)),
-                "n_boot": int(values.size),
-            }
-    return output
-
-
 def _hash_digest(hashes: dict[str, tuple[str, ...]], m: int) -> str:
     digest = hashlib.sha256()
     for ticker in sorted(hashes):
@@ -507,88 +362,6 @@ def _validate_common_hashes(
                 message = f"url_hash prefix mismatch for {model}/{ticker} at m={m}"
                 raise WassersteinInputError(message)
     return _hash_digest(reference_hashes, m), reference_hashes
-
-
-def _same_firm_split_values(
-    samples: dict[str, np.ndarray], m: int, distance: StatisticalDistanceSpec
-) -> np.ndarray:
-    """Return each firm's own-sample split distance under one transport order."""
-    return np.asarray(
-        [
-            _typed_wasserstein_matrix(
-                {"left": sample[:m], "right": sample[m : 2 * m]},
-                ["left", "right"],
-                m,
-                distance,
-            )[0, 1]
-            for sample in samples.values()
-        ],
-        dtype=np.float64,
-    )
-
-
-def _same_firm_floor(
-    samples: dict[str, np.ndarray],
-    m: int,
-    cross_firm_w1_median: float,
-    cross_firm_w2_median: float,
-) -> dict[str, object]:
-    """Report the finite-sample floor for both transport orders.
-
-    The floor bounds what a matched-sample Wasserstein comparison can resolve at
-    this ``m``, and that bound is order-specific: W2 charges the same transport
-    quadratically, so its floor cannot be inferred from the W1 one.
-    """
-    values = _same_firm_split_values(samples, m, _WASSERSTEIN_DISTANCE)
-    values_w2 = _same_firm_split_values(samples, m, _WASSERSTEIN2_DISTANCE)
-    return {
-        "m_per_half": m,
-        "n_embedding_firms": int(values.size),
-        "split": "first m versus next m after lexicographic url_hash sort",
-        "mean": float(values.mean()),
-        "median": float(np.median(values)),
-        "p95": float(np.percentile(values, 95.0)),
-        "cross_firm_w1_median": cross_firm_w1_median,
-        "w2_mean": float(values_w2.mean()),
-        "w2_median": float(np.median(values_w2)),
-        "w2_p95": float(np.percentile(values_w2, 95.0)),
-        "cross_firm_w2_median": cross_firm_w2_median,
-        "use": "diagnostic floor only; not subtracted and not used for debiasing",
-    }
-
-
-def _run_summary(
-    frame: pd.DataFrame,
-    tickers: list[str],
-    hashes: dict[str, tuple[str, ...]],
-    options: RunSummaryOptions,
-) -> dict[str, object]:
-    model = str(frame["model"].iloc[0])
-    m = int(frame["m"].iloc[0])
-    u_values = frame["energy_u_functional"].to_numpy(dtype=np.float64)
-    u_negative = int(np.sum(u_values < _FUNCTIONAL_NEGATIVE_TOLERANCE))
-    return {
-        "model": model,
-        "native_dim": options.native_dim,
-        "m": m,
-        "n_embedding_tickers": options.n_embedding_tickers,
-        "n_priced_tickers": len(tickers),
-        "n_dyads": len(frame),
-        "url_hash_prefix_sha256": _hash_digest(hashes, m),
-        "u_functional_diagnostics": {
-            "minimum": float(u_values.min()),
-            "negative_count": u_negative,
-            "sqrt_transform_available": u_negative == 0,
-            "rule": (
-                "sqrt(U) emitted only when every dyad is nonnegative within "
-                "1e-10; signed U is never clipped or described as a metric"
-            ),
-        },
-        "matrix_correlations": _matrix_statistics(frame),
-        "paired_gaps": _paired_node_bootstrap(
-            frame, tickers, options.n_boot, options.seed
-        ),
-    }
 
 
 def _validate_model_tickers(
@@ -626,18 +399,14 @@ def run_wasserstein_comparator(
         )
         raise WassersteinInputError(message)
     all_pair_frames: list[pd.DataFrame] = []
-    common_runs: list[dict[str, object]] = []
-    sensitivity_runs: list[dict[str, object]] = []
     common_hashes: dict[str, dict[str, tuple[str, ...]]] = {}
-    qwen_samples: dict[str, np.ndarray] | None = None
 
-    for model_index, (model, dirname) in enumerate(_MODEL_DIRS.items()):
+    for model, dirname in _MODEL_DIRS.items():
         maximum = max(_SENSITIVITY_M) if model == "qwen3-embedding-8b" else _COMMON_M
         hashes, samples = _load_model(config.embeddings_root / dirname, maximum)
         embedding_tickers = sorted(samples)
         _validate_model_tickers(model, embedding_tickers, priced_tickers)
         common_hashes[model] = {ticker: hashes[ticker][:_COMMON_M] for ticker in hashes}
-        native_dim = int(next(iter(samples.values())).shape[1])
         typed_wasserstein = _load_typed_wasserstein_matrix(
             config.typed_distance_root, model, priced_tickers
         )
@@ -646,7 +415,7 @@ def run_wasserstein_comparator(
         )
 
         m_values = _SENSITIVITY_M if model == "qwen3-embedding-8b" else (_COMMON_M,)
-        for run_index, m in enumerate(m_values):
+        for m in m_values:
             frame = _pair_metrics(
                 samples,
                 priced_tickers,
@@ -662,89 +431,15 @@ def run_wasserstein_comparator(
                 ),
             )
             all_pair_frames.append(frame)
-            run = _run_summary(
-                frame,
-                priced_tickers,
-                hashes,
-                RunSummaryOptions(
-                    native_dim=native_dim,
-                    n_embedding_tickers=len(embedding_tickers),
-                    n_boot=config.bootstrap_iters,
-                    seed=config.bootstrap_seed + 100 * model_index + run_index,
-                ),
-            )
-            if m == _COMMON_M:
-                common_runs.append(run)
-            if model == "qwen3-embedding-8b":
-                sensitivity_runs.append(run)
-        if model == "qwen3-embedding-8b":
-            qwen_samples = samples
 
-    common_digest, _reference_hashes = _validate_common_hashes(common_hashes, _COMMON_M)
-
-    if qwen_samples is None:
-        message = "Qwen3-Embedding-8B samples were not loaded"
-        raise WassersteinComputationError(message)
-    qwen_frames = {
-        int(frame["m"].iloc[0]): frame
-        for frame in all_pair_frames
-        if str(frame["model"].iloc[0]) == "qwen3-embedding-8b"
-    }
-    floors = [
-        _same_firm_floor(
-            qwen_samples,
-            m,
-            float(qwen_frames[m]["wasserstein_w1"].median()),
-            float(qwen_frames[m]["wasserstein_w2"].median()),
-        )
-        for m in _FLOOR_M
-    ]
+    _validate_common_hashes(common_hashes, _COMMON_M)
 
     combined = pd.concat(all_pair_frames, ignore_index=True)
     config.output_pairs.parent.mkdir(parents=True, exist_ok=True)
     combined.to_parquet(config.output_pairs, index=False)
-    result: dict[str, object] = {
-        "estimator": (
-            "exact empirical balanced Wasserstein-1 and Wasserstein-2; uniform "
-            "equal cardinality. The two solve different assignment problems: W2 "
-            "matches on the squared chord cost, so its matrix is not a transform "
-            "of the W1 one"
-        ),
-        "ground_geometry": {
-            "name": "Euclidean chord distance on row-L2-normalized embeddings",
-            "role": (
-                "harmonized inference geometry across complete encoder/input pipelines"
-            ),
-            "native_loss_claim": "none; the encoders need not share a training loss",
-            "relation": "chord=sqrt(2-2*cos(theta))=2*sin(theta/2); angular=theta",
-            "cosine_dissimilarity": "1-cos(theta)=chord^2/2 and is not a metric",
-            "theorem_selection_claim": "none",
-        },
-        "selection": "deterministic lexicographic url_hash prefix",
-        # Derived, not restated: these drifted from the constants above when the
-        # roster changed, so the manifest reported a universe the run had not
-        # used.
-        "embedding_universe": _EMBEDDING_UNIVERSE_SIZE,
+    return {
+        "common_m": _COMMON_M,
         "priced_universe": _PRICED_UNIVERSE_SIZE,
         "n_priced_dyads": _PRICED_UNIVERSE_SIZE * (_PRICED_UNIVERSE_SIZE - 1) // 2,
-        "return_alignment_exclusion": None,
-        "common_m": _COMMON_M,
-        "common_url_hashes_equal": True,
-        "common_prefix_sha256": common_digest,
-        "common_native_width_runs": common_runs,
-        "qwen8b_sample_size_sensitivity": sensitivity_runs,
-        "qwen8b_same_firm_split_floor": floors,
-        "bootstrap": {
-            "unit": "firm/node",
-            "requested_draws": config.bootstrap_iters,
-            "seed": config.bootstrap_seed,
-            "duplicate_original_self_dyads": "excluded",
-            "pairing": "all metric correlations recomputed on the same resample",
-        },
         "pair_artifact": str(config.output_pairs),
     }
-    config.output_summary.parent.mkdir(parents=True, exist_ok=True)
-    config.output_summary.write_text(
-        yaml.safe_dump(result, sort_keys=False), encoding="utf-8"
-    )
-    return result

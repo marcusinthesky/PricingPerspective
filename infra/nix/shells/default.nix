@@ -1,54 +1,89 @@
-# The flake's `devShells`. `default` is assembled from ./groups; CI shells stand
-# alone under ./ci so an unrelated interactive-tool addition cannot grow either
-# runner closure.
-{
-  pkgs,
-  lib,
-  customPkgs,
-}:
+{ pkgs, customPkgs }:
 let
-  # One set carrying both nixpkgs and ../pkgs, so a group file can just name
-  # packages. A shallow merge at this call site, NOT an overlay — nothing inside
-  # nixpkgs resolves through it. `chktex` is the one deliberate collision.
-  scope = pkgs // customPkgs;
-
-  # The group's name is its filename, by construction — there is no second place
-  # to keep them in step.
-  group = name: { inherit name; } // import (./groups + "/${name}.nix") { pkgs = scope; };
-
-  # ORDER IS LOAD-BEARING: mkShell hashes `nativeBuildInputs` in list order, and
-  # the order decides which package wins on PATH when two ship the same binary
-  # (see the chktex/pgf-metrics note in groups/languages.nix). Add a package
-  # inside the group that owns it; do not append at the end.
-  groups = map group [
-    "shell"
-    "tools"
-    "languages"
-    "search"
-    "documents"
-    "diagnostics"
-    "cloud"
+  inherit (pkgs) lib;
+  groups = [
+    {
+      name = "runtime";
+      description = "Locked Python execution, data retrieval, and task orchestration.";
+      packages = with pkgs; [
+        git
+        git-lfs
+        curl
+        cacert
+        just
+        uv
+        (lib.hiPrio python313)
+        dvc
+      ];
+    }
+    {
+      name = "proofs";
+      description = "Lean 4.35 and mathematical dependency graphs.";
+      packages = [
+        customPkgs.lean-toolchain.lean-all
+        pkgs.graphviz
+      ];
+    }
+    {
+      name = "papers";
+      description = "arXiv manuscript rendering, source bundles, and bibliography projection.";
+      packages = with pkgs; [
+        tectonic
+        pandoc
+        poppler-utils
+        imagemagick
+        zip
+        jq
+        yq
+        ripgrep
+        tex-fmt
+        customPkgs.chktex
+        customPkgs.pgf-metrics
+        customPkgs.frontmatter-cli
+      ];
+    }
+    {
+      name = "site";
+      description = "The retained paper website and static export.";
+      packages = [
+        customPkgs.bun
+        pkgs.nodejs
+      ];
+    }
+    {
+      name = "checks";
+      description = "Repository hooks and Nix validation.";
+      packages = with pkgs; [
+        prek
+        nixfmt-rfc-style
+        statix
+        deadnix
+      ];
+    }
   ];
+  runtime = (builtins.elemAt groups 0).packages;
+  proofPackages = (builtins.elemAt groups 1).packages;
+  paperPackages = (builtins.elemAt groups 2).packages;
+  checkPackages = (builtins.elemAt groups 4).packages;
+  packageSets = {
+    default = lib.concatMap (group: group.packages) groups;
+    lean = lib.filter (package: lib.getName package != "dvc") runtime ++ proofPackages;
+    prek = runtime ++ checkPackages ++ [ customPkgs.pgf-metrics ];
+    replication = runtime ++ proofPackages ++ paperPackages;
+  };
 in
 {
-  default = pkgs.mkShell {
-    name = "pricing-perspective-dev";
-    packages = lib.concatMap (g: g.packages) groups;
-    # `scope`, not `pkgs`: env.nix points cargo at the vendored DuckDB, which
-    # lives in ../pkgs and is deliberately not the main nixpkgs pin.
-    shellHook = import ./env.nix { pkgs = scope; };
-  };
-
-  lean = import ./ci/lean.nix { pkgs = scope; };
-  prek = import ./ci/prek.nix { pkgs = scope; };
-  replication = import ./ci/replication.nix { pkgs = scope; };
-
-  # Ordered inventory for the generated table in ../README.md (`just nix::tools`).
-  # Nothing in the shell reads it — it exists so that table is derived from this
-  # list rather than maintained beside it. `mainProgram` first so tools render as
-  # the command you type (`tofu`, `rg`) rather than the attribute name.
-  inventory = map (g: {
-    inherit (g) name description;
-    tools = map (p: p.meta.mainProgram or (lib.getName p)) g.packages;
+  inherit packageSets;
+  devShells = builtins.mapAttrs (
+    name: packages:
+    pkgs.mkShell {
+      name = "pricing-perspective-${name}";
+      inherit packages;
+      shellHook = import ./env.nix { inherit pkgs; };
+    }
+  ) packageSets;
+  inventory = map (group: {
+    inherit (group) name description;
+    tools = map (package: package.meta.mainProgram or (lib.getName package)) group.packages;
   }) groups;
 }

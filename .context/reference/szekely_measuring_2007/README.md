@@ -19,5 +19,3 @@ issue: '6'
 publisher: Institute of Mathematical Statistics
 page: 2769-2794
 ---
-
-# Measuring and testing dependence by correlation of distances

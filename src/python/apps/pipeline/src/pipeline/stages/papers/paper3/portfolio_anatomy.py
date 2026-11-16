@@ -19,11 +19,11 @@ from typing import TYPE_CHECKING, Never
 
 import numpy as np
 import pandas as pd
-import yaml
 
-from pipeline._kernels.paper3_validation import solve_certificate
+from pipeline._kernels.paper3.validation import solve_certificate
 from pipeline.io.contracts import read_manifest, write_manifest
-from pipeline.io.paper3_certificate import sha256_path
+from pipeline.io.semantic_identity import entrypoint_code_identity
+from pipeline.stages.papers.paper3.certificate_artifacts import sha256_path
 from pipeline.stages.shared.typed_artifacts import read_typed_distance_artifact
 
 if TYPE_CHECKING:
@@ -508,10 +508,12 @@ def _write_parquet(path: Path, frame: pd.DataFrame) -> None:
         raise
 
 
-def _write_yaml(path: Path, value: object) -> None:
+def _write_json(path: Path, value: object) -> None:
     temporary = _temporary_sibling(path)
     try:
-        temporary.write_text(yaml.safe_dump(value, sort_keys=False), encoding="utf-8")
+        temporary.write_text(
+            json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         temporary.replace(path)
     except Exception:
         temporary.unlink(missing_ok=True)
@@ -519,7 +521,7 @@ def _write_yaml(path: Path, value: object) -> None:
 
 
 def _code_identity() -> str:
-    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    return entrypoint_code_identity("paper3-portfolio-anatomy")
 
 
 def run_paper3_portfolio_anatomy(paths: Paper3PortfolioAnatomyPaths) -> None:
@@ -537,8 +539,8 @@ def run_paper3_portfolio_anatomy(paths: Paper3PortfolioAnatomyPaths) -> None:
     }
     for name, frame in frames.items():
         _write_parquet(paths.output_dir / name, frame)
-    summary_path = paths.output_dir / "summary.yaml"
-    _write_yaml(summary_path, artifacts.summary)
+    summary_path = paths.output_dir / "results.json"
+    _write_json(summary_path, artifacts.summary)
     output_paths = [paths.output_dir / name for name in frames] + [summary_path]
     upstreams = (
         paths.weights_path,

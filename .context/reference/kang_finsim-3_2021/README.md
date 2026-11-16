@@ -16,5 +16,3 @@ issued:
   - - 2021
 URL: https://spec.edmcouncil.org/fibo/ontology/
 ---
-
-# {FinSim}-3: {The} 3rd {Shared} {Task} on {Learning} {Semantic} {Similarities} for the {Financial} {Domain}

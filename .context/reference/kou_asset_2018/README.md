@@ -26,5 +26,3 @@ cites:
 - chamberlain_rothschild_1983
 - fernandez_spatial_2011
 ---
-
-# Asset Pricing with Spatial Interaction

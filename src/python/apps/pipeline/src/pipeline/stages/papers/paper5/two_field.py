@@ -24,14 +24,14 @@ per-date blocks rather than a fresh pass over the panel. Second, the spatial
 Jacobian ``log|det(I - rho_total W(theta))|`` depends only on the parameters and
 never on the returns, so it is tabulated once for the whole stage.
 
-``estimate.sar_qmle`` is deliberately left untouched: it produces the published
-single-field values, and this module is reconciled against it by test.
+``estimate.sar_qmle`` remains the single-field reference implementation, and
+this module is reconciled against it by test.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NoReturn
 
 import numpy as np
 from scipy.optimize import minimize_scalar
@@ -50,6 +50,9 @@ _RHO_INTERIOR_EPS = 1e-3
 # Bracketing tolerance for the polish step, two orders of magnitude finer than any
 # grid this stage runs, so a reported coefficient is not a grid node.
 _REFINE_TOLERANCE = 1e-6
+_BOUNDARY_TOLERANCE = 1e-7
+_QLR_NEGATIVE_TOLERANCE = 1e-6
+_INDEX_NDIM = 3
 # Draw-level columns: the two channel coefficients, the mixture weight, and the
 # two grid-boundary indicators.
 _DRAW_COLUMNS = 5
@@ -59,7 +62,7 @@ class TwoFieldEstimationError(ValueError):
     """Report an invalid two-field configuration or an unusable fit."""
 
 
-def _raise(message: str) -> None:
+def _raise(message: str) -> NoReturn:
     """Raise the module's domain error without embedding literals at call sites."""
     raise TwoFieldEstimationError(message)
 
@@ -426,6 +429,8 @@ def _refine(
     theta_lower, theta_upper = _bracket(problem.grid.theta, theta_index)
     rho_lower, rho_upper = _bracket(problem.grid.rho, rho_index)
 
+    inner_statuses: list[bool] = []
+
     def fit_rho(theta: float) -> tuple[float, float]:
         result = minimize_scalar(
             lambda rho: -_point_loglik(aggregate, problem, theta, rho),
@@ -433,20 +438,80 @@ def _refine(
             method="bounded",
             options={"xatol": tolerance},
         )
-        return float(result.x), float(-result.fun)
+        rho_hat = float(result.x)
+        loglik = (
+            _point_loglik(aggregate, problem, theta, rho_hat)
+            if np.isfinite(rho_hat)
+            else float("nan")
+        )
+        success = bool(result.success) and np.isfinite(rho_hat) and np.isfinite(loglik)
+        inner_statuses.append(success)
+        return rho_hat, loglik if success else float("-inf")
 
     if theta_lower >= theta_upper:
         rho_hat, loglik = fit_rho(theta_lower)
-        return theta_lower, rho_hat, loglik, True
+        return theta_lower, rho_hat, loglik, bool(inner_statuses[-1])
+
+    def outer_objective(theta: float) -> float:
+        _rho_hat, loglik = fit_rho(theta)
+        return -loglik
+
     outer = minimize_scalar(
-        lambda theta: -fit_rho(theta)[1],
+        outer_objective,
         bounds=(theta_lower, theta_upper),
         method="bounded",
         options={"xatol": tolerance},
     )
     theta_hat = float(outer.x)
     rho_hat, loglik = fit_rho(theta_hat)
-    return theta_hat, rho_hat, loglik, bool(outer.success)
+    return (
+        theta_hat,
+        rho_hat,
+        loglik,
+        bool(
+            outer.success
+            and np.isfinite(theta_hat)
+            and np.isfinite(rho_hat)
+            and np.isfinite(loglik)
+            and all(inner_statuses)
+        ),
+    )
+
+
+def _refine_fixed_theta(
+    aggregate: _Aggregate,
+    problem: TwoFieldProblem,
+    theta: float,
+    rho_index: int,
+    tolerance: float = _REFINE_TOLERANCE,
+) -> tuple[float, float, bool]:
+    """Polish total feedback while retaining one exact mixture endpoint."""
+    rho_lower, rho_upper = _bracket(problem.grid.rho, rho_index)
+    result = minimize_scalar(
+        lambda rho: -_point_loglik(aggregate, problem, theta, rho),
+        bounds=(rho_lower, rho_upper),
+        method="bounded",
+        options={"xatol": tolerance},
+    )
+    rho_hat = float(result.x)
+    loglik = (
+        _point_loglik(aggregate, problem, theta, rho_hat)
+        if np.isfinite(rho_hat)
+        else float("nan")
+    )
+    success = bool(result.success) and np.isfinite(rho_hat) and np.isfinite(loglik)
+    return rho_hat, loglik if success else float("-inf"), success
+
+
+def _mixture_boundary_index(theta: float, rho_total: float) -> int | None:
+    """Return the final mixture endpoint, excluding zero total feedback."""
+    if rho_total <= _BOUNDARY_TOLERANCE:
+        return None
+    if abs(theta) <= _BOUNDARY_TOLERANCE:
+        return 0
+    if abs(theta - 1.0) <= _BOUNDARY_TOLERANCE:
+        return 1
+    return None
 
 
 def two_field_qmle(
@@ -462,10 +527,9 @@ def two_field_qmle(
     grid, so a joint fit can never report a worse fit than a nested boundary
     evaluated on the same grid.
 
-    The two boundary indicators read the grid argmax rather than the polished
-    weight. Bounded polishing approaches a bracket endpoint without reaching it,
-    so testing the polished weight against the endpoint would silently report a
-    boundary optimum as interior.
+    The two boundary indicators read the final polished weight. A small tolerance
+    recognizes an endpoint approached by bounded polishing, while zero total
+    feedback is reported separately from either single-field boundary.
 
     Args:
         problem: Precomputed resample-independent inputs.
@@ -484,16 +548,47 @@ def two_field_qmle(
     theta = float(problem.grid.theta[theta_index])
     rho_total = float(problem.grid.rho[rho_index])
     loglik = float(profile[theta_index, rho_index])
-    converged = True
+    search_converged = True
+    selected_candidate_converged = True
     if refine:
-        theta_hat, rho_hat, refined, converged = _refine(
+        theta_hat, rho_hat, refined, interior_converged = _refine(
             aggregate, problem, int(theta_index), int(rho_index)
         )
-        if refined >= loglik:
+        search_converged = search_converged and interior_converged
+        if interior_converged and np.isfinite(refined) and refined >= loglik:
             theta, rho_total, loglik = theta_hat, rho_hat, refined
+            selected_candidate_converged = True
+
+        # Bounded scalar polishing cannot attain an endpoint. Compare exact
+        # fixed-theta endpoint polishes so the unrestricted fit respects its
+        # polished nested boundaries, rather than reporting a tiny phantom
+        # coefficient and a likelihood a few ulps below a restricted fit.
+        endpoint_indices = {0, problem.grid.theta.size - 1}
+        for endpoint_index in endpoint_indices:
+            endpoint_rho_index = int(np.argmax(profile[endpoint_index]))
+            endpoint_theta = float(problem.grid.theta[endpoint_index])
+            endpoint_rho, endpoint_loglik, endpoint_converged = _refine_fixed_theta(
+                aggregate,
+                problem,
+                endpoint_theta,
+                endpoint_rho_index,
+            )
+            search_converged = search_converged and endpoint_converged
+            if (
+                endpoint_converged
+                and np.isfinite(endpoint_loglik)
+                and endpoint_loglik > loglik
+            ):
+                theta = endpoint_theta
+                rho_total = endpoint_rho
+                loglik = endpoint_loglik
+                selected_candidate_converged = endpoint_converged
+
+    converged = search_converged and selected_candidate_converged
 
     rho_b = rho_total * theta
     rho_n = rho_total * (1.0 - theta)
+    boundary_index = _mixture_boundary_index(theta, rho_total)
     coefficients = np.array([1.0, -rho_b, -rho_n], dtype=np.float64)
     alpha_hat = float(aggregate.column @ coefficients) / aggregate.observations
     sigma2_hat = max(
@@ -512,8 +607,8 @@ def two_field_qmle(
         "t_obs": float(aggregate.t_obs),
         "n_assets": float(aggregate.n_assets),
         "converged": float(converged),
-        "at_field_b_boundary": float(int(theta_index) == problem.grid.theta.size - 1),
-        "at_field_n_boundary": float(int(theta_index) == 0),
+        "at_field_b_boundary": float(boundary_index == 1),
+        "at_field_n_boundary": float(boundary_index == 0),
     }
 
 
@@ -572,6 +667,9 @@ def two_field_bootstrap(
     draws = np.empty((indices.shape[0], _DRAW_COLUMNS), dtype=np.float64)
     for draw, date_index in enumerate(indices):
         fit = two_field_qmle(problem, date_index=date_index, refine=refine)
+        if not bool(fit["converged"]):
+            message = f"two-field bootstrap draw {draw} did not converge"
+            raise TwoFieldEstimationError(message)
         draws[draw] = (
             fit["rho_b"],
             fit["rho_n"],
@@ -586,14 +684,18 @@ def quasi_likelihood_ratio(
     unrestricted_loglik: float,
     restricted_loglik: float,
 ) -> float:
-    """Return twice the nonnegative gain of a nested quasi-likelihood fit.
+    """Return twice the gain of a nested quasi-likelihood fit.
 
-    The unrestricted family contains the restricted boundary, so a negative
-    numerical difference is truncation or optimizer noise rather than evidence
-    against nesting. Truncating at zero preserves that geometry; taking an
-    absolute value would turn a failed nested fit into positive evidence.
+    A materially negative gain indicates an invalid nested comparison or a
+    failed optimizer. Tiny negative roundoff is retained as a zero statistic.
     """
-    return 2.0 * max(unrestricted_loglik - restricted_loglik, 0.0)
+    gain = unrestricted_loglik - restricted_loglik
+    if gain < -_QLR_NEGATIVE_TOLERANCE:
+        _raise(
+            "unrestricted nested fit has materially lower quasi-likelihood: "
+            f"gain={gain!r}"
+        )
+    return 2.0 * max(gain, 0.0)
 
 
 def _restricted_residuals(
@@ -603,9 +705,18 @@ def _restricted_residuals(
     rho: float,
     alpha: float,
 ) -> NDArray[np.float64]:
-    """Recover and recenter full cross-sectional innovations under one null."""
+    """Recover centered firm innovations under one restricted fit."""
     residuals = returns - rho * (returns @ weights.T) - alpha
     return np.asarray(residuals - np.mean(residuals), dtype=np.float64)
+
+
+def _standardize_residuals(
+    residuals: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """Standardize centered firm innovations for a common-variance null."""
+    centered = residuals - np.mean(residuals, axis=0, keepdims=True)
+    scale = np.sqrt(np.maximum(np.mean(np.square(centered), axis=0), NUMERICAL_FLOOR))
+    return np.asarray(centered / scale, dtype=np.float64)
 
 
 def _null_panel(
@@ -622,22 +733,6 @@ def _null_panel(
     return np.asarray((alpha + innovations) @ multiplier.T, dtype=np.float64)
 
 
-def _assetwise_date_index(
-    indices: NDArray[np.int64],
-    *,
-    draw: int,
-    n_assets: int,
-) -> NDArray[np.int64]:
-    """Assign a different existing stationary-bootstrap path to each asset.
-
-    Cycling through the shared draw bank uses every precomputed path equally
-    often, preserves each asset's temporal blocks, and removes the excluded
-    field's contemporaneous residual alignment under the imposed null.
-    """
-    draw_rows = (draw + np.arange(n_assets, dtype=np.int64)) % indices.shape[0]
-    return np.asarray(indices[draw_rows].T, dtype=np.int64)
-
-
 def nested_qlr_bootstrap(
     returns: NDArray[np.float64],
     joint_problem: TwoFieldProblem,
@@ -647,9 +742,9 @@ def nested_qlr_bootstrap(
     """Calibrate one nested-channel QLR by a restricted residual bootstrap.
 
     The restricted problem must pin the mixture weight to one value. Each
-    asset's fitted innovations are resampled on a different path from the shared
-    stationary-bootstrap draw bank. This preserves asset-level temporal blocks
-    while removing the excluded field's contemporaneous residual alignment,
+    asset's fitted innovations are resampled on an independent stationary path.
+    This preserves asset-level temporal blocks while removing the excluded
+    field's contemporaneous residual alignment,
     which would otherwise carry the tested channel into every null panel. Every
     null panel is then fit by the same joint and pinned objectives used for the
     observed statistic, so the draw distribution absorbs the nonnegative-channel
@@ -659,7 +754,8 @@ def nested_qlr_bootstrap(
         returns: Original return panel, shape ``(T, n)``.
         joint_problem: Unrestricted two-field problem.
         restricted_problem: Same field pair with a singleton theta grid.
-        indices: Stationary-bootstrap date indices, shape ``(draws, T)``.
+        indices: Independent asset-wise stationary-bootstrap indices, shape
+            ``(draws, n_assets, T)``.
 
     Returns:
         Observed QLR statistic, finite-sample p-value, exceedance count, and
@@ -672,11 +768,17 @@ def nested_qlr_bootstrap(
     """
     if restricted_problem.grid.theta.size != 1:
         _raise("the nested QLR null must pin the mixture weight")
-    if indices.ndim != _PANEL_NDIM or indices.shape[1] != returns.shape[0]:
-        _raise("nested QLR indices must have one full date panel per draw")
+    if (
+        indices.ndim != _INDEX_NDIM
+        or indices.shape[1] != returns.shape[1]
+        or indices.shape[2] != returns.shape[0]
+    ):
+        _raise("nested QLR indices must provide one path per asset and draw")
 
     restricted = two_field_qmle(restricted_problem)
     unrestricted = two_field_qmle(joint_problem)
+    if not bool(restricted["converged"]) or not bool(unrestricted["converged"]):
+        _raise("nested QLR observed fits did not converge")
     statistic = quasi_likelihood_ratio(unrestricted["loglik"], restricted["loglik"])
 
     theta_null = float(restricted_problem.grid.theta[0])
@@ -686,12 +788,14 @@ def nested_qlr_bootstrap(
     )
     rho_null = restricted["rho_total"]
     alpha_null = restricted["alpha_hat"]
-    residuals = _restricted_residuals(
-        returns,
-        weights,
-        rho=rho_null,
-        alpha=alpha_null,
-    )
+    residuals = _standardize_residuals(
+        _restricted_residuals(
+            returns,
+            weights,
+            rho=rho_null,
+            alpha=alpha_null,
+        )
+    ) * np.sqrt(max(float(restricted["sigma2_hat"]), NUMERICAL_FLOOR))
     operator = np.eye(weights.shape[0], dtype=np.float64) - rho_null * weights
     multiplier = np.asarray(np.linalg.inv(operator), dtype=np.float64)
 
@@ -701,11 +805,7 @@ def nested_qlr_bootstrap(
             residuals,
             multiplier,
             alpha=alpha_null,
-            asset_date_index=_assetwise_date_index(
-                indices,
-                draw=draw,
-                n_assets=returns.shape[1],
-            ),
+            asset_date_index=np.asarray(indices[draw].T, dtype=np.int64),
         )
         stats = two_field_panel_stats(
             null_returns,
@@ -714,6 +814,10 @@ def nested_qlr_bootstrap(
         )
         unrestricted_draw = two_field_qmle(replace(joint_problem, stats=stats))
         restricted_draw = two_field_qmle(replace(restricted_problem, stats=stats))
+        if not bool(restricted_draw["converged"]) or not bool(
+            unrestricted_draw["converged"]
+        ):
+            _raise(f"nested QLR null draw {draw} did not converge")
         draws[draw] = quasi_likelihood_ratio(
             unrestricted_draw["loglik"], restricted_draw["loglik"]
         )

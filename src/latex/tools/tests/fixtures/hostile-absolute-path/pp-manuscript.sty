@@ -1,0 +1,87 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pp-manuscript}[2026/07/22 Pricing Perspective manuscript semantics]
+
+% Scalable-font closure: the minimal TeX Live set ships accented glyphs only via
+% the bitmap EC fonts, which microtype cannot font-expand ("auto expansion is only
+% possible with scalable fonts"). T1 fontenc + Latin Modern provide the scalable
+% Type1 equivalents so accented bibliography names (e.g. Ismaïl) compile under the
+% arXiv manuscript build.
+\RequirePackage[T1]{fontenc}
+\RequirePackage{lmodern}
+
+\RequirePackage{amssymb}
+\RequirePackage{amsthm}
+\RequirePackage{booktabs}
+\RequirePackage{mathtools}
+\RequirePackage{siunitx}
+\RequirePackage{bm}
+\RequirePackage{graphicx}
+\RequirePackage{tabularx}
+\RequirePackage{xfp} % \fpeval for display-time scaling, e.g.
+% \num{\fpeval{\ppvalue{k}*100}}
+
+% Match the Typst baseline's float display: round to the requested precision but
+% do NOT pad with trailing zeros (Typst's calc.round drops them, so 0.61 renders
+% as "0.61", not siunitx's default-padded "0.610").
+\sisetup{round-pad=false}
+
+% Independent per-type counters with flat numbering (Theorem 1, Corollary 1, ...),
+% matching the canonical Typst templates/common.typ. Sharing one counter would
+% both renumber the theorem objects and make cleveref mislabel every corollary,
+% lemma, and assumption as "Theorem".
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{hypothesis}{Hypothesis}
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\ppDeclareValue}[2]{%
+  \expandafter\gdef\csname pp@value@#1\endcsname{#2}%
+}
+
+\newcommand{\ppvalue}[1]{%
+  \ifcsname pp@value@#1\endcsname
+  \csname pp@value@#1\endcsname
+  \else
+  \PackageError{pp-manuscript}{Undefined generated value '#1'}%
+  {Regenerate the project's generated/value bindings.}%
+  \fi
+}
+
+% Marker for empirical cells that were genuinely not computed this pass (upstream
+% float.nan). Mirrors the Typst ``fmt``/``sci`` helpers, which render an em dash so
+% a missing value never appears as a bare number. Declared values that resolve to
+% \ppmissing are recorded and auditable rather than silently zero-filled.
+\newcommand{\ppmissing}{--}
+
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\1}{\mathbb{1}}
+
+% Paired delimiters for the analytical chapters (Typst norm()/abs()/chevron/floor).
+% Chapters are content-only and may not define macros, so the shared math
+% vocabulary lives here. Starred forms auto-size: \norm*{x}, \inner*{a,b}.
+\DeclarePairedDelimiter{\abs}{\lvert}{\rvert}
+\DeclarePairedDelimiter{\norm}{\lVert}{\rVert}
+\DeclarePairedDelimiter{\inner}{\langle}{\rangle}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+
+\AtBeginDocument{%
+  \crefname{assumption}{assumption}{assumptions}%
+  \crefname{corollary}{corollary}{corollaries}%
+  \crefname{definition}{definition}{definitions}%
+  \crefname{hypothesis}{hypothesis}{hypotheses}%
+  \crefname{lemma}{lemma}{lemmas}%
+  \crefname{proposition}{proposition}{propositions}%
+  \crefname{remark}{remark}{remarks}%
+  \crefname{theorem}{theorem}{theorems}%
+}
